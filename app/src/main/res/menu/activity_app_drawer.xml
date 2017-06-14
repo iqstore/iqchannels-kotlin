@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2017 iqstore.ru.
+  ~ All rights reserved.
+  -->
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_index"
+            android:title="Main"/>
+        <item
+            android:id="@+id/nav_chat"
+            android:title="Chat"/>
+
+        <item
+            android:id="@+id/nav_login"
+            android:title="Login"/>
+
+        <item
+            android:id="@+id/nav_logout"
+            android:title="Logout"/>
+
+        <item
+            android:id="@+id/nav_listen_to_unread"
+            android:title="Listen to unread"/>
+
+        <item
+            android:id="@+id/nav_remove_unread_listener"
+            android:title="Remove unread listener"/>
+    </group>
+</menu>

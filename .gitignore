@@ -1,0 +1,25 @@
+# Android
+*.iml
+.gradle
+/local.properties
+/.idea/workspace.xml
+/.idea/libraries
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+
+
+# OSX
+.DS_Store
+.AppleDouble
+.LSOverride
+
+
+# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm
+.idea/
+*.ipr
+*.iws
+*.iml
+out/
+

@@ -26,9 +26,11 @@ import ru.iqchannels.sdk.schema.ChatEvent;
 import ru.iqchannels.sdk.schema.ChatEventQuery;
 import ru.iqchannels.sdk.schema.ChatMessage;
 import ru.iqchannels.sdk.schema.ChatMessageForm;
+import ru.iqchannels.sdk.schema.Client;
 import ru.iqchannels.sdk.schema.ClientAuth;
 import ru.iqchannels.sdk.schema.ClientAuthRequest;
 import ru.iqchannels.sdk.schema.ClientIntegrationAuthRequest;
+import ru.iqchannels.sdk.schema.ClientSignupRequest;
 import ru.iqchannels.sdk.schema.MaxIdQuery;
 import ru.iqchannels.sdk.schema.RelationMap;
 import ru.iqchannels.sdk.schema.Response;
@@ -80,6 +82,51 @@ public class HttpClient {
     }
 
     // Clients
+
+    public HttpRequest clientsMe(@NonNull final HttpCallback<Client> callback) {
+        String path = "/clients/me";
+        TypeToken<Response<Client>> type = new TypeToken<Response<Client>>() {};
+        return this.post(path, null, type, new HttpCallback<Response<Client>>() {
+            @Override
+            public void onResult(Response<Client> response) {
+                RelationMap map = rels.map(response.Rels);
+                Client client = response.Result;
+                rels.client(client, map);
+                callback.onResult(client);
+            }
+
+            @Override
+            public void onException(Exception exception) {
+                callback.onException(exception);
+            }
+        });
+    }
+
+    public HttpRequest clientsSignup(
+            @NonNull String name,
+            @NonNull String channel,
+            @NonNull final HttpCallback<ClientAuth> callback) {
+        checkNotNull(name, "null name");
+
+        String path = "/clients/signup";
+        ClientSignupRequest req = new ClientSignupRequest(name, channel);
+        TypeToken<Response<ClientAuth>> type = new TypeToken<Response<ClientAuth>>() {};
+        return this.post(path, req, type, new HttpCallback<Response<ClientAuth>>() {
+            @Override
+            public void onResult(Response<ClientAuth> response) {
+                RelationMap map = rels.map(response.Rels);
+                ClientAuth auth = response.Result;
+                rels.clientAuth(auth, map);
+                callback.onResult(auth);
+            }
+
+            @Override
+            public void onException(Exception exception) {
+                callback.onException(exception);
+            }
+        });
+    }
+
     public HttpRequest clientsAuth(
             @NonNull String token,
             @NonNull final HttpCallback<ClientAuth> callback) {

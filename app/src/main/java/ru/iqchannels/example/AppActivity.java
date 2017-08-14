@@ -54,8 +54,8 @@ public class AppActivity extends AppCompatActivity
     private void setupIQChannels() {
         IQChannels iq = IQChannels.instance();
         // iq.configure(this, new IQChannelsConfig("http://52.57.77.143/", "support"));
-        // iq.configure(this, new IQChannelsConfig("http://192.168.4.85/", "support"));
-        iq.configure(this, new IQChannelsConfig("http://88.99.143.201/", "support"));
+        iq.configure(this, new IQChannelsConfig("http://192.168.31.158/", "support"));
+        // iq.configure(this, new IQChannelsConfig("https://dev.iqstore.ru/", "support"));
     }
 
     @Override
@@ -104,7 +104,6 @@ public class AppActivity extends AppCompatActivity
 
             case R.id.nav_login:
                 IQChannels.instance().login("1");
-                ;
                 return false;
 
             case R.id.nav_logout:
@@ -139,5 +138,14 @@ public class AppActivity extends AppCompatActivity
     @Override
     public void unreadChanged(int unread) {
         Log.i(TAG, String.format("Unread: %d", unread));
+
+        NavigationView nav = (NavigationView) findViewById(R.id.nav_view);
+        Menu menu = nav.getMenu();
+        MenuItem item = menu.findItem(R.id.nav_chat);
+        if (unread == 0) {
+            item.setTitle("Chat");
+        } else {
+            item.setTitle(String.format("Chat (%d)", unread));
+        }
     }
 }

@@ -28,9 +28,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.webkit.MimeTypeMap;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.io.File;
@@ -45,9 +48,11 @@ import ru.iqchannels.sdk.R;
 import ru.iqchannels.sdk.app.Callback;
 import ru.iqchannels.sdk.app.Cancellable;
 import ru.iqchannels.sdk.app.IQChannels;
+import ru.iqchannels.sdk.app.IQChannelsListener;
 import ru.iqchannels.sdk.app.MessagesListener;
 import ru.iqchannels.sdk.lib.InternalIO;
 import ru.iqchannels.sdk.schema.ChatMessage;
+import ru.iqchannels.sdk.schema.ClientAuth;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -74,11 +79,24 @@ public class ChatFragment extends Fragment {
     }
 
     private final IQChannels iqchannels;
+    @Nullable private Cancellable iqchannelsListenerCancellable;
 
     // Messages
     private boolean messagesLoaded;
     @Nullable private Cancellable messagesRequest;
     @Nullable private Cancellable moreMessagesRequest;
+
+    // Auth layout
+    private RelativeLayout authLayout;
+
+    // Signup layout
+    private LinearLayout signupLayout;
+    private EditText signupText;
+    private Button signupButton;
+    private TextView signupError;
+
+    // Chat layout
+    private RelativeLayout chatLayout;
 
     // Message views
     private ProgressBar progress;
@@ -102,49 +120,26 @@ public class ChatFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chat, container, false);
-        setupMessageViews(view);
-        setupSendViews(view);
-        return view;
-    }
 
-    @Override
-    public void onStart() {
-        super.onStart();
+        // Auth views.
+        authLayout = (RelativeLayout) view.findViewById(R.id.authLayout);
 
-        loadMessages();
-    }
+        // Login views.
+        signupLayout = (LinearLayout) view.findViewById(R.id.signupLayout);
+        signupText = (EditText) view.findViewById(R.id.signupName);
+        signupButton = (Button) view.findViewById(R.id.signupButton);
+        signupButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                signup();
+            }
+        });
+        signupError = (TextView) view.findViewById(R.id.signupError);
 
-    @Override
-    public void onStop() {
-        super.onStop();
+        // Chat.
+        chatLayout = (RelativeLayout) view.findViewById(R.id.chatLayout);
 
-        clearMessages();
-        clearMoreMessages();
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        switch (requestCode) {
-            case REQUEST_CAMERA_OR_GALLERY:
-                boolean isCamera = data == null;
-                if (!isCamera) {
-                    isCamera = MediaStore.ACTION_IMAGE_CAPTURE.equals(data.getAction());
-                }
-
-                if (isCamera) {
-                    onCameraResult(resultCode);
-                } else {
-                    onGalleryResult(resultCode, data);
-                }
-                break;
-        }
-    }
-
-    // Views
-
-    private void setupMessageViews(View view) {
+        // Messages.
         progress = (ProgressBar) view.findViewById(R.id.messagesProgress);
 
         refresh = (SwipeRefreshLayout) view.findViewById(R.id.messagesRefresh);
@@ -167,9 +162,8 @@ public class ChatFragment extends Fragment {
                 maybeScrollToBottomOnKeyboardShown(bottom, oldBottom);
             }
         });
-    }
 
-    private void setupSendViews(View view) {
+        // Send.
         sendText = (EditText) view.findViewById(R.id.sendText);
         sendText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -201,6 +195,80 @@ public class ChatFragment extends Fragment {
 
         if (!getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
             attachButton.setVisibility(View.GONE);
+        }
+        return view;
+    }
+
+    private void updateViews() {
+        authLayout.setVisibility(
+                iqchannels.getAuth() == null && iqchannels.getAuthRequest() != null
+                        ? View.VISIBLE : View.GONE);
+
+        signupLayout.setVisibility(
+                iqchannels.getAuth() == null && iqchannels.getAuthRequest() == null
+                        ? View.VISIBLE : View.GONE);
+        signupButton.setEnabled(iqchannels.getAuthRequest() == null);
+        signupText.setEnabled(iqchannels.getAuthRequest() == null);
+
+        chatLayout.setVisibility(iqchannels.getAuth() != null ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        iqchannelsListenerCancellable = iqchannels.addListener(new IQChannelsListener() {
+            @Override
+            public void authenticating() {
+                signupError.setText("");
+                updateViews();
+            }
+
+            @Override
+            public void authComplete(ClientAuth auth) {
+                signupError.setText("");
+                updateViews();
+            }
+
+            @Override
+            public void authFailed(Exception e) {
+                signupError.setText(String.format("Ошибка: %s", e.getLocalizedMessage()));
+                updateViews();
+            }
+        });
+
+        loadMessages();
+        updateViews();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (this.iqchannelsListenerCancellable != null) {
+            this.iqchannelsListenerCancellable.cancel();
+            this.iqchannelsListenerCancellable = null;
+        }
+
+        clearMessages();
+        clearMoreMessages();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case REQUEST_CAMERA_OR_GALLERY:
+                boolean isCamera = data == null;
+                if (!isCamera) {
+                    isCamera = MediaStore.ACTION_IMAGE_CAPTURE.equals(data.getAction());
+                }
+
+                if (isCamera) {
+                    onCameraResult(resultCode);
+                } else {
+                    onGalleryResult(resultCode, data);
+                }
+                break;
         }
     }
 
@@ -235,6 +303,19 @@ public class ChatFragment extends Fragment {
 
         int count = adapter.getItemCount();
         recycler.smoothScrollToPosition(count == 0 ? 0 : count - 1);
+    }
+
+    // Signup
+
+    private void signup() {
+        String name = signupText.getText().toString();
+        if (name.length() < 3) {
+            signupError.setText("Ошибка: длина имени должна быть не менее 3-х символов.");
+            return;
+        }
+
+        signupError.setText("");
+        iqchannels.signup(name);
     }
 
     // Messages

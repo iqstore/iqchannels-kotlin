@@ -5,13 +5,13 @@ ext {
     bintrayName = 'iqchannels-sdk'
 
     publishedGroupId = 'ru.iqstore'
-    libraryName = 'iQChannels Android SDK'
+    libraryName = 'IQChannels Android SDK'
     artifact = 'iqchannels-sdk'
 
-    libraryDescription = 'iQChannels SDK for Android'
+    libraryDescription = 'IQChannels SDK for Android'
 
     siteUrl = 'http://iqchannels.ru/'
-    gitUrl = 'https://github.com/iqstore'
+    gitUrl = 'https://github.com/iqstore/iqchannels-android'
 
     libraryVersion = '1.0.0'
 

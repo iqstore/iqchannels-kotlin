@@ -1,6 +1,7 @@
 package ru.iqchannels.sdk.app;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -27,6 +28,7 @@ import ru.iqchannels.sdk.schema.ChatException;
 import ru.iqchannels.sdk.schema.ChatExceptionCode;
 import ru.iqchannels.sdk.schema.ChatMessage;
 import ru.iqchannels.sdk.schema.ChatMessageForm;
+import ru.iqchannels.sdk.schema.Client;
 import ru.iqchannels.sdk.schema.ClientAuth;
 import ru.iqchannels.sdk.schema.MaxIdQuery;
 import ru.iqchannels.sdk.schema.UploadedFile;
@@ -47,13 +49,17 @@ public class IQChannels {
     // Config and login
     @Nullable private IQChannelsConfig config;
     @Nullable private HttpClient client;
-    @Nullable private String credentials;
     @Nullable private Handler handler; // Always nonnull where used.
+    @Nullable private SharedPreferences preferences;
+
+    @Nullable private String token;
+    @Nullable private String credentials;
 
     // Auth
     @Nullable private ClientAuth auth;
+    @Nullable private HttpRequest authRequest;
     private int authAttempt;
-    private HttpRequest authRequest;
+    private final Set<IQChannelsListener> listeners;
 
     // Unread
     private int unread;
@@ -91,12 +97,33 @@ public class IQChannels {
     @Nullable private HttpRequest sendRequest;
 
     private IQChannels() {
+        listeners = new HashSet<>();
         unreadListeners = new HashSet<>();
         messageListeners = new HashSet<>();
         moreMessageCallbacks = new HashSet<>();
         receivedQueue = new HashSet<>();
         readQueue = new HashSet<>();
         sendQueue = new ArrayList<>();
+    }
+
+    @Nullable
+    public ClientAuth getAuth() {
+        return auth;
+    }
+
+    @Nullable
+    public HttpRequest getAuthRequest() {
+        return authRequest;
+    }
+
+    public Cancellable addListener(final IQChannelsListener listener) {
+        this.listeners.add(listener);
+        return new Cancellable() {
+            @Override
+            public void cancel() {
+                listeners.remove(listener);
+            }
+        };
     }
 
     private void execute(Runnable runnable) {
@@ -115,14 +142,83 @@ public class IQChannels {
         this.handler = new Handler(context.getApplicationContext().getMainLooper());
         this.config = config;
         this.client = new HttpClient(config.address, new Rels(config.address));
+        this.preferences = context.getApplicationContext().getSharedPreferences(
+                "IQChannels", Context.MODE_PRIVATE);
+        this.token = this.preferences.getString("token", null);
 
         auth();
     }
 
-    public void login(String credentials) {
-        if (this.credentials != null) {
-            clear();
+    public void signup(String name) {
+        if (client == null) {
+            return;
         }
+
+        this.logout();
+        assert this.config != null;
+        String channel = this.config.channel;
+        this.authRequest = this.client.clientsSignup(name, channel, new HttpCallback<ClientAuth>() {
+            @Override
+            public void onResult(final ClientAuth result) {
+                execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        signupComplete(result);
+                    }
+                });
+            }
+
+            @Override
+            public void onException(final Exception exception) {
+                execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        signupException(exception);
+                    }
+                });
+            }
+        });
+
+        Log.i(TAG, String.format("Signing up, name=%s", name));
+    }
+
+    private void signupComplete(final ClientAuth auth) {
+        if (auth.Client == null || auth.Session == null || auth.Session.Token == null) {
+            signupException(new ChatException(ChatExceptionCode.INVALID, "Invalid client auth"));
+            return;
+        }
+        if (this.authRequest == null) {
+            return;
+        }
+
+        assert this.preferences != null;
+        SharedPreferences.Editor editor = this.preferences.edit();
+        editor.putString("token", auth.Session.Token);
+        editor.apply();
+        Log.i(TAG, String.format("Signed up, clientId=%d", auth.Client.Id));
+
+        authComplete(auth);
+    }
+
+    private void signupException(final Exception exception) {
+        if (authRequest == null) {
+            return;
+        }
+        authRequest = null;
+        Log.e(TAG, String.format("Failed to sign up, exc=%s", exception));
+
+        for (final IQChannelsListener listener : listeners) {
+            execute(new Runnable() {
+                @Override
+                public void run() {
+                    listener.authFailed(exception);
+                }
+            });
+        }
+    }
+
+    public void login(String credentials) {
+        this.logout();
 
         this.credentials = credentials;
         auth();
@@ -171,16 +267,14 @@ public class IQChannels {
         if (authRequest != null) {
             return;
         }
-
         if (client == null) {
             return;
         }
-        if (credentials == null) {
+        if (credentials == null && token == null) {
             return;
         }
 
-        authAttempt++;
-        authRequest = this.client.clientsIntegrationAuth(credentials, new HttpCallback<ClientAuth>() {
+        HttpCallback<ClientAuth> callback = new HttpCallback<ClientAuth>() {
             @Override
             public void onResult(final ClientAuth result) {
                 execute(new Runnable() {
@@ -200,11 +294,27 @@ public class IQChannels {
                     }
                 });
             }
-        });
+        };
+
+        authAttempt++;
+        if (credentials != null) {
+            authRequest = this.client.clientsIntegrationAuth(credentials, callback);
+        } else {
+            authRequest = this.client.clientsAuth(token, callback);
+        }
         Log.i(TAG, String.format("Authenticating, attempt=%d", authAttempt));
+
+        for (final IQChannelsListener listener: this.listeners) {
+            execute(new Runnable() {
+                @Override
+                public void run() {
+                    listener.authenticating();
+                }
+            });
+        }
     }
 
-    private void authException(Exception exception) {
+    private void authException(final Exception exception) {
         if (authRequest == null) {
             return;
         }
@@ -212,6 +322,15 @@ public class IQChannels {
         if (credentials == null) {
             Log.e(TAG, String.format("Failed to auth, exc=%s", exception));
             return;
+        }
+
+        for (final IQChannelsListener listener: this.listeners) {
+            execute(new Runnable() {
+                @Override
+                public void run() {
+                    listener.authFailed(exception);
+                }
+            });
         }
 
         assert handler != null;
@@ -226,7 +345,7 @@ public class IQChannels {
                 delaySec, exception));
     }
 
-    private void authComplete(ClientAuth auth) {
+    private void authComplete(final ClientAuth auth) {
         if (auth.Client == null || auth.Session == null || auth.Session.Token == null) {
             authException(new ChatException(ChatExceptionCode.INVALID, "Invalid client auth"));
             return;
@@ -242,6 +361,15 @@ public class IQChannels {
         this.client.setToken(auth.Session.Token);
         Log.i(TAG, String.format("Authenticated, clientId=%d, sessionId=%d",
                 auth.Client.Id, auth.Session.Id));
+
+        for (final IQChannelsListener listener: listeners) {
+            execute(new Runnable() {
+                @Override
+                public void run() {
+                    listener.authComplete(auth);
+                }
+            });
+        }
 
         loadMessages();
         listenToUnread();

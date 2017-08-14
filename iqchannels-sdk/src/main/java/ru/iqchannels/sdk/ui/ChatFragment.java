@@ -226,6 +226,7 @@ public class ChatFragment extends Fragment {
             @Override
             public void authComplete(ClientAuth auth) {
                 signupError.setText("");
+                loadMessages();
                 updateViews();
             }
 
@@ -236,7 +237,9 @@ public class ChatFragment extends Fragment {
             }
         });
 
-        loadMessages();
+        if (iqchannels.getAuth() != null) {
+            loadMessages();
+        }
         updateViews();
     }
 

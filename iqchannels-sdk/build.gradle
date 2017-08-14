@@ -13,7 +13,7 @@ ext {
     siteUrl = 'http://iqchannels.ru/'
     gitUrl = 'https://github.com/iqstore/iqchannels-android'
 
-    libraryVersion = '1.0.0'
+    libraryVersion = '1.1.0'
 
     developerId = 'ivankorobkov'
     developerName = 'Ivan Korobkov'

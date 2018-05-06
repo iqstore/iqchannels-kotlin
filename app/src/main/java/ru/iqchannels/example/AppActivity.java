@@ -54,8 +54,8 @@ public class AppActivity extends AppCompatActivity
     private void setupIQChannels() {
         IQChannels iq = IQChannels.instance();
         // iq.configure(this, new IQChannelsConfig("http://52.57.77.143/", "support"));
-        iq.configure(this, new IQChannelsConfig("http://192.168.31.158/", "support"));
-        // iq.configure(this, new IQChannelsConfig("https://dev.iqstore.ru/", "support"));
+        iq.configure(this, new IQChannelsConfig("http://192.168.31.125:3001/", "support"));
+        // iq.configure(this, new IQChannelsConfig("http://88.99.143.201/", "support"));
     }
 
     @Override

@@ -19,6 +19,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.google.firebase.iid.FirebaseInstanceId;
+
 import ru.iqchannels.sdk.app.Cancellable;
 import ru.iqchannels.sdk.app.IQChannels;
 import ru.iqchannels.sdk.app.IQChannelsConfig;
@@ -52,10 +54,11 @@ public class AppActivity extends AppCompatActivity
     }
 
     private void setupIQChannels() {
+        String token = FirebaseInstanceId.getInstance().getToken();
         IQChannels iq = IQChannels.instance();
         // iq.configure(this, new IQChannelsConfig("http://52.57.77.143/", "support"));
         iq.configure(this, new IQChannelsConfig("http://192.168.31.125:3001/", "support"));
-        iq.setPushToken("my-push-token");
+        iq.setPushToken(token);
         // iq.configure(this, new IQChannelsConfig("http://88.99.143.201/", "support"));
     }
 

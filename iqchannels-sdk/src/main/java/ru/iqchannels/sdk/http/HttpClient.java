@@ -32,6 +32,7 @@ import ru.iqchannels.sdk.schema.ClientAuthRequest;
 import ru.iqchannels.sdk.schema.ClientIntegrationAuthRequest;
 import ru.iqchannels.sdk.schema.ClientSignupRequest;
 import ru.iqchannels.sdk.schema.MaxIdQuery;
+import ru.iqchannels.sdk.schema.PushTokenInput;
 import ru.iqchannels.sdk.schema.RelationMap;
 import ru.iqchannels.sdk.schema.Response;
 import ru.iqchannels.sdk.schema.UploadedFile;
@@ -166,6 +167,30 @@ public class HttpClient {
                 ClientAuth auth = response.Result;
                 rels.clientAuth(auth, map);
                 callback.onResult(auth);
+            }
+
+            @Override
+            public void onException(Exception exception) {
+                callback.onException(exception);
+            }
+        });
+    }
+
+    // Push token
+
+    public HttpRequest pushChannelFCM(
+            @NonNull String channel,
+            @NonNull String token,
+            @NonNull final HttpCallback<Void> callback) {
+        checkNotNull(channel, "null channel");
+        checkNotNull(token, "null push token");
+
+        String path = "/push/channel/fcm/" +channel;
+        PushTokenInput input = new PushTokenInput(token);
+        return this.post(path, input, null, new HttpCallback<Response<Object>>() {
+            @Override
+            public void onResult(Response<Object> result) {
+                callback.onResult(null);
             }
 
             @Override

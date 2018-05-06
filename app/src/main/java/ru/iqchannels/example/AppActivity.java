@@ -55,6 +55,7 @@ public class AppActivity extends AppCompatActivity
         IQChannels iq = IQChannels.instance();
         // iq.configure(this, new IQChannelsConfig("http://52.57.77.143/", "support"));
         iq.configure(this, new IQChannelsConfig("http://192.168.31.125:3001/", "support"));
+        iq.setPushToken("my-push-token");
         // iq.configure(this, new IQChannelsConfig("http://88.99.143.201/", "support"));
     }
 
@@ -103,7 +104,7 @@ public class AppActivity extends AppCompatActivity
                 break;
 
             case R.id.nav_login:
-                IQChannels.instance().login("1");
+                IQChannels.instance().login("2");
                 return false;
 
             case R.id.nav_logout:

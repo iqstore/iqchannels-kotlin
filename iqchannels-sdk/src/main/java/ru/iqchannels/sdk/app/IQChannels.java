@@ -61,6 +61,12 @@ public class IQChannels {
     private int authAttempt;
     private final Set<IQChannelsListener> listeners;
 
+    // Push token
+    private String pushToken;
+    private boolean pushTokenSent;
+    private int pushTokenAttempt;
+    @Nullable private HttpRequest pushTokenRequest;
+
     // Unread
     private int unread;
     private int unreadAttempt;
@@ -233,6 +239,7 @@ public class IQChannels {
 
     private void clear() {
         clearAuth();
+        clearPushTokenState();
         clearUnread();
         clearMessages();
         clearMoreMessages();
@@ -371,8 +378,108 @@ public class IQChannels {
             });
         }
 
+        sendPushToken();
         loadMessages();
         listenToUnread();
+    }
+
+    // Push token
+
+    public void setPushToken(String token) {
+        if (token != null && pushToken != null && token.equals(pushToken)) {
+            return;
+        }
+
+        this.pushToken = token;
+        this.pushTokenSent = false;
+        if (this.pushTokenRequest != null) {
+            this.pushTokenRequest.cancel();
+        }
+
+        this.sendPushToken();
+    }
+
+    private void clearPushTokenState() {
+        if (pushTokenRequest != null) {
+            pushTokenRequest.cancel();
+        }
+
+        pushTokenSent = false;
+        pushTokenAttempt = 0;
+        pushTokenRequest = null;
+        Log.d(TAG, "Cleared push token state");
+    }
+
+    private void sendPushToken() {
+        if (auth == null) {
+            return;
+        }
+        if (pushToken == null) {
+            return;
+        }
+        if (pushTokenSent) {
+            return;
+        }
+        if (pushTokenRequest != null) {
+            return;
+        }
+
+        assert client != null;
+        assert config != null;
+
+        pushTokenAttempt++;
+        pushTokenRequest = client.pushChannelFCM(config.channel, pushToken, new HttpCallback<Void>() {
+            @Override
+            public void onResult(Void result) {
+                execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        onSentPushToken();
+                    }
+                });
+            }
+
+            @Override
+            public void onException(final Exception e) {
+                execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        onFailedToSendPushToken(e);
+                    }
+                });
+            }
+        });
+        Log.i(TAG, String.format("Sending a push token, attempt=%d", pushTokenAttempt));
+    }
+
+    private void onSentPushToken() {
+        if (pushTokenRequest == null) {
+            return;
+        }
+
+        pushTokenRequest = null;
+        pushTokenSent = true;
+        Log.i(TAG, "Sent a push token");
+    }
+
+    private void onFailedToSendPushToken(Exception e) {
+        if (pushTokenRequest == null) {
+            return;
+        }
+
+        pushTokenRequest = null;
+
+        assert handler != null;
+        int delaySec = Retry.delaySeconds(pushTokenAttempt);
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                sendPushToken();
+            }
+        }, delaySec * 1000);
+        Log.e(TAG, String.format(
+                "Failed to send a push token, will retyr in %ds, exc=%s",
+                delaySec, e));
     }
 
     // Unread

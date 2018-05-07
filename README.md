@@ -160,3 +160,36 @@ public class MainActivity extends AppCompatActivity
     }
 }
 ```
+
+Настройка пуш-уведомлений
+-------------------------
+SDK поддерживает пуш-уведомления о новых сообщениях в чате.
+Для этого в приложении настроить Firebase Messaging, получить пуш-токен
+и передать его в IQChannels.
+
+Передача токена в `Activity.onCreate`:
+```
+@Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        String token = FirebaseInstanceId.getInstance().getToken();
+
+        IQChannels iq = IQChannels.instance();
+        iq.configure(this, new IQChannelsConfig("https://chat.example.com/", "support"));
+        iq.setPushToken(token);
+    }
+```
+
+Обновление токена в наследнике `FirebaseInstanceIdService`:
+```
+public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
+
+    @Override
+    public void onTokenRefresh() {
+        super.onTokenRefresh();
+
+        String token = FirebaseInstanceId.getInstance().getToken();
+        IQChannels.instance().setPushToken(token);
+    }
+}
+```

@@ -1,0 +1,89 @@
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
+
+version '1.2.0'
+group 'ru.iqstore'
+
+publishing {
+    publications {
+        Production(MavenPublication) {
+            groupId this.group
+            artifactId 'iqchannels-sdk'
+            version this.version
+
+            artifact("$buildDir/outputs/aar/iqchannels-sdk-release.aar") {
+                assembleRelease
+            }
+
+            pom.withXml {
+                def dependenciesNode = asNode().appendNode('dependencies')
+
+                // Iterate over the implementation dependencies (we don't want the test ones), adding a <dependency> node for each
+                configurations.implementation.allDependencies.each {
+                    // Ensure dependencies such as fileTree are not included in the pom.
+                    if (it.name != 'unspecified') {
+                        def dependencyNode = dependenciesNode.appendNode('dependency')
+                        dependencyNode.appendNode('groupId', it.group)
+                        dependencyNode.appendNode('artifactId', it.name)
+                        dependencyNode.appendNode('version', it.version)
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
+//task javadoc(type: Javadoc) {
+//    source = android.sourceSets.main.java.srcDirs
+//    configurations.implementation.setCanBeResolved(true)
+//    classpath += project.files(android.getBootClasspath().join(File.pathSeparator)) + configurations.implementation
+//}
+//
+//task javadocJar(type: Jar, dependsOn: javadoc) {
+//    classifier = 'javadoc'
+//    from javadoc.destinationDir
+//}
+
+artifacts {
+//    archives javadocJar
+    archives sourcesJar
+}
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+
+    publications = ['Production']
+    configurations = ['archives']
+    override = true
+
+    pkg {
+        repo = 'maven'
+        name = 'iqchannels-sdk'
+        userOrg = properties.getProperty("bintray.userOrg")
+        description = "IQChannels SDK for Android"
+
+        publish = true
+        publicDownloadNumbers = true
+
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/iqstore/iqchannels-android'
+        websiteUrl = 'http://iqchannels.ru/'
+
+        version {
+            name = this.version
+            desc = "IQChannels SDK for Android"
+            released = new Date()
+            vcsTag = this.version
+        }
+    }
+}

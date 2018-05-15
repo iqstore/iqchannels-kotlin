@@ -24,11 +24,11 @@ allprojects {
 }
 ```
 
-Добавить зависимосить `compile 'ru.iqstore:iqchannels-sdk:1.1.0'` в `build.gradle` модуля приложнеия.
+Добавить зависимосить `compile 'ru.iqstore:iqchannels-sdk:1.2.0'` в `build.gradle` модуля приложнеия.
 ```build.gradle
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])   
-    compile 'ru.iqstore:iqchannels-sdk:1.1.0'
+    compile 'ru.iqstore:iqchannels-sdk:1.2.0'
     // etc...
 }
 ```

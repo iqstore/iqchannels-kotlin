@@ -7,7 +7,7 @@ import android.support.annotation.Nullable;
  */
 public class ChatMessageForm {
     public long LocalId;
-    public ChatPayloadType Payload;
+    public String Payload; // ChatPayloadType
     public String Text;
     @Nullable public String FileId;
 

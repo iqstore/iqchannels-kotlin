@@ -26,7 +26,7 @@ public class ChatMessage {
     @Nullable public Long UserId;
 
     // Payload
-    public ChatPayloadType Payload;
+    public String Payload; // ChatPayloadType
     public String Text;
     @Nullable public String FileId;
     @Nullable public String NoticeId;

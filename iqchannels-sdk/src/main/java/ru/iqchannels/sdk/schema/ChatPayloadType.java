@@ -1,13 +1,12 @@
 package ru.iqchannels.sdk.schema;
 
-import com.google.gson.annotations.SerializedName;
-
 /**
  * Copyright iqstore.ru. All Rights Reserved.
  */
-public enum ChatPayloadType {
-    @SerializedName("")INVALID,
-    @SerializedName("text")TEXT,
-    @SerializedName("file")FILE,
-    @SerializedName("notice")NOTICE,
+public class ChatPayloadType {
+    public static final String INVALID = "";
+    public static final String TEXT = "text";
+    public static final String FILE ="file";
+    public static final String NOTICE = "notice";
+    public static final String RATING = "rating";
 }

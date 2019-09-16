@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="#fff0f0f0"
+    android:paddingBottom="10dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="8dp">
+
+    <LinearLayout
+        android:id="@+id/rating_rate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/rating_rate_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="40dp"
+            android:autoLink="all"
+            android:textColor="#ff4c4c4c"
+            android:textSize="12sp"
+            android:text="@string/chat_ratings_rate"/>
+
+        <LinearLayout
+            android:id="@+id/rating_rates"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3pt"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/rating_rate_1"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginRight="3pt"
+                android:background="@null"
+                android:scaleType="centerCrop"
+                android:src="@drawable/star_empty"
+                tools:ignore="ContentDescription" />
+
+            <ImageButton
+                android:id="@+id/rating_rate_2"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginRight="3pt"
+                android:background="@null"
+                android:scaleType="centerCrop"
+                android:src="@drawable/star_empty"
+                tools:ignore="ContentDescription" />
+
+            <ImageButton
+                android:id="@+id/rating_rate_3"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginRight="3pt"
+                android:background="@null"
+                android:scaleType="centerCrop"
+                android:src="@drawable/star_empty"
+                tools:ignore="ContentDescription" />
+
+            <ImageButton
+                android:id="@+id/rating_rate_4"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginRight="3pt"
+                android:background="@null"
+                android:scaleType="centerCrop"
+                android:src="@drawable/star_empty"
+                tools:ignore="ContentDescription" />
+
+            <ImageButton
+                android:id="@+id/rating_rate_5"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_marginRight="3pt"
+                android:background="@null"
+                android:scaleType="centerCrop"
+                android:src="@drawable/star_empty"
+                tools:ignore="ContentDescription" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/rating_rated"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="40dp"
+        android:autoLink="all"
+        android:textColor="#ff4c4c4c"
+        android:textSize="16sp"
+        android:textStyle="italic">
+    </TextView>
+
+</LinearLayout>

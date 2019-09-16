@@ -15,6 +15,7 @@ import ru.iqchannels.sdk.schema.Client;
 import ru.iqchannels.sdk.schema.ClientAuth;
 import ru.iqchannels.sdk.schema.FileImageSize;
 import ru.iqchannels.sdk.schema.FileType;
+import ru.iqchannels.sdk.schema.Rating;
 import ru.iqchannels.sdk.schema.Relations;
 import ru.iqchannels.sdk.schema.UploadedFile;
 import ru.iqchannels.sdk.schema.RelationMap;
@@ -52,6 +53,11 @@ public class Rels {
         if (rels.Files != null) {
             for (UploadedFile file : rels.Files) {
                 map.Files.put(file.Id, file);
+            }
+        }
+        if (rels.Ratings != null) {
+            for (Rating rating : rels.Ratings) {
+                map.Ratings.put(rating.Id, rating);
             }
         }
         if (rels.Users != null) {
@@ -92,6 +98,9 @@ public class Rels {
         }
         if (message.FileId != null) {
             message.File = map.Files.get(message.FileId);
+        }
+        if (message.RatingId != null) {
+            message.Rating = map.Ratings.get(message.RatingId);
         }
         if (message.CreatedAt > 0) {
             message.Date = new Date(message.CreatedAt);

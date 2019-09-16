@@ -5,6 +5,7 @@
 
 package ru.iqchannels.sdk.ui;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
@@ -13,11 +14,14 @@ import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -32,6 +36,8 @@ import java.util.List;
 import ru.iqchannels.sdk.R;
 import ru.iqchannels.sdk.app.IQChannels;
 import ru.iqchannels.sdk.schema.ChatMessage;
+import ru.iqchannels.sdk.schema.Rating;
+import ru.iqchannels.sdk.schema.RatingState;
 import ru.iqchannels.sdk.schema.UploadedFile;
 import ru.iqchannels.sdk.schema.User;
 
@@ -303,7 +309,16 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         }
 
         // Message
+
+        // Reset the visibility.
+        {
+            holder.otherText.setVisibility(View.GONE);
+            holder.otherImageFrame.setVisibility(View.GONE);
+            holder.otherRating.setVisibility(View.GONE);
+        }
+
         UploadedFile file = message.File;
+        Rating rating = message.Rating;
         if (file != null) {
             String imageUrl = file.ImagePreviewUrl;
             if (imageUrl != null) {
@@ -327,8 +342,44 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                 holder.otherText.setText(makeFileLink(file));
             }
 
+        } else if (rating != null) {
+            holder.otherRating.setVisibility(View.VISIBLE);
+            holder.otherRatingRate.setVisibility(View.GONE);
+            holder.otherRatingRated.setVisibility(View.GONE);
+
+            if (objectEquals(rating.State, RatingState.PENDING)) {
+                holder.otherRatingRate.setVisibility(View.VISIBLE);
+
+                int value = rating.Value == null ? 0 : rating.Value;
+                ImageButton[] ratingButtons = new ImageButton[]{
+                        holder.otherRatingRate1,
+                        holder.otherRatingRate2,
+                        holder.otherRatingRate3,
+                        holder.otherRatingRate4,
+                        holder.otherRatingRate5,
+                };
+
+                for (int i = 0; i < ratingButtons.length; i++) {
+                    ImageButton button = ratingButtons[i];
+                    if (value >= i+1) {
+                        button.setImageResource(R.drawable.star_filled);
+                    } else {
+                        button.setImageResource(R.drawable.star_empty);
+                    }
+                }
+
+            } else if (objectEquals(rating.State, RatingState.RATED)) {
+                int value = rating.Value == null ? 0 : rating.Value;
+                String text = rootView.getResources().getString(R.string.chat_ratings_rated, value);
+
+                holder.otherRatingRated.setVisibility(View.VISIBLE);
+                holder.otherRatingRated.setText(text);
+
+            } else {
+                holder.otherRating.setVisibility(View.GONE);
+            }
+
         } else {
-            holder.otherImageFrame.setVisibility(View.GONE);
             holder.otherText.setVisibility(View.VISIBLE);
             holder.otherText.setAutoLinkMask(Linkify.ALL);
             holder.otherText.setText(message.Text);
@@ -427,6 +478,38 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         iqchannels.sendFile(message);
     }
 
+    private void onRateDown(int position, int value) {
+        ChatMessage message = messages.get(position);
+        Rating rating = message.Rating;
+
+        if (rating == null) {
+            return;
+        }
+        if (rating.Sent) {
+            return;
+        }
+
+        rating.Value = value;
+        notifyItemChanged(position);
+    }
+
+    private void onRateClicked(int position, int value) {
+        ChatMessage message = messages.get(position);
+        Rating rating = message.Rating;
+
+        if (rating == null) {
+            return;
+        }
+        if (rating.Sent) {
+            return;
+        }
+
+        rating.Sent = true;
+        rating.Value = value;
+        iqchannels.ratingsRate(rating.Id, value);
+        notifyItemChanged(position);
+    }
+
     static class ViewHolder extends RecyclerView.ViewHolder {
         private final ChatMessagesAdapter adapter;
 
@@ -462,6 +545,17 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         private final ImageView otherImageSrc;
         private final TextView otherDate;
 
+        // Rating
+        private final LinearLayout otherRating;
+        private final LinearLayout otherRatingRate;
+        private final ImageButton otherRatingRate1;
+        private final ImageButton otherRatingRate2;
+        private final ImageButton otherRatingRate3;
+        private final ImageButton otherRatingRate4;
+        private final ImageButton otherRatingRate5;
+        private final TextView otherRatingRated;
+
+        @SuppressLint("ClickableViewAccessibility")
         ViewHolder(final ChatMessagesAdapter adapter, final View itemView) {
             super(itemView);
             this.adapter = adapter;
@@ -487,17 +581,6 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             myReceived = (TextView) itemView.findViewById(R.id.myReceived);
             myRead = (TextView) itemView.findViewById(R.id.myRead);
 
-            // Other
-            other = (LinearLayout) itemView.findViewById(R.id.other);
-            otherAvatar = (FrameLayout) itemView.findViewById(R.id.otherAvatar);
-            otherAvatarImage = (ImageView) itemView.findViewById(R.id.otherAvatarImage);
-            otherAvatarText = (TextView) itemView.findViewById(R.id.otherAvatarText);
-            otherName = (TextView) itemView.findViewById(R.id.otherName);
-            otherText = (TextView) itemView.findViewById(R.id.otherText);
-            otherImageFrame = (FrameLayout) itemView.findViewById(R.id.otherImageFrame);
-            otherImageSrc = (ImageView) itemView.findViewById(R.id.otherImageSrc);
-            otherDate = (TextView) itemView.findViewById(R.id.otherDate);
-
             myUploadCancel.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -510,7 +593,91 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                     adapter.onUploadRetryClicked(getAdapterPosition());
                 }
             });
+
+            // Other
+            other = (LinearLayout) itemView.findViewById(R.id.other);
+            otherAvatar = (FrameLayout) itemView.findViewById(R.id.otherAvatar);
+            otherAvatarImage = (ImageView) itemView.findViewById(R.id.otherAvatarImage);
+            otherAvatarText = (TextView) itemView.findViewById(R.id.otherAvatarText);
+            otherName = (TextView) itemView.findViewById(R.id.otherName);
+            otherText = (TextView) itemView.findViewById(R.id.otherText);
+            otherImageFrame = (FrameLayout) itemView.findViewById(R.id.otherImageFrame);
+            otherImageSrc = (ImageView) itemView.findViewById(R.id.otherImageSrc);
+            otherDate = (TextView) itemView.findViewById(R.id.otherDate);
+
+            // Rating
+            otherRating = itemView.findViewById(R.id.rating);
+            otherRatingRate = itemView.findViewById(R.id.rating_rate);
+            otherRatingRate1 = itemView.findViewById(R.id.rating_rate_1);
+            otherRatingRate2 = itemView.findViewById(R.id.rating_rate_2);
+            otherRatingRate3 = itemView.findViewById(R.id.rating_rate_3);
+            otherRatingRate4 = itemView.findViewById(R.id.rating_rate_4);
+            otherRatingRate5 = itemView.findViewById(R.id.rating_rate_5);
+            otherRatingRated = itemView.findViewById(R.id.rating_rated);
+
+            ImageButton[] ratingButtons = new ImageButton[]{
+                    otherRatingRate1,
+                    otherRatingRate2,
+                    otherRatingRate3,
+                    otherRatingRate4,
+                    otherRatingRate5,
+            };
+
+            for (ImageButton button : ratingButtons) {
+                button.setOnTouchListener(new View.OnTouchListener(){
+                    @Override
+                    public boolean onTouch(View view, MotionEvent motionEvent) {
+                        return onRateButtonTouch(view, motionEvent);
+                    }
+                });
+
+                button.setOnClickListener(new View.OnClickListener(){
+                    @Override
+                    public void onClick(View view) {
+                        onRateButtonClick(view);
+                    }
+                });
+            }
         }
+
+        private boolean onRateButtonTouch(View view, MotionEvent event) {
+            if (event.getAction() != MotionEvent.ACTION_DOWN) {
+                return false;
+            }
+
+            int value = getRateButtonValue(view);
+            adapter.onRateDown(getAdapterPosition(), value);
+            return false;
+        }
+
+        private void onRateButtonClick(View view) {
+            int value = getRateButtonValue(view);
+            if (value == 0) {
+                return;
+            }
+
+            adapter.onRateClicked(getAdapterPosition(), value);
+        }
+
+        private int getRateButtonValue(View view) {
+            int value = 0;
+            int id = view.getId();
+
+            if (id == R.id.rating_rate_1) {
+                value = 1;
+            } else if (id == R.id.rating_rate_2) {
+                value = 2;
+            } else if (id == R.id.rating_rate_3) {
+                value = 3;
+            } else if (id == R.id.rating_rate_4) {
+                value = 4;
+            } else if (id == R.id.rating_rate_5) {
+                value = 5;
+            }
+
+            return value;
+        }
+
     }
 
     private static boolean objectEquals(Object a, Object b) {

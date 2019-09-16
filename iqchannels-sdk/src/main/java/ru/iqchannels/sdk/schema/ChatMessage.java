@@ -30,6 +30,7 @@ public class ChatMessage {
     public String Text;
     @Nullable public String FileId;
     @Nullable public String NoticeId;
+    @Nullable public Long RatingId;
 
     // Flags
     public boolean Received;
@@ -47,6 +48,7 @@ public class ChatMessage {
     @Nullable public Client Client;
     @Nullable public User User;
     @Nullable public UploadedFile File;
+    @Nullable public Rating Rating;
     @Nullable public Date Date;
 
     // Upload

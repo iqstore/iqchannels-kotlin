@@ -11,5 +11,6 @@ public class Relations {
     @Nullable public List<ChatMessage> ChatMessages;
     @Nullable public List<Client> Clients;
     @Nullable public List<UploadedFile> Files;
+    @Nullable public List<Rating> Ratings;
     @Nullable public List<User> Users;
 }

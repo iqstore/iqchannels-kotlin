@@ -1520,6 +1520,8 @@ public class IQChannels {
             @Override
             public void onException(Exception exception) {}
         });
+
+        Log.i(TAG, String.format("Sent rating, ratingId=%d, value=%d", ratingId, value));
     }
 
     // Data

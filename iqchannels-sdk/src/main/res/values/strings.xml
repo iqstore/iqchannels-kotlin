@@ -12,4 +12,6 @@
     <string name="chat_upload_error">Ошибка</string>
     <string name="chat_upload_cancel">Отменить</string>
     <string name="chat_upload_retry">Повторить</string>
+    <string name="chat_ratings_rate">Пожалуйста, оцените качество консультации:</string>
+    <string name="chat_ratings_rated">Оценка оператора %1$d из 5</string>
 </resources>

@@ -19,4 +19,8 @@ public class Rating {
 
     public long CreatedAt;
     public long UpdatedAt;
+
+    // Local
+
+    public boolean Sent;
 }

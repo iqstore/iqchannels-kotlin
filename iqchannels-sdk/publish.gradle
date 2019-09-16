@@ -12,7 +12,7 @@ publishing {
             version this.version
 
             artifact("$buildDir/outputs/aar/iqchannels-sdk-release.aar") {
-                assembleRelease
+                "assembleRelease"
             }
 
             pom.withXml {

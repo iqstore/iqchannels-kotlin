@@ -57,7 +57,7 @@ public class AppActivity extends AppCompatActivity
         String token = FirebaseInstanceId.getInstance().getToken();
         IQChannels iq = IQChannels.instance();
         // iq.configure(this, new IQChannelsConfig("http://52.57.77.143/", "support"));
-        iq.configure(this, new IQChannelsConfig("http://192.168.31.125:3001/", "support"));
+        iq.configure(this, new IQChannelsConfig("https://app.iqstore.ru/", "support"));
         iq.setPushToken(token);
         // iq.configure(this, new IQChannelsConfig("http://88.99.143.201/", "support"));
     }

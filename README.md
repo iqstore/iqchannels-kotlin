@@ -4,8 +4,8 @@ SDK для Андроида сделано как обычная андроид-
 Библиотека легко интегрируется как обычная зависимость в существующее приложение.
 
 Требования:
-* minSdkVersion 11 (3.0).
-* targetSdkVersion 25.
+* minSdkVersion 14.
+* targetSdkVersion 26.
 
 
 Установка
@@ -24,11 +24,11 @@ allprojects {
 }
 ```
 
-Добавить зависимосить `compile 'ru.iqstore:iqchannels-sdk:1.2.0'` в `build.gradle` модуля приложнеия.
+Добавить зависимосить `compile 'ru.iqstore:iqchannels-sdk:1.3.0'` в `build.gradle` модуля приложнеия.
 ```build.gradle
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])   
-    compile 'ru.iqstore:iqchannels-sdk:1.2.0'
+    compile 'ru.iqstore:iqchannels-sdk:1.3.0'
     // etc...
 }
 ```

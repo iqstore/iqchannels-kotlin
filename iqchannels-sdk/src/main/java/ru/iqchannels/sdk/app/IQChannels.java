@@ -1503,6 +1503,25 @@ public class IQChannels {
         send();
     }
 
+    // Ratings
+
+    public void ratingsRate(long ratingId, int value) {
+        if (auth == null) {
+            return;
+        }
+
+        assert client != null;
+        assert config != null;
+
+        client.ratingsRate(ratingId, value, new HttpCallback<Void>() {
+            @Override
+            public void onResult(Void result) { }
+
+            @Override
+            public void onException(Exception exception) {}
+        });
+    }
+
     // Data
 
     private void setMessages(@NonNull List<ChatMessage> messages) {

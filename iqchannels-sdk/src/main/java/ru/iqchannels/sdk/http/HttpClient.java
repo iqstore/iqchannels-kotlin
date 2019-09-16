@@ -33,6 +33,8 @@ import ru.iqchannels.sdk.schema.ClientIntegrationAuthRequest;
 import ru.iqchannels.sdk.schema.ClientSignupRequest;
 import ru.iqchannels.sdk.schema.MaxIdQuery;
 import ru.iqchannels.sdk.schema.PushTokenInput;
+import ru.iqchannels.sdk.schema.RateRequest;
+import ru.iqchannels.sdk.schema.RatingInput;
 import ru.iqchannels.sdk.schema.RelationMap;
 import ru.iqchannels.sdk.schema.Response;
 import ru.iqchannels.sdk.schema.UploadedFile;
@@ -414,6 +416,29 @@ public class HttpClient {
                 callback.onException(exception);
             }
         }, progressCallback);
+    }
+
+    // Ratings
+
+    public HttpRequest ratingsRate(
+            long ratingId,
+            int value,
+            @NonNull final HttpCallback<Void> callback) {
+
+        String path = "/ratings/rate";
+        RateRequest req = new RateRequest(ratingId, value);
+
+        return this.post(path, req, null, new HttpCallback<Response<Object>>() {
+            @Override
+            public void onResult(Response<Object> result) {
+                callback.onResult(null);
+            }
+
+            @Override
+            public void onException(Exception exception) {
+                callback.onException(exception);
+            }
+        });
     }
 
     // POST JSON

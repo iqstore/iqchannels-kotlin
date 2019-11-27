@@ -106,11 +106,9 @@ public class HttpClient {
     }
 
     public HttpRequest clientsSignup(
-            @NonNull String name,
+            @Nullable String name,
             @NonNull String channel,
             @NonNull final HttpCallback<ClientAuth> callback) {
-        checkNotNull(name, "null name");
-
         String path = "/clients/signup";
         ClientSignupRequest req = new ClientSignupRequest(name, channel);
         TypeToken<Response<ClientAuth>> type = new TypeToken<Response<ClientAuth>>() {};

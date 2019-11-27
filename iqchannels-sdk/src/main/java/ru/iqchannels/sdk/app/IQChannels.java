@@ -37,6 +37,8 @@ import static ru.iqchannels.sdk.app.Preconditions.checkNotNull;
 
 public class IQChannels {
     private static final String TAG = "iqchannels";
+    private static final String ANONYMOUS_TOKEN = "anonymous_token";
+
     private static IQChannels instance;
 
     public static synchronized IQChannels instance() {
@@ -54,6 +56,7 @@ public class IQChannels {
 
     @Nullable private String token;
     @Nullable private String credentials;
+    @Nullable private String signupName;
 
     // Auth
     @Nullable private ClientAuth auth;
@@ -150,77 +153,13 @@ public class IQChannels {
         this.client = new HttpClient(config.address, new Rels(config.address));
         this.preferences = context.getApplicationContext().getSharedPreferences(
                 "IQChannels", Context.MODE_PRIVATE);
-        this.token = this.preferences.getString("token", null);
-
-        auth();
     }
 
     public void signup(String name) {
-        if (client == null) {
-            return;
-        }
-
         this.logout();
-        assert this.config != null;
-        String channel = this.config.channel;
-        this.authRequest = this.client.clientsSignup(name, channel, new HttpCallback<ClientAuth>() {
-            @Override
-            public void onResult(final ClientAuth result) {
-                execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        signupComplete(result);
-                    }
-                });
-            }
 
-            @Override
-            public void onException(final Exception exception) {
-                execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        signupException(exception);
-                    }
-                });
-            }
-        });
-
-        Log.i(TAG, String.format("Signing up, name=%s", name));
-    }
-
-    private void signupComplete(final ClientAuth auth) {
-        if (auth.Client == null || auth.Session == null || auth.Session.Token == null) {
-            signupException(new ChatException(ChatExceptionCode.INVALID, "Invalid client auth"));
-            return;
-        }
-        if (this.authRequest == null) {
-            return;
-        }
-
-        assert this.preferences != null;
-        SharedPreferences.Editor editor = this.preferences.edit();
-        editor.putString("token", auth.Session.Token);
-        editor.apply();
-        Log.i(TAG, String.format("Signed up, clientId=%d", auth.Client.Id));
-
-        authComplete(auth);
-    }
-
-    private void signupException(final Exception exception) {
-        if (authRequest == null) {
-            return;
-        }
-        authRequest = null;
-        Log.e(TAG, String.format("Failed to sign up, exc=%s", exception));
-
-        for (final IQChannelsListener listener : listeners) {
-            execute(new Runnable() {
-                @Override
-                public void run() {
-                    listener.authFailed(exception);
-                }
-            });
-        }
+        this.signupName = name;
+        this.signupAnonymous();
     }
 
     public void login(String credentials) {
@@ -230,11 +169,40 @@ public class IQChannels {
         auth();
     }
 
+    public void loginAnonymous() {
+        this.logout();
+
+        this.authAnonymous();
+
+        this.token = this.preferences.getString(ANONYMOUS_TOKEN, null);
+        if (this.token == null || this.token.isEmpty()) {
+            this.signup("");
+        } else {
+            this.auth();
+        }
+    }
+
     public void logout() {
         clear();
 
         this.credentials = null;
+        this.token = null;
+
         Log.i(TAG, "Logout");
+    }
+
+    public void logoutAnonymous() {
+        this.logout();
+
+        if (this.preferences == null) {
+            return;
+        }
+
+        SharedPreferences.Editor editor = this.preferences.edit();
+        editor.remove(ANONYMOUS_TOKEN);
+        editor.apply();
+
+        Log.i(TAG, "Logout anonymous");
     }
 
     private void clear() {
@@ -264,6 +232,7 @@ public class IQChannels {
             client.clearToken();
         }
 
+        this.signupName = null;
         Log.d(TAG, "Cleared auth");
     }
 
@@ -366,6 +335,7 @@ public class IQChannels {
         this.auth = auth;
         this.authAttempt = 0;
         this.client.setToken(auth.Session.Token);
+
         Log.i(TAG, String.format("Authenticated, clientId=%d, sessionId=%d",
                 auth.Client.Id, auth.Session.Id));
 
@@ -381,6 +351,194 @@ public class IQChannels {
         sendPushToken();
         loadMessages();
         listenToUnread();
+    }
+
+    // Anonymous auth
+
+    private void authAnonymous() {
+        if (auth != null) {
+            return;
+        }
+        if (authRequest != null) {
+            return;
+        }
+        if (client == null) {
+            return;
+        }
+
+        this.token = this.preferences.getString(ANONYMOUS_TOKEN, null);
+        if (token == null || token.isEmpty()) {
+            this.signupAnonymous();
+            return;
+        }
+
+        HttpCallback<ClientAuth> callback = new HttpCallback<ClientAuth>() {
+            @Override
+            public void onResult(final ClientAuth result) {
+                execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        authComplete(result);
+                    }
+                });
+            }
+
+            @Override
+            public void onException(final Exception exception) {
+                execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        authAnonymousException(exception);
+                    }
+                });
+            }
+        };
+
+        authAttempt++;
+        authRequest = this.client.clientsAuth(token, callback);
+        Log.i(TAG, String.format("Authenticating anonymous, attempt=%d", authAttempt));
+
+        for (final IQChannelsListener listener: this.listeners) {
+            execute(new Runnable() {
+                @Override
+                public void run() {
+                    listener.authenticating();
+                }
+            });
+        }
+    }
+
+    private void authAnonymousException(final Exception exception) {
+        if (authRequest == null) {
+            return;
+        }
+        authRequest = null;
+        if (credentials == null) {
+            Log.e(TAG, String.format("Failed to auth, exc=%s", exception));
+            return;
+        }
+
+        for (final IQChannelsListener listener: this.listeners) {
+            execute(new Runnable() {
+                @Override
+                public void run() {
+                    listener.authFailed(exception);
+                }
+            });
+        }
+
+        if (exception instanceof ChatException) {
+            ChatException exc = (ChatException)exception;
+            ChatExceptionCode code = exc.getCode();
+
+            if (code == ChatExceptionCode.UNAUTHORIZED) {
+                Log.e(TAG, "Failed to auth, invalid anonymous token");
+
+                assert this.preferences != null;
+                SharedPreferences.Editor editor = this.preferences.edit();
+                editor.remove(ANONYMOUS_TOKEN);
+                editor.apply();
+                this.token = null;
+
+                this.signupAnonymous();
+                return;
+            }
+        }
+
+        assert handler != null;
+        int delaySec = Retry.delaySeconds(authAttempt);
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                auth();
+            }
+        }, delaySec * 1000);
+        Log.e(TAG, String.format("Failed to auth, will retry in %d seconds, exc=%s",
+                delaySec, exception));
+    }
+
+    // Signup anonymous
+
+    private void signupAnonymous() {
+        if (client == null) {
+            return;
+        }
+
+        this.logout();
+        assert this.config != null;
+
+        String name = this.signupName;
+        String channel = this.config.channel;
+
+        this.authRequest = this.client.clientsSignup(name, channel, new HttpCallback<ClientAuth>() {
+            @Override
+            public void onResult(final ClientAuth result) {
+                execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        signupComplete(result);
+                    }
+                });
+            }
+
+            @Override
+            public void onException(final Exception exception) {
+                execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        signupException(exception);
+                    }
+                });
+            }
+        });
+
+        Log.i(TAG, "Signing up anonymous client");
+    }
+
+    private void signupComplete(final ClientAuth auth) {
+        if (auth.Client == null || auth.Session == null || auth.Session.Token == null) {
+            signupException(new ChatException(ChatExceptionCode.INVALID, "Invalid client auth"));
+            return;
+        }
+        if (this.authRequest == null) {
+            return;
+        }
+
+        assert this.preferences != null;
+        SharedPreferences.Editor editor = this.preferences.edit();
+        editor.putString(ANONYMOUS_TOKEN, auth.Session.Token);
+        editor.apply();
+        Log.i(TAG, String.format("Signed up anonymous client, clientId=%d", auth.Client.Id));
+
+        authComplete(auth);
+    }
+
+    private void signupException(final Exception exception) {
+        if (authRequest == null) {
+            return;
+        }
+        authRequest = null;
+        Log.e(TAG, String.format("Failed to sign up anonymous client, exc=%s", exception));
+
+        for (final IQChannelsListener listener : listeners) {
+            execute(new Runnable() {
+                @Override
+                public void run() {
+                    listener.authFailed(exception);
+                }
+            });
+        }
+
+        assert handler != null;
+        int delaySec = Retry.delaySeconds(authAttempt);
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                signupAnonymous();
+            }
+        }, delaySec * 1000);
+        Log.e(TAG, String.format("Failed to signup, will retry in %d seconds, exc=%s",
+                delaySec, exception));
     }
 
     // Push token

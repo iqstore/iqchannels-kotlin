@@ -23,6 +23,10 @@
             android:title="Logout"/>
 
         <item
+            android:id="@+id/nav_logout_anonymous"
+            android:title="Logout anonymous"/>
+
+        <item
             android:id="@+id/nav_listen_to_unread"
             android:title="Listen to unread"/>
 

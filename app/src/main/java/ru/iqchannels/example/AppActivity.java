@@ -59,6 +59,7 @@ public class AppActivity extends AppCompatActivity
         // iq.configure(this, new IQChannelsConfig("http://52.57.77.143/", "support"));
         iq.configure(this, new IQChannelsConfig("https://app.iqstore.ru/", "support"));
         iq.setPushToken(token);
+        iq.loginAnonymous();
         // iq.configure(this, new IQChannelsConfig("http://88.99.143.201/", "support"));
     }
 
@@ -112,6 +113,11 @@ public class AppActivity extends AppCompatActivity
 
             case R.id.nav_logout:
                 IQChannels.instance().logout();
+                IQChannels.instance().loginAnonymous();
+                return false;
+
+            case R.id.nav_logout_anonymous:
+                IQChannels.instance().logoutAnonymous();
                 return false;
 
             case R.id.nav_listen_to_unread:

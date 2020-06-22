@@ -1678,22 +1678,15 @@ public class IQChannels {
 
     // File url
 
-    public void filesUrl(@NonNull String fileId) {
+    public void filesUrl(@NonNull String fileId, HttpCallback<String> callback) {
         if (auth == null) {
             return;
         }
+        if (client == null) {
+            return;
+        }
 
-        client.filesToken(fileId, new HttpCallback<FileToken>() {
-            @Override
-            public void onResult(FileToken result) {
-
-            }
-
-            @Override
-            public void onException(Exception exception) {
-
-            }
-        });
+        client.filesUrl(fileId, callback);
     }
 
     // Ratings

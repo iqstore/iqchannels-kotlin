@@ -451,6 +451,25 @@ public class HttpClient {
         }, progressCallback);
     }
 
+    public HttpRequest filesUrl(
+            @NonNull final String fileId,
+            @NonNull final HttpCallback<String> callback) {
+
+        return this.filesToken(fileId, new HttpCallback<FileToken>() {
+            @Override
+            public void onResult(FileToken result) {
+                String token = result.Token;
+                String url = fileUrl(fileId, token);
+                callback.onResult(url);
+            }
+
+            @Override
+            public void onException(Exception exception) {
+                callback.onException(exception);
+            }
+        });
+    }
+
     public HttpRequest filesToken(
             @NonNull String fileId,
             @NonNull final HttpCallback<FileToken> callback) {
@@ -472,6 +491,10 @@ public class HttpClient {
                 callback.onException(exception);
             }
         });
+    }
+
+    private String fileUrl(String fileId, String token) {
+        return String.format("%s/public/api/v1/files/get/%s?token=%s", this.address, fileId, token);
     }
 
     // Ratings

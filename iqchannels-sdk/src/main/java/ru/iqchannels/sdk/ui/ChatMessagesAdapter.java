@@ -7,6 +7,8 @@ package ru.iqchannels.sdk.ui;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.text.Spanned;
@@ -33,6 +35,7 @@ import java.util.List;
 
 import ru.iqchannels.sdk.R;
 import ru.iqchannels.sdk.app.IQChannels;
+import ru.iqchannels.sdk.http.HttpCallback;
 import ru.iqchannels.sdk.schema.ChatMessage;
 import ru.iqchannels.sdk.schema.Rating;
 import ru.iqchannels.sdk.schema.RatingState;
@@ -244,7 +247,10 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                 holder.myText.setVisibility(View.VISIBLE);
                 holder.myText.setAutoLinkMask(0);
                 holder.myText.setMovementMethod(LinkMovementMethod.getInstance());
-                holder.myText.setText(makeFileLink(file));
+
+                holder.myText.setText(file.Name);
+                holder.myText.setTextColor(Colors.linkColor());
+//                holder.myText.setText(makeFileLink(file));
             }
 
         } else {
@@ -253,6 +259,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             holder.myText.setVisibility(View.VISIBLE);
             holder.myText.setAutoLinkMask(Linkify.ALL);
             holder.myText.setText(message.Text);
+            holder.myText.setTextColor(Colors.textColor());
         }
     }
 
@@ -337,7 +344,10 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                 holder.otherText.setVisibility(View.VISIBLE);
                 holder.otherText.setAutoLinkMask(0);
                 holder.otherText.setMovementMethod(LinkMovementMethod.getInstance());
-                holder.otherText.setText(makeFileLink(file));
+
+                holder.otherText.setText(file.Name);
+                holder.otherText.setTextColor(Colors.linkColor());
+//                holder.otherText.setText(makeFileLink(file));
             }
 
         } else if (rating != null) {
@@ -381,6 +391,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             holder.otherText.setVisibility(View.VISIBLE);
             holder.otherText.setAutoLinkMask(Linkify.ALL);
             holder.otherText.setText(message.Text);
+            holder.otherText.setTextColor(Colors.textColor());
         }
     }
 
@@ -508,6 +519,26 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         notifyItemChanged(position);
     }
 
+    private void onTextMessageClicked(int position) {
+        ChatMessage message = messages.get(position);
+        UploadedFile file = message.File;
+        if (file == null) {
+            return;
+        }
+
+        iqchannels.filesUrl(file.Id, new HttpCallback<String>() {
+            @Override
+            public void onResult(String url) {
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse(url));
+                rootView.getContext().startActivity(i);
+            }
+
+            @Override
+            public void onException(Exception exception) {}
+        });
+    }
+
     static class ViewHolder extends RecyclerView.ViewHolder {
         private final ChatMessagesAdapter adapter;
 
@@ -563,6 +594,12 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             // My
             my = (LinearLayout) itemView.findViewById(R.id.my);
             myText = (TextView) itemView.findViewById(R.id.myText);
+            myText.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    adapter.onTextMessageClicked(getAdapterPosition());
+                }
+            });
 
             myUpload = (LinearLayout) itemView.findViewById(R.id.myUpload);
             myUploadProgress = (ProgressBar) itemView.findViewById(R.id.myUploadProgress);
@@ -599,6 +636,13 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             otherAvatarText = (TextView) itemView.findViewById(R.id.otherAvatarText);
             otherName = (TextView) itemView.findViewById(R.id.otherName);
             otherText = (TextView) itemView.findViewById(R.id.otherText);
+            otherText.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    adapter.onTextMessageClicked(getAdapterPosition());
+                }
+            });
+
             otherImageFrame = (FrameLayout) itemView.findViewById(R.id.otherImageFrame);
             otherImageSrc = (ImageView) itemView.findViewById(R.id.otherImageSrc);
             otherDate = (TextView) itemView.findViewById(R.id.otherDate);

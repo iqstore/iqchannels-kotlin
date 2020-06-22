@@ -40,4 +40,12 @@ class Colors {
         char ch = letter.charAt(0);
         return COLORS[ch % COLORS.length];
     }
+
+    static int linkColor() {
+        return 0xff7e57c2;
+    }
+
+    static int textColor() {
+        return 0xff4c4c4c;
+    }
 }

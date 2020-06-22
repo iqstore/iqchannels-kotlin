@@ -27,8 +27,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.squareup.picasso.Picasso;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -237,7 +235,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                 holder.myImageFrame.getLayoutParams().height = size[1];
                 holder.myImageFrame.requestLayout();
 
-                Picasso.with(holder.myImageFrame.getContext())
+                iqchannels.picasso(holder.myImageFrame.getContext())
                         .load(imageUrl)
                         .into(holder.myImageSrc);
             } else {
@@ -279,9 +277,9 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             if (avatarUrl != null && !avatarUrl.isEmpty()) {
                 // Avatar image
                 holder.otherAvatarText.setVisibility(View.GONE);
-
                 holder.otherAvatarImage.setVisibility(View.VISIBLE);
-                Picasso.with(holder.otherAvatarImage.getContext())
+
+                iqchannels.picasso(holder.otherAvatarImage.getContext())
                         .load(avatarUrl)
                         .placeholder(R.drawable.avatar_placeholder)
                         .into(holder.otherAvatarImage);
@@ -330,7 +328,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                 holder.otherImageFrame.getLayoutParams().height = size[1];
                 holder.otherImageFrame.requestLayout();
 
-                Picasso.with(holder.otherImageFrame.getContext())
+                iqchannels.picasso(holder.otherImageFrame.getContext())
                         .load(imageUrl)
                         .into(holder.otherImageSrc);
             } else {

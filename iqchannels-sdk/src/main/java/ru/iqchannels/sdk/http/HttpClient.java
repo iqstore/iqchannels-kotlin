@@ -1,12 +1,17 @@
 package ru.iqchannels.sdk.http;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.squareup.okhttp.Interceptor;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.picasso.OkHttpDownloader;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +36,7 @@ import ru.iqchannels.sdk.schema.ClientAuth;
 import ru.iqchannels.sdk.schema.ClientAuthRequest;
 import ru.iqchannels.sdk.schema.ClientIntegrationAuthRequest;
 import ru.iqchannels.sdk.schema.ClientSignupRequest;
+import ru.iqchannels.sdk.schema.FileToken;
 import ru.iqchannels.sdk.schema.MaxIdQuery;
 import ru.iqchannels.sdk.schema.PushTokenInput;
 import ru.iqchannels.sdk.schema.RateRequest;
@@ -49,9 +55,12 @@ public class HttpClient {
     private final Gson gson;
     private final Rels rels;
     private final ExecutorService executor;
+    private final Picasso picasso;
+
     private volatile String token;  // Can be changed by the application main thread.
 
-    public HttpClient(@NonNull String address, @NonNull Rels rels) {
+
+    public HttpClient(@NonNull Context context, @NonNull String address, @NonNull Rels rels) {
         address = checkNotNull(address, "null address");
         if (address.endsWith("/")) {
             address = address.substring(0, address.length() - 1);
@@ -70,6 +79,32 @@ public class HttpClient {
                 return thread;
             }
         });
+
+        this.picasso = this.buildPicasso(context);
+    }
+
+    public Picasso picasso() {
+        return this.picasso;
+    }
+
+    private Picasso buildPicasso(Context context) {
+        Interceptor auth = new PicassoAuth();
+        OkHttpClient client = new OkHttpClient();
+        client.interceptors().add(auth);
+        OkHttpDownloader downloader = new OkHttpDownloader(client);
+        return new Picasso.Builder(context).downloader(downloader).build();
+    }
+
+    private class PicassoAuth implements  Interceptor {
+        @Override
+        public com.squareup.okhttp.Response intercept(Chain chain) throws IOException {
+            String header = String.format("Client %s", HttpClient.this.token);
+            com.squareup.okhttp.Request request = chain.request()
+                    .newBuilder()
+                    .addHeader("Authorization", header)
+                    .build();
+            return chain.proceed(request);
+        }
     }
 
     public void setToken(String token) {
@@ -414,6 +449,29 @@ public class HttpClient {
                 callback.onException(exception);
             }
         }, progressCallback);
+    }
+
+    public HttpRequest filesToken(
+            @NonNull String fileId,
+            @NonNull final HttpCallback<FileToken> callback) {
+        checkNotNull(fileId, "null fileId");
+
+        String path = "/files/token";
+        Map<String, String> params = new HashMap<>();
+        params.put("FileId", fileId);
+
+        TypeToken<Response<FileToken>> type = new TypeToken<Response<FileToken>>() {};
+        return this.post(path, params, type, new HttpCallback<Response<FileToken>>() {
+            @Override
+            public void onResult(Response<FileToken> result) {
+                callback.onResult(result.Result);
+            }
+
+            @Override
+            public void onException(Exception exception) {
+                callback.onException(exception);
+            }
+        });
     }
 
     // Ratings

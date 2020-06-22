@@ -8,7 +8,14 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
+import com.squareup.okhttp.Interceptor;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Response;
+import com.squareup.picasso.OkHttpDownloader;
+import com.squareup.picasso.Picasso;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -30,6 +37,7 @@ import ru.iqchannels.sdk.schema.ChatMessage;
 import ru.iqchannels.sdk.schema.ChatMessageForm;
 import ru.iqchannels.sdk.schema.Client;
 import ru.iqchannels.sdk.schema.ClientAuth;
+import ru.iqchannels.sdk.schema.FileToken;
 import ru.iqchannels.sdk.schema.MaxIdQuery;
 import ru.iqchannels.sdk.schema.UploadedFile;
 
@@ -150,9 +158,16 @@ public class IQChannels {
 
         this.handler = new Handler(context.getApplicationContext().getMainLooper());
         this.config = config;
-        this.client = new HttpClient(config.address, new Rels(config.address));
+        this.client = new HttpClient(context, config.address, new Rels(config.address));
         this.preferences = context.getApplicationContext().getSharedPreferences(
                 "IQChannels", Context.MODE_PRIVATE);
+    }
+
+    public Picasso picasso(Context context) {
+        if (this.client == null) {
+            return Picasso.with(context);
+        }
+        return this.client.picasso();
     }
 
     public void signup(String name) {
@@ -1659,6 +1674,26 @@ public class IQChannels {
 
         Log.i(TAG, String.format("Sent a message, localId=%d", form.LocalId));
         send();
+    }
+
+    // File url
+
+    public void filesUrl(@NonNull String fileId) {
+        if (auth == null) {
+            return;
+        }
+
+        client.filesToken(fileId, new HttpCallback<FileToken>() {
+            @Override
+            public void onResult(FileToken result) {
+
+            }
+
+            @Override
+            public void onException(Exception exception) {
+
+            }
+        });
     }
 
     // Ratings

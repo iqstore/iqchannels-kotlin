@@ -1,4 +1,5 @@
 # iqchannels-android
+.PHONY: build
 
 main: build upload
 

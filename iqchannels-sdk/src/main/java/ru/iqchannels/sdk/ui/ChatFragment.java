@@ -5,6 +5,7 @@
 
 package ru.iqchannels.sdk.ui;
 
+import android.Manifest;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -17,6 +18,7 @@ import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
@@ -547,7 +549,8 @@ public class ChatFragment extends Fragment {
 
         // Create a gallery intent.
         Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
-        galleryIntent.setType("image/*");
+        galleryIntent.setType("*/*");
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             galleryIntent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{
                     "audio/*", "video/*", "text/*", "application/*", "file/*"});
@@ -565,8 +568,8 @@ public class ChatFragment extends Fragment {
 
     // Gallery
 
-    private void onGalleryResult(int resultCode, final Intent data) {
-        if (resultCode != RESULT_OK || data == null) {
+    private void onGalleryResult(int resultCode, final Intent intent) {
+        if (resultCode != RESULT_OK || intent == null) {
             Log.i(TAG, String.format(
                     "onGalleryResult: Did not pick an image, activity result=%d", resultCode));
             return;
@@ -577,10 +580,14 @@ public class ChatFragment extends Fragment {
             @Override
             protected File doInBackground(Void... params) {
                 try {
-                    Uri uri = data.getData();
-                    File file = createGalleryTempFile(uri);
+                    final Uri uri = intent.getData();
 
                     ContentResolver resolver = getActivity().getContentResolver();
+                    MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
+                    String mtype = resolver.getType(uri);
+                    String ext = mimeTypeMap.getExtensionFromMimeType(mtype);
+
+                    final File file = createGalleryTempFile(uri, ext);
                     InputStream in = resolver.openInputStream(uri);
                     if (in == null) {
                         Log.e(TAG, "onGalleryResult: Failed to pick a file, no input stream");
@@ -616,9 +623,9 @@ public class ChatFragment extends Fragment {
         }.execute();
     }
 
-    private File createGalleryTempFile(Uri uri) throws IOException {
+    private File createGalleryTempFile(Uri uri, String ext) throws IOException {
         String filename = getGalleryFilename(uri);
-        String ext = null;
+
         if (filename != null) {
             int i = filename.lastIndexOf(".");
             if (i > -1) {
@@ -631,12 +638,26 @@ public class ChatFragment extends Fragment {
             ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
         }
 
+        if (filename.length() < 3) {
+            filename = "file-" + filename;
+        }
+
         File file = File.createTempFile(filename, "." + ext, getActivity().getCacheDir());
         file.deleteOnExit();
         return file;
     }
 
     private String getGalleryFilename(Uri uri) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            String path = uri.getPath();
+
+            int i = path.lastIndexOf("/");
+            if (i > -1) {
+                path = path.substring(i+1);
+            }
+            return path;
+        }
+
         String scheme = uri.getScheme();
         if (scheme.equals("file")) {
             return uri.getLastPathSegment();

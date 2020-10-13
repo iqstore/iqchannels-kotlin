@@ -289,7 +289,9 @@ public class IQChannels {
 
         authAttempt++;
         if (credentials != null) {
-            authRequest = this.client.clientsIntegrationAuth(credentials, callback);
+            assert this.config != null;
+            String channel = this.config.channel;
+            authRequest = this.client.clientsIntegrationAuth(credentials, channel, callback);
         } else {
             authRequest = this.client.clientsAuth(token, callback);
         }
@@ -443,7 +445,7 @@ public class IQChannels {
         }
 
         if (exception instanceof ChatException) {
-            ChatException exc = (ChatException)exception;
+            ChatException exc = (ChatException) exception;
             ChatExceptionCode code = exc.getCode();
 
             if (code == ChatExceptionCode.UNAUTHORIZED) {

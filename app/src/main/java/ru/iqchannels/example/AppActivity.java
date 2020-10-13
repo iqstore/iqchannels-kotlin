@@ -108,7 +108,7 @@ public class AppActivity extends AppCompatActivity
                 break;
 
             case R.id.nav_login:
-                IQChannels.instance().login("101");
+                IQChannels.instance().login("3");
                 return false;
 
             case R.id.nav_logout:

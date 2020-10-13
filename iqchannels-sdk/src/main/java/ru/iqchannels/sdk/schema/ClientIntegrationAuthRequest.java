@@ -7,10 +7,12 @@ import android.support.annotation.Nullable;
  */
 public class ClientIntegrationAuthRequest {
     @Nullable public String Credentials;
+    @Nullable public String Channel;
 
     public ClientIntegrationAuthRequest() {}
 
-    public ClientIntegrationAuthRequest(@Nullable String credentials) {
+    public ClientIntegrationAuthRequest(@Nullable String credentials, @Nullable String channel) {
         this.Credentials = credentials;
+        this.Channel = channel;
     }
 }

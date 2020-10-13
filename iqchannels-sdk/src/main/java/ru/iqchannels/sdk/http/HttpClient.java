@@ -189,11 +189,12 @@ public class HttpClient {
 
     public HttpRequest clientsIntegrationAuth(
             @NonNull String credentials,
+            @NonNull String channel,
             @NonNull final HttpCallback<ClientAuth> callback) {
         checkNotNull(credentials, "null credentials");
 
         String path = "/clients/integration_auth";
-        ClientIntegrationAuthRequest req = new ClientIntegrationAuthRequest(credentials);
+        ClientIntegrationAuthRequest req = new ClientIntegrationAuthRequest(credentials, channel);
         TypeToken<Response<ClientAuth>> type = new TypeToken<Response<ClientAuth>>() {};
         return this.post(path, req, type, new HttpCallback<Response<ClientAuth>>() {
             @Override

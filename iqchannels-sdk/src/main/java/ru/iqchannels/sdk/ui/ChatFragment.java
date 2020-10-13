@@ -17,9 +17,11 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
@@ -57,6 +59,8 @@ import ru.iqchannels.sdk.schema.ChatMessage;
 import ru.iqchannels.sdk.schema.ClientAuth;
 
 import static android.app.Activity.RESULT_OK;
+import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
+import static android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
 
 /**
  * Created by Ivan Korobkov i.korobkov@iqstore.ru on 24/01/2017.
@@ -66,6 +70,7 @@ public class ChatFragment extends Fragment {
     private static final int SEND_FOCUS_SCROLL_THRESHOLD_PX = 300;
 
     private static final int REQUEST_CAMERA_OR_GALLERY = 1;
+    private static final int REQUEST_CAMERA_PERMISSION = 2;
 
     /**
      * Use this factory method to create a new instance of
@@ -258,22 +263,42 @@ public class ChatFragment extends Fragment {
     }
 
     @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
 
         switch (requestCode) {
             case REQUEST_CAMERA_OR_GALLERY:
-                boolean isCamera = data == null;
+                boolean isCamera = intent == null;
+
                 if (!isCamera) {
-                    isCamera = MediaStore.ACTION_IMAGE_CAPTURE.equals(data.getAction());
+                    String action = intent.getAction();
+                    isCamera = MediaStore.ACTION_IMAGE_CAPTURE.equals(action);
+                }
+
+                if (!isCamera) {
+                    Uri uri = intent.getData();
+                    isCamera = uri == null;
                 }
 
                 if (isCamera) {
                     onCameraResult(resultCode);
                 } else {
-                    onGalleryResult(resultCode, data);
+                    onGalleryResult(resultCode, intent);
                 }
                 break;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == REQUEST_CAMERA_PERMISSION) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                showAttachChooser(true);
+            } else {
+                showAttachChooser(false);
+            }
         }
     }
 
@@ -528,17 +553,46 @@ public class ChatFragment extends Fragment {
     // Attach
 
     private void showAttachChooser() {
+        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                ActivityCompat.requestPermissions(getActivity(), new String[] {
+                        Manifest.permission.CAMERA,
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                }, REQUEST_CAMERA_PERMISSION);
+            }  else {
+                ActivityCompat.requestPermissions(getActivity(), new String[] {
+                        Manifest.permission.CAMERA,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                }, REQUEST_CAMERA_PERMISSION);
+            }
+            return;
+        }
+
+        showAttachChooser(true);
+    }
+
+    private void showAttachChooser(boolean withCamera) {
         // Try to create a camera intent.
         Intent cameraIntent = null;
-        {
+        if (withCamera) {
             Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             try {
                 if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
-                    File temp = File.createTempFile("image", null, getActivity().getExternalCacheDir());
-                    temp.deleteOnExit();
+                    File tmpDir = getActivity().getExternalCacheDir();
 
-                    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(temp));
-                    cameraTempFile = temp;
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                        tmpDir = Environment.getExternalStorageDirectory();
+                    }
+
+                    File tmp = File.createTempFile("image", ".jpg", tmpDir);
+                    tmp.deleteOnExit();
+
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(tmp));
+                    intent.addFlags(FLAG_GRANT_READ_URI_PERMISSION);
+                    intent.addFlags(FLAG_GRANT_WRITE_URI_PERMISSION);
+
+                    cameraTempFile = tmp;
                 }
                 cameraIntent = intent;
             } catch (IOException e) {
@@ -549,7 +603,7 @@ public class ChatFragment extends Fragment {
 
         // Create a gallery intent.
         Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
-        galleryIntent.setType("*/*");
+        galleryIntent.setType("image/*");
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             galleryIntent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{

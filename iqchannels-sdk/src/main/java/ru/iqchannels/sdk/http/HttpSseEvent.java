@@ -1,7 +1,8 @@
 package ru.iqchannels.sdk.http;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 class HttpSseEvent {
     @NonNull public final String id;

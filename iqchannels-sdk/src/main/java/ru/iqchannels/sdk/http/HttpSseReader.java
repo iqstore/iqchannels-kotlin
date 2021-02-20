@@ -1,6 +1,7 @@
 package ru.iqchannels.sdk.http;
 
-import android.support.annotation.Nullable;
+
+import androidx.annotation.Nullable;
 
 import java.io.BufferedReader;
 import java.io.Closeable;

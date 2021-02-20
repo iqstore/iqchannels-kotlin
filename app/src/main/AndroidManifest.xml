@@ -10,10 +10,11 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        android:fullBackupContent="@xml/backup_descriptor">
 
         <activity
-            android:name=".AppActivity"
+            android:name=".IQAppActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -22,9 +23,12 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".AppFirebaseInstanceIDService">
+        <service
+            android:exported="false"
+            android:name=".IQFirebaseMessagingService"
+            android:stopWithTask="false">
             <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT"/>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
 

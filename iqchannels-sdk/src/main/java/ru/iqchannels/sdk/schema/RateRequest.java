@@ -1,6 +1,7 @@
 package ru.iqchannels.sdk.schema;
 
-import android.support.annotation.NonNull;
+
+import androidx.annotation.NonNull;
 
 /**
  * Copyright iqstore.ru. All Rights Reserved.

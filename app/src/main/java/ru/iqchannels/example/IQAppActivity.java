@@ -5,21 +5,29 @@
 
 package ru.iqchannels.example;
 
+import android.app.Activity;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.NavigationView;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.installations.FirebaseInstallations;
+import com.google.firebase.installations.InstallationTokenResult;
 
 import ru.iqchannels.sdk.app.Cancellable;
 import ru.iqchannels.sdk.app.IQChannels;
@@ -27,7 +35,7 @@ import ru.iqchannels.sdk.app.IQChannelsConfig;
 import ru.iqchannels.sdk.app.UnreadListener;
 import ru.iqchannels.sdk.ui.ChatFragment;
 
-public class AppActivity extends AppCompatActivity
+public class IQAppActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, UnreadListener {
 
     private static final String TAG = "iqchannels-app";
@@ -38,27 +46,41 @@ public class AppActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_app);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
         setupIQChannels();
     }
 
     private void setupIQChannels() {
-        String token = FirebaseInstanceId.getInstance().getToken();
+        FirebaseInstallations.getInstance().getToken(false).addOnCompleteListener(new OnCompleteListener<InstallationTokenResult>() {
+            @Override
+            public void onComplete(@NonNull Task<InstallationTokenResult> task) {
+                if(!task.isSuccessful()){
+                    return;
+                }
+
+                // Get new Instance ID token.
+                String token = task.getResult().getToken();
+
+                IQChannels iq = IQChannels.instance();
+                iq.setPushToken(token);
+            }
+        });
+
         IQChannels iq = IQChannels.instance();
         // iq.configure(this, new IQChannelsConfig("http://52.57.77.143/", "support"));
         iq.configure(this, new IQChannelsConfig("https://app.iqstore.ru/", "support"));
-        iq.setPushToken(token);
+
         iq.loginAnonymous();
         // iq.configure(this, new IQChannelsConfig("http://88.99.143.201/", "support"));
     }
@@ -140,7 +162,7 @@ public class AppActivity extends AppCompatActivity
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.content, fragment).commit();
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -149,7 +171,7 @@ public class AppActivity extends AppCompatActivity
     public void unreadChanged(int unread) {
         Log.i(TAG, String.format("Unread: %d", unread));
 
-        NavigationView nav = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView nav = findViewById(R.id.nav_view);
         Menu menu = nav.getMenu();
         MenuItem item = menu.findItem(R.id.nav_chat);
         if (unread == 0) {

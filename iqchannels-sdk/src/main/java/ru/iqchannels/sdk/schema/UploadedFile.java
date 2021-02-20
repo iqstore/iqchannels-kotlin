@@ -1,6 +1,7 @@
 package ru.iqchannels.sdk.schema;
 
-import android.support.annotation.Nullable;
+
+import androidx.annotation.Nullable;
 
 /**
  * Created by Ivan Korobkov i.korobkov@iqstore.ru on 26/01/2017.

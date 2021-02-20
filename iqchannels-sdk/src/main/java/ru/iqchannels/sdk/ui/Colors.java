@@ -5,7 +5,6 @@
 
 package ru.iqchannels.sdk.ui;
 
-import android.support.annotation.Nullable;
 
 /**
  * Created by Ivan Korobkov i.korobkov@iqstore.ru on 27/01/2017.
@@ -32,7 +31,7 @@ class Colors {
 
     private Colors() {}
 
-    static int paletteColor(@Nullable String letter) {
+    static int paletteColor(String letter) {
         if (letter == null || letter.isEmpty()) {
             return BLUE_GREY_400;
         }

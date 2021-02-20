@@ -85,7 +85,7 @@
             android:visibility="gone"/>
 
         <!-- Messages -->
-        <android.support.v4.widget.SwipeRefreshLayout
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/messagesRefresh"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -94,7 +94,7 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentTop="true">
 
-            <android.support.v7.widget.RecyclerView
+            <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/messages"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -104,7 +104,7 @@
                 android:paddingTop="@dimen/activity_vertical_margin"
                 app:layoutManager="LinearLayoutManager"/>
 
-        </android.support.v4.widget.SwipeRefreshLayout>
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
         <ImageView
             xmlns:android="http://schemas.android.com/apk/res/android"

@@ -8,23 +8,47 @@ SDK для Андроида сделано как обычная андроид-
 * targetSdkVersion 26.
 
 
-Установка
----------
-Добавить репозиторий с библиотекой в `build.gradle` всего проекта в раздел `allProjects`. 
-Это временное требование, в ближайшем будущем библиотека появится в центральном репозитории jCenter.
+# Установка
+IQChannels SDK использует Maven репозиторий Github Packages. Для установки:
+
+1. Сгенерируйте токен доступа к Github Packages с правами `read:packages` на странице https://github.com/settings/tokens/
+
+2. Сохраните имя пользователя и токен доступа в файле `local.properties`:
+```
+gpr.user=<github_username>
+gpr.key=<ghp_token>
+```
+
+3. Добавьте файл `local.properties` в `.gitignore`:
+```
+local.properties
+```
+
+4. Добавьте репозиторий `https://maven.pkg.github.com/iqstore/iqchannels-android` в `build.gradle` всего проекта в раздел `allProjects`.
+Загрузите `local.properties` и укажите `username` и `password` из них:
 
 ```build.gradle
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
 allprojects {
     repositories {
         jcenter()
+
         maven {
-            url "https://dl.bintray.com/iqstore/maven/"
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/iqstore/iqchannels-android")
+
+            credentials(PasswordCredentials) {
+                username = properties['gpr.user'] ?: System.getenv("GPR_USER")
+                password = properties['gpr.key'] ?: System.getenv("GPR_API_KEY")
+            }
         }
     }
 }
 ```
 
-Добавить зависимосить `compile 'ru.iqstore:iqchannels-sdk:1.6.0'` в `build.gradle` модуля приложнеия.
+5. Добавьте зависимосить `compile 'ru.iqstore:iqchannels-sdk:1.6.0'` в `build.gradle` модуля приложнеия.
 ```build.gradle
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])   
@@ -33,11 +57,12 @@ dependencies {
 }
 ```
 
-Собрать проект, `gradle` должен успешно скачать все зависимости. 
+6. Соберите проект, `gradle` должен успешно скачать все зависимости. 
+
+Подробнее смотрите в официальной документации Github https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-gradle-registry.
 
 
-Конфигурация
-------------
+# Конфигурация
 Приложение разделено на два основных класса: `IQChannels` и `ChatFragment`. Первый представляет собой библиотеку, 
 которая реализуюет бизнес-логику. Второй - это фрагмент, который реализует пользовательский интерфейс чата.
 
@@ -65,8 +90,7 @@ public class MainActivity extends AppCompatActivity
 }
 ```
 
-Анонимный режим
----------------
+# Анонимный режим
 По умолчанию в анонимном режиме пользователю предлагается представиться, чтобы начать чать.
 Для автоматического создания анонимного пользователя нужно вызвать:
 
@@ -81,8 +105,7 @@ IQChannels.instance().loginAnonymous();
 IQChannels.instance().logoutAnonymous();
 ```
 
-Логин
------
+# Логин
 Если `login()` не вызывать, тогда IQChannels функционирует в анонимном режиме. В этом случае
 клиенту предлагается представиться и начать неавторизованный чат.
 
@@ -104,8 +127,7 @@ IQChannels.instance().logout();
 сессия переподключается к серверу. При отсутствии сети, сессия ждет, когда последняя станет доступна.
 
 
-Интерфейс чата
---------------
+# Интерфейс чата
 Интерфес чата построен как отдельный фрагмент, который можно использовать в любом месте в приложении.
 Интерфейс чата корректно обрабатывает логины/логаут, обнуляет сообщения.
 
@@ -145,8 +167,7 @@ public class MainActivity extends AppCompatActivity
 ```
 
 
-Отображение непрочитанных сообщений
------------------------------------
+# Отображение непрочитанных сообщений
 Для отображения и обновления непрочитанных сообщений нужно добавить слушателя в IQChannels.
 Слушателя можно добавлять в любой момент времени, он корректно обрабатывает переподключения,
 логин, логаут.
@@ -179,8 +200,7 @@ public class MainActivity extends AppCompatActivity
 }
 ```
 
-Настройка пуш-уведомлений
--------------------------
+# Настройка пуш-уведомлений
 SDK поддерживает пуш-уведомления о новых сообщениях в чате.
 Для этого в приложении настроить Firebase Messaging, получить пуш-токен
 и передать его в IQChannels.

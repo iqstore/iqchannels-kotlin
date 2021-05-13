@@ -6,7 +6,6 @@
 package ru.iqchannels.sdk.http;
 
 import android.annotation.SuppressLint;
-import android.util.Log;
 import android.util.StringBuilderPrinter;
 
 import androidx.annotation.NonNull;
@@ -36,6 +35,7 @@ import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
+import ru.iqchannels.sdk.Log;
 import ru.iqchannels.sdk.lib.InternalIO;
 import ru.iqchannels.sdk.schema.ChatException;
 import ru.iqchannels.sdk.schema.Relations;

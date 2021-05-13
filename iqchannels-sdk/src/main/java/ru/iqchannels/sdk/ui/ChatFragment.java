@@ -27,7 +27,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,6 +49,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import ru.iqchannels.sdk.Log;
 import ru.iqchannels.sdk.R;
 import ru.iqchannels.sdk.app.Callback;
 import ru.iqchannels.sdk.app.Cancellable;

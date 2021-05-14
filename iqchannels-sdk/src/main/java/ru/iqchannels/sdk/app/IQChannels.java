@@ -3,7 +3,6 @@ package ru.iqchannels.sdk.app;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Handler;
-import android.util.Log;
 import android.webkit.MimeTypeMap;
 
 import androidx.annotation.NonNull;
@@ -24,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 
+import ru.iqchannels.sdk.Log;
 import ru.iqchannels.sdk.http.HttpCallback;
 import ru.iqchannels.sdk.http.HttpClient;
 import ru.iqchannels.sdk.http.HttpProgressCallback;

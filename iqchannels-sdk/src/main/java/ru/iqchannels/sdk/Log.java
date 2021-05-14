@@ -1,7 +1,13 @@
 package ru.iqchannels.sdk;
 
 public class Log {
-    private static final boolean LOGGING = false;
+    private static boolean LOGGING = true;
+
+    public static void configure(boolean state) {
+        synchronized(Log.class) {
+            LOGGING = state;
+        }
+    }
 
     public static void d(String tag, String message) {
         if (LOGGING) android.util.Log.d(tag, message);

@@ -8,9 +8,10 @@ import androidx.annotation.Nullable;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.squareup.okhttp.Interceptor;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.picasso.OkHttpDownloader;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+
+import com.squareup.picasso.OkHttp3Downloader;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -90,17 +91,16 @@ public class HttpClient {
 
     private Picasso buildPicasso(Context context) {
         Interceptor auth = new PicassoAuth();
-        OkHttpClient client = new OkHttpClient();
-        client.interceptors().add(auth);
-        OkHttpDownloader downloader = new OkHttpDownloader(client);
+        OkHttpClient client = new OkHttpClient().newBuilder().addInterceptor(auth).build();
+        OkHttp3Downloader downloader = new OkHttp3Downloader(client);
         return new Picasso.Builder(context).downloader(downloader).build();
     }
 
     private class PicassoAuth implements  Interceptor {
         @Override
-        public com.squareup.okhttp.Response intercept(Chain chain) throws IOException {
+        public okhttp3.Response intercept(Chain chain) throws IOException {
             String header = String.format("Client %s", HttpClient.this.token);
-            com.squareup.okhttp.Request request = chain.request()
+            okhttp3.Request request = chain.request()
                     .newBuilder()
                     .addHeader("Authorization", header)
                     .build();

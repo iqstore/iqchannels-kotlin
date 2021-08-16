@@ -8,10 +8,6 @@ import android.webkit.MimeTypeMap;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.squareup.okhttp.Interceptor;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Response;
-import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -166,7 +162,7 @@ public class IQChannels {
 
     public Picasso picasso(Context context) {
         if (this.client == null) {
-            return Picasso.with(context);
+            return Picasso.get();
         }
         return this.client.picasso();
     }

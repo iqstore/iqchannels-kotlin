@@ -274,7 +274,8 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         // Name and avatar
         User user = message.User;
         if (groupStart && user != null) {
-            String name = user.DisplayName != null ? user.DisplayName : "";
+            String displayName = user.DisplayName != null ? user.DisplayName : "";
+            String name = user.Pseudonym != null ? user.Pseudonym : displayName;
             String letter = name.isEmpty() ? "" : name.substring(0, 1);
 
             holder.otherName.setText(name);

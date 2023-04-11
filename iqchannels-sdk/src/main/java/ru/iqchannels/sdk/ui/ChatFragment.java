@@ -57,6 +57,7 @@ import ru.iqchannels.sdk.app.IQChannels;
 import ru.iqchannels.sdk.app.IQChannelsListener;
 import ru.iqchannels.sdk.app.MessagesListener;
 import ru.iqchannels.sdk.lib.InternalIO;
+import ru.iqchannels.sdk.schema.ChatEvent;
 import ru.iqchannels.sdk.schema.ChatMessage;
 import ru.iqchannels.sdk.schema.ClientAuth;
 
@@ -432,6 +433,11 @@ public class ChatFragment extends Fragment {
             public void messageCancelled(ChatMessage message) {
                 ChatFragment.this.messageCancelled(message);
             }
+
+            @Override
+            public void eventTyping(ChatEvent event) {
+                ChatFragment.this.eventTyping(event);
+            }
         });
     }
 
@@ -492,6 +498,11 @@ public class ChatFragment extends Fragment {
             return;
         }
         adapter.cancelled(message);
+    }
+
+    private void eventTyping(ChatEvent event) {
+        adapter.typing(event);
+        maybeScrollToBottomOnNewMessage();
     }
 
     private void messageUpdated(ChatMessage message) {

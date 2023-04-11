@@ -1781,6 +1781,9 @@ public class IQChannels {
             case MESSAGE_READ:
                 messageRead(event);
                 break;
+            case TYPING:
+                messageTyping(event);
+                break;
         }
     }
 
@@ -1889,6 +1892,17 @@ public class IQChannels {
                 @Override
                 public void run() {
                     listener.messageUpdated(message);
+                }
+            });
+        }
+    }
+
+    private void messageTyping(ChatEvent event) {
+        for (final MessagesListener listener : messageListeners) {
+            execute(new Runnable() {
+                @Override
+                public void run() {
+                    listener.eventTyping(event);
                 }
             });
         }

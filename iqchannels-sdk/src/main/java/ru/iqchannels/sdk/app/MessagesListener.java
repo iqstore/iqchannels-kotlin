@@ -7,6 +7,7 @@ package ru.iqchannels.sdk.app;
 
 import java.util.List;
 
+import ru.iqchannels.sdk.schema.ChatEvent;
 import ru.iqchannels.sdk.schema.ChatMessage;
 
 /**
@@ -27,6 +28,8 @@ public interface MessagesListener {
     void messageUploaded(ChatMessage message);
 
     void messageUpdated(ChatMessage message);
+
+    void eventTyping(ChatEvent event);
 
     void messageCancelled(ChatMessage message);
 }

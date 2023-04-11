@@ -9,6 +9,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Looper;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.TextUtils;
@@ -28,16 +29,21 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import ru.iqchannels.sdk.R;
 import ru.iqchannels.sdk.app.IQChannels;
 import ru.iqchannels.sdk.http.HttpCallback;
+import ru.iqchannels.sdk.schema.ActorType;
+import ru.iqchannels.sdk.schema.ChatEvent;
 import ru.iqchannels.sdk.schema.ChatMessage;
+import ru.iqchannels.sdk.schema.ChatPayloadType;
 import ru.iqchannels.sdk.schema.Rating;
 import ru.iqchannels.sdk.schema.RatingState;
 import ru.iqchannels.sdk.schema.UploadedFile;
@@ -108,6 +114,30 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         notifyItemRemoved(i);;
     }
 
+    void typing(ChatEvent event) {
+        ChatMessage msg = new ChatMessage();
+        msg.Author = ActorType.USER;
+        String name = event.User.Name;
+        if (event.User.Pseudonym != ""){
+            name = event.User.Pseudonym;
+        }
+        msg.Text = name + " печатает...";
+        msg.Payload = ChatPayloadType.TYPING;
+        msg.Date = new Date();
+        messages.add(msg);
+        if (messages.size() > 1) {
+            notifyItemChanged(messages.size() - 2);
+        }
+        notifyItemInserted(messages.size() - 1);
+        new android.os.Handler(Looper.getMainLooper()).postDelayed(
+                () -> {
+                    int i = messages.indexOf(msg);
+                    messages.remove(msg);
+                    notifyItemRemoved(i);
+                },
+                3000);
+    }
+
     void updated(ChatMessage message) {
         int i = getIndexByMessage(message);
         if (i < 0 ) {
@@ -151,12 +181,12 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         return new ViewHolder(this, contactView);
     }
 
+
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         ChatMessage message = messages.get(position);
-
         // Day
-        if (isNewDay(position)) {
+        if (isNewDay(position) && message.Payload != ChatPayloadType.TYPING) {
             holder.date.setText(dateFormat.format(message.Date));
             holder.date.setVisibility(View.VISIBLE);
         } else {
@@ -172,6 +202,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
 
         iqchannels.markAsRead(message);
     }
+
 
     private void onBindMyMessage(ViewHolder holder, int position, ChatMessage message) {
         boolean groupEnd = isGroupEnd(position);
@@ -389,7 +420,8 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                 holder.otherRating.setVisibility(View.GONE);
             }
 
-        } else {
+        }
+        else {
             holder.otherText.setVisibility(View.VISIBLE);
             holder.otherText.setAutoLinkMask(Linkify.ALL);
             holder.otherText.setText(message.Text);
@@ -575,6 +607,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         private final FrameLayout otherImageFrame;
         private final ImageView otherImageSrc;
         private final TextView otherDate;
+        private final TextView typing;
 
         // Rating
         private final LinearLayout otherRating;
@@ -585,6 +618,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         private final ImageButton otherRatingRate4;
         private final ImageButton otherRatingRate5;
         private final TextView otherRatingRated;
+
 
         @SuppressLint("ClickableViewAccessibility")
         ViewHolder(final ChatMessagesAdapter adapter, final View itemView) {
@@ -648,6 +682,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             otherImageFrame = (FrameLayout) itemView.findViewById(R.id.otherImageFrame);
             otherImageSrc = (ImageView) itemView.findViewById(R.id.otherImageSrc);
             otherDate = (TextView) itemView.findViewById(R.id.otherDate);
+            typing = (TextView) itemView.findViewById(R.id.typing);
 
             // Rating
             otherRating = itemView.findViewById(R.id.rating);

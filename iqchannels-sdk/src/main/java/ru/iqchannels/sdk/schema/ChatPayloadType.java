@@ -9,4 +9,5 @@ public class ChatPayloadType {
     public static final String FILE ="file";
     public static final String NOTICE = "notice";
     public static final String RATING = "rating";
+    public static final String TYPING = "typing";
 }

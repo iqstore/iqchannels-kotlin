@@ -61,6 +61,8 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
     private final java.text.DateFormat timeFormat;
     private final List<ChatMessage> messages;
 
+    private boolean agentTyping;
+
     ChatMessagesAdapter(IQChannels iqchannels, final View rootView) {
         this.iqchannels = iqchannels;
         this.rootView = rootView;
@@ -72,6 +74,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
 
     void clear() {
         messages.clear();
+        this.agentTyping = false;
         notifyDataSetChanged();
     }
 
@@ -115,10 +118,14 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
     }
 
     void typing(ChatEvent event) {
+        if (agentTyping) {
+            return;
+        }
+        agentTyping = true;
         ChatMessage msg = new ChatMessage();
         msg.Author = ActorType.USER;
         String name = event.User.Name;
-        if (event.User.Pseudonym != ""){
+        if (!event.User.Pseudonym.isEmpty()){
             name = event.User.Pseudonym;
         }
         msg.Text = name + " печатает...";
@@ -131,6 +138,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         notifyItemInserted(messages.size() - 1);
         new android.os.Handler(Looper.getMainLooper()).postDelayed(
                 () -> {
+                    agentTyping = false;
                     int i = messages.indexOf(msg);
                     messages.remove(msg);
                     notifyItemRemoved(i);
@@ -305,8 +313,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         // Name and avatar
         User user = message.User;
         if (groupStart && user != null) {
-            String displayName = user.DisplayName != null ? user.DisplayName : "";
-            String name = user.Pseudonym != null ? user.Pseudonym : displayName;
+            String name = user.Pseudonym.isEmpty() ? user.DisplayName : user.Pseudonym;
             String letter = name.isEmpty() ? "" : name.substring(0, 1);
 
             holder.otherName.setText(name);

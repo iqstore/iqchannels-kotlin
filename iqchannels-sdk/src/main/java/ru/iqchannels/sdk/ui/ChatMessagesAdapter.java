@@ -124,10 +124,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         agentTyping = true;
         ChatMessage msg = new ChatMessage();
         msg.Author = ActorType.USER;
-        String name = event.User.Name;
-        if (!event.User.Pseudonym.isEmpty()){
-            name = event.User.Pseudonym;
-        }
+        String name = event.User.DisplayName;
         msg.Text = name + " печатает...";
         msg.Payload = ChatPayloadType.TYPING;
         msg.Date = new Date();
@@ -313,7 +310,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         // Name and avatar
         User user = message.User;
         if (groupStart && user != null) {
-            String name = user.Pseudonym.isEmpty() ? user.DisplayName : user.Pseudonym;
+            String name = user.DisplayName;
             String letter = name.isEmpty() ? "" : name.substring(0, 1);
 
             holder.otherName.setText(name);

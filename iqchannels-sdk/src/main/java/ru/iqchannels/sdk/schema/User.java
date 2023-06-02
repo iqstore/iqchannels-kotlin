@@ -9,7 +9,6 @@ public class User {
     public long Id;
     public String Name;
     public String DisplayName;
-    public String Pseudonym;
     public String Email;
     public boolean Online;
     public boolean Deleted;

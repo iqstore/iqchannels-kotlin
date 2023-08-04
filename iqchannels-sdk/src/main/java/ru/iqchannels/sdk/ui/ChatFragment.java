@@ -685,9 +685,21 @@ public class ChatFragment extends Fragment {
                     return;
                 }
 
-                iqchannels.sendFile(file);
+                showConfirmDialog(file);
             }
         }.execute();
+    }
+
+    private void showConfirmDialog(File file) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
+                .setTitle(R.string.chat_send_file_confirmation)
+                .setMessage(file.getName())
+                .setPositiveButton(R.string.ok, (dialogInterface, i) -> {
+                    iqchannels.sendFile(file);
+                })
+                .setNegativeButton(R.string.cancel, null);
+
+        builder.show();
     }
 
     private File createGalleryTempFile(Uri uri, String ext) throws IOException {
@@ -790,7 +802,7 @@ public class ChatFragment extends Fragment {
         }
 
         addCameraPhotoToGallery(file);
-        iqchannels.sendFile(file);
+        showConfirmDialog(file);
     }
 
     private void addCameraPhotoToGallery(File file) {

@@ -14,4 +14,6 @@
     <string name="chat_upload_retry">Повторить</string>
     <string name="chat_ratings_rate">Пожалуйста, оцените качество консультации:</string>
     <string name="chat_ratings_rated">Оценка оператора %1$d из 5</string>
+    <string name="chat_send_file_confirmation">Подтвердите отправку файла:</string>
+    <string name="cancel">Отмена</string>
 </resources>

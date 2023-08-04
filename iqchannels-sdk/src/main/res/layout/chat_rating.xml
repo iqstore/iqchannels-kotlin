@@ -35,8 +35,8 @@
 
             <ImageButton
                 android:id="@+id/rating_rate_1"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
+                android:layout_width="@dimen/rating_button_size"
+                android:layout_height="@dimen/rating_button_size"
                 android:layout_marginRight="3pt"
                 android:background="@null"
                 android:scaleType="centerCrop"
@@ -45,8 +45,8 @@
 
             <ImageButton
                 android:id="@+id/rating_rate_2"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
+                android:layout_width="@dimen/rating_button_size"
+                android:layout_height="@dimen/rating_button_size"
                 android:layout_marginRight="3pt"
                 android:background="@null"
                 android:scaleType="centerCrop"
@@ -55,8 +55,8 @@
 
             <ImageButton
                 android:id="@+id/rating_rate_3"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
+                android:layout_width="@dimen/rating_button_size"
+                android:layout_height="@dimen/rating_button_size"
                 android:layout_marginRight="3pt"
                 android:background="@null"
                 android:scaleType="centerCrop"
@@ -65,8 +65,8 @@
 
             <ImageButton
                 android:id="@+id/rating_rate_4"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
+                android:layout_width="@dimen/rating_button_size"
+                android:layout_height="@dimen/rating_button_size"
                 android:layout_marginRight="3pt"
                 android:background="@null"
                 android:scaleType="centerCrop"
@@ -75,8 +75,8 @@
 
             <ImageButton
                 android:id="@+id/rating_rate_5"
-                android:layout_width="35dp"
-                android:layout_height="35dp"
+                android:layout_width="@dimen/rating_button_size"
+                android:layout_height="@dimen/rating_button_size"
                 android:layout_marginRight="3pt"
                 android:background="@null"
                 android:scaleType="centerCrop"

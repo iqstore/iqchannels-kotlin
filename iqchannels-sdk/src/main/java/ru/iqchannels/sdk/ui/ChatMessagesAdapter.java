@@ -611,7 +611,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         private final FrameLayout otherImageFrame;
         private final ImageView otherImageSrc;
         private final TextView otherDate;
-        private final TextView typing;
+        //private final TextView typing;
 
         // Rating
         private final LinearLayout otherRating;
@@ -686,7 +686,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             otherImageFrame = (FrameLayout) itemView.findViewById(R.id.otherImageFrame);
             otherImageSrc = (ImageView) itemView.findViewById(R.id.otherImageSrc);
             otherDate = (TextView) itemView.findViewById(R.id.otherDate);
-            typing = (TextView) itemView.findViewById(R.id.typing);
+            //typing = (TextView) itemView.findViewById(R.id.typing);
 
             // Rating
             otherRating = itemView.findViewById(R.id.rating);

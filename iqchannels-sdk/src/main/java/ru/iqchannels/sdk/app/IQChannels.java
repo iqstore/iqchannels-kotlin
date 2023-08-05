@@ -1775,6 +1775,8 @@ public class IQChannels {
             case MESSAGE_CREATED:
                 messageCreated(event);
                 break;
+            case MESSAGE_DELETED:
+                break;
             case MESSAGE_RECEIVED:
                 messageReceived(event);
                 break;

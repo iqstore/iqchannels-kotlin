@@ -1775,6 +1775,9 @@ public class IQChannels {
             case MESSAGE_CREATED:
                 messageCreated(event);
                 break;
+            case MESSAGE_DELETED:
+                messageDeleted(event);
+                break;
             case MESSAGE_RECEIVED:
                 messageReceived(event);
                 break;
@@ -1835,6 +1838,26 @@ public class IQChannels {
         }
 
         enqueueReceived(message);
+    }
+
+    private void messageDeleted(ChatEvent event) {
+        final ChatMessage message = event.Message;
+        if (message == null) {
+            return;
+        }
+
+        assert messages != null;
+        messages.remove(message);
+        Log.i(TAG, String.format("Deleted message, messageId=%d", message.Id));
+
+        for (final MessagesListener listener : messageListeners) {
+            execute(new Runnable() {
+                @Override
+                public void run() {
+                    listener.messageCancelled(message);
+                }
+            });
+        }
     }
 
     private void messageReceived(ChatEvent event) {

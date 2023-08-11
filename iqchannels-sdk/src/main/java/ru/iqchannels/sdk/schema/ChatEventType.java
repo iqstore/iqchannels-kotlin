@@ -16,6 +16,6 @@ public enum ChatEventType {
     @SerializedName("message_created")MESSAGE_CREATED,
     @SerializedName("system_message_created")SYSTEM_MESSAGE_CREATED,
     @SerializedName("message_received")MESSAGE_RECEIVED,
-    @SerializedName("delete-messages")MESSAGE_DELETED,
-    @SerializedName("message_read")MESSAGE_READ
+    @SerializedName("message_read")MESSAGE_READ,
+    @SerializedName("delete-messages")MESSAGE_DELETED
 }

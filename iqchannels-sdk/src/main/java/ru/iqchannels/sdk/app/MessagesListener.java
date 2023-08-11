@@ -32,4 +32,6 @@ public interface MessagesListener {
     void eventTyping(ChatEvent event);
 
     void messageCancelled(ChatMessage message);
+
+    void messageDeleted(ChatMessage message);
 }

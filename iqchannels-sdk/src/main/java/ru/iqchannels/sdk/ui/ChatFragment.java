@@ -435,6 +435,11 @@ public class ChatFragment extends Fragment {
             }
 
             @Override
+            public void messageDeleted(ChatMessage message) {
+                ChatFragment.this.messageDeleted(message);
+            }
+
+            @Override
             public void eventTyping(ChatEvent event) {
                 ChatFragment.this.eventTyping(event);
             }
@@ -498,6 +503,13 @@ public class ChatFragment extends Fragment {
             return;
         }
         adapter.cancelled(message);
+    }
+
+    private void messageDeleted(ChatMessage message) {
+        if (messagesRequest == null) {
+            return;
+        }
+        adapter.deleted(message);
     }
 
     private void eventTyping(ChatEvent event) {

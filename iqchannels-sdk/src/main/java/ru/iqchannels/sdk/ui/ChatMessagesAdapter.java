@@ -117,6 +117,26 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         notifyItemRemoved(i);;
     }
 
+    void deleted(ChatMessage messageToDelete) {
+        ChatMessage oldMessage = null;
+
+        for (ChatMessage message : messages) {
+            if (message.Id == messageToDelete.Id) {
+                oldMessage = message;
+            }
+        }
+
+        if (oldMessage != null) {
+            int i = messages.indexOf(oldMessage);
+            if (i < 0) {
+                return;
+            }
+
+            messages.remove(i);
+            notifyItemRemoved(i);
+        }
+    }
+
     void typing(ChatEvent event) {
         if (agentTyping) {
             return;

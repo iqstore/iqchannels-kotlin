@@ -1787,6 +1787,8 @@ public class IQChannels {
             case TYPING:
                 messageTyping(event);
                 break;
+            default:
+                Log.i(TAG, String.format("applyEvent: %s", event.Type) );
         }
     }
 
@@ -1841,22 +1843,34 @@ public class IQChannels {
     }
 
     private void messageDeleted(ChatEvent event) {
-        final ChatMessage message = event.Message;
-        if (message == null) {
+        final List<ChatMessage> messagesToDelete = event.Messages;
+        if (messagesToDelete == null || messagesToDelete.isEmpty()) {
             return;
         }
 
-        assert messages != null;
-        messages.remove(message);
-        Log.i(TAG, String.format("Deleted message, messageId=%d", message.Id));
+        for (ChatMessage chatMessageToDelete : messagesToDelete) {
+            ChatMessage oldMessage = null;
 
-        for (final MessagesListener listener : messageListeners) {
-            execute(new Runnable() {
-                @Override
-                public void run() {
-                    listener.messageCancelled(message);
+            assert messages != null;
+            for (ChatMessage message : messages) {
+                if (message.Id == chatMessageToDelete.Id) {
+                    oldMessage = message;
                 }
-            });
+            }
+
+            if (oldMessage != null) {
+                messages.remove(oldMessage);
+                Log.i(TAG, String.format("Deleted message, messageId=%d", oldMessage.Id));
+            }
+
+            for (final MessagesListener listener : messageListeners) {
+                execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        listener.messageDeleted(chatMessageToDelete);
+                    }
+                });
+            }
         }
     }
 

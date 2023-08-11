@@ -406,7 +406,6 @@ public class HttpRequest {
                     }
 
                     assert gson != null;
-                    android.util.Log.d("abctag", sseEvent.data);
                     Response<T> event = gson.fromJson(sseEvent.data, eventType.getType());
                     listener.onEvent(event);
                 }

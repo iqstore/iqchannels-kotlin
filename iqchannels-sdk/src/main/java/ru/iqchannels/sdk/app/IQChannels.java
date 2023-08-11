@@ -1771,6 +1771,11 @@ public class IQChannels {
     }
 
     private void applyEvent(ChatEvent event) {
+        if (event.Type == null) {
+            Log.i(TAG, String.format("applyEvent: skipping %s", event) );
+            return;
+        }
+
         switch (event.Type) {
             case MESSAGE_CREATED:
                 messageCreated(event);

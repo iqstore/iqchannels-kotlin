@@ -16,4 +16,7 @@
     <string name="chat_ratings_rated">Оценка оператора %1$d из 5</string>
     <string name="chat_send_file_confirmation">Подтвердите отправку файла:</string>
     <string name="cancel">Отмена</string>
+    <string name="downloading">Загрузка...</string>
+    <string name="open_file">Открыть файл</string>
+    <string name="download_file">Сохранить в "Загрузки"</string>
 </resources>

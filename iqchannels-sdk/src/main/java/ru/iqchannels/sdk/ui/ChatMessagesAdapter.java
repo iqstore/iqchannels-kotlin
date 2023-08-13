@@ -63,9 +63,12 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
 
     private boolean agentTyping;
 
-    ChatMessagesAdapter(IQChannels iqchannels, final View rootView) {
+    private FileClickListener fileClickListener;
+
+    ChatMessagesAdapter(IQChannels iqchannels, final View rootView, FileClickListener fileClickListener) {
         this.iqchannels = iqchannels;
         this.rootView = rootView;
+        this.fileClickListener = fileClickListener;
 
         dateFormat = DateFormat.getDateFormat(rootView.getContext());
         timeFormat = DateFormat.getTimeFormat(rootView.getContext());
@@ -587,9 +590,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         iqchannels.filesUrl(file.Id, new HttpCallback<String>() {
             @Override
             public void onResult(String url) {
-                Intent i = new Intent(Intent.ACTION_VIEW);
-                i.setData(Uri.parse(url));
-                rootView.getContext().startActivity(i);
+                fileClickListener.onClick(url, file.Name);
             }
 
             @Override
@@ -785,5 +786,9 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
 
     private static boolean objectEquals(Object a, Object b) {
         return (a == b) || (a != null && a.equals(b));
+    }
+
+    interface FileClickListener {
+        void onClick(String url, String fileName);
     }
 }

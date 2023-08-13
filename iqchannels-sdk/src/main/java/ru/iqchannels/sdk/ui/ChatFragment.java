@@ -24,6 +24,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -161,7 +162,12 @@ public class ChatFragment extends Fragment {
             }
         });
 
-        adapter = new ChatMessagesAdapter(iqchannels, view);
+        adapter = new ChatMessagesAdapter(iqchannels, view, (url, fileName) -> {
+            FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
+            fragmentTransaction.add(FileActionsChooseFragment.newInstance(url, fileName), null);
+            fragmentTransaction.commit();
+        });
+
         recycler = view.findViewById(R.id.messages);
         recycler.setAdapter(adapter);
         recycler.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {

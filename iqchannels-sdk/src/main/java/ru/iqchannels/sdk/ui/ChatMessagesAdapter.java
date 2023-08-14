@@ -29,7 +29,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -384,6 +384,13 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
 
         UploadedFile file = message.File;
         Rating rating = message.Rating;
+
+        if (file == null) {
+            holder.otherText.setCompoundDrawablesWithIntrinsicBounds(
+                null, null, null, null
+            );
+        }
+
         if (file != null) {
             String imageUrl = file.ImagePreviewUrl;
             if (imageUrl != null) {
@@ -407,6 +414,13 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
 
                 holder.otherText.setText(file.Name);
                 holder.otherText.setTextColor(Colors.linkColor());
+                holder.otherText.setCompoundDrawablesWithIntrinsicBounds(
+                    ContextCompat.getDrawable(rootView.getContext(), R.drawable.file_16),
+                    null, null, null
+                );
+                holder.otherText.setCompoundDrawablePadding(
+                    rootView.getResources().getDimensionPixelSize(R.dimen.file_drawable_padding)
+                );
 //                holder.otherText.setText(makeFileLink(file));
             }
 

@@ -7,8 +7,12 @@ package ru.iqchannels.sdk.ui;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -41,6 +45,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -122,6 +127,8 @@ public class ChatFragment extends Fragment {
 
     // Camera and gallery
     @Nullable private File cameraTempFile;
+
+    private BroadcastReceiver onDownloadComplete = null;
 
     public ChatFragment() {
         iqchannels = IQChannels.instance();
@@ -213,6 +220,32 @@ public class ChatFragment extends Fragment {
             attachButton.setVisibility(View.GONE);
         }
         return view;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        getChildFragmentManager().setFragmentResultListener(
+            FileActionsChooseFragment.REQUEST_KEY,
+            this,
+            (requestKey, bundle) -> {
+
+                long downloadID = bundle.getLong(FileActionsChooseFragment.KEY_DOWNLOAD_ID);
+                String fileName = bundle.getString(FileActionsChooseFragment.KEY_FILE_NAME);
+
+                handleDownload(downloadID, fileName);
+            }
+        );
+    }
+
+    @Override
+    public void onDestroy() {
+        if (onDownloadComplete != null) {
+            getContext().unregisterReceiver(onDownloadComplete);
+        }
+
+        super.onDestroy();
     }
 
     private void updateViews() {
@@ -863,5 +896,50 @@ public class ChatFragment extends Fragment {
             builder.setMessage(R.string.unknown_exception);
         }
         builder.show();
+    }
+
+    private void handleDownload(long downloadID, String fileName) {
+        if (downloadID > 0) {
+            onDownloadComplete = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    String action = intent.getAction();
+                    if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
+                        long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
+                        Log.d(TAG, "received: " + downloadId);
+                        if (downloadID != downloadId) return;
+
+                        DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+                        DownloadManager.Query query = new DownloadManager.Query();
+                        query.setFilterById(downloadId);
+
+                        Cursor cursor = downloadManager.query(query);
+                        if (cursor.moveToFirst()) {
+                            int columnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
+                            int status = cursor.getInt(columnIndex);
+
+                            if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                                // Загрузка завершена успешно
+                                Log.d(TAG, "SUCCESS");
+                                Toast.makeText(context, getString(R.string.file_saved_success_msg, fileName), Toast.LENGTH_LONG).show();
+                            } else if (status == DownloadManager.STATUS_FAILED) {
+                                int columnReason = cursor.getColumnIndex(DownloadManager.COLUMN_REASON);
+                                int reason = cursor.getInt(columnReason);
+                                // Обработка ошибки загрузки
+                                Log.d(TAG, "FAILED");
+                                Toast.makeText(context, getString(R.string.file_saved_fail_msg, fileName), Toast.LENGTH_LONG).show();
+                            }
+                        }
+                        cursor.close();
+                        getContext().unregisterReceiver(this);
+                    }
+                }
+            };
+
+            getContext().registerReceiver(
+                    onDownloadComplete,
+                    new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
+            );
+        }
     }
 }

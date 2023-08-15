@@ -18,6 +18,8 @@
     <string name="cancel">Отмена</string>
     <string name="downloading">Загрузка...</string>
     <string name="open_file">Открыть файл</string>
-    <string name="download_file">Сохранить в "Загрузки"</string>
+    <string name="download_file">Сохранить в \"Загрузки\"</string>
     <string name="file_size_too_large">Превышен максимально допустимый размер файла</string>
+    <string name="file_saved_success_msg">Файл \"%1$s\" успешно сохранен в папку \"Загрузки\"</string>
+    <string name="file_saved_fail_msg">Не удалось сохранить файл \"%1$s\" в папку \"Загрузки\"</string>
 </resources>

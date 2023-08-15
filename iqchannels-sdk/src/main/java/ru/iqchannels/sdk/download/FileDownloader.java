@@ -8,7 +8,7 @@ import ru.iqchannels.sdk.R;
 
 public class FileDownloader {
 
-    public static void downloadFile(Context context, String fileUrl, String fileName) {
+    public static Long downloadFile(Context context, String fileUrl, String fileName) {
         DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
 
         Uri uri = Uri.parse(fileUrl);
@@ -20,7 +20,7 @@ public class FileDownloader {
                 .setDescription(context.getString(R.string.downloading))
                 .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
 
-        downloadManager.enqueue(request);
+        return downloadManager.enqueue(request);
     }
 }
 

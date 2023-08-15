@@ -40,6 +40,7 @@ import java.util.List;
 import ru.iqchannels.sdk.R;
 import ru.iqchannels.sdk.app.IQChannels;
 import ru.iqchannels.sdk.http.HttpCallback;
+import ru.iqchannels.sdk.http.HttpException;
 import ru.iqchannels.sdk.schema.ActorType;
 import ru.iqchannels.sdk.schema.ChatEvent;
 import ru.iqchannels.sdk.schema.ChatMessage;
@@ -273,7 +274,15 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                 holder.myUploadProgress.setVisibility(View.GONE);
 
                 holder.myUploadError.setVisibility(View.VISIBLE);
-                holder.myUploadError.setText(message.UploadExc.getLocalizedMessage());
+
+                Exception exception = message.UploadExc;
+                String errMessage = exception.getLocalizedMessage();
+                if (exception instanceof HttpException && ((HttpException) exception).code == 413) {
+                    errMessage = rootView.getResources().getString(R.string.file_size_too_large);
+                }
+
+                holder.myUploadError.setText(errMessage);
+                
                 holder.myUploadCancel.setVisibility(View.VISIBLE);
                 holder.myUploadRetry.setVisibility(View.VISIBLE);
             } else {

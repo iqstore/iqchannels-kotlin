@@ -263,8 +263,12 @@ public class HttpRequest {
             // Get a status code.
             int status = conn.getResponseCode();
             String statusText = conn.getResponseMessage();
+
             if ((status / 100) != 2) {
-                throw new HttpException(statusText);
+                HttpException exception = new HttpException(statusText);
+                exception.code = status;
+
+                throw exception;
             }
 
             // Assert an application/json response.

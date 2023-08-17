@@ -402,7 +402,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             if (imageUrl != null) {
                 int[] size = computeImageSizeFromFile(file);
 
-                if (message.Text != null) {
+                if (message.Text != null && !message.Text.isEmpty()) {
                     holder.otherText.setVisibility(View.VISIBLE);
                     holder.otherText.setText(message.Text);
                 } else  {

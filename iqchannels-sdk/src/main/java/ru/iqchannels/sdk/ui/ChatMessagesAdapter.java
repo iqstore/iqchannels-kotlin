@@ -32,6 +32,7 @@ import android.widget.TextView;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -387,6 +388,8 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         // Reset the visibility.
         {
             holder.otherText.setVisibility(View.GONE);
+            holder.tvOtherFileName.setVisibility(View.GONE);
+            holder.tvOtherFileSize.setVisibility(View.GONE);
             holder.otherImageFrame.setVisibility(View.GONE);
             holder.otherRating.setVisibility(View.GONE);
         }
@@ -394,18 +397,18 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         UploadedFile file = message.File;
         Rating rating = message.Rating;
 
-        if (file == null) {
-            holder.otherText.setCompoundDrawablesWithIntrinsicBounds(
-                null, null, null, null
-            );
-        }
-
         if (file != null) {
             String imageUrl = file.ImagePreviewUrl;
             if (imageUrl != null) {
                 int[] size = computeImageSizeFromFile(file);
 
-                holder.otherText.setVisibility(View.GONE);
+                if (message.Text != null) {
+                    holder.otherText.setVisibility(View.VISIBLE);
+                    holder.otherText.setText(message.Text);
+                } else  {
+                    holder.otherText.setVisibility(View.GONE);
+                }
+
                 holder.otherImageFrame.setVisibility(View.VISIBLE);
                 holder.otherImageFrame.getLayoutParams().width = size[0];
                 holder.otherImageFrame.getLayoutParams().height = size[1];
@@ -417,19 +420,46 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             } else {
 
                 holder.otherImageFrame.setVisibility(View.GONE);
-                holder.otherText.setVisibility(View.VISIBLE);
-                holder.otherText.setAutoLinkMask(0);
-                holder.otherText.setMovementMethod(LinkMovementMethod.getInstance());
+                holder.tvOtherFileName.setVisibility(View.VISIBLE);
+                holder.tvOtherFileName.setAutoLinkMask(0);
+                holder.tvOtherFileName.setMovementMethod(LinkMovementMethod.getInstance());
 
-                holder.otherText.setText(file.Name);
-                holder.otherText.setTextColor(Colors.linkColor());
-                holder.otherText.setCompoundDrawablesWithIntrinsicBounds(
-                    ContextCompat.getDrawable(rootView.getContext(), R.drawable.file_16),
-                    null, null, null
-                );
-                holder.otherText.setCompoundDrawablePadding(
-                    rootView.getResources().getDimensionPixelSize(R.dimen.file_drawable_padding)
-                );
+                holder.tvOtherFileName.setText(file.Name);
+
+                if (file.Size > 0) {
+                    holder.tvOtherFileSize.setVisibility(View.VISIBLE);
+                    float sizeKb = file.Size / 1024;
+                    float sizeMb = 0;
+                    if (sizeKb > 1024) {
+                        sizeMb = sizeKb / 1024;
+                    }
+
+                    int strRes = 0;
+                    String fileSize;
+                    if (sizeMb > 0) {
+                        strRes = R.string.file_size_mb_placeholder;
+                        DecimalFormat df = new DecimalFormat("0.00");
+                        fileSize = df.format(sizeMb);
+                    } else {
+                        strRes = R.string.file_size_kb_placeholder;
+                        fileSize = String.valueOf(sizeKb);
+                    }
+
+                    holder.tvOtherFileSize.setText(
+                        rootView.getResources().getString(
+                            strRes,
+                            fileSize
+                        )
+                    );
+                } else {
+                    holder.tvOtherFileSize.setText(null);
+                }
+
+                if (message.Text != null) {
+                    holder.otherText.setVisibility(View.VISIBLE);
+                    holder.otherText.setText(message.Text);
+                }
+
 //                holder.otherText.setText(makeFileLink(file));
             }
 
@@ -652,6 +682,8 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         private final TextView otherAvatarText;
         private final TextView otherName;
         private final TextView otherText;
+        private final TextView tvOtherFileName;
+        private final TextView tvOtherFileSize;
         private final FrameLayout otherImageFrame;
         private final ImageView otherImageSrc;
         private final TextView otherDate;
@@ -720,7 +752,9 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             otherAvatarText = (TextView) itemView.findViewById(R.id.otherAvatarText);
             otherName = (TextView) itemView.findViewById(R.id.otherName);
             otherText = (TextView) itemView.findViewById(R.id.otherText);
-            otherText.setOnClickListener(new View.OnClickListener() {
+            tvOtherFileName = (TextView) itemView.findViewById(R.id.tvOtherFileName);
+            tvOtherFileSize = (TextView) itemView.findViewById(R.id.tvOtherFileSize);
+            tvOtherFileName.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     adapter.onTextMessageClicked(getAdapterPosition());

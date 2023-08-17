@@ -22,4 +22,6 @@
     <string name="file_size_too_large">Превышен максимально допустимый размер файла</string>
     <string name="file_saved_success_msg">Файл \"%1$s\" успешно сохранен в папку \"Загрузки\"</string>
     <string name="file_saved_fail_msg">Не удалось сохранить файл \"%1$s\" в папку \"Загрузки\"</string>
+    <string name="file_size_kb_placeholder">%1$s кб</string>
+    <string name="file_size_mb_placeholder">%1$s Мб</string>
 </resources>

@@ -455,7 +455,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                     holder.tvOtherFileSize.setText(null);
                 }
 
-                if (message.Text != null) {
+                if (message.Text != null && !message.Text.isEmpty()) {
                     holder.otherText.setVisibility(View.VISIBLE);
                     holder.otherText.setText(message.Text);
                 }

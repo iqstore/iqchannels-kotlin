@@ -1771,9 +1771,17 @@ public class IQChannels {
     }
 
     private void applyEvent(ChatEvent event) {
+        if (event.Type == null) {
+            Log.i(TAG, String.format("applyEvent: skipping %s", event) );
+            return;
+        }
+
         switch (event.Type) {
             case MESSAGE_CREATED:
                 messageCreated(event);
+                break;
+            case MESSAGE_DELETED:
+                messageDeleted(event);
                 break;
             case MESSAGE_RECEIVED:
                 messageReceived(event);
@@ -1784,6 +1792,8 @@ public class IQChannels {
             case TYPING:
                 messageTyping(event);
                 break;
+            default:
+                Log.i(TAG, String.format("applyEvent: %s", event.Type) );
         }
     }
 
@@ -1835,6 +1845,38 @@ public class IQChannels {
         }
 
         enqueueReceived(message);
+    }
+
+    private void messageDeleted(ChatEvent event) {
+        final List<ChatMessage> messagesToDelete = event.Messages;
+        if (messagesToDelete == null || messagesToDelete.isEmpty()) {
+            return;
+        }
+
+        for (ChatMessage chatMessageToDelete : messagesToDelete) {
+            ChatMessage oldMessage = null;
+
+            assert messages != null;
+            for (ChatMessage message : messages) {
+                if (message.Id == chatMessageToDelete.Id) {
+                    oldMessage = message;
+                }
+            }
+
+            if (oldMessage != null) {
+                messages.remove(oldMessage);
+                Log.i(TAG, String.format("Deleted message, messageId=%d", oldMessage.Id));
+            }
+
+            for (final MessagesListener listener : messageListeners) {
+                execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        listener.messageDeleted(chatMessageToDelete);
+                    }
+                });
+            }
+        }
     }
 
     private void messageReceived(ChatEvent event) {

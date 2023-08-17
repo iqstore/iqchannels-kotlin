@@ -2,6 +2,8 @@ package ru.iqchannels.sdk.schema;
 
 import androidx.annotation.Nullable;
 
+import java.util.List;
+
 /**
  * Copyright iqstore.ru. All Rights Reserved.
  */
@@ -19,6 +21,7 @@ public class ChatEvent {
     public ActorType Actor;
     @Nullable public Long ClientId;
     @Nullable public Long UserId;
+    @Nullable public List<ChatMessage> Messages;
 
     public long CreatedAt;
 

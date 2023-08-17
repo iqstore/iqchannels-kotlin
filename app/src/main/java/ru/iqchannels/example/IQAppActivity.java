@@ -79,7 +79,7 @@ public class IQAppActivity extends AppCompatActivity
 
         IQChannels iq = IQChannels.instance();
         // iq.configure(this, new IQChannelsConfig("http://52.57.77.143/", "support"));
-        iq.configure(this, new IQChannelsConfig("https://app.iqstore.ru/", "support"));
+        iq.configure(this, new IQChannelsConfig("https://iqchannels.isimplelab.com", "support"));
 
         iq.loginAnonymous();
         // iq.configure(this, new IQChannelsConfig("http://88.99.143.201/", "support"));

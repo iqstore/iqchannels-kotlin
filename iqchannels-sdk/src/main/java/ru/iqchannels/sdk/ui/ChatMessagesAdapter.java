@@ -29,7 +29,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -40,6 +40,7 @@ import java.util.List;
 import ru.iqchannels.sdk.R;
 import ru.iqchannels.sdk.app.IQChannels;
 import ru.iqchannels.sdk.http.HttpCallback;
+import ru.iqchannels.sdk.http.HttpException;
 import ru.iqchannels.sdk.schema.ActorType;
 import ru.iqchannels.sdk.schema.ChatEvent;
 import ru.iqchannels.sdk.schema.ChatMessage;
@@ -63,9 +64,12 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
 
     private boolean agentTyping;
 
-    ChatMessagesAdapter(IQChannels iqchannels, final View rootView) {
+    private FileClickListener fileClickListener;
+
+    ChatMessagesAdapter(IQChannels iqchannels, final View rootView, FileClickListener fileClickListener) {
         this.iqchannels = iqchannels;
         this.rootView = rootView;
+        this.fileClickListener = fileClickListener;
 
         dateFormat = DateFormat.getDateFormat(rootView.getContext());
         timeFormat = DateFormat.getTimeFormat(rootView.getContext());
@@ -115,6 +119,26 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
 
         messages.remove(i);
         notifyItemRemoved(i);;
+    }
+
+    void deleted(ChatMessage messageToDelete) {
+        ChatMessage oldMessage = null;
+
+        for (ChatMessage message : messages) {
+            if (message.Id == messageToDelete.Id) {
+                oldMessage = message;
+            }
+        }
+
+        if (oldMessage != null) {
+            int i = messages.indexOf(oldMessage);
+            if (i < 0) {
+                return;
+            }
+
+            messages.remove(i);
+            notifyItemRemoved(i);
+        }
     }
 
     void typing(ChatEvent event) {
@@ -250,7 +274,15 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                 holder.myUploadProgress.setVisibility(View.GONE);
 
                 holder.myUploadError.setVisibility(View.VISIBLE);
-                holder.myUploadError.setText(message.UploadExc.getLocalizedMessage());
+
+                Exception exception = message.UploadExc;
+                String errMessage = exception.getLocalizedMessage();
+                if (exception instanceof HttpException && ((HttpException) exception).code == 413) {
+                    errMessage = rootView.getResources().getString(R.string.file_size_too_large);
+                }
+
+                holder.myUploadError.setText(errMessage);
+                
                 holder.myUploadCancel.setVisibility(View.VISIBLE);
                 holder.myUploadRetry.setVisibility(View.VISIBLE);
             } else {
@@ -361,6 +393,13 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
 
         UploadedFile file = message.File;
         Rating rating = message.Rating;
+
+        if (file == null) {
+            holder.otherText.setCompoundDrawablesWithIntrinsicBounds(
+                null, null, null, null
+            );
+        }
+
         if (file != null) {
             String imageUrl = file.ImagePreviewUrl;
             if (imageUrl != null) {
@@ -384,6 +423,13 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
 
                 holder.otherText.setText(file.Name);
                 holder.otherText.setTextColor(Colors.linkColor());
+                holder.otherText.setCompoundDrawablesWithIntrinsicBounds(
+                    ContextCompat.getDrawable(rootView.getContext(), R.drawable.file_16),
+                    null, null, null
+                );
+                holder.otherText.setCompoundDrawablePadding(
+                    rootView.getResources().getDimensionPixelSize(R.dimen.file_drawable_padding)
+                );
 //                holder.otherText.setText(makeFileLink(file));
             }
 
@@ -567,9 +613,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         iqchannels.filesUrl(file.Id, new HttpCallback<String>() {
             @Override
             public void onResult(String url) {
-                Intent i = new Intent(Intent.ACTION_VIEW);
-                i.setData(Uri.parse(url));
-                rootView.getContext().startActivity(i);
+                fileClickListener.onClick(url, file.Name);
             }
 
             @Override
@@ -611,7 +655,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         private final FrameLayout otherImageFrame;
         private final ImageView otherImageSrc;
         private final TextView otherDate;
-        private final TextView typing;
+        //private final TextView typing;
 
         // Rating
         private final LinearLayout otherRating;
@@ -686,7 +730,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             otherImageFrame = (FrameLayout) itemView.findViewById(R.id.otherImageFrame);
             otherImageSrc = (ImageView) itemView.findViewById(R.id.otherImageSrc);
             otherDate = (TextView) itemView.findViewById(R.id.otherDate);
-            typing = (TextView) itemView.findViewById(R.id.typing);
+            //typing = (TextView) itemView.findViewById(R.id.typing);
 
             // Rating
             otherRating = itemView.findViewById(R.id.rating);
@@ -765,5 +809,9 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
 
     private static boolean objectEquals(Object a, Object b) {
         return (a == b) || (a != null && a.equals(b));
+    }
+
+    interface FileClickListener {
+        void onClick(String url, String fileName);
     }
 }

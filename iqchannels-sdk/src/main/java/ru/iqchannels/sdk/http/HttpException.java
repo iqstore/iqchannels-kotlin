@@ -15,4 +15,6 @@ public class HttpException extends RuntimeException {
     public HttpException(String message, Throwable throwable) {
         super(message, throwable);
     }
+
+    public int code = -1;
 }

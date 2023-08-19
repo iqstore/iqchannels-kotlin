@@ -24,4 +24,7 @@
     <string name="file_saved_fail_msg">Не удалось сохранить файл \"%1$s\" в папку \"Загрузки\"</string>
     <string name="file_size_kb_placeholder">%1$s кб</string>
     <string name="file_size_mb_placeholder">%1$s Мб</string>
+    <string name="msg_date_time">%1$s, %2$s</string>
+    <string name="today">Сегодня</string>
+    <string name="image_saved">Изображение сохранено</string>
 </resources>

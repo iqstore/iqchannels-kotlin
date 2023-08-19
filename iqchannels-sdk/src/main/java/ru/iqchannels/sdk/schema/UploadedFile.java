@@ -30,4 +30,5 @@ public class UploadedFile {
     // Local
     @Nullable public String Url;
     @Nullable public String ImagePreviewUrl;
+    @Nullable public String imageUrl;
 }

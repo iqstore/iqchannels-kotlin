@@ -66,6 +66,7 @@ import ru.iqchannels.sdk.lib.InternalIO;
 import ru.iqchannels.sdk.schema.ChatEvent;
 import ru.iqchannels.sdk.schema.ChatMessage;
 import ru.iqchannels.sdk.schema.ClientAuth;
+import ru.iqchannels.sdk.ui.images.ImagePreviewFragment;
 
 import static android.app.Activity.RESULT_OK;
 import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
@@ -169,11 +170,7 @@ public class ChatFragment extends Fragment {
             }
         });
 
-        adapter = new ChatMessagesAdapter(iqchannels, view, (url, fileName) -> {
-            FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
-            fragmentTransaction.add(FileActionsChooseFragment.newInstance(url, fileName), null);
-            fragmentTransaction.commit();
-        });
+        adapter = new ChatMessagesAdapter(iqchannels, view, new ItemClickListener());
 
         recycler = view.findViewById(R.id.messages);
         recycler.setAdapter(adapter);
@@ -940,6 +937,31 @@ public class ChatFragment extends Fragment {
                     onDownloadComplete,
                     new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
             );
+        }
+    }
+
+    private class ItemClickListener implements ChatMessagesAdapter.ItemClickListener {
+        @Override
+        public void onFileClick(String url, String fileName) {
+            FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
+            fragmentTransaction.add(FileActionsChooseFragment.newInstance(url, fileName), null);
+            fragmentTransaction.commit();
+        }
+
+        @Override
+        public void onImageClick(ChatMessage message) {
+            String senderName = message.User.DisplayName;
+            Date date = message.Date;
+            String msg = message.Text;
+            String imageUrl = message.File.imageUrl;
+
+            FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
+            ImagePreviewFragment fragment = ImagePreviewFragment.newInstance(
+                senderName, date, imageUrl, msg
+            );
+            transaction.replace(((ViewGroup)getView().getParent()).getId(), fragment);
+            transaction.addToBackStack(null);
+            transaction.commit();
         }
     }
 }

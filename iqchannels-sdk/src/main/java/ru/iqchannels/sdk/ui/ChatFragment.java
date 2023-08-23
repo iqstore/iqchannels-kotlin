@@ -187,7 +187,6 @@ public class ChatFragment extends Fragment {
 
         SwipeController swipeController = new SwipeController(position -> {
             ChatMessage chatMessage = adapter.getItem(position);
-            Log.d("abctag", "onSwiped: " + chatMessage.Text);
         });
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeController);
         itemTouchHelper.attachToRecyclerView(recycler);

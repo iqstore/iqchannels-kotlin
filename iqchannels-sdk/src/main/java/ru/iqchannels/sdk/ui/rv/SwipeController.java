@@ -3,6 +3,7 @@ package ru.iqchannels.sdk.ui.rv;
 import static androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_IDLE;
 import static androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_SWIPE;
 import static androidx.recyclerview.widget.ItemTouchHelper.LEFT;
+import static androidx.recyclerview.widget.ItemTouchHelper.RIGHT;
 
 import android.annotation.SuppressLint;
 import android.content.res.Resources;
@@ -27,7 +28,7 @@ public class SwipeController extends ItemTouchHelper.Callback {
 
     @Override
     public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-        return makeMovementFlags(ACTION_STATE_IDLE, LEFT);
+        return makeMovementFlags(ACTION_STATE_IDLE, RIGHT);
     }
 
     @Override

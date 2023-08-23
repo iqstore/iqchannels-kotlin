@@ -29,6 +29,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -67,6 +68,7 @@ import ru.iqchannels.sdk.schema.ChatEvent;
 import ru.iqchannels.sdk.schema.ChatMessage;
 import ru.iqchannels.sdk.schema.ClientAuth;
 import ru.iqchannels.sdk.ui.images.ImagePreviewFragment;
+import ru.iqchannels.sdk.ui.rv.SwipeController;
 
 import static android.app.Activity.RESULT_OK;
 import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
@@ -182,6 +184,13 @@ public class ChatFragment extends Fragment {
                 maybeScrollToBottomOnKeyboardShown(bottom, oldBottom);
             }
         });
+
+        SwipeController swipeController = new SwipeController(position -> {
+            ChatMessage chatMessage = adapter.getItem(position);
+            Log.d("abctag", "onSwiped: " + chatMessage.Text);
+        });
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeController);
+        itemTouchHelper.attachToRecyclerView(recycler);
 
         // Send.
         sendText = (EditText) view.findViewById(R.id.sendText);

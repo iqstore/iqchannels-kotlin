@@ -175,6 +175,10 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         notifyItemChanged(i);
     }
 
+    public ChatMessage getItem(int position) {
+        return messages.get(position);
+    }
+
     private int getIndexByMessage(ChatMessage message) {
         if (message.My) {
             for (int i = 0; i < messages.size(); i++) {

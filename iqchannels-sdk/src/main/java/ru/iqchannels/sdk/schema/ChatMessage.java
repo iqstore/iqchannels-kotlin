@@ -32,6 +32,8 @@ public class ChatMessage {
     @Nullable public String NoticeId;
     @Nullable public Long RatingId;
 
+    @Nullable public Long ReplyToMessageId;
+
     // Flags
     public boolean Received;
     public boolean Read;

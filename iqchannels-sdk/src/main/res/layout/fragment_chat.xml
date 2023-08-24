@@ -125,11 +125,21 @@
             android:paddingLeft="@dimen/activity_horizontal_margin"
             android:paddingRight="@dimen/activity_horizontal_margin">
 
+            <!-- Reply -->
+
+            <include android:id="@+id/reply"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                layout="@layout/layout_reply_to_message"/>
+
+            <!-- Type message -->
             <ImageButton
                 android:id="@+id/attachButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
+                android:layout_below="@id/reply"
                 android:background="@null"
                 android:contentDescription="@string/chat_attach"
                 android:paddingRight="8sp"
@@ -155,6 +165,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
+                android:layout_below="@id/reply"
                 android:background="@null"
                 android:contentDescription="@string/chat_send"
                 android:paddingLeft="4sp"

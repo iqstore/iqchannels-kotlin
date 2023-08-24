@@ -25,6 +25,7 @@ import android.provider.MediaStore;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -42,6 +43,7 @@ import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -128,6 +130,8 @@ public class ChatFragment extends Fragment {
     private ImageButton attachButton;
     private ImageButton sendButton;
 
+    private ConstraintLayout clReply;
+
     // Camera and gallery
     @Nullable private File cameraTempFile;
 
@@ -149,6 +153,7 @@ public class ChatFragment extends Fragment {
         signupLayout = (LinearLayout) view.findViewById(R.id.signupLayout);
         signupText = (EditText) view.findViewById(R.id.signupName);
         signupButton = (Button) view.findViewById(R.id.signupButton);
+        clReply = (ConstraintLayout) view.findViewById(R.id.reply);
         signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -187,6 +192,7 @@ public class ChatFragment extends Fragment {
 
         SwipeController swipeController = new SwipeController(position -> {
             ChatMessage chatMessage = adapter.getItem(position);
+            showReplyingMessage(chatMessage);
         });
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeController);
         itemTouchHelper.attachToRecyclerView(recycler);
@@ -946,6 +952,47 @@ public class ChatFragment extends Fragment {
                     new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
             );
         }
+    }
+
+    private void showReplyingMessage(ChatMessage message) {
+        clReply.setVisibility(View.VISIBLE);
+        if (message.User != null) {
+            TextView sender = clReply.findViewById(R.id.tvSenderName);
+            sender.setText(message.User.DisplayName);
+        }
+
+        TextView tvText = clReply.findViewById(R.id.tv_text);
+        if (message.Text != null && !message.Text.isEmpty()) {
+            tvText.setText(message.Text);
+        } else {
+            tvText.setVisibility(View.GONE);
+        }
+
+        TextView tvFileName = clReply.findViewById(R.id.tvFileName);
+        ImageView imageView = clReply.findViewById(R.id.iv_image);
+        if (message.File != null) {
+            String imageUrl = message.File.ImagePreviewUrl;
+
+            if (imageUrl != null) {
+                tvFileName.setVisibility(View.GONE);
+                imageView.setVisibility(View.VISIBLE);
+                iqchannels.picasso(getContext())
+                        .load(imageUrl)
+                        .into(imageView);
+            } else {
+                imageView.setVisibility(View.GONE);
+                tvFileName.setVisibility(View.VISIBLE);
+                tvFileName.setText(message.File.Name);
+            }
+        } else {
+            tvFileName.setVisibility(View.GONE);
+            imageView.setVisibility(View.GONE);
+        }
+
+        ImageButton ibClose = clReply.findViewById(R.id.ib_close);
+        ibClose.setOnClickListener(v -> {
+            clReply.setVisibility(View.GONE);
+        });
     }
 
     private class ItemClickListener implements ChatMessagesAdapter.ItemClickListener {

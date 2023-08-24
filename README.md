@@ -57,7 +57,22 @@ dependencies {
 }
 ```
 
-6. Соберите проект, `gradle` должен успешно скачать все зависимости. 
+6. Соберите проект, `gradle` должен успешно скачать все зависимости.
+
+7. Также подключите репозиторий в build.gradle на уровне проекта
+```build.gradle
+allprojects {
+    repositories {
+        maven { url "https://www.jitpack.io" }
+    }
+}
+
+buildscript {
+    repositories {
+        maven { url "https://www.jitpack.io" }
+    }	
+}
+```
 
 Подробнее смотрите в официальной документации Github https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-gradle-registry.
 

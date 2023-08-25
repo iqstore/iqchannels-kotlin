@@ -139,6 +139,7 @@ public class Rels {
         file.Url = this.fileUrl(file.Id);
         if (file.Type == FileType.IMAGE) {
             file.ImagePreviewUrl = this.fileImageUrl(file.Id, FileImageSize.PREVIEW);
+            file.imageUrl = this.fileImageUrl(file.Id, FileImageSize.ORIGINAL);
         }
     }
 

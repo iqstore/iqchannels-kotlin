@@ -118,11 +118,14 @@
 
             <!-- Reply -->
 
-            <include android:id="@+id/reply"
+            <ru.iqchannels.sdk.ui.widgets.ReplyMessageView
+                android:id="@+id/reply"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone"
-                layout="@layout/layout_reply_to_message"/>
+                android:background="@color/reply_typing_bg"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="15dp"
+                android:visibility="gone" />
 
             <ImageView
                 android:id="@+id/divider"

@@ -102,7 +102,7 @@
                 android:paddingHorizontal="16dp"
                 android:paddingBottom="10dp"
                 android:paddingTop="8dp"
-                android:background="#fff0f0f0"
+                android:background="@color/other_msg_bg"
                 >
 
                 <TextView

@@ -47,6 +47,7 @@ import ru.iqchannels.sdk.schema.Rating;
 import ru.iqchannels.sdk.schema.RatingState;
 import ru.iqchannels.sdk.schema.UploadedFile;
 import ru.iqchannels.sdk.schema.User;
+import ru.iqchannels.sdk.ui.widgets.ReplyMessageView;
 
 /**
  * Created by Ivan Korobkov i.korobkov@iqstore.ru on 24/01/2017.
@@ -263,6 +264,19 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             holder.myFlags.setVisibility(View.GONE);
         }
 
+        // Reply message (attached message)
+        holder.myReply.setVisibility(View.GONE);
+        if (message.ReplyToMessageId != null && message.ReplyToMessageId > 0) {
+            ChatMessage replyMsg = findMessage(message);
+            if (replyMsg != null) {
+                holder.myReply.showReplyingMessage(replyMsg);
+                holder.myReply.setCloseBtnVisibility(View.GONE);
+                holder.myReply.setVerticalDividerColor(R.color.my_msg_bg);
+                holder.myReply.setTvSenderNameColor(R.color.my_msg_bg);
+                holder.myReply.setTvTextColor(R.color.my_msg_bg);
+            }
+        }
+
         // Message
         if (message.Upload != null) {
             holder.myText.setVisibility(View.GONE);
@@ -394,6 +408,19 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             holder.tvOtherFileSize.setVisibility(View.GONE);
             holder.otherImageFrame.setVisibility(View.GONE);
             holder.otherRating.setVisibility(View.GONE);
+            holder.otherReply.setVisibility(View.GONE);
+        }
+
+        // Reply message (attached message)
+        if (message.ReplyToMessageId != null && message.ReplyToMessageId > 0) {
+            ChatMessage replyMsg = findMessage(message);
+            if (replyMsg != null) {
+                holder.otherReply.showReplyingMessage(replyMsg);
+                holder.otherReply.setCloseBtnVisibility(View.GONE);
+                holder.otherReply.setVerticalDividerColor(R.color.other_reply_text);
+                holder.otherReply.setTvSenderNameColor(R.color.other_reply_text);
+                holder.otherReply.setTvTextColor(R.color.other_reply_text);
+            }
         }
 
         UploadedFile file = message.File;
@@ -512,6 +539,15 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             holder.otherText.setText(message.Text);
             holder.otherText.setTextColor(Colors.textColor());
         }
+    }
+
+    private ChatMessage findMessage(ChatMessage message) {
+        for (ChatMessage msg : messages) {
+            if (msg.Id == message.ReplyToMessageId) {
+                return msg;
+            }
+        }
+        return null;
     }
 
     private boolean isNewDay(int position) {
@@ -689,6 +725,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         private final ProgressBar mySending;
         private final TextView myReceived;
         private final TextView myRead;
+        private final ReplyMessageView myReply;
 
         // Other
         private final LinearLayout other;
@@ -703,6 +740,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         private final FrameLayout otherImageFrame;
         private final ImageView otherImageSrc;
         private final TextView otherDate;
+        private final ReplyMessageView otherReply;
         //private final TextView typing;
 
         // Rating
@@ -747,6 +785,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             mySending = (ProgressBar) itemView.findViewById(R.id.mySending);
             myReceived = (TextView) itemView.findViewById(R.id.myReceived);
             myRead = (TextView) itemView.findViewById(R.id.myRead);
+            myReply = itemView.findViewById(R.id.myReply);
 
             myUploadCancel.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -763,6 +802,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
 
             // Other
             other = (LinearLayout) itemView.findViewById(R.id.other);
+            otherReply = itemView.findViewById(R.id.otherReply);
             otherAvatar = (FrameLayout) itemView.findViewById(R.id.otherAvatar);
             otherAvatarImage = (ImageView) itemView.findViewById(R.id.otherAvatarImage);
             otherAvatarText = (TextView) itemView.findViewById(R.id.otherAvatarText);

@@ -7,4 +7,6 @@
     <color name="divider_sending_reply">#A9A9A9</color>
     <color name="reply_typing_bg">#F9F9F9</color>
     <color name="other_msg_bg">#fff0f0f0</color>
+    <color name="other_reply_text">#2D98F4</color>
+    <color name="my_msg_bg">#ffe8f9d4</color>
 </resources>

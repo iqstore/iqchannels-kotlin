@@ -25,7 +25,6 @@ import android.provider.MediaStore;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -43,7 +42,6 @@ import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -138,6 +136,8 @@ public class ChatFragment extends Fragment {
 
     private BroadcastReceiver onDownloadComplete = null;
 
+    private ChatMessage replyingMessage = null;
+
     public ChatFragment() {
         iqchannels = IQChannels.instance();
     }
@@ -193,11 +193,16 @@ public class ChatFragment extends Fragment {
 
         SwipeController swipeController = new SwipeController(position -> {
             ChatMessage chatMessage = adapter.getItem(position);
+            replyingMessage = chatMessage;
             clReply.showReplyingMessage(chatMessage);
             clReply.post(this::maybeScrollToBottomOnNewMessage);
         });
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeController);
         itemTouchHelper.attachToRecyclerView(recycler);
+
+        clReply.setCloseBtnClickListener(v -> {
+            hideReplying();
+        });
 
         // Send.
         sendText = (EditText) view.findViewById(R.id.sendText);
@@ -759,11 +764,21 @@ public class ChatFragment extends Fragment {
                 .setTitle(R.string.chat_send_file_confirmation)
                 .setMessage(file.getName())
                 .setPositiveButton(R.string.ok, (dialogInterface, i) -> {
-                    iqchannels.sendFile(file);
+                    Long replyToMessageId = null;
+                    if (replyingMessage != null) {
+                        replyToMessageId = replyingMessage.Id;
+                    }
+                    iqchannels.sendFile(file, replyToMessageId);
+                    hideReplying();
                 })
                 .setNegativeButton(R.string.cancel, null);
 
         builder.show();
+    }
+
+    private void hideReplying() {
+        clReply.setVisibility(View.GONE);
+        replyingMessage = null;
     }
 
     private File createGalleryTempFile(Uri uri, String ext) throws IOException {
@@ -893,7 +908,12 @@ public class ChatFragment extends Fragment {
     private void sendMessage() {
         String text = sendText.getText().toString();
         sendText.setText("");
-        iqchannels.send(text);
+        Long replyToMessageId = null;
+        if (replyingMessage != null) {
+            replyToMessageId = replyingMessage.Id;
+        }
+        iqchannels.send(text, replyToMessageId);
+        hideReplying();
     }
 
     // Error alerts

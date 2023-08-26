@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@color/reply_typing_bg"
     android:paddingVertical="15dp"
@@ -42,7 +42,7 @@
 
     <TextView
         android:id="@+id/tvSenderName"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="3dp"
         android:layout_marginStart="10dp"
@@ -56,12 +56,14 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toEndOf="@id/iv_image"
         app:layout_constraintEnd_toStartOf="@id/ib_close"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintHorizontal_bias="0"
         tools:text="Мария"
         />
 
     <TextView
         android:id="@+id/tvFileName"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/link_file_text_color"
         android:drawableStart="@drawable/file_16"
@@ -74,13 +76,15 @@
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/tvSenderName"
         app:layout_constraintStart_toStartOf="@id/tvSenderName"
-        app:layout_constraintEnd_toEndOf="@id/tvSenderName"
+        app:layout_constraintEnd_toStartOf="@id/ib_close"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintHorizontal_bias="0"
         tools:text="CJM.pdf"
         />
 
     <TextView
         android:id="@+id/tv_text"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:autoLink="all"
         android:maxLines="1"
@@ -91,7 +95,9 @@
         android:textFontWeight="400"
         app:layout_constraintTop_toBottomOf="@id/tvFileName"
         app:layout_constraintStart_toStartOf="@id/tvSenderName"
-        app:layout_constraintEnd_toEndOf="@id/tvSenderName"
+        app:layout_constraintEnd_toStartOf="@id/ib_close"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintHorizontal_bias="0"
         tools:text="Сообщение"
         />
 

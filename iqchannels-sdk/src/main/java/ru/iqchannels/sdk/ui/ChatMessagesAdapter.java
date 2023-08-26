@@ -14,6 +14,7 @@ import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,6 +25,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -271,10 +273,36 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             if (replyMsg != null) {
                 holder.myReply.showReplyingMessage(replyMsg);
                 holder.myReply.setCloseBtnVisibility(View.GONE);
-                holder.myReply.setVerticalDividerColor(R.color.my_msg_bg);
-                holder.myReply.setTvSenderNameColor(R.color.my_msg_bg);
-                holder.myReply.setTvTextColor(R.color.my_msg_bg);
+                holder.myReply.setVerticalDividerColor(R.color.my_msg_reply_text);
+                holder.myReply.setTvSenderNameColor(R.color.my_msg_reply_text);
+                holder.myReply.setTvTextColor(R.color.my_msg_reply_text);
+                holder.myReply.requestLayout();
+
+                holder.myReply.post(() -> {
+//                    if (holder.myReply.getWidth() > holder.myText.getWidth()) {
+//                        holder.myText.setWidth(holder.myReply.getWidth());
+//                        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+//                            LinearLayout.LayoutParams.WRAP_CONTENT,
+//                            LinearLayout.LayoutParams.WRAP_CONTENT
+//                        );
+//                        lp.gravity = Gravity.END;
+//                        holder.myReply.setLayoutParams(lp);
+//                    } else {
+//                        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+//                            holder.myText.getWidth(),
+//                            LinearLayout.LayoutParams.WRAP_CONTENT
+//                        );
+//                        lp.gravity = Gravity.END;
+//                        holder.myReply.setLayoutParams(lp);
+//                        holder.myText.setMinWidth(0);
+//                        holder.myText.setMaxWidth(Integer.MAX_VALUE);
+//                    }
+                    holder.myText.setWidth(holder.myReply.getWidth());
+                });
             }
+        } else {
+            holder.myText.setMinWidth(0);
+            holder.myText.setMaxWidth(Integer.MAX_VALUE);
         }
 
         // Message
@@ -420,7 +448,21 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                 holder.otherReply.setVerticalDividerColor(R.color.other_reply_text);
                 holder.otherReply.setTvSenderNameColor(R.color.other_reply_text);
                 holder.otherReply.setTvTextColor(R.color.other_reply_text);
+
+//                holder.otherReply.post(() -> {
+//                    LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+//                        holder.otherReply.getWidth(),
+//                        LinearLayout.LayoutParams.WRAP_CONTENT
+//                    );
+//                    holder.clTexts.setLayoutParams(lp);
+//                });
             }
+        } else {
+//            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+//                LinearLayout.LayoutParams.WRAP_CONTENT,
+//                LinearLayout.LayoutParams.WRAP_CONTENT
+//            );
+//            holder.clTexts.setLayoutParams(lp);
         }
 
         UploadedFile file = message.File;

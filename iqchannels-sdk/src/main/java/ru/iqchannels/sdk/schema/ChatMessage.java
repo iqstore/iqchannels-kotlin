@@ -68,12 +68,13 @@ public class ChatMessage {
         Text = text;
     }
 
-    public ChatMessage(@NonNull Client client, long localId, @NonNull File file) {
+    public ChatMessage(@NonNull Client client, long localId, @NonNull File file, @Nullable Long replyToMessageId) {
         this(client, localId);
 
         Payload = ChatPayloadType.FILE;
         Text = file.getName();
         Upload = file;
+        ReplyToMessageId = replyToMessageId;
     }
 
     public ChatMessage(@NonNull Client client, long localId) {

@@ -77,7 +77,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginRight="40dp"
-                android:paddingStart="15dp"
+                android:paddingHorizontal="15dp"
                 android:paddingTop="15dp"
                 android:background="@color/other_msg_bg"
                 />
@@ -184,8 +184,9 @@
 
         <ru.iqchannels.sdk.ui.widgets.ReplyMessageView
             android:id="@+id/myReply"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="end"
             android:paddingStart="15dp"
             android:paddingRight="16dp"
             android:paddingTop="15dp"

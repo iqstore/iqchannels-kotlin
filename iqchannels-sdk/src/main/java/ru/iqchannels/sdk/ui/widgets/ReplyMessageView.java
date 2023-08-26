@@ -110,6 +110,7 @@ public class ReplyMessageView extends ConstraintLayout {
         }
 
         if (message.Text != null && !message.Text.isEmpty()) {
+            tvText.setVisibility(View.VISIBLE);
             tvText.setText(message.Text);
         } else {
             tvText.setVisibility(View.GONE);
@@ -133,10 +134,6 @@ public class ReplyMessageView extends ConstraintLayout {
             tvFileName.setVisibility(View.GONE);
             imageView.setVisibility(View.GONE);
         }
-
-        ibClose.setOnClickListener(v -> {
-            setVisibility(View.GONE);
-        });
     }
 
     public void setCloseBtnVisibility(int visibility) {
@@ -159,6 +156,10 @@ public class ReplyMessageView extends ConstraintLayout {
         tvText.setTextColor(
             ContextCompat.getColor(getContext(), id)
         );
+    }
+
+    public void setCloseBtnClickListener(View.OnClickListener listener) {
+        ibClose.setOnClickListener(listener);
     }
 
 }

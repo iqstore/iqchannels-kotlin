@@ -2,6 +2,9 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="@color/reply_typing_bg"
+    android:paddingVertical="15dp"
+    android:paddingHorizontal="16dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
@@ -9,7 +12,7 @@
         android:id="@+id/divider_start"
         android:layout_width="3dp"
         android:layout_height="0dp"
-        android:background="#488445"
+        android:background="@color/divider_sending_reply"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -17,10 +20,12 @@
 
     <ImageView
         android:id="@+id/iv_image"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
+        android:layout_width="39dp"
+        android:layout_height="39dp"
+        android:layout_marginVertical="5dp"
+        android:layout_marginStart="5dp"
         app:layout_constraintStart_toEndOf="@id/divider_start"
-        app:layout_constraintTop_toTopOf="@id/tvSenderName"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         />
 
@@ -29,21 +34,28 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="?selectableItemBackgroundBorderless"
-        android:src="@drawable/close_24"
+        android:src="@drawable/ic_close_14"
+        android:tint="@color/divider_sending_reply"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/tvSenderName"
-        app:layout_constraintBottom_toBottomOf="parent"
         />
 
     <TextView
         android:id="@+id/tvSenderName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="16dp"
         android:maxLines="1"
         android:ellipsize="end"
+        android:textSize="16sp"
+        android:textColor="@color/text_color"
+        android:lineHeight="18.75dp"
+        android:textFontWeight="700"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toEndOf="@id/iv_image"
-        app:layout_constraintEnd_toEndOf="@id/ib_close"
+        app:layout_constraintEnd_toStartOf="@id/ib_close"
         tools:text="Мария"
         />
 
@@ -51,14 +63,18 @@
         android:id="@+id/tvFileName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textColor="#3F51B5"
+        android:textColor="@color/link_file_text_color"
         android:drawableStart="@drawable/file_16"
         android:drawablePadding="4dp"
         android:maxLines="1"
         android:ellipsize="end"
+        android:textSize="16sp"
+        android:lineHeight="18.75dp"
+        android:textFontWeight="400"
+        android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/tvSenderName"
         app:layout_constraintStart_toStartOf="@id/tvSenderName"
-        app:layout_constraintEnd_toEndOf="@id/ib_close"
+        app:layout_constraintEnd_toEndOf="@id/tvSenderName"
         tools:text="CJM.pdf"
         />
 
@@ -67,12 +83,15 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:autoLink="all"
-        android:textColor="#ff4c4c4c"
         android:maxLines="1"
         android:ellipsize="end"
+        android:textSize="16sp"
+        android:textColor="@color/text_color"
+        android:lineHeight="18.75dp"
+        android:textFontWeight="400"
         app:layout_constraintTop_toBottomOf="@id/tvFileName"
         app:layout_constraintStart_toStartOf="@id/tvSenderName"
-        app:layout_constraintEnd_toEndOf="@id/ib_close"
+        app:layout_constraintEnd_toEndOf="@id/tvSenderName"
         tools:text="Сообщение"
         />
 

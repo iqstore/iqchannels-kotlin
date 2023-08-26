@@ -993,6 +993,8 @@ public class ChatFragment extends Fragment {
         ibClose.setOnClickListener(v -> {
             clReply.setVisibility(View.GONE);
         });
+
+        clReply.post(this::maybeScrollToBottomOnNewMessage);
     }
 
     private class ItemClickListener implements ChatMessagesAdapter.ItemClickListener {

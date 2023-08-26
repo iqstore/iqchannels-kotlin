@@ -106,14 +106,7 @@
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-        <ImageView
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@id/send"
-            android:scaleType="fitXY"
-            android:src="@android:drawable/divider_horizontal_bright"
-            tools:ignore="ContentDescription"/>
+
 
         <!-- Send textbox and button -->
         <RelativeLayout
@@ -121,9 +114,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:paddingBottom="@dimen/activity_vertical_margin"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin">
+            android:paddingBottom="@dimen/activity_vertical_margin">
 
             <!-- Reply -->
 
@@ -133,13 +124,23 @@
                 android:visibility="gone"
                 layout="@layout/layout_reply_to_message"/>
 
+            <ImageView
+                android:id="@+id/divider"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/reply"
+                android:scaleType="fitXY"
+                android:src="@android:drawable/divider_horizontal_bright"
+                tools:ignore="ContentDescription"/>
+
             <!-- Type message -->
             <ImageButton
                 android:id="@+id/attachButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
                 android:layout_alignParentLeft="true"
-                android:layout_below="@id/reply"
+                android:layout_below="@id/divider"
                 android:background="@null"
                 android:contentDescription="@string/chat_attach"
                 android:paddingRight="8sp"
@@ -164,6 +165,7 @@
                 android:id="@+id/sendButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
                 android:layout_alignParentRight="true"
                 android:layout_below="@id/reply"
                 android:background="@null"

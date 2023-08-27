@@ -461,6 +461,15 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                 iqchannels.picasso(holder.otherImageFrame.getContext())
                         .load(imageUrl)
                         .into(holder.otherImageSrc);
+
+                holder.otherImageSrc.post(() -> {
+                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                        holder.otherImageFrame.getWidth(),
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    );
+                    layoutParams.setMargins(0, 0, toPx(40), 0);
+                    holder.clTexts.setLayoutParams(layoutParams);
+                });
             } else {
 
                 holder.otherImageFrame.setVisibility(View.GONE);

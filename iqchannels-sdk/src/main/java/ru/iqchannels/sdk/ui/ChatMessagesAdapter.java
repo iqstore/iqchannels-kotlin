@@ -7,6 +7,7 @@ package ru.iqchannels.sdk.ui;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.Looper;
 import android.text.Html;
 import android.text.Spanned;
@@ -14,6 +15,8 @@ import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
+import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -24,6 +27,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -47,6 +51,7 @@ import ru.iqchannels.sdk.schema.Rating;
 import ru.iqchannels.sdk.schema.RatingState;
 import ru.iqchannels.sdk.schema.UploadedFile;
 import ru.iqchannels.sdk.schema.User;
+import ru.iqchannels.sdk.ui.widgets.ReplyMessageView;
 
 /**
  * Created by Ivan Korobkov i.korobkov@iqstore.ru on 24/01/2017.
@@ -173,6 +178,10 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
 
         messages.set(i, message);
         notifyItemChanged(i);
+    }
+
+    public ChatMessage getItem(int position) {
+        return messages.get(position);
     }
 
     private int getIndexByMessage(ChatMessage message) {
@@ -327,6 +336,41 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             holder.myText.setAutoLinkMask(Linkify.ALL);
             holder.myText.setText(message.Text);
             holder.myText.setTextColor(Colors.textColor());
+            holder.myText.setMinWidth(0);
+            holder.myText.setMaxWidth(Integer.MAX_VALUE);
+        }
+
+        // Reply message (attached message)
+        holder.myReply.setVisibility(View.GONE);
+        if (message.ReplyToMessageId != null && message.ReplyToMessageId > 0) {
+            ChatMessage replyMsg = findMessage(message);
+            if (replyMsg != null) {
+                holder.myReply.showReplyingMessage(replyMsg);
+                holder.myReply.setCloseBtnVisibility(View.GONE);
+                holder.myReply.setVerticalDividerColor(R.color.my_msg_reply_text);
+                holder.myReply.setTvSenderNameColor(R.color.my_msg_reply_text);
+                holder.myReply.setTvTextColor(R.color.my_msg_reply_text);
+
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                );
+                lp.gravity = Gravity.END;
+                holder.myReply.setLayoutParams(lp);
+
+                holder.myReply.post(() -> {
+                    if (holder.myReply.getWidth() > holder.myText.getWidth()) {
+                        holder.myText.setWidth(holder.myReply.getWidth());
+                    } else {
+                        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                            holder.myText.getWidth(),
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                        );
+                        lp.gravity = Gravity.END;
+                        holder.myReply.setLayoutParams(layoutParams);
+                    }
+                });
+            }
         }
     }
 
@@ -390,6 +434,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             holder.tvOtherFileSize.setVisibility(View.GONE);
             holder.otherImageFrame.setVisibility(View.GONE);
             holder.otherRating.setVisibility(View.GONE);
+            holder.otherReply.setVisibility(View.GONE);
         }
 
         UploadedFile file = message.File;
@@ -416,6 +461,15 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                 iqchannels.picasso(holder.otherImageFrame.getContext())
                         .load(imageUrl)
                         .into(holder.otherImageSrc);
+
+                holder.otherImageSrc.post(() -> {
+                    LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                        holder.otherImageFrame.getWidth(),
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                    );
+                    layoutParams.setMargins(0, 0, toPx(40), 0);
+                    holder.clTexts.setLayoutParams(layoutParams);
+                });
             } else {
 
                 holder.otherImageFrame.setVisibility(View.GONE);
@@ -508,6 +562,53 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             holder.otherText.setText(message.Text);
             holder.otherText.setTextColor(Colors.textColor());
         }
+
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        lp.setMargins(0, 0, toPx(40), 0);
+        holder.clTexts.setLayoutParams(lp);
+
+        // Reply message (attached message)
+        if (message.ReplyToMessageId != null && message.ReplyToMessageId > 0) {
+            ChatMessage replyMsg = findMessage(message);
+            if (replyMsg != null) {
+                holder.otherReply.showReplyingMessage(replyMsg);
+                holder.otherReply.setCloseBtnVisibility(View.GONE);
+                holder.otherReply.setVerticalDividerColor(R.color.other_reply_text);
+                holder.otherReply.setTvSenderNameColor(R.color.other_reply_text);
+                holder.otherReply.setTvTextColor(R.color.other_reply_text);
+                holder.otherReply.setLayoutParams(lp);
+
+                holder.otherReply.post(() -> {
+                    if (holder.otherReply.getWidth() > holder.clTexts.getWidth()) {
+                        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                            holder.otherReply.getWidth(),
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                        );
+                        layoutParams.setMargins(0, 0, toPx(40), 0);
+                        holder.clTexts.setLayoutParams(layoutParams);
+                    } else {
+                        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+                            holder.clTexts.getWidth(),
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                        );
+                        layoutParams.setMargins(0, 0, toPx(40), 0);
+                        holder.otherReply.setLayoutParams(layoutParams);
+                    }
+                });
+            }
+        }
+    }
+
+    private ChatMessage findMessage(ChatMessage message) {
+        for (ChatMessage msg : messages) {
+            if (msg.Id == message.ReplyToMessageId) {
+                return msg;
+            }
+        }
+        return null;
     }
 
     private boolean isNewDay(int position) {
@@ -685,6 +786,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         private final ProgressBar mySending;
         private final TextView myReceived;
         private final TextView myRead;
+        private final ReplyMessageView myReply;
 
         // Other
         private final LinearLayout other;
@@ -699,6 +801,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         private final FrameLayout otherImageFrame;
         private final ImageView otherImageSrc;
         private final TextView otherDate;
+        private final ReplyMessageView otherReply;
         //private final TextView typing;
 
         // Rating
@@ -743,6 +846,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             mySending = (ProgressBar) itemView.findViewById(R.id.mySending);
             myReceived = (TextView) itemView.findViewById(R.id.myReceived);
             myRead = (TextView) itemView.findViewById(R.id.myRead);
+            myReply = itemView.findViewById(R.id.myReply);
 
             myUploadCancel.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -759,6 +863,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
 
             // Other
             other = (LinearLayout) itemView.findViewById(R.id.other);
+            otherReply = itemView.findViewById(R.id.otherReply);
             otherAvatar = (FrameLayout) itemView.findViewById(R.id.otherAvatar);
             otherAvatarImage = (ImageView) itemView.findViewById(R.id.otherAvatarImage);
             otherAvatarText = (TextView) itemView.findViewById(R.id.otherAvatarText);
@@ -860,6 +965,14 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
 
     private static boolean objectEquals(Object a, Object b) {
         return (a == b) || (a != null && a.equals(b));
+    }
+
+    private int toPx(int dp) {
+        return Math.round(TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            (float) dp,
+            Resources.getSystem().getDisplayMetrics()
+        ));
     }
 
     interface ItemClickListener {

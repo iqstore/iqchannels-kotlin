@@ -1372,7 +1372,7 @@ public class IQChannels {
 
     // Send
 
-    public void send(String text) {
+    public void send(String text, Long replyToMessageId) {
         if (text == null) {
             return;
         }
@@ -1399,13 +1399,13 @@ public class IQChannels {
             });
         }
 
-        ChatMessageForm form = ChatMessageForm.text(localId, text);
+        ChatMessageForm form = ChatMessageForm.text(localId, text, replyToMessageId);
         sendQueue.add(form);
         Log.i(TAG, String.format("Enqueued an outgoing message, localId=%d", localId));
         send();
     }
 
-    public void sendFile(File file) {
+    public void sendFile(File file, Long replyToMessageId) {
         if (file == null) {
             return;
         }
@@ -1417,7 +1417,7 @@ public class IQChannels {
         }
 
         long localId = nextLocalId();
-        final ChatMessage message = new ChatMessage(auth.Client, localId, file);
+        final ChatMessage message = new ChatMessage(auth.Client, localId, file, replyToMessageId);
         assert messages != null;
         messages.add(message);
 
@@ -1476,7 +1476,7 @@ public class IQChannels {
                         message.File = uploadedFile;
                         Log.i(TAG, String.format("sendFile: Uploaded a file, fileId=%s", uploadedFile.Id));
 
-                        ChatMessageForm form = ChatMessageForm.file(localId, uploadedFile.Id);
+                        ChatMessageForm form = ChatMessageForm.file(localId, uploadedFile.Id, message.ReplyToMessageId);
                         sendQueue.add(form);
                         Log.i(TAG, String.format("Enqueued an outgoing message, localId=%d", localId));
                         send();
@@ -1815,6 +1815,7 @@ public class IQChannels {
                 existing.File = message.File;
                 existing.Client = message.Client;
                 existing.Sending = false;
+                existing.ReplyToMessageId = message.ReplyToMessageId;
 
                 Log.i(TAG, String.format("Received a message confirmation, localId=%d",
                         message.LocalId));

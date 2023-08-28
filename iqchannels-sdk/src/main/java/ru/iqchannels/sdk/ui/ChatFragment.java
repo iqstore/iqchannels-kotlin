@@ -29,6 +29,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
@@ -67,6 +68,8 @@ import ru.iqchannels.sdk.schema.ChatEvent;
 import ru.iqchannels.sdk.schema.ChatMessage;
 import ru.iqchannels.sdk.schema.ClientAuth;
 import ru.iqchannels.sdk.ui.images.ImagePreviewFragment;
+import ru.iqchannels.sdk.ui.rv.SwipeController;
+import ru.iqchannels.sdk.ui.widgets.ReplyMessageView;
 
 import static android.app.Activity.RESULT_OK;
 import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
@@ -126,10 +129,14 @@ public class ChatFragment extends Fragment {
     private ImageButton attachButton;
     private ImageButton sendButton;
 
+    private ReplyMessageView clReply;
+
     // Camera and gallery
     @Nullable private File cameraTempFile;
 
     private BroadcastReceiver onDownloadComplete = null;
+
+    private ChatMessage replyingMessage = null;
 
     public ChatFragment() {
         iqchannels = IQChannels.instance();
@@ -147,6 +154,7 @@ public class ChatFragment extends Fragment {
         signupLayout = (LinearLayout) view.findViewById(R.id.signupLayout);
         signupText = (EditText) view.findViewById(R.id.signupName);
         signupButton = (Button) view.findViewById(R.id.signupButton);
+        clReply = view.findViewById(R.id.reply);
         signupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -181,6 +189,19 @@ public class ChatFragment extends Fragment {
                     int oldLeft, int oldTop, int oldRight, int oldBottom) {
                 maybeScrollToBottomOnKeyboardShown(bottom, oldBottom);
             }
+        });
+
+        SwipeController swipeController = new SwipeController(position -> {
+            ChatMessage chatMessage = adapter.getItem(position);
+            replyingMessage = chatMessage;
+            clReply.showReplyingMessage(chatMessage);
+            clReply.post(this::maybeScrollToBottomOnNewMessage);
+        });
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeController);
+        itemTouchHelper.attachToRecyclerView(recycler);
+
+        clReply.setCloseBtnClickListener(v -> {
+            hideReplying();
         });
 
         // Send.
@@ -743,11 +764,21 @@ public class ChatFragment extends Fragment {
                 .setTitle(R.string.chat_send_file_confirmation)
                 .setMessage(file.getName())
                 .setPositiveButton(R.string.ok, (dialogInterface, i) -> {
-                    iqchannels.sendFile(file);
+                    Long replyToMessageId = null;
+                    if (replyingMessage != null) {
+                        replyToMessageId = replyingMessage.Id;
+                    }
+                    iqchannels.sendFile(file, replyToMessageId);
+                    hideReplying();
                 })
                 .setNegativeButton(R.string.cancel, null);
 
         builder.show();
+    }
+
+    private void hideReplying() {
+        clReply.setVisibility(View.GONE);
+        replyingMessage = null;
     }
 
     private File createGalleryTempFile(Uri uri, String ext) throws IOException {
@@ -877,7 +908,12 @@ public class ChatFragment extends Fragment {
     private void sendMessage() {
         String text = sendText.getText().toString();
         sendText.setText("");
-        iqchannels.send(text);
+        Long replyToMessageId = null;
+        if (replyingMessage != null) {
+            replyToMessageId = replyingMessage.Id;
+        }
+        iqchannels.send(text, replyToMessageId);
+        hideReplying();
     }
 
     // Error alerts

@@ -32,6 +32,8 @@ public class ChatMessage {
     @Nullable public String NoticeId;
     @Nullable public Long RatingId;
 
+    @Nullable public Long ReplyToMessageId;
+
     // Flags
     public boolean Received;
     public boolean Read;
@@ -66,12 +68,13 @@ public class ChatMessage {
         Text = text;
     }
 
-    public ChatMessage(@NonNull Client client, long localId, @NonNull File file) {
+    public ChatMessage(@NonNull Client client, long localId, @NonNull File file, @Nullable Long replyToMessageId) {
         this(client, localId);
 
         Payload = ChatPayloadType.FILE;
         Text = file.getName();
         Upload = file;
+        ReplyToMessageId = replyToMessageId;
     }
 
     public ChatMessage(@NonNull Client client, long localId) {

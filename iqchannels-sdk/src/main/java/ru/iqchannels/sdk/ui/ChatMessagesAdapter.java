@@ -50,6 +50,7 @@ import ru.iqchannels.sdk.schema.ChatMessage;
 import ru.iqchannels.sdk.schema.ChatPayloadType;
 import ru.iqchannels.sdk.schema.Rating;
 import ru.iqchannels.sdk.schema.RatingState;
+import ru.iqchannels.sdk.schema.SingleChoice;
 import ru.iqchannels.sdk.schema.UploadedFile;
 import ru.iqchannels.sdk.schema.User;
 import ru.iqchannels.sdk.ui.widgets.ReplyMessageView;
@@ -623,7 +624,11 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
 
             } else {
                 holder.rvButtons.setVisibility(View.VISIBLE);
-                ButtonsAdapter adapter = new ButtonsAdapter();
+                ButtonsAdapter adapter = new ButtonsAdapter(item -> {
+                    this.itemClickListener.onButtonClick(
+                        messages.get(holder.getAdapterPosition()), item
+                    );
+                });
                 adapter.setItems(message.SingleChoices);
                 holder.rvButtons.setAdapter(adapter);
             }
@@ -1002,5 +1007,6 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
     interface ItemClickListener {
         void onFileClick(String url, String fileName);
         void onImageClick(ChatMessage message);
+        void onButtonClick(ChatMessage message, SingleChoice singleChoice);
     }
 }

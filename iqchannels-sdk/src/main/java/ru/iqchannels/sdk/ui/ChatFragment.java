@@ -67,6 +67,7 @@ import ru.iqchannels.sdk.lib.InternalIO;
 import ru.iqchannels.sdk.schema.ChatEvent;
 import ru.iqchannels.sdk.schema.ChatMessage;
 import ru.iqchannels.sdk.schema.ClientAuth;
+import ru.iqchannels.sdk.schema.SingleChoice;
 import ru.iqchannels.sdk.ui.images.ImagePreviewFragment;
 import ru.iqchannels.sdk.ui.rv.SwipeController;
 import ru.iqchannels.sdk.ui.widgets.ReplyMessageView;
@@ -916,6 +917,10 @@ public class ChatFragment extends Fragment {
         hideReplying();
     }
 
+    private void sendSingleChoice(SingleChoice singleChoice) {
+        iqchannels.sendSingleChoiceReply(singleChoice);
+    }
+
     // Error alerts
 
     private void showMessagesErrorAlert(Exception e) {
@@ -998,6 +1003,11 @@ public class ChatFragment extends Fragment {
             transaction.replace(((ViewGroup)getView().getParent()).getId(), fragment);
             transaction.addToBackStack(null);
             transaction.commit();
+        }
+
+        @Override
+        public void onButtonClick(ChatMessage message, SingleChoice singleChoice) {
+            sendSingleChoice(singleChoice);
         }
     }
 }

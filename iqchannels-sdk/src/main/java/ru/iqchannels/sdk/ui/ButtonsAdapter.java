@@ -20,6 +20,12 @@ public class ButtonsAdapter extends RecyclerView.Adapter<ButtonsAdapter.ButtonsV
 
     private List<SingleChoice> items;
 
+    private final ClickListener clickListener;
+
+    ButtonsAdapter(ClickListener clickListener) {
+        this.clickListener = clickListener;
+    }
+
     @NonNull
     @Override
     public ButtonsVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -42,7 +48,11 @@ public class ButtonsAdapter extends RecyclerView.Adapter<ButtonsAdapter.ButtonsV
 
     @Override
     public void onBindViewHolder(@NonNull ButtonsVH holder, int position) {
-        holder.bind(items.get(position));
+        SingleChoice item = items.get(position);
+        holder.bind(item);
+        holder.itemView.setOnClickListener(v -> {
+            clickListener.onClick(item);
+        });
     }
 
     @Override
@@ -65,5 +75,10 @@ public class ButtonsAdapter extends RecyclerView.Adapter<ButtonsAdapter.ButtonsV
             Button btn = (Button) itemView;
             btn.setText(item.title);
         }
+    }
+
+    interface ClickListener {
+
+        void onClick(SingleChoice item);
     }
 }

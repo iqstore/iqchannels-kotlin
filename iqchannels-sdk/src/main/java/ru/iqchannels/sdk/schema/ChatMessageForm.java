@@ -11,6 +11,7 @@ public class ChatMessageForm {
     public String Text;
     @Nullable public String FileId;
     @Nullable public Long ReplyToMessageId;
+    @Nullable public String BotpressPayload;
 
     public ChatMessageForm() {}
 
@@ -29,6 +30,15 @@ public class ChatMessageForm {
         form.Payload = ChatPayloadType.FILE;
         form.FileId = fileId;
         form.ReplyToMessageId = replyToMessageId;
+        return form;
+    }
+
+    public static ChatMessageForm payloadReply(long localId, String text, String botpressPayload) {
+        ChatMessageForm form = new ChatMessageForm();
+        form.LocalId = localId;
+        form.Payload = ChatPayloadType.TEXT;
+        form.Text = text;
+        form.BotpressPayload = botpressPayload;
         return form;
     }
 }

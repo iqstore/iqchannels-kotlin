@@ -333,6 +333,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             holder.myImageFrame.setVisibility(View.GONE);
             holder.myUpload.setVisibility(View.GONE);
             holder.myText.setVisibility(View.VISIBLE);
+            holder.myText.setBackgroundResource(R.drawable.my_msg_bg);
             holder.myText.setAutoLinkMask(Linkify.ALL);
             holder.myText.setText(message.Text);
             holder.myText.setTextColor(Colors.textColor());
@@ -357,6 +358,8 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                 );
                 lp.gravity = Gravity.END;
                 holder.myReply.setLayoutParams(lp);
+
+                holder.myText.setBackgroundResource(R.drawable.my_msg_reply_text_bg);
 
                 holder.myReply.post(() -> {
                     if (holder.myReply.getWidth() > holder.myText.getWidth()) {
@@ -447,6 +450,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
 
                 if (message.Text != null && !message.Text.isEmpty()) {
                     holder.clTexts.setVisibility(View.VISIBLE);
+                    holder.clTexts.setBackgroundResource(R.drawable.other_msg_reply_text_bg);
                     holder.otherText.setVisibility(View.VISIBLE);
                     holder.otherText.setText(message.Text);
                 } else  {
@@ -454,6 +458,11 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                 }
 
                 holder.otherImageFrame.setVisibility(View.VISIBLE);
+                if (message.Text != null && !message.Text.isEmpty()) {
+                    holder.otherImageFrame.setBackgroundResource(R.drawable.other_msg_reply_bg);
+                } else {
+                    holder.otherImageFrame.setBackgroundResource(R.drawable.other_msg_bg);
+                }
                 holder.otherImageFrame.getLayoutParams().width = size[0];
                 holder.otherImageFrame.getLayoutParams().height = size[1];
                 holder.otherImageFrame.requestLayout();
@@ -474,6 +483,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
 
                 holder.otherImageFrame.setVisibility(View.GONE);
                 holder.clTexts.setVisibility(View.VISIBLE);
+                holder.clTexts.setBackgroundResource(R.drawable.other_msg_bg);
                 holder.tvOtherFileName.setVisibility(View.VISIBLE);
                 holder.tvOtherFileName.setAutoLinkMask(0);
                 holder.tvOtherFileName.setMovementMethod(LinkMovementMethod.getInstance());
@@ -557,6 +567,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         }
         else {
             holder.clTexts.setVisibility(View.VISIBLE);
+            holder.clTexts.setBackgroundResource(R.drawable.other_msg_bg);
             holder.otherText.setVisibility(View.VISIBLE);
             holder.otherText.setAutoLinkMask(Linkify.ALL);
             holder.otherText.setText(message.Text);
@@ -580,6 +591,8 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                 holder.otherReply.setTvSenderNameColor(R.color.other_reply_text);
                 holder.otherReply.setTvTextColor(R.color.other_reply_text);
                 holder.otherReply.setLayoutParams(lp);
+
+                holder.clTexts.setBackgroundResource(R.drawable.other_msg_reply_text_bg);
 
                 holder.otherReply.post(() -> {
                     if (holder.otherReply.getWidth() > holder.clTexts.getWidth()) {

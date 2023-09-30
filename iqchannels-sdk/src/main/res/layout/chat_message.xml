@@ -79,7 +79,7 @@
                 android:layout_marginRight="40dp"
                 android:paddingHorizontal="15dp"
                 android:paddingTop="15dp"
-                android:background="@color/other_msg_bg"
+                android:background="@drawable/other_msg_reply_bg"
                 />
 
             <!-- Image -->
@@ -87,7 +87,7 @@
                 android:id="@+id/otherImageFrame"
                 android:layout_width="200dp"
                 android:layout_height="150dp"
-                android:background="#fff0f0f0">
+                android:background="@drawable/other_msg_bg">
 
                 <ProgressBar
                     android:layout_width="16dp"
@@ -112,7 +112,7 @@
                 android:paddingHorizontal="16dp"
                 android:paddingBottom="10dp"
                 android:paddingTop="8dp"
-                android:background="@color/other_msg_bg"
+                android:background="@drawable/other_msg_bg"
                 >
 
                 <TextView
@@ -190,7 +190,7 @@
             android:paddingStart="15dp"
             android:paddingRight="16dp"
             android:paddingTop="15dp"
-            android:background="@color/my_msg_bg"
+            android:background="@drawable/my_msg_reply_bg"
             />
 
         <!-- Payload -->
@@ -204,7 +204,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
-                android:background="#fff0f0f0"
+                android:background="@drawable/other_msg_bg"
                 android:orientation="vertical"
                 android:padding="8dp">
 
@@ -250,7 +250,7 @@
                 android:layout_width="200dp"
                 android:layout_height="150dp"
                 android:layout_alignParentRight="true"
-                android:background="#fff0f0f0">
+                android:background="@drawable/other_msg_bg">
 
                 <ProgressBar
                     android:layout_width="16dp"
@@ -273,7 +273,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
                 android:autoLink="all"
-                android:background="@color/my_msg_bg"
+                android:background="@drawable/my_msg_bg"
                 android:gravity="end|center_vertical"
                 android:paddingBottom="10dp"
                 android:paddingLeft="16dp"

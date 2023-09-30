@@ -35,7 +35,7 @@ public class ChatMessage {
 
     @Nullable public Long ReplyToMessageId;
 
-    @Nullable public Boolean isDropDown;
+    @Nullable public Boolean IsDropDown;
     @Nullable public Boolean DisableFreeText;
     @Nullable public List<SingleChoice> SingleChoices;
 

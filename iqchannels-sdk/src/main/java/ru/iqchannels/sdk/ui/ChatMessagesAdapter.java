@@ -7,7 +7,7 @@ package ru.iqchannels.sdk.ui;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.res.Resources;
+import android.os.Build;
 import android.os.Looper;
 import android.text.Html;
 import android.text.Spanned;
@@ -15,7 +15,6 @@ import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -27,9 +26,9 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.constraintlayout.helper.widget.Flow;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -53,6 +52,7 @@ import ru.iqchannels.sdk.schema.RatingState;
 import ru.iqchannels.sdk.schema.SingleChoice;
 import ru.iqchannels.sdk.schema.UploadedFile;
 import ru.iqchannels.sdk.schema.User;
+import ru.iqchannels.sdk.ui.widgets.DropDownButton;
 import ru.iqchannels.sdk.ui.widgets.ReplyMessageView;
 
 /**
@@ -247,6 +247,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
 
         holder.my.setVisibility(View.VISIBLE);
         holder.other.setVisibility(View.GONE);
+        holder.clDropdownBtns.setVisibility(View.GONE);
 
         // Time
         if (groupEnd) {
@@ -441,6 +442,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             holder.otherRating.setVisibility(View.GONE);
             holder.otherReply.setVisibility(View.GONE);
             holder.rvButtons.setVisibility(View.GONE);
+            holder.clDropdownBtns.setVisibility(View.GONE);
         }
 
         UploadedFile file = message.File;
@@ -620,10 +622,33 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         // buttons
         if (Objects.equals(message.Payload, ChatPayloadType.SINGLE_CHOICE)
                 && message.SingleChoices != null && !message.SingleChoices.isEmpty()) {
-            if (message.isDropDown != null && message.isDropDown) {
+            if (message.IsDropDown != null && message.IsDropDown) {
+                Flow flow = new Flow(holder.itemView.getContext());
+                flow.setLayoutParams(new ViewGroup.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                ));
+                flow.setHorizontalStyle(Flow.CHAIN_PACKED);
+                flow.setHorizontalAlign(Flow.HORIZONTAL_ALIGN_END);
+                flow.setHorizontalGap(UiUtils.toPx(4));
+                flow.setVerticalGap(UiUtils.toPx(4));
+                flow.setWrapMode(Flow.WRAP_CHAIN);
+                flow.setHorizontalBias(1f);
 
+                holder.clDropdownBtns.removeAllViews();
+                holder.clDropdownBtns.addView(flow);
+
+                for (SingleChoice singleChoice : message.SingleChoices) {
+                    DropDownButton btn = new DropDownButton(holder.itemView.getContext());
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                        btn.setId(View.generateViewId());
+                    }
+                    btn.setSingleChoice(singleChoice);
+                    holder.clDropdownBtns.addView(btn);
+                    flow.addView(btn);
+                }
+                holder.clDropdownBtns.setVisibility(View.VISIBLE);
             } else {
-                holder.rvButtons.setVisibility(View.VISIBLE);
                 ButtonsAdapter adapter = new ButtonsAdapter(item -> {
                     this.itemClickListener.onButtonClick(
                         messages.get(holder.getAdapterPosition()), item
@@ -631,6 +656,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                 });
                 adapter.setItems(message.SingleChoices);
                 holder.rvButtons.setAdapter(adapter);
+                holder.rvButtons.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -849,6 +875,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
 
         // Buttons
         private final RecyclerView rvButtons;
+        private final ConstraintLayout clDropdownBtns;
 
         @SuppressLint("ClickableViewAccessibility")
         ViewHolder(final ChatMessagesAdapter adapter, final View itemView) {
@@ -958,6 +985,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             }
 
             rvButtons = itemView.findViewById(R.id.rv_buttons);
+            clDropdownBtns = itemView.findViewById(R.id.cl_dropdown_btns);
         }
 
         private boolean onRateButtonTouch(View view, MotionEvent event) {

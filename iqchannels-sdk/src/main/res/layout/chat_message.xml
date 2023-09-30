@@ -183,6 +183,16 @@
         </LinearLayout>
     </LinearLayout>
 
+    <!-- DropDown buttons -->
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_dropdown_btns"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="40dp"
+        android:visibility="gone"
+        />
+
     <!-- My message -->
     <LinearLayout
         android:id="@+id/my"

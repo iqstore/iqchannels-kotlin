@@ -504,11 +504,29 @@ public class ChatFragment extends Fragment {
         });
     }
 
+    private void checkDisableFreeText(Boolean disableFreeText) {
+        if (disableFreeText != null && disableFreeText) {
+            disableFreeText(true);
+        } else {
+            disableFreeText(false);
+        }
+    }
+
+    private void disableFreeText(Boolean disable) {
+        sendText.setEnabled(!disable);
+        sendText.setFocusable(!disable);
+        sendText.setFocusableInTouchMode(!disable);
+        attachButton.setClickable(!disable);
+    }
+
     private void messagesLoaded(List<ChatMessage> messages) {
         if (messagesRequest == null) {
             return;
         }
         messagesLoaded = true;
+
+        ChatMessage lastMsg = messages.get(messages.size() - 1);
+        checkDisableFreeText(lastMsg.DisableFreeText);
 
         enableSend();
         adapter.loaded(messages);
@@ -536,6 +554,7 @@ public class ChatFragment extends Fragment {
         if (messagesRequest == null) {
             return;
         }
+        checkDisableFreeText(message.DisableFreeText);
         adapter.received(message);
         maybeScrollToBottomOnNewMessage();
     }
@@ -579,6 +598,7 @@ public class ChatFragment extends Fragment {
         if (messagesRequest == null) {
             return;
         }
+        checkDisableFreeText(message.DisableFreeText);
         adapter.updated(message);
     }
 
@@ -1008,6 +1028,7 @@ public class ChatFragment extends Fragment {
         @Override
         public void onButtonClick(ChatMessage message, SingleChoice singleChoice) {
             sendSingleChoice(singleChoice);
+            disableFreeText(false);
         }
     }
 }

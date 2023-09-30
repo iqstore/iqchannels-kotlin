@@ -155,6 +155,15 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_buttons"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="40dp"
+                android:paddingBottom="1dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                />
+
             <!-- Rating -->
             <include layout="@layout/chat_rating"
                 android:id="@+id/rating"

@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import ru.iqchannels.sdk.R;
 import ru.iqchannels.sdk.app.IQChannels;
@@ -438,6 +439,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             holder.otherImageFrame.setVisibility(View.GONE);
             holder.otherRating.setVisibility(View.GONE);
             holder.otherReply.setVisibility(View.GONE);
+            holder.rvButtons.setVisibility(View.GONE);
         }
 
         UploadedFile file = message.File;
@@ -476,7 +478,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                         holder.otherImageFrame.getWidth(),
                         LinearLayout.LayoutParams.WRAP_CONTENT
                     );
-                    layoutParams.setMargins(0, 0, toPx(40), 0);
+                    layoutParams.setMargins(0, 0, UiUtils.toPx(40), 0);
                     holder.clTexts.setLayoutParams(layoutParams);
                 });
             } else {
@@ -578,7 +580,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        lp.setMargins(0, 0, toPx(40), 0);
+        lp.setMargins(0, 0, UiUtils.toPx(40), 0);
         holder.clTexts.setLayoutParams(lp);
 
         // Reply message (attached message)
@@ -600,17 +602,30 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                             holder.otherReply.getWidth(),
                             LinearLayout.LayoutParams.WRAP_CONTENT
                         );
-                        layoutParams.setMargins(0, 0, toPx(40), 0);
+                        layoutParams.setMargins(0, 0, UiUtils.toPx(40), 0);
                         holder.clTexts.setLayoutParams(layoutParams);
                     } else {
                         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                             holder.clTexts.getWidth(),
                             LinearLayout.LayoutParams.WRAP_CONTENT
                         );
-                        layoutParams.setMargins(0, 0, toPx(40), 0);
+                        layoutParams.setMargins(0, 0, UiUtils.toPx(40), 0);
                         holder.otherReply.setLayoutParams(layoutParams);
                     }
                 });
+            }
+        }
+
+        // buttons
+        if (Objects.equals(message.Payload, ChatPayloadType.SINGLE_CHOICE)
+                && message.SingleChoices != null && !message.SingleChoices.isEmpty()) {
+            if (message.isDropDown != null && message.isDropDown) {
+
+            } else {
+                holder.rvButtons.setVisibility(View.VISIBLE);
+                ButtonsAdapter adapter = new ButtonsAdapter();
+                adapter.setItems(message.SingleChoices);
+                holder.rvButtons.setAdapter(adapter);
             }
         }
     }
@@ -827,6 +842,8 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         private final ImageButton otherRatingRate5;
         private final TextView otherRatingRated;
 
+        // Buttons
+        private final RecyclerView rvButtons;
 
         @SuppressLint("ClickableViewAccessibility")
         ViewHolder(final ChatMessagesAdapter adapter, final View itemView) {
@@ -934,6 +951,8 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                     }
                 });
             }
+
+            rvButtons = itemView.findViewById(R.id.rv_buttons);
         }
 
         private boolean onRateButtonTouch(View view, MotionEvent event) {
@@ -978,14 +997,6 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
 
     private static boolean objectEquals(Object a, Object b) {
         return (a == b) || (a != null && a.equals(b));
-    }
-
-    private int toPx(int dp) {
-        return Math.round(TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            (float) dp,
-            Resources.getSystem().getDisplayMetrics()
-        ));
     }
 
     interface ItemClickListener {

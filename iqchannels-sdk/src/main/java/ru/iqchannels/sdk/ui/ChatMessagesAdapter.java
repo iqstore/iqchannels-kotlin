@@ -623,31 +623,36 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         if (Objects.equals(message.Payload, ChatPayloadType.SINGLE_CHOICE)
                 && message.SingleChoices != null && !message.SingleChoices.isEmpty()) {
             if (message.IsDropDown != null && message.IsDropDown) {
-                Flow flow = new Flow(holder.itemView.getContext());
-                flow.setLayoutParams(new ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
-                ));
-                flow.setHorizontalStyle(Flow.CHAIN_PACKED);
-                flow.setHorizontalAlign(Flow.HORIZONTAL_ALIGN_END);
-                flow.setHorizontalGap(UiUtils.toPx(4));
-                flow.setVerticalGap(UiUtils.toPx(4));
-                flow.setWrapMode(Flow.WRAP_CHAIN);
-                flow.setHorizontalBias(1f);
+                if (messages.indexOf(message) == (messages.size() - 1)) {
+                    Flow flow = new Flow(holder.itemView.getContext());
+                    flow.setLayoutParams(new ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT
+                    ));
+                    flow.setHorizontalStyle(Flow.CHAIN_PACKED);
+                    flow.setHorizontalAlign(Flow.HORIZONTAL_ALIGN_END);
+                    flow.setHorizontalGap(UiUtils.toPx(4));
+                    flow.setVerticalGap(UiUtils.toPx(4));
+                    flow.setWrapMode(Flow.WRAP_CHAIN);
+                    flow.setHorizontalBias(1f);
 
-                holder.clDropdownBtns.removeAllViews();
-                holder.clDropdownBtns.addView(flow);
+                    holder.clDropdownBtns.removeAllViews();
+                    holder.clDropdownBtns.addView(flow);
 
-                for (SingleChoice singleChoice : message.SingleChoices) {
-                    DropDownButton btn = new DropDownButton(holder.itemView.getContext());
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                        btn.setId(View.generateViewId());
+                    for (SingleChoice singleChoice : message.SingleChoices) {
+                        DropDownButton btn = new DropDownButton(holder.itemView.getContext());
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                            btn.setId(View.generateViewId());
+                        }
+                        btn.setSingleChoice(singleChoice);
+                        btn.setOnClickListener(v -> {
+                            itemClickListener.onButtonClick(message, singleChoice);
+                        });
+                        holder.clDropdownBtns.addView(btn);
+                        flow.addView(btn);
                     }
-                    btn.setSingleChoice(singleChoice);
-                    holder.clDropdownBtns.addView(btn);
-                    flow.addView(btn);
+                    holder.clDropdownBtns.setVisibility(View.VISIBLE);
                 }
-                holder.clDropdownBtns.setVisibility(View.VISIBLE);
             } else {
                 ButtonsAdapter adapter = new ButtonsAdapter(item -> {
                     this.itemClickListener.onButtonClick(

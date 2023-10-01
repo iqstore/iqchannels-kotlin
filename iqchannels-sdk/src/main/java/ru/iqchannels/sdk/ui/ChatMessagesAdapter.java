@@ -671,7 +671,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                 holder.rvButtons.setAdapter(adapter);
                 holder.rvButtons.setVisibility(View.VISIBLE);
             }
-        } else if (Objects.equals(message.Payload, ChatPayloadType.CARD)
+        } else if ((Objects.equals(message.Payload, ChatPayloadType.CARD) || (Objects.equals(message.Payload, ChatPayloadType.CAROUSEL)))
                 && message.Actions != null && !message.Actions.isEmpty()) {
 
             ActionsAdapter adapter = new ActionsAdapter(item -> {

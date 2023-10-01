@@ -64,6 +64,7 @@ import ru.iqchannels.sdk.app.IQChannels;
 import ru.iqchannels.sdk.app.IQChannelsListener;
 import ru.iqchannels.sdk.app.MessagesListener;
 import ru.iqchannels.sdk.lib.InternalIO;
+import ru.iqchannels.sdk.schema.Action;
 import ru.iqchannels.sdk.schema.ChatEvent;
 import ru.iqchannels.sdk.schema.ChatMessage;
 import ru.iqchannels.sdk.schema.ClientAuth;
@@ -933,8 +934,17 @@ public class ChatFragment extends Fragment {
         hideReplying();
     }
 
+    private void sendMessage(String text) {
+        iqchannels.send(text, null);
+        hideReplying();
+    }
+
     private void sendSingleChoice(SingleChoice singleChoice) {
-        iqchannels.sendSingleChoiceReply(singleChoice);
+        iqchannels.sendPostbackReply(singleChoice.title, singleChoice.value);
+    }
+
+    private void sendAction(Action action) {
+        iqchannels.sendPostbackReply(action.Title, action.Payload);
     }
 
     // Error alerts
@@ -1025,6 +1035,25 @@ public class ChatFragment extends Fragment {
         public void onButtonClick(ChatMessage message, SingleChoice singleChoice) {
             sendSingleChoice(singleChoice);
             disableFreeText(false);
+        }
+
+        @Override
+        public void onActionClick(ChatMessage message, Action action) {
+            if (action.Action == null) return;
+
+            switch (action.Action) {
+                case POSTBACK:
+                    sendAction(action);
+                    break;
+                case OPEN_URL:
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse(action.URL));
+                    startActivity(intent);
+                    break;
+                case SAY_SOMETHING:
+                    sendMessage(action.Title);
+                    break;
+            }
         }
     }
 }

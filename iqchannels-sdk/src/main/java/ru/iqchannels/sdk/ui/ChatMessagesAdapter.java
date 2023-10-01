@@ -32,6 +32,10 @@ import androidx.constraintlayout.helper.widget.Flow;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.GranularRoundedCorners;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -43,6 +47,7 @@ import ru.iqchannels.sdk.R;
 import ru.iqchannels.sdk.app.IQChannels;
 import ru.iqchannels.sdk.http.HttpCallback;
 import ru.iqchannels.sdk.http.HttpException;
+import ru.iqchannels.sdk.schema.Action;
 import ru.iqchannels.sdk.schema.ActorType;
 import ru.iqchannels.sdk.schema.ChatEvent;
 import ru.iqchannels.sdk.schema.ChatMessage;
@@ -317,8 +322,9 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                 holder.myImageFrame.getLayoutParams().height = size[1];
                 holder.myImageFrame.requestLayout();
 
-                iqchannels.picasso(holder.myImageFrame.getContext())
+                Glide.with(holder.myImageFrame.getContext())
                         .load(imageUrl)
+                        .transform(new GranularRoundedCorners(UiUtils.toPx(12), UiUtils.toPx(12), 0, 0))
                         .into(holder.myImageSrc);
             } else {
 
@@ -443,6 +449,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             holder.otherReply.setVisibility(View.GONE);
             holder.rvButtons.setVisibility(View.GONE);
             holder.clDropdownBtns.setVisibility(View.GONE);
+            holder.rvCardBtns.setVisibility(View.GONE);
         }
 
         UploadedFile file = message.File;
@@ -472,8 +479,9 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                 holder.otherImageFrame.getLayoutParams().height = size[1];
                 holder.otherImageFrame.requestLayout();
 
-                iqchannels.picasso(holder.otherImageFrame.getContext())
+                Glide.with(holder.otherImageFrame.getContext())
                         .load(imageUrl)
+                        .transform(new GranularRoundedCorners(UiUtils.toPx(12), UiUtils.toPx(12), 0, 0))
                         .into(holder.otherImageSrc);
 
                 holder.otherImageSrc.post(() -> {
@@ -663,6 +671,17 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                 holder.rvButtons.setAdapter(adapter);
                 holder.rvButtons.setVisibility(View.VISIBLE);
             }
+        } else if (Objects.equals(message.Payload, ChatPayloadType.CARD)
+                && message.Actions != null && !message.Actions.isEmpty()) {
+
+            ActionsAdapter adapter = new ActionsAdapter(item -> {
+                this.itemClickListener.onActionClick(
+                    messages.get(holder.getAdapterPosition()), item
+                );
+            });
+            adapter.setItems(message.Actions);
+            holder.rvCardBtns.setAdapter(adapter);
+            holder.rvCardBtns.setVisibility(View.VISIBLE);
         }
     }
 
@@ -881,6 +900,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         // Buttons
         private final RecyclerView rvButtons;
         private final ConstraintLayout clDropdownBtns;
+        private final RecyclerView rvCardBtns;
 
         @SuppressLint("ClickableViewAccessibility")
         ViewHolder(final ChatMessagesAdapter adapter, final View itemView) {
@@ -991,6 +1011,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
 
             rvButtons = itemView.findViewById(R.id.rv_buttons);
             clDropdownBtns = itemView.findViewById(R.id.cl_dropdown_btns);
+            rvCardBtns = itemView.findViewById(R.id.rv_card_buttons);
         }
 
         private boolean onRateButtonTouch(View view, MotionEvent event) {
@@ -1041,5 +1062,6 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         void onFileClick(String url, String fileName);
         void onImageClick(ChatMessage message);
         void onButtonClick(ChatMessage message, SingleChoice singleChoice);
+        void onActionClick(ChatMessage message, Action action);
     }
 }

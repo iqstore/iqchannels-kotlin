@@ -38,6 +38,7 @@ public class ChatMessage {
     @Nullable public Boolean IsDropDown;
     @Nullable public Boolean DisableFreeText;
     @Nullable public List<SingleChoice> SingleChoices;
+    @Nullable public List<Action> Actions;
 
     // Flags
     public boolean Received;

@@ -1403,8 +1403,8 @@ public class IQChannels {
         send();
     }
 
-    public void sendSingleChoiceReply(SingleChoice singleChoice) {
-        if (singleChoice == null) {
+    public void sendPostbackReply(String title, String botpressPayload) {
+        if (botpressPayload == null || title == null) {
             return;
         }
 
@@ -1428,7 +1428,7 @@ public class IQChannels {
             });
         }
 
-        ChatMessageForm form = ChatMessageForm.payloadReply(localId, singleChoice.title, singleChoice.value);
+        ChatMessageForm form = ChatMessageForm.payloadReply(localId, title, botpressPayload);
         sendQueue.add(form);
         Log.i(TAG, String.format("Enqueued an outgoing message, localId=%d", localId));
         send();

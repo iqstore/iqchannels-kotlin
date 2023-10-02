@@ -34,11 +34,11 @@ public class ButtonsAdapter extends RecyclerView.Adapter<ButtonsAdapter.ButtonsV
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        lp.setMargins(0, UiUtils.toPx(4), 0, 0);
+        lp.setMargins(0, UiUtils.toPx(5), 0, 0);
         btn.setLayoutParams(lp);
         btn.setBackgroundResource(R.drawable.bg_single_choice_btn);
         btn.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.light_text_color));
-        btn.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
+        btn.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
         btn.setAllCaps(false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             btn.setElevation(0f);

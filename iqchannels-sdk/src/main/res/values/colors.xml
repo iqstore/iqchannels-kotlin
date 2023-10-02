@@ -10,6 +10,8 @@
     <color name="other_reply_text">#2D98F4</color>
     <color name="my_msg_bg">#ffe8f9d4</color>
     <color name="my_msg_reply_text">#488445</color>
+    <color name="drop_down_btn_border">#a3de62</color>
+    <color name="drop_down_btn_text">#74b928</color>
     <color name="color_single_choice_btn_border">#98a8b2</color>
     <color name="color_single_choice_btn">#abb8c0</color>
 </resources>

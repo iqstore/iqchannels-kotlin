@@ -20,7 +20,7 @@ public class DropDownButton extends androidx.appcompat.widget.AppCompatButton {
         super(context);
 
         setBackgroundResource(R.drawable.bg_single_choice_btn_dropdown);
-        setTextColor(ContextCompat.getColor(getContext(), R.color.my_msg_bg));
+        setTextColor(ContextCompat.getColor(getContext(), R.color.drop_down_btn_text));
         setTextSize(TypedValue.COMPLEX_UNIT_SP, 16);
         setAllCaps(false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -36,7 +36,7 @@ public class DropDownButton extends androidx.appcompat.widget.AppCompatButton {
         super(context, attrs);
 
         setBackgroundResource(R.drawable.bg_single_choice_btn_dropdown);
-        setTextColor(ContextCompat.getColor(getContext(), R.color.my_msg_bg));
+        setTextColor(ContextCompat.getColor(getContext(), R.color.drop_down_btn_text));
         setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
         setAllCaps(false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -52,7 +52,7 @@ public class DropDownButton extends androidx.appcompat.widget.AppCompatButton {
         super(context, attrs, defStyleAttr);
 
         setBackgroundResource(R.drawable.bg_single_choice_btn_dropdown);
-        setTextColor(ContextCompat.getColor(getContext(), R.color.my_msg_bg));
+        setTextColor(ContextCompat.getColor(getContext(), R.color.drop_down_btn_text));
         setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
         setAllCaps(false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

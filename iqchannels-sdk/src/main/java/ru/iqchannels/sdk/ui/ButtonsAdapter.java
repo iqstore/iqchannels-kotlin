@@ -42,6 +42,7 @@ public class ButtonsAdapter extends RecyclerView.Adapter<ButtonsAdapter.ButtonsV
         btn.setAllCaps(false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             btn.setElevation(0f);
+            btn.setStateListAnimator(null);
         }
         return new ButtonsVH(btn);
     }

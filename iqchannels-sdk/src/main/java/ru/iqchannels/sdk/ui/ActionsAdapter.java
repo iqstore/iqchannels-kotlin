@@ -34,7 +34,6 @@ public class ActionsAdapter extends RecyclerView.Adapter<ActionsAdapter.ButtonsV
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        lp.setMargins(0, UiUtils.toPx(5), 0, 0);
         btn.setLayoutParams(lp);
         btn.setBackgroundResource(R.drawable.bg_action_btn);
         btn.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.dark_text_color));
@@ -42,6 +41,7 @@ public class ActionsAdapter extends RecyclerView.Adapter<ActionsAdapter.ButtonsV
         btn.setAllCaps(false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             btn.setElevation(0f);
+            btn.setStateListAnimator(null);
         }
         return new ButtonsVH(btn);
     }

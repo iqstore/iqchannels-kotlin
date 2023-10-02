@@ -57,6 +57,7 @@ import ru.iqchannels.sdk.schema.RatingState;
 import ru.iqchannels.sdk.schema.SingleChoice;
 import ru.iqchannels.sdk.schema.UploadedFile;
 import ru.iqchannels.sdk.schema.User;
+import ru.iqchannels.sdk.ui.rv.MarginItemDecoration;
 import ru.iqchannels.sdk.ui.widgets.DropDownButton;
 import ru.iqchannels.sdk.ui.widgets.ReplyMessageView;
 
@@ -1012,6 +1013,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             rvButtons = itemView.findViewById(R.id.rv_buttons);
             clDropdownBtns = itemView.findViewById(R.id.cl_dropdown_btns);
             rvCardBtns = itemView.findViewById(R.id.rv_card_buttons);
+            rvCardBtns.addItemDecoration(new MarginItemDecoration());
         }
 
         private boolean onRateButtonTouch(View view, MotionEvent event) {

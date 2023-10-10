@@ -522,8 +522,10 @@ public class ChatFragment extends Fragment {
         }
         messagesLoaded = true;
 
-        ChatMessage lastMsg = messages.get(messages.size() - 1);
-        checkDisableFreeText(lastMsg);
+        if (!messages.isEmpty()) {
+            ChatMessage lastMsg = messages.get(messages.size() - 1);
+            checkDisableFreeText(lastMsg);
+        }
 
         enableSend();
         adapter.loaded(messages);

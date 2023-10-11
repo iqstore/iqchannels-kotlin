@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="light_text_color">#FFFFFF</color>
+    <color name="dark_text_color">#000000</color>
     <color name="preview_theme_bg">#494949</color>
     <color name="text_color">#5B5B5B</color>
     <color name="link_file_text_color">#3F51B5</color>
@@ -10,4 +11,10 @@
     <color name="other_reply_text">#2D98F4</color>
     <color name="my_msg_bg">#ffe8f9d4</color>
     <color name="my_msg_reply_text">#488445</color>
+    <color name="drop_down_btn_border">#a3de62</color>
+    <color name="drop_down_btn_text">#74b928</color>
+    <color name="color_single_choice_btn_border">#98a8b2</color>
+    <color name="color_action_btn_border">#CCCCCC</color>
+    <color name="color_action_btn_bg">#D9D9D9</color>
+    <color name="color_single_choice_btn">#abb8c0</color>
 </resources>

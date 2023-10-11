@@ -64,9 +64,11 @@ import ru.iqchannels.sdk.app.IQChannels;
 import ru.iqchannels.sdk.app.IQChannelsListener;
 import ru.iqchannels.sdk.app.MessagesListener;
 import ru.iqchannels.sdk.lib.InternalIO;
+import ru.iqchannels.sdk.schema.Action;
 import ru.iqchannels.sdk.schema.ChatEvent;
 import ru.iqchannels.sdk.schema.ChatMessage;
 import ru.iqchannels.sdk.schema.ClientAuth;
+import ru.iqchannels.sdk.schema.SingleChoice;
 import ru.iqchannels.sdk.ui.images.ImagePreviewFragment;
 import ru.iqchannels.sdk.ui.rv.SwipeController;
 import ru.iqchannels.sdk.ui.widgets.ReplyMessageView;
@@ -503,11 +505,27 @@ public class ChatFragment extends Fragment {
         });
     }
 
+    private void checkDisableFreeText(ChatMessage message) {
+        disableFreeText(message.DisableFreeText != null && message.DisableFreeText);
+    }
+
+    private void disableFreeText(Boolean disable) {
+        sendText.setEnabled(!disable);
+        sendText.setFocusable(!disable);
+        sendText.setFocusableInTouchMode(!disable);
+        attachButton.setClickable(!disable);
+    }
+
     private void messagesLoaded(List<ChatMessage> messages) {
         if (messagesRequest == null) {
             return;
         }
         messagesLoaded = true;
+
+        if (!messages.isEmpty()) {
+            ChatMessage lastMsg = messages.get(messages.size() - 1);
+            checkDisableFreeText(lastMsg);
+        }
 
         enableSend();
         adapter.loaded(messages);
@@ -535,6 +553,7 @@ public class ChatFragment extends Fragment {
         if (messagesRequest == null) {
             return;
         }
+        checkDisableFreeText(message);
         adapter.received(message);
         maybeScrollToBottomOnNewMessage();
     }
@@ -578,6 +597,7 @@ public class ChatFragment extends Fragment {
         if (messagesRequest == null) {
             return;
         }
+        checkDisableFreeText(message);
         adapter.updated(message);
     }
 
@@ -916,6 +936,19 @@ public class ChatFragment extends Fragment {
         hideReplying();
     }
 
+    private void sendMessage(String text) {
+        iqchannels.send(text, null);
+        hideReplying();
+    }
+
+    private void sendSingleChoice(SingleChoice singleChoice) {
+        iqchannels.sendPostbackReply(singleChoice.title, singleChoice.value);
+    }
+
+    private void sendAction(Action action) {
+        iqchannels.sendPostbackReply(action.Title, action.Payload);
+    }
+
     // Error alerts
 
     private void showMessagesErrorAlert(Exception e) {
@@ -998,6 +1031,31 @@ public class ChatFragment extends Fragment {
             transaction.replace(((ViewGroup)getView().getParent()).getId(), fragment);
             transaction.addToBackStack(null);
             transaction.commit();
+        }
+
+        @Override
+        public void onButtonClick(ChatMessage message, SingleChoice singleChoice) {
+            sendSingleChoice(singleChoice);
+            disableFreeText(false);
+        }
+
+        @Override
+        public void onActionClick(ChatMessage message, Action action) {
+            if (action.Action == null) return;
+
+            switch (action.Action) {
+                case POSTBACK:
+                    sendAction(action);
+                    break;
+                case OPEN_URL:
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setData(Uri.parse(action.URL));
+                    startActivity(intent);
+                    break;
+                case SAY_SOMETHING:
+                    sendMessage(action.Title);
+                    break;
+            }
         }
     }
 }

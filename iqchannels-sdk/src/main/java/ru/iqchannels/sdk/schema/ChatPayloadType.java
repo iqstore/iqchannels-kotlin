@@ -10,4 +10,7 @@ public class ChatPayloadType {
     public static final String NOTICE = "notice";
     public static final String RATING = "rating";
     public static final String TYPING = "typing";
+    public static final String SINGLE_CHOICE = "single-choice";
+    public static final String CARD = "card";
+    public static final String CAROUSEL = "carousel";
 }

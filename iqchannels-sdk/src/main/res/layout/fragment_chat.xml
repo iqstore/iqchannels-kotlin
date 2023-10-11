@@ -170,7 +170,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
                 android:layout_alignParentRight="true"
-                android:layout_below="@id/reply"
+                android:layout_below="@id/divider"
                 android:background="@null"
                 android:contentDescription="@string/chat_send"
                 android:paddingLeft="4sp"

@@ -11,7 +11,6 @@ import androidx.annotation.Nullable;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -32,10 +31,9 @@ import ru.iqchannels.sdk.schema.ChatException;
 import ru.iqchannels.sdk.schema.ChatExceptionCode;
 import ru.iqchannels.sdk.schema.ChatMessage;
 import ru.iqchannels.sdk.schema.ChatMessageForm;
-import ru.iqchannels.sdk.schema.Client;
 import ru.iqchannels.sdk.schema.ClientAuth;
-import ru.iqchannels.sdk.schema.FileToken;
 import ru.iqchannels.sdk.schema.MaxIdQuery;
+import ru.iqchannels.sdk.schema.SingleChoice;
 import ru.iqchannels.sdk.schema.UploadedFile;
 
 import static ru.iqchannels.sdk.app.Preconditions.checkNotNull;
@@ -1400,6 +1398,37 @@ public class IQChannels {
         }
 
         ChatMessageForm form = ChatMessageForm.text(localId, text, replyToMessageId);
+        sendQueue.add(form);
+        Log.i(TAG, String.format("Enqueued an outgoing message, localId=%d", localId));
+        send();
+    }
+
+    public void sendPostbackReply(String title, String botpressPayload) {
+        if (botpressPayload == null || title == null) {
+            return;
+        }
+
+        if (auth == null) {
+            return;
+        }
+
+        long localId = nextLocalId();
+        final ChatMessage message = new ChatMessage(auth.Client, localId);
+        message.Sending = true;
+
+        assert messages != null;
+        messages.add(message);
+
+        for (final MessagesListener listener : messageListeners) {
+            execute(new Runnable() {
+                @Override
+                public void run() {
+                    listener.messageSent(message);
+                }
+            });
+        }
+
+        ChatMessageForm form = ChatMessageForm.payloadReply(localId, title, botpressPayload);
         sendQueue.add(form);
         Log.i(TAG, String.format("Enqueued an outgoing message, localId=%d", localId));
         send();

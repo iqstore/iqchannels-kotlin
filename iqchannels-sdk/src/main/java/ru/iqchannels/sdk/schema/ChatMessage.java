@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 
 import java.io.File;
 import java.util.Date;
+import java.util.List;
 
 import ru.iqchannels.sdk.http.HttpRequest;
 
@@ -33,6 +34,11 @@ public class ChatMessage {
     @Nullable public Long RatingId;
 
     @Nullable public Long ReplyToMessageId;
+
+    @Nullable public Boolean IsDropDown;
+    @Nullable public Boolean DisableFreeText;
+    @Nullable public List<SingleChoice> SingleChoices;
+    @Nullable public List<Action> Actions;
 
     // Flags
     public boolean Received;

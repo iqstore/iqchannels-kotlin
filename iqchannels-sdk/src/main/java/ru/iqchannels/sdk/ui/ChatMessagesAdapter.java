@@ -7,7 +7,7 @@ package ru.iqchannels.sdk.ui;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.res.Resources;
+import android.os.Build;
 import android.os.Looper;
 import android.text.Html;
 import android.text.Spanned;
@@ -15,7 +15,6 @@ import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
-import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -27,30 +26,39 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import androidx.constraintlayout.helper.widget.Flow;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.GranularRoundedCorners;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import ru.iqchannels.sdk.R;
 import ru.iqchannels.sdk.app.IQChannels;
 import ru.iqchannels.sdk.http.HttpCallback;
 import ru.iqchannels.sdk.http.HttpException;
+import ru.iqchannels.sdk.schema.Action;
 import ru.iqchannels.sdk.schema.ActorType;
 import ru.iqchannels.sdk.schema.ChatEvent;
 import ru.iqchannels.sdk.schema.ChatMessage;
 import ru.iqchannels.sdk.schema.ChatPayloadType;
 import ru.iqchannels.sdk.schema.Rating;
 import ru.iqchannels.sdk.schema.RatingState;
+import ru.iqchannels.sdk.schema.SingleChoice;
 import ru.iqchannels.sdk.schema.UploadedFile;
 import ru.iqchannels.sdk.schema.User;
+import ru.iqchannels.sdk.ui.rv.MarginItemDecoration;
+import ru.iqchannels.sdk.ui.widgets.DropDownButton;
 import ru.iqchannels.sdk.ui.widgets.ReplyMessageView;
 
 /**
@@ -245,6 +253,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
 
         holder.my.setVisibility(View.VISIBLE);
         holder.other.setVisibility(View.GONE);
+        holder.clDropdownBtns.setVisibility(View.GONE);
 
         // Time
         if (groupEnd) {
@@ -314,8 +323,9 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                 holder.myImageFrame.getLayoutParams().height = size[1];
                 holder.myImageFrame.requestLayout();
 
-                iqchannels.picasso(holder.myImageFrame.getContext())
+                Glide.with(holder.myImageFrame.getContext())
                         .load(imageUrl)
+                        .transform(new GranularRoundedCorners(UiUtils.toPx(12), UiUtils.toPx(12), 0, 0))
                         .into(holder.myImageSrc);
             } else {
 
@@ -333,6 +343,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             holder.myImageFrame.setVisibility(View.GONE);
             holder.myUpload.setVisibility(View.GONE);
             holder.myText.setVisibility(View.VISIBLE);
+            holder.myText.setBackgroundResource(R.drawable.my_msg_bg);
             holder.myText.setAutoLinkMask(Linkify.ALL);
             holder.myText.setText(message.Text);
             holder.myText.setTextColor(Colors.textColor());
@@ -357,6 +368,8 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                 );
                 lp.gravity = Gravity.END;
                 holder.myReply.setLayoutParams(lp);
+
+                holder.myText.setBackgroundResource(R.drawable.my_msg_reply_text_bg);
 
                 holder.myReply.post(() -> {
                     if (holder.myReply.getWidth() > holder.myText.getWidth()) {
@@ -435,6 +448,9 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             holder.otherImageFrame.setVisibility(View.GONE);
             holder.otherRating.setVisibility(View.GONE);
             holder.otherReply.setVisibility(View.GONE);
+            holder.rvButtons.setVisibility(View.GONE);
+            holder.clDropdownBtns.setVisibility(View.GONE);
+            holder.rvCardBtns.setVisibility(View.GONE);
         }
 
         UploadedFile file = message.File;
@@ -447,6 +463,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
 
                 if (message.Text != null && !message.Text.isEmpty()) {
                     holder.clTexts.setVisibility(View.VISIBLE);
+                    holder.clTexts.setBackgroundResource(R.drawable.other_msg_reply_text_bg);
                     holder.otherText.setVisibility(View.VISIBLE);
                     holder.otherText.setText(message.Text);
                 } else  {
@@ -454,12 +471,18 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                 }
 
                 holder.otherImageFrame.setVisibility(View.VISIBLE);
+                if (message.Text != null && !message.Text.isEmpty()) {
+                    holder.otherImageFrame.setBackgroundResource(R.drawable.other_msg_reply_bg);
+                } else {
+                    holder.otherImageFrame.setBackgroundResource(R.drawable.other_msg_bg);
+                }
                 holder.otherImageFrame.getLayoutParams().width = size[0];
                 holder.otherImageFrame.getLayoutParams().height = size[1];
                 holder.otherImageFrame.requestLayout();
 
-                iqchannels.picasso(holder.otherImageFrame.getContext())
+                Glide.with(holder.otherImageFrame.getContext())
                         .load(imageUrl)
+                        .transform(new GranularRoundedCorners(UiUtils.toPx(12), UiUtils.toPx(12), 0, 0))
                         .into(holder.otherImageSrc);
 
                 holder.otherImageSrc.post(() -> {
@@ -467,13 +490,14 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                         holder.otherImageFrame.getWidth(),
                         LinearLayout.LayoutParams.WRAP_CONTENT
                     );
-                    layoutParams.setMargins(0, 0, toPx(40), 0);
+                    layoutParams.setMargins(0, 0, UiUtils.toPx(40), 0);
                     holder.clTexts.setLayoutParams(layoutParams);
                 });
             } else {
 
                 holder.otherImageFrame.setVisibility(View.GONE);
                 holder.clTexts.setVisibility(View.VISIBLE);
+                holder.clTexts.setBackgroundResource(R.drawable.other_msg_bg);
                 holder.tvOtherFileName.setVisibility(View.VISIBLE);
                 holder.tvOtherFileName.setAutoLinkMask(0);
                 holder.tvOtherFileName.setMovementMethod(LinkMovementMethod.getInstance());
@@ -557,6 +581,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         }
         else {
             holder.clTexts.setVisibility(View.VISIBLE);
+            holder.clTexts.setBackgroundResource(R.drawable.other_msg_bg);
             holder.otherText.setVisibility(View.VISIBLE);
             holder.otherText.setAutoLinkMask(Linkify.ALL);
             holder.otherText.setText(message.Text);
@@ -567,7 +592,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             LinearLayout.LayoutParams.WRAP_CONTENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        lp.setMargins(0, 0, toPx(40), 0);
+        lp.setMargins(0, 0, UiUtils.toPx(40), 0);
         holder.clTexts.setLayoutParams(lp);
 
         // Reply message (attached message)
@@ -581,24 +606,83 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                 holder.otherReply.setTvTextColor(R.color.other_reply_text);
                 holder.otherReply.setLayoutParams(lp);
 
+                holder.clTexts.setBackgroundResource(R.drawable.other_msg_reply_text_bg);
+
                 holder.otherReply.post(() -> {
                     if (holder.otherReply.getWidth() > holder.clTexts.getWidth()) {
                         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                             holder.otherReply.getWidth(),
                             LinearLayout.LayoutParams.WRAP_CONTENT
                         );
-                        layoutParams.setMargins(0, 0, toPx(40), 0);
+                        layoutParams.setMargins(0, 0, UiUtils.toPx(40), 0);
                         holder.clTexts.setLayoutParams(layoutParams);
                     } else {
                         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                             holder.clTexts.getWidth(),
                             LinearLayout.LayoutParams.WRAP_CONTENT
                         );
-                        layoutParams.setMargins(0, 0, toPx(40), 0);
+                        layoutParams.setMargins(0, 0, UiUtils.toPx(40), 0);
                         holder.otherReply.setLayoutParams(layoutParams);
                     }
                 });
             }
+        }
+
+        // buttons
+        if (Objects.equals(message.Payload, ChatPayloadType.SINGLE_CHOICE)
+                && message.SingleChoices != null && !message.SingleChoices.isEmpty()) {
+            if (message.IsDropDown != null && message.IsDropDown) {
+                if (messages.indexOf(message) == (messages.size() - 1)) {
+                    Flow flow = new Flow(holder.itemView.getContext());
+                    flow.setLayoutParams(new ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT
+                    ));
+                    flow.setHorizontalStyle(Flow.CHAIN_PACKED);
+                    flow.setHorizontalAlign(Flow.HORIZONTAL_ALIGN_END);
+                    flow.setHorizontalGap(UiUtils.toPx(4));
+                    flow.setVerticalGap(UiUtils.toPx(4));
+                    flow.setWrapMode(Flow.WRAP_CHAIN);
+                    flow.setHorizontalBias(1f);
+
+                    holder.clDropdownBtns.removeAllViews();
+                    holder.clDropdownBtns.addView(flow);
+
+                    for (SingleChoice singleChoice : message.SingleChoices) {
+                        DropDownButton btn = new DropDownButton(holder.itemView.getContext());
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                            btn.setId(View.generateViewId());
+                        }
+                        btn.setSingleChoice(singleChoice);
+                        btn.setOnClickListener(v -> {
+                            itemClickListener.onButtonClick(message, singleChoice);
+                        });
+                        holder.clDropdownBtns.addView(btn);
+                        flow.addView(btn);
+                    }
+                    holder.clDropdownBtns.setVisibility(View.VISIBLE);
+                }
+            } else {
+                ButtonsAdapter adapter = new ButtonsAdapter(item -> {
+                    this.itemClickListener.onButtonClick(
+                        messages.get(holder.getAdapterPosition()), item
+                    );
+                });
+                adapter.setItems(message.SingleChoices);
+                holder.rvButtons.setAdapter(adapter);
+                holder.rvButtons.setVisibility(View.VISIBLE);
+            }
+        } else if ((Objects.equals(message.Payload, ChatPayloadType.CARD) || (Objects.equals(message.Payload, ChatPayloadType.CAROUSEL)))
+                && message.Actions != null && !message.Actions.isEmpty()) {
+
+            ActionsAdapter adapter = new ActionsAdapter(item -> {
+                this.itemClickListener.onActionClick(
+                    messages.get(holder.getAdapterPosition()), item
+                );
+            });
+            adapter.setItems(message.Actions);
+            holder.rvCardBtns.setAdapter(adapter);
+            holder.rvCardBtns.setVisibility(View.VISIBLE);
         }
     }
 
@@ -814,6 +898,10 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         private final ImageButton otherRatingRate5;
         private final TextView otherRatingRated;
 
+        // Buttons
+        private final RecyclerView rvButtons;
+        private final ConstraintLayout clDropdownBtns;
+        private final RecyclerView rvCardBtns;
 
         @SuppressLint("ClickableViewAccessibility")
         ViewHolder(final ChatMessagesAdapter adapter, final View itemView) {
@@ -921,6 +1009,11 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                     }
                 });
             }
+
+            rvButtons = itemView.findViewById(R.id.rv_buttons);
+            clDropdownBtns = itemView.findViewById(R.id.cl_dropdown_btns);
+            rvCardBtns = itemView.findViewById(R.id.rv_card_buttons);
+            rvCardBtns.addItemDecoration(new MarginItemDecoration());
         }
 
         private boolean onRateButtonTouch(View view, MotionEvent event) {
@@ -967,16 +1060,10 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         return (a == b) || (a != null && a.equals(b));
     }
 
-    private int toPx(int dp) {
-        return Math.round(TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            (float) dp,
-            Resources.getSystem().getDisplayMetrics()
-        ));
-    }
-
     interface ItemClickListener {
         void onFileClick(String url, String fileName);
         void onImageClick(ChatMessage message);
+        void onButtonClick(ChatMessage message, SingleChoice singleChoice);
+        void onActionClick(ChatMessage message, Action action);
     }
 }

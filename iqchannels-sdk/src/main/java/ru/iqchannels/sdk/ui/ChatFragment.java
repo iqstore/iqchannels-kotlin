@@ -55,6 +55,7 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import ru.iqchannels.sdk.Log;
 import ru.iqchannels.sdk.R;
@@ -928,6 +929,10 @@ public class ChatFragment extends Fragment {
     private void sendMessage() {
         String text = sendText.getText().toString();
         sendText.setText("");
+        if (Objects.equals(text, "/version_sdk")){
+            iqchannels.handleVersion();
+            return;
+        }
         Long replyToMessageId = null;
         if (replyingMessage != null) {
             replyToMessageId = replyingMessage.Id;

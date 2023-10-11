@@ -33,8 +33,8 @@ import ru.iqchannels.sdk.schema.ChatMessage;
 import ru.iqchannels.sdk.schema.ChatMessageForm;
 import ru.iqchannels.sdk.schema.ClientAuth;
 import ru.iqchannels.sdk.schema.MaxIdQuery;
-import ru.iqchannels.sdk.schema.SingleChoice;
 import ru.iqchannels.sdk.schema.UploadedFile;
+import ru.iqchannels.sdk.schema.User;
 
 import static ru.iqchannels.sdk.app.Preconditions.checkNotNull;
 
@@ -1401,6 +1401,31 @@ public class IQChannels {
         sendQueue.add(form);
         Log.i(TAG, String.format("Enqueued an outgoing message, localId=%d", localId));
         send();
+    }
+
+    public void handleVersion() {
+        if (auth == null) {
+            return;
+        }
+
+        long localId = nextLocalId();
+        User user = new User();
+        user.DisplayName = "Система";
+        user.Online = true;
+        user.Id = 1;
+        final ChatMessage message = new ChatMessage(user, localId);
+        message.Text = "1.8.1";
+        messages.add(message);
+        for (final MessagesListener listener : messageListeners) {
+            execute(new Runnable() {
+                @Override
+                public void run() {
+                    List<ChatMessage> l = new ArrayList<>();
+                    l.add(message);
+                    listener.messagesLoaded(l);
+                }
+            });
+        }
     }
 
     public void sendPostbackReply(String title, String botpressPayload) {

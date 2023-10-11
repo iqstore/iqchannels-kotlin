@@ -101,4 +101,23 @@ public class ChatMessage {
         Client = client;
         Date = now;
     }
+
+    public ChatMessage(@NonNull User user, long localId) {
+        LocalId = localId;
+        Public = true;
+
+        // Author
+        Author = ActorType.USER;
+        UserId = user.Id;
+
+        Date now = new Date();
+        CreatedAt = now.getTime();
+
+        // Transitive
+        My = false;
+
+        // Local
+        User = user;
+        Date = now;
+    }
 }

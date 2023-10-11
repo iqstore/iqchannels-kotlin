@@ -28,7 +28,7 @@ public class DropDownButton extends androidx.appcompat.widget.AppCompatButton {
         }
 
         int vertical = UiUtils.toPx(4);
-        int horizontal = UiUtils.toPx(4);
+        int horizontal = UiUtils.toPx(6);
         setPadding(horizontal, vertical, horizontal, vertical);
     }
 

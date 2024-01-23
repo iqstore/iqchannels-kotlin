@@ -133,12 +133,12 @@
                     android:id="@+id/tvOtherFileSize"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
+                    android:layout_marginStart="20dp"
                     android:textColor="#ff979fa7"
                     android:textSize="12sp"
-                    app:layout_constraintStart_toEndOf="@id/tvOtherFileName"
-                    app:layout_constraintBaseline_toBaselineOf="@id/tvOtherFileName"
-                    tools:text="CJM.pdf"
+                    app:layout_constraintTop_toBottomOf="@id/tvOtherFileName"
+                    app:layout_constraintStart_toStartOf="parent"
+                    tools:text="15.0 кб"
                     />
 
                 <TextView
@@ -148,8 +148,8 @@
                     android:autoLink="all"
                     android:textColor="#ff4c4c4c"
                     android:textSize="16sp"
-                    app:layout_constraintTop_toBottomOf="@id/tvOtherFileName"
-                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvOtherFileSize"
+                    app:layout_constraintStart_toStartOf="@id/tvOtherFileName"
                     tools:text="Message Text"
                     />
 

@@ -156,10 +156,15 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         if (agentTyping) {
             return;
         }
+
+        if (event.Actor == ActorType.CLIENT) {
+            return;
+        }
+
         agentTyping = true;
         ChatMessage msg = new ChatMessage();
         msg.Author = ActorType.USER;
-        String name = event.User.DisplayName;
+        String name = event.User != null ? event.User.DisplayName : null;
         msg.Text = name + " печатает...";
         msg.Payload = ChatPayloadType.TYPING;
         msg.Date = new Date();

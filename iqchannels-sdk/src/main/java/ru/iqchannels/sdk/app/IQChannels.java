@@ -108,6 +108,8 @@ public class IQChannels {
     private final List<ChatMessageForm> sendQueue;
     @Nullable private HttpRequest sendRequest;
 
+    @Nullable private HttpRequest sendTypingRequest;
+
     private IQChannels() {
         listeners = new HashSet<>();
         unreadListeners = new HashSet<>();
@@ -1736,6 +1738,38 @@ public class IQChannels {
         });
 
         Log.i(TAG, String.format("Sent rating, ratingId=%d, value=%d", ratingId, value));
+    }
+
+    // Typing
+
+    public void sendTyping() {
+        if (auth == null) {
+            return;
+        }
+
+        if (sendTypingRequest != null) {
+            return;
+        }
+
+        assert client != null;
+        assert config != null;
+        assert handler != null;
+
+        sendTypingRequest = client.chatsChannelTyping(config.channel, new HttpCallback<Void>() {
+            @Override
+            public void onResult(Void result) {
+                Log.d("sendTypingRequest", "successfully sent self 'Typing...'");
+            }
+
+            @Override
+            public void onException(final Exception exception) {
+                Log.e("sendTypingRequest", exception.getLocalizedMessage());
+            }
+        });
+
+        handler.postDelayed(() -> sendTypingRequest = null, 5000);
+
+        Log.i(TAG, String.format("Sending a typing message"));
     }
 
     // Data

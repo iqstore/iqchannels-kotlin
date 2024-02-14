@@ -8,21 +8,21 @@ package ru.iqchannels.sdk.ui;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.DownloadManager;
-import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.*;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.Environment;
-import android.os.Parcelable;
+import android.os.*;
 import android.provider.MediaStore;
-
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.webkit.MimeTypeMap;
+import android.widget.*;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -32,23 +32,14 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
-import android.webkit.MimeTypeMap;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
+import ru.iqchannels.sdk.Log;
+import ru.iqchannels.sdk.R;
+import ru.iqchannels.sdk.app.*;
+import ru.iqchannels.sdk.lib.InternalIO;
+import ru.iqchannels.sdk.schema.*;
+import ru.iqchannels.sdk.ui.images.ImagePreviewFragment;
+import ru.iqchannels.sdk.ui.rv.SwipeController;
+import ru.iqchannels.sdk.ui.widgets.ReplyMessageView;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -58,23 +49,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-
-import ru.iqchannels.sdk.Log;
-import ru.iqchannels.sdk.R;
-import ru.iqchannels.sdk.app.Callback;
-import ru.iqchannels.sdk.app.Cancellable;
-import ru.iqchannels.sdk.app.IQChannels;
-import ru.iqchannels.sdk.app.IQChannelsListener;
-import ru.iqchannels.sdk.app.MessagesListener;
-import ru.iqchannels.sdk.lib.InternalIO;
-import ru.iqchannels.sdk.schema.Action;
-import ru.iqchannels.sdk.schema.ChatEvent;
-import ru.iqchannels.sdk.schema.ChatMessage;
-import ru.iqchannels.sdk.schema.ClientAuth;
-import ru.iqchannels.sdk.schema.SingleChoice;
-import ru.iqchannels.sdk.ui.images.ImagePreviewFragment;
-import ru.iqchannels.sdk.ui.rv.SwipeController;
-import ru.iqchannels.sdk.ui.widgets.ReplyMessageView;
 
 import static android.app.Activity.RESULT_OK;
 import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
@@ -1041,10 +1015,16 @@ public class ChatFragment extends Fragment {
 
         @Override
         public void onImageClick(ChatMessage message) {
-            String senderName = message.User.DisplayName;
+            String senderName;
+            String imageUrl;
+            if (message.My) {
+                senderName = message.Client != null ? message.Client.Name : "";
+            } else {
+                senderName = message.User != null ? message.User.DisplayName : "";
+            }
+            imageUrl = message.File != null ? message.File.imageUrl : "";
             Date date = message.Date;
             String msg = message.Text;
-            String imageUrl = message.File.imageUrl;
 
             FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
             ImagePreviewFragment fragment = ImagePreviewFragment.newInstance(

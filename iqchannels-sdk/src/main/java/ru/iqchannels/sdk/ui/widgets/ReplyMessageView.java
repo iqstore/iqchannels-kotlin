@@ -8,16 +8,16 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.ColorRes;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
-
 import ru.iqchannels.sdk.R;
 import ru.iqchannels.sdk.app.IQChannels;
 import ru.iqchannels.sdk.schema.ChatMessage;
+
+import java.util.Objects;
 
 public class ReplyMessageView extends ConstraintLayout {
 
@@ -106,7 +106,10 @@ public class ReplyMessageView extends ConstraintLayout {
     public void showReplyingMessage(ChatMessage message) {
         setVisibility(View.VISIBLE);
         if (message.User != null) {
-            tvSenderName.setText(message.User.DisplayName);
+            tvSenderName.setText(Objects.equals(message.User.DisplayName, "") ? message.User.Name : message.User.DisplayName);
+        }
+        else if (message.Client != null) {
+            tvSenderName.setText(message.Client.Name);
         }
 
         if (message.Text != null && !message.Text.isEmpty()) {
@@ -158,7 +161,7 @@ public class ReplyMessageView extends ConstraintLayout {
         );
     }
 
-    public void setCloseBtnClickListener(View.OnClickListener listener) {
+    public void setCloseBtnClickListener(OnClickListener listener) {
         ibClose.setOnClickListener(listener);
     }
 

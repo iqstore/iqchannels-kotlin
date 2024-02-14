@@ -15,51 +15,24 @@ import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.TextView;
-
+import android.view.*;
+import android.widget.*;
 import androidx.constraintlayout.helper.widget.Flow;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.GranularRoundedCorners;
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
-
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-
 import ru.iqchannels.sdk.R;
 import ru.iqchannels.sdk.app.IQChannels;
 import ru.iqchannels.sdk.http.HttpCallback;
 import ru.iqchannels.sdk.http.HttpException;
-import ru.iqchannels.sdk.schema.Action;
-import ru.iqchannels.sdk.schema.ActorType;
-import ru.iqchannels.sdk.schema.ChatEvent;
-import ru.iqchannels.sdk.schema.ChatMessage;
-import ru.iqchannels.sdk.schema.ChatPayloadType;
-import ru.iqchannels.sdk.schema.Rating;
-import ru.iqchannels.sdk.schema.RatingState;
-import ru.iqchannels.sdk.schema.SingleChoice;
-import ru.iqchannels.sdk.schema.UploadedFile;
-import ru.iqchannels.sdk.schema.User;
+import ru.iqchannels.sdk.schema.*;
 import ru.iqchannels.sdk.ui.rv.MarginItemDecoration;
 import ru.iqchannels.sdk.ui.widgets.DropDownButton;
 import ru.iqchannels.sdk.ui.widgets.ReplyMessageView;
+
+import java.text.DecimalFormat;
+import java.util.*;
 
 /**
  * Created by Ivan Korobkov i.korobkov@iqstore.ru on 24/01/2017.
@@ -282,6 +255,13 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             holder.myFlags.setVisibility(View.GONE);
         }
 
+        // Reset the visibility.
+        {
+            holder.clTextsMy.setVisibility(View.GONE);
+            holder.tvMyFileName.setVisibility(View.GONE);
+            holder.tvMyFileSize.setVisibility(View.GONE);
+        }
+
         // Message
         if (message.Upload != null) {
             holder.myText.setVisibility(View.GONE);
@@ -303,7 +283,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                 }
 
                 holder.myUploadError.setText(errMessage);
-                
+
                 holder.myUploadCancel.setVisibility(View.VISIBLE);
                 holder.myUploadRetry.setVisibility(View.VISIBLE);
             } else {
@@ -322,7 +302,13 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             if (imageUrl != null) {
                 int[] size = computeImageSizeFromFile(file);
 
-                holder.myText.setVisibility(View.GONE);
+                if (message.Text != null && !message.Text.isEmpty()) {
+                    holder.clTextsMy.setVisibility(View.VISIBLE);
+                    holder.myText.setVisibility(View.VISIBLE);
+                    holder.myText.setText(message.Text);
+                } else  {
+                    holder.myText.setVisibility(View.GONE);
+                }
                 holder.myImageFrame.setVisibility(View.VISIBLE);
                 holder.myImageFrame.getLayoutParams().width = size[0];
                 holder.myImageFrame.getLayoutParams().height = size[1];
@@ -335,9 +321,42 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             } else {
 
                 holder.myImageFrame.setVisibility(View.GONE);
-                holder.myText.setVisibility(View.VISIBLE);
-                holder.myText.setAutoLinkMask(0);
-                holder.myText.setMovementMethod(LinkMovementMethod.getInstance());
+                holder.clTextsMy.setVisibility(View.VISIBLE);
+                holder.myText.setVisibility(View.GONE);
+                holder.tvMyFileName.setVisibility(View.VISIBLE);
+                holder.tvMyFileName.setAutoLinkMask(0);
+                holder.tvMyFileName.setMovementMethod(LinkMovementMethod.getInstance());
+
+                holder.tvMyFileName.setText(file.Name);
+
+                if (file.Size > 0) {
+                    holder.tvMyFileSize.setVisibility(View.VISIBLE);
+                    float sizeKb = file.Size / 1024;
+                    float sizeMb = 0;
+                    if (sizeKb > 1024) {
+                        sizeMb = sizeKb / 1024;
+                    }
+
+                    int strRes;
+                    String fileSize;
+                    if (sizeMb > 0) {
+                        strRes = R.string.file_size_mb_placeholder;
+                        DecimalFormat df = new DecimalFormat("0.00");
+                        fileSize = df.format(sizeMb);
+                    } else {
+                        strRes = R.string.file_size_kb_placeholder;
+                        fileSize = String.valueOf(sizeKb);
+                    }
+
+                    holder.tvMyFileSize.setText(
+                            rootView.getResources().getString(
+                                    strRes,
+                                    fileSize
+                            )
+                    );
+                } else {
+                    holder.tvMyFileSize.setText(null);
+                }
 
                 holder.myText.setText(file.Name);
                 holder.myText.setTextColor(Colors.linkColor());
@@ -347,6 +366,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
         } else {
             holder.myImageFrame.setVisibility(View.GONE);
             holder.myUpload.setVisibility(View.GONE);
+            holder.clTextsMy.setVisibility(View.VISIBLE);
             holder.myText.setVisibility(View.VISIBLE);
             holder.myText.setBackgroundResource(R.drawable.my_msg_bg);
             holder.myText.setAutoLinkMask(Linkify.ALL);
@@ -869,6 +889,9 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
 
         private final FrameLayout myImageFrame;
         private final ImageView myImageSrc;
+        private final ConstraintLayout clTextsMy;
+        private final TextView tvMyFileName;
+        private final TextView tvMyFileSize;
 
         private final LinearLayout myFlags;
         private final TextView myDate;
@@ -930,9 +953,16 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             myUploadError = (TextView) itemView.findViewById(R.id.myUploadError);
             myUploadCancel = (Button) itemView.findViewById(R.id.myUploadCancel);
             myUploadRetry = (Button) itemView.findViewById(R.id.myUploadRetry);
+            clTextsMy = itemView.findViewById(R.id.cl_texts_my);
+            tvMyFileName = (TextView) itemView.findViewById(R.id.tvMyFileName);
+            tvMyFileSize = (TextView) itemView.findViewById(R.id.tvMyFileSize);
+            tvMyFileName.setOnClickListener(view -> adapter.onTextMessageClicked(getAdapterPosition()));
 
             myImageFrame = (FrameLayout) itemView.findViewById(R.id.myImageFrame);
             myImageSrc = (ImageView) itemView.findViewById(R.id.myImageSrc);
+            myImageSrc.setOnClickListener(v -> {
+                adapter.onImageClicked(getAdapterPosition());
+            });
 
             myFlags = (LinearLayout) itemView.findViewById(R.id.myFlags);
             myDate = (TextView) itemView.findViewById(R.id.myDate);

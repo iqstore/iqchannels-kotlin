@@ -1921,6 +1921,14 @@ public class IQChannels {
         }
 
         assert messages != null;
+
+        // Check for duplicates
+        for (ChatMessage msg : messages) {
+            if (msg.Id == message.Id) {
+                return;
+            }
+        }
+
         messages.add(message);
         Log.i(TAG, String.format("Received a new message, messageId=%d", message.Id));
 

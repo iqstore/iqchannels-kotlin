@@ -956,7 +956,14 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             clTextsMy = itemView.findViewById(R.id.cl_texts_my);
             tvMyFileName = (TextView) itemView.findViewById(R.id.tvMyFileName);
             tvMyFileSize = (TextView) itemView.findViewById(R.id.tvMyFileSize);
-            tvMyFileName.setOnClickListener(view -> adapter.onTextMessageClicked(getAdapterPosition()));
+            if (tvMyFileName.getVisibility() == View.VISIBLE) {
+                tvMyFileName.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        adapter.onTextMessageClicked(getAdapterPosition());
+                    }
+                });
+            }
 
             myImageFrame = (FrameLayout) itemView.findViewById(R.id.myImageFrame);
             myImageSrc = (ImageView) itemView.findViewById(R.id.myImageSrc);

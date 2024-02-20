@@ -941,12 +941,6 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
             // My
             my = (LinearLayout) itemView.findViewById(R.id.my);
             myText = (TextView) itemView.findViewById(R.id.myText);
-            myText.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    adapter.onTextMessageClicked(getAdapterPosition());
-                }
-            });
 
             myUpload = (LinearLayout) itemView.findViewById(R.id.myUpload);
             myUploadProgress = (ProgressBar) itemView.findViewById(R.id.myUploadProgress);

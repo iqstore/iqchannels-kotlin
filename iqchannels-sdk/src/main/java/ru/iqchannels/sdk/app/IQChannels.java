@@ -747,6 +747,16 @@ public class IQChannels {
                     }
                 });
             }
+
+            @Override
+            public void onDisconnected() {
+                execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        unreadDisconnected(new Exception("disconnected"));
+                    }
+                });
+            }
         });
         Log.i(TAG, String.format("Listening to unread notifications, attempt=%d", unreadAttempt));
     }
@@ -773,6 +783,27 @@ public class IQChannels {
         Log.e(TAG, String.format(
                 "Failed to listen to unread notifications, will retry in %ds, exc=%s",
                 delaySec, e));
+    }
+
+    private void unreadDisconnected(Exception e) {
+        if (unreadRequest == null) {
+            return;
+        }
+        unreadRequest = null;
+
+        if (auth == null) {
+            Log.i(TAG, String.format("Failed to listen to unread notifications, exc=%s", e));
+            return;
+        }
+
+        assert handler != null;
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                listenToUnread();
+            }
+        }, 1000);
+        Log.e(TAG, String.format("Failed to listen to unread notifications, will retry in 1s, exc=%s", e));
     }
 
     private void unreadReceived(Integer unread) {
@@ -1129,6 +1160,16 @@ public class IQChannels {
                     }
                 });
             }
+
+            @Override
+            public void onDisconnected() {
+                execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        eventsDisconnected(new Exception("disconnected"));
+                    }
+                });
+            }
         });
     }
 
@@ -1153,6 +1194,27 @@ public class IQChannels {
         }, delaySec * 1000);
         Log.e(TAG, String.format("Failed to listen to events, will retry in %d seconds, exc=%s",
                 delaySec, e));
+    }
+
+    private void eventsDisconnected(Exception e) {
+        if (eventsRequest == null) {
+            return;
+        }
+        eventsRequest = null;
+
+        if (auth == null) {
+            Log.i(TAG, String.format("Failed to listen to events, exc=%s", e));
+            return;
+        }
+
+        assert handler != null;
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                listenToEvents();
+            }
+        }, 1000);
+        Log.e(TAG, String.format("Failed to listen to events, will retry in 1 seconds, exc=%s", e));
     }
 
     private void eventsReceived(List<ChatEvent> events) {

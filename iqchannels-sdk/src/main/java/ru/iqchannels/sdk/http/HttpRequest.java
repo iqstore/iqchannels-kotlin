@@ -415,7 +415,6 @@ public class HttpRequest {
                 }
             } finally {
                 if (reader != null) {
-                    //noinspection ThrowFromFinallyBlock
                     reader.close();
                 }
             }
@@ -423,6 +422,7 @@ public class HttpRequest {
         } finally {
             if (conn != null) {
                 conn.disconnect();
+                listener.onDisconnected();
             }
         }
     }

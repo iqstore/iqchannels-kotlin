@@ -348,6 +348,9 @@ public class HttpClient {
             public void onException(Exception e) {
                 listener.onException(e);
             }
+
+            @Override
+            public void onDisconnected() { listener.onDisconnected(); }
         });
     }
 
@@ -373,6 +376,9 @@ public class HttpClient {
             public void onException(Exception e) {
                 listener.onException(e);
             }
+
+            @Override
+            public void onDisconnected() { listener.onDisconnected(); }
         });
     }
 

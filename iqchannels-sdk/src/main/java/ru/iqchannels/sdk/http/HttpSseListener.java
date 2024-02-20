@@ -6,4 +6,6 @@ public interface HttpSseListener<T> {
     void onEvent(T event);
 
     void onException(Exception e);
+
+    void onDisconnected();
 }

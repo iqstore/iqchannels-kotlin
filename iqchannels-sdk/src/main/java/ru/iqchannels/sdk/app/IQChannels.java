@@ -1478,7 +1478,7 @@ public class IQChannels {
         user.Online = true;
         user.Id = 1;
         final ChatMessage message = new ChatMessage(user, localId);
-        message.Text = "1.8.4";
+        message.Text = "1.8.5";
         messages.add(message);
         for (final MessagesListener listener : messageListeners) {
             execute(new Runnable() {

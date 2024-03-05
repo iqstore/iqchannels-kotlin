@@ -1,26 +1,23 @@
-package ru.iqchannels.example;
+package ru.iqchannels.example
 
-import android.util.Log;
+import android.util.Log
+import com.google.firebase.messaging.FirebaseMessagingService
+import com.google.firebase.messaging.RemoteMessage
+import ru.iqchannels.sdk.app.IQChannels
 
-import androidx.annotation.NonNull;
+class IQFirebaseMessagingService : FirebaseMessagingService() {
 
-import com.google.firebase.messaging.FirebaseMessagingService;
-import com.google.firebase.messaging.RemoteMessage;
+	companion object {
+		private const val TAG = "iqchannels"
+	}
 
-import ru.iqchannels.sdk.app.IQChannels;
+	override fun onNewToken(token: String) {
+		Log.d(TAG, "Refreshed token: $token")
+		IQChannels.instance().setPushToken(token)
+	}
 
-public class IQFirebaseMessagingService extends FirebaseMessagingService {
-    private static final String TAG = "iqchannels";
-
-    @Override
-    public void onNewToken(String token) {
-        Log.d(TAG, "Refreshed token: " + token);
-        IQChannels.instance().setPushToken(token);
-    }
-
-    @Override
-    public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
-        Log.d(TAG, "Message received: " + remoteMessage);
-        super.onMessageReceived(remoteMessage);
-    }
+	override fun onMessageReceived(remoteMessage: RemoteMessage) {
+		Log.d(TAG, "Message received: $remoteMessage")
+		super.onMessageReceived(remoteMessage)
+	}
 }

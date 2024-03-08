@@ -435,7 +435,7 @@ class ChatMessagesAdapter extends RecyclerView.Adapter<ChatMessagesAdapter.ViewH
                 holder.otherAvatarText.setVisibility(View.GONE);
                 holder.otherAvatarImage.setVisibility(View.VISIBLE);
 
-                iqchannels.picasso(holder.otherAvatarImage.getContext())
+                iqchannels.picasso()
                         .load(avatarUrl)
                         .placeholder(R.drawable.avatar_placeholder)
                         .into(holder.otherAvatarImage);

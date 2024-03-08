@@ -125,7 +125,7 @@ public class ReplyMessageView extends ConstraintLayout {
             if (imageUrl != null) {
                 tvFileName.setVisibility(View.GONE);
                 imageView.setVisibility(View.VISIBLE);
-                iqchannels.picasso(getContext())
+                iqchannels.picasso()
                         .load(imageUrl)
                         .into(imageView);
             } else {

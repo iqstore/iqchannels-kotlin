@@ -1,85 +1,63 @@
-package ru.iqchannels.sdk.ui;
+package ru.iqchannels.sdk.ui
 
-import android.os.Build;
-import android.util.TypedValue;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.LinearLayout;
+import android.util.TypedValue
+import android.view.View
+import android.view.ViewGroup
+import android.view.ViewGroup.MarginLayoutParams
+import android.widget.Button
+import android.widget.LinearLayout
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.RecyclerView
+import ru.iqchannels.sdk.R
+import ru.iqchannels.sdk.schema.SingleChoice
 
-import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.RecyclerView;
+class ButtonsAdapter internal constructor(
+	private val clickListener: ClickListener
+) : RecyclerView.Adapter<ButtonsAdapter.ButtonsVH>() {
 
-import java.util.List;
+	private var items: List<SingleChoice>? = null
 
-import ru.iqchannels.sdk.R;
-import ru.iqchannels.sdk.schema.SingleChoice;
+	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ButtonsVH {
+		val btn = Button(parent.context)
+		val lp = MarginLayoutParams(
+			LinearLayout.LayoutParams.MATCH_PARENT,
+			LinearLayout.LayoutParams.WRAP_CONTENT
+		)
+		lp.setMargins(0, UiUtils.toPx(5), 0, 0)
+		btn.layoutParams = lp
+		btn.setBackgroundResource(R.drawable.bg_single_choice_btn)
+		btn.setTextColor(ContextCompat.getColor(parent.context, R.color.light_text_color))
+		btn.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+		btn.isAllCaps = false
+		btn.elevation = 0f
+		btn.stateListAnimator = null
 
-public class ButtonsAdapter extends RecyclerView.Adapter<ButtonsAdapter.ButtonsVH> {
+		return ButtonsVH(btn)
+	}
 
-    private List<SingleChoice> items;
+	override fun onBindViewHolder(holder: ButtonsVH, position: Int) {
+		val item = items?.get(position) ?: return
+		holder.bind(item)
+		holder.itemView.setOnClickListener { clickListener.onClick(item) }
+	}
 
-    private final ClickListener clickListener;
+	override fun getItemCount(): Int {
+		return items?.size ?: 0
+	}
 
-    ButtonsAdapter(ClickListener clickListener) {
-        this.clickListener = clickListener;
-    }
+	fun setItems(items: List<SingleChoice>?) {
+		this.items = items
+		notifyDataSetChanged()
+	}
 
-    @NonNull
-    @Override
-    public ButtonsVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Button btn = new Button(parent.getContext());
-        ViewGroup.MarginLayoutParams lp = new ViewGroup.MarginLayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        lp.setMargins(0, UiUtils.toPx(5), 0, 0);
-        btn.setLayoutParams(lp);
-        btn.setBackgroundResource(R.drawable.bg_single_choice_btn);
-        btn.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.light_text_color));
-        btn.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-        btn.setAllCaps(false);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            btn.setElevation(0f);
-            btn.setStateListAnimator(null);
-        }
-        return new ButtonsVH(btn);
-    }
+	class ButtonsVH(itemView: View?) : RecyclerView.ViewHolder(itemView!!) {
+		fun bind(item: SingleChoice) {
+			val btn = itemView as Button
+			btn.text = item.title
+		}
+	}
 
-    @Override
-    public void onBindViewHolder(@NonNull ButtonsVH holder, int position) {
-        SingleChoice item = items.get(position);
-        holder.bind(item);
-        holder.itemView.setOnClickListener(v -> {
-            clickListener.onClick(item);
-        });
-    }
-
-    @Override
-    public int getItemCount() {
-        return items.size();
-    }
-
-    public void setItems(List<SingleChoice> items) {
-        this.items = items;
-        this.notifyDataSetChanged();
-    }
-
-    static class ButtonsVH extends RecyclerView.ViewHolder {
-
-        ButtonsVH(View itemView) {
-            super(itemView);
-        }
-
-        public void bind(SingleChoice item) {
-            Button btn = (Button) itemView;
-            btn.setText(item.title);
-        }
-    }
-
-    interface ClickListener {
-
-        void onClick(SingleChoice item);
-    }
+	internal interface ClickListener {
+		fun onClick(item: SingleChoice?)
+	}
 }

@@ -1,84 +1,63 @@
-package ru.iqchannels.sdk.ui;
+package ru.iqchannels.sdk.ui
 
-import android.os.Build;
-import android.util.TypedValue;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.LinearLayout;
+import android.os.Build
+import android.util.TypedValue
+import android.view.View
+import android.view.ViewGroup
+import android.view.ViewGroup.MarginLayoutParams
+import android.widget.Button
+import android.widget.LinearLayout
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.RecyclerView
+import ru.iqchannels.sdk.R
+import ru.iqchannels.sdk.schema.Action
 
-import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.RecyclerView;
+class ActionsAdapter internal constructor(
+	private val clickListener: ClickListener
+) : RecyclerView.Adapter<ActionsAdapter.ButtonsVH>() {
 
-import java.util.List;
+	private var items: List<Action>? = null
 
-import ru.iqchannels.sdk.R;
-import ru.iqchannels.sdk.schema.Action;
+	override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ButtonsVH {
+		val btn = Button(parent.context)
+		val lp = MarginLayoutParams(
+			LinearLayout.LayoutParams.MATCH_PARENT,
+			LinearLayout.LayoutParams.WRAP_CONTENT
+		)
+		btn.layoutParams = lp
+		btn.setBackgroundResource(R.drawable.bg_action_btn)
+		btn.setTextColor(ContextCompat.getColor(parent.context, R.color.dark_text_color))
+		btn.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+		btn.isAllCaps = false
+		btn.elevation = 0f
+		btn.stateListAnimator = null
 
-public class ActionsAdapter extends RecyclerView.Adapter<ActionsAdapter.ButtonsVH> {
+		return ButtonsVH(btn)
+	}
 
-    private List<Action> items;
+	override fun onBindViewHolder(holder: ButtonsVH, position: Int) {
+		val item = items?.get(position) ?: return
+		holder.bind(item)
+		holder.itemView.setOnClickListener { clickListener.onClick(item) }
+	}
 
-    private final ClickListener clickListener;
+	override fun getItemCount(): Int {
+		return items?.size ?: 0
+	}
 
-    ActionsAdapter(ClickListener clickListener) {
-        this.clickListener = clickListener;
-    }
+	fun setItems(items: List<Action>?) {
+		this.items = items
+		notifyDataSetChanged()
+	}
 
-    @NonNull
-    @Override
-    public ButtonsVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Button btn = new Button(parent.getContext());
-        ViewGroup.MarginLayoutParams lp = new ViewGroup.MarginLayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        btn.setLayoutParams(lp);
-        btn.setBackgroundResource(R.drawable.bg_action_btn);
-        btn.setTextColor(ContextCompat.getColor(parent.getContext(), R.color.dark_text_color));
-        btn.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-        btn.setAllCaps(false);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            btn.setElevation(0f);
-            btn.setStateListAnimator(null);
-        }
-        return new ButtonsVH(btn);
-    }
+	class ButtonsVH(itemView: View?) : RecyclerView.ViewHolder(itemView!!) {
+		fun bind(item: Action) {
+			val btn = itemView as Button
+			btn.text = item.Title
+		}
+	}
 
-    @Override
-    public void onBindViewHolder(@NonNull ButtonsVH holder, int position) {
-        Action item = items.get(position);
-        holder.bind(item);
-        holder.itemView.setOnClickListener(v -> {
-            clickListener.onClick(item);
-        });
-    }
-
-    @Override
-    public int getItemCount() {
-        return items.size();
-    }
-
-    public void setItems(List<Action> items) {
-        this.items = items;
-        this.notifyDataSetChanged();
-    }
-
-    static class ButtonsVH extends RecyclerView.ViewHolder {
-
-        ButtonsVH(View itemView) {
-            super(itemView);
-        }
-
-        public void bind(Action item) {
-            Button btn = (Button) itemView;
-            btn.setText(item.Title);
-        }
-    }
-
-    interface ClickListener {
-
-        void onClick(Action item);
-    }
+	internal interface ClickListener {
+		fun onClick(item: Action?)
+	}
 }

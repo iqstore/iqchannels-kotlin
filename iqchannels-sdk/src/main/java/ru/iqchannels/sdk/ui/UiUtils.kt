@@ -1,15 +1,15 @@
-package ru.iqchannels.sdk.ui;
+package ru.iqchannels.sdk.ui
 
-import android.content.res.Resources;
-import android.util.TypedValue;
+import android.content.res.Resources
+import android.util.TypedValue
+import kotlin.math.roundToInt
 
-public class UiUtils {
+object UiUtils {
 
-    public static int toPx(int dp) {
-        return Math.round(TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_DIP,
-                (float) dp,
-                Resources.getSystem().getDisplayMetrics()
-        ));
-    }
+	fun toPx(dp: Int): Int {
+		return TypedValue.applyDimension(
+			TypedValue.COMPLEX_UNIT_DIP, dp.toFloat(),
+			Resources.getSystem().displayMetrics
+		).roundToInt()
+	}
 }

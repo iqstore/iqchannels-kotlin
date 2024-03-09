@@ -2,1062 +2,971 @@
  * Copyright (c) 2017 iqstore.ru.
  * All rights reserved.
  */
-
-package ru.iqchannels.sdk.ui;
-
-import android.Manifest;
-import android.app.AlertDialog;
-import android.app.DownloadManager;
-import android.content.*;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.*;
-import android.provider.MediaStore;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.KeyEvent;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
-import android.webkit.MimeTypeMap;
-import android.widget.*;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import ru.iqchannels.sdk.Log;
-import ru.iqchannels.sdk.R;
-import ru.iqchannels.sdk.app.*;
-import ru.iqchannels.sdk.lib.InternalIO;
-import ru.iqchannels.sdk.schema.*;
-import ru.iqchannels.sdk.ui.images.ImagePreviewFragment;
-import ru.iqchannels.sdk.ui.rv.SwipeController;
-import ru.iqchannels.sdk.ui.widgets.ReplyMessageView;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-
-import static android.app.Activity.RESULT_OK;
-import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
-import static android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
-
-/**
- * Created by Ivan Korobkov i.korobkov@iqstore.ru on 24/01/2017.
- */
-public class ChatFragment extends Fragment {
-    private static final String TAG = "iqchannels";
-    private static final int SEND_FOCUS_SCROLL_THRESHOLD_PX = 300;
-
-    private static final int REQUEST_CAMERA_OR_GALLERY = 1;
-    private static final int REQUEST_CAMERA_PERMISSION = 2;
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @return A new instance of fragment ChatFragment.
-     */
-    public static ChatFragment newInstance() {
-        ChatFragment fragment = new ChatFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    private final IQChannels iqchannels;
-    @Nullable private Cancellable iqchannelsListenerCancellable;
-
-    // Messages
-    private boolean messagesLoaded;
-    @Nullable private Cancellable messagesRequest;
-    @Nullable private Cancellable moreMessagesRequest;
-
-    // Auth layout
-    private RelativeLayout authLayout;
-
-    // Signup layout
-    private LinearLayout signupLayout;
-    private EditText signupText;
-    private Button signupButton;
-    private TextView signupError;
-
-    // Chat layout
-    private RelativeLayout chatLayout;
-
-    // Message views
-    private ProgressBar progress;
-    private SwipeRefreshLayout refresh;
-    private ChatMessagesAdapter adapter;
-    private RecyclerView recycler;
-
-    // Send views
-    private EditText sendText;
-    private ImageButton attachButton;
-    private ImageButton sendButton;
-
-    private ReplyMessageView clReply;
-
-    // Camera and gallery
-    @Nullable private File cameraTempFile;
-
-    private BroadcastReceiver onDownloadComplete = null;
-
-    private ChatMessage replyingMessage = null;
-
-    public ChatFragment() {
-        iqchannels = IQChannels.instance();
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_chat, container, false);
-
-        // Auth views.
-        authLayout = (RelativeLayout) view.findViewById(R.id.authLayout);
-
-        // Login views.
-        signupLayout = (LinearLayout) view.findViewById(R.id.signupLayout);
-        signupText = (EditText) view.findViewById(R.id.signupName);
-        signupButton = (Button) view.findViewById(R.id.signupButton);
-        clReply = view.findViewById(R.id.reply);
-        signupButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                signup();
-            }
-        });
-        signupError = (TextView) view.findViewById(R.id.signupError);
-
-        // Chat.
-        chatLayout = (RelativeLayout) view.findViewById(R.id.chatLayout);
-
-        // Messages.
-        progress = (ProgressBar) view.findViewById(R.id.messagesProgress);
-
-        refresh = (SwipeRefreshLayout) view.findViewById(R.id.messagesRefresh);
-        refresh.setEnabled(false);
-        refresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                refreshMessages();
-            }
-        });
-
-        adapter = new ChatMessagesAdapter(iqchannels, view, new ItemClickListener());
-
-        recycler = view.findViewById(R.id.messages);
-        recycler.setAdapter(adapter);
-        recycler.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-            @Override
-            public void onLayoutChange(
-                    View v, int left, int top, int right, int bottom,
-                    int oldLeft, int oldTop, int oldRight, int oldBottom) {
-                maybeScrollToBottomOnKeyboardShown(bottom, oldBottom);
-            }
-        });
-
-        SwipeController swipeController = new SwipeController(position -> {
-            ChatMessage chatMessage = adapter.getItem(position);
-            replyingMessage = chatMessage;
-            clReply.showReplyingMessage(chatMessage);
-            clReply.post(this::maybeScrollToBottomOnNewMessage);
-        });
-        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeController);
-        itemTouchHelper.attachToRecyclerView(recycler);
-
-        clReply.setCloseBtnClickListener(v -> {
-            hideReplying();
-        });
-
-        // Send.
-        sendText = (EditText) view.findViewById(R.id.sendText);
-        sendText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                boolean handled = false;
-                if (actionId == EditorInfo.IME_ACTION_SEND) {
-                    sendMessage();
-                    handled = true;
-                }
-                return handled;
-            }
-        });
-
-        sendText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                iqchannels.sendTyping();
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
-
-        attachButton = (ImageButton) view.findViewById(R.id.attachButton);
-        attachButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showAttachChooser();
-            }
-        });
-
-        sendButton = (ImageButton) view.findViewById(R.id.sendButton);
-        sendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                sendMessage();
-            }
-        });
-
-        if (!getActivity().getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-            attachButton.setVisibility(View.GONE);
-        }
-        return view;
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        getChildFragmentManager().setFragmentResultListener(
-            FileActionsChooseFragment.REQUEST_KEY,
-            this,
-            (requestKey, bundle) -> {
-
-                long downloadID = bundle.getLong(FileActionsChooseFragment.KEY_DOWNLOAD_ID);
-                String fileName = bundle.getString(FileActionsChooseFragment.KEY_FILE_NAME);
-
-                handleDownload(downloadID, fileName);
-            }
-        );
-    }
-
-    @Override
-    public void onDestroy() {
-        if (onDownloadComplete != null) {
-            getContext().unregisterReceiver(onDownloadComplete);
-        }
-
-        super.onDestroy();
-    }
-
-    private void updateViews() {
-        authLayout.setVisibility(
-                iqchannels.getAuth() == null && iqchannels.getAuthRequest() != null
-                        ? View.VISIBLE : View.GONE);
-
-        signupLayout.setVisibility(
-                iqchannels.getAuth() == null && iqchannels.getAuthRequest() == null
-                        ? View.VISIBLE : View.GONE);
-        signupButton.setEnabled(iqchannels.getAuthRequest() == null);
-        signupText.setEnabled(iqchannels.getAuthRequest() == null);
-
-        chatLayout.setVisibility(iqchannels.getAuth() != null ? View.VISIBLE : View.GONE);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        iqchannelsListenerCancellable = iqchannels.addListener(new IQChannelsListener() {
-            @Override
-            public void authenticating() {
-                signupError.setText("");
-                updateViews();
-            }
-
-            @Override
-            public void authComplete(ClientAuth auth) {
-                signupError.setText("");
-                loadMessages();
-                updateViews();
-            }
-
-            @Override
-            public void authFailed(Exception e) {
-                signupError.setText(String.format("Ошибка: %s", e.getLocalizedMessage()));
-                updateViews();
-            }
-        });
-
-        if (iqchannels.getAuth() != null) {
-            loadMessages();
-        }
-        updateViews();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (this.iqchannelsListenerCancellable != null) {
-            this.iqchannelsListenerCancellable.cancel();
-            this.iqchannelsListenerCancellable = null;
-        }
-
-        clearMessages();
-        clearMoreMessages();
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-
-        switch (requestCode) {
-            case REQUEST_CAMERA_OR_GALLERY:
-                boolean isCamera = intent == null;
-
-                if (!isCamera) {
-                    String action = intent.getAction();
-                    isCamera = MediaStore.ACTION_IMAGE_CAPTURE.equals(action);
-                }
-
-                if (!isCamera) {
-                    Uri uri = intent.getData();
-                    isCamera = uri == null;
-                }
-
-                if (isCamera) {
-                    onCameraResult(resultCode);
-                } else {
-                    onGalleryResult(resultCode, intent);
-                }
-                break;
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == REQUEST_CAMERA_PERMISSION) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                showAttachChooser(true);
-            } else {
-                showAttachChooser(false);
-            }
-        }
-    }
-
-    // Messages scroll
-
-    private void maybeScrollToBottomOnKeyboardShown(int bottom, int oldBottom) {
-        if (!sendText.hasFocus()) {
-            return;
-        }
-        if (bottom >= oldBottom) {
-            return;
-        }
-
-        int extent = recycler.computeVerticalScrollExtent();
-        int offset = recycler.computeVerticalScrollOffset();
-        int range = recycler.computeVerticalScrollRange();
-        if (range - (oldBottom - bottom) - (extent + offset) > SEND_FOCUS_SCROLL_THRESHOLD_PX) {
-            return;
-        }
-
-        int count = adapter.getItemCount();
-        recycler.smoothScrollToPosition(count == 0 ? 0 : count - 1);
-    }
-
-    private void maybeScrollToBottomOnNewMessage() {
-        int extent = recycler.computeVerticalScrollExtent();
-        int offset = recycler.computeVerticalScrollOffset();
-        int range = recycler.computeVerticalScrollRange();
-        if (range - (extent + offset) > SEND_FOCUS_SCROLL_THRESHOLD_PX) {
-            return;
-        }
-
-        int count = adapter.getItemCount();
-        recycler.smoothScrollToPosition(count == 0 ? 0 : count - 1);
-    }
-
-    // Signup
-
-    private void signup() {
-        String name = signupText.getText().toString();
-        if (name.length() < 3) {
-            signupError.setText("Ошибка: длина имени должна быть не менее 3-х символов.");
-            return;
-        }
-
-        signupError.setText("");
-        iqchannels.signup(name);
-    }
-
-    // Messages
-
-    private void clearMessages() {
-        if (messagesRequest != null) {
-            messagesRequest.cancel();
-        }
-
-        messagesLoaded = false;
-        messagesRequest = null;
-        adapter.clear();
-
-        progress.setVisibility(View.GONE);
-        refresh.setRefreshing(false);
-        refresh.setEnabled(false);
-    }
-
-    private void refreshMessages() {
-        if (!messagesLoaded) {
-            if (messagesRequest != null) {
-                refresh.setRefreshing(false);
-                return;
-            }
-
-            // Load messages.
-            loadMessages();
-            return;
-        }
-
-        loadMoreMessages();
-    }
-
-    private void loadMessages() {
-        if (messagesLoaded) {
-            return;
-        }
-        if (messagesRequest != null) {
-            return;
-        }
-
-        // Show the progress bar only when the refresh control is not active already.
-        disableSend();
-        progress.setVisibility(refresh.isRefreshing() ? View.GONE : View.VISIBLE);
-        messagesRequest = iqchannels.loadMessages(new MessagesListener() {
-            @Override
-            public void messagesLoaded(List<ChatMessage> messages) {
-                ChatFragment.this.messagesLoaded(messages);
-            }
-
-            @Override
-            public void messagesException(Exception e) {
-                ChatFragment.this.messagesException(e);
-            }
-
-            @Override
-            public void messagesCleared() {
-                ChatFragment.this.clearMessages();
-            }
-
-            @Override
-            public void messageReceived(ChatMessage message) {
-                ChatFragment.this.messageReceived(message);
-            }
-
-            @Override
-            public void messageSent(ChatMessage message) {
-                ChatFragment.this.messageSent(message);
-            }
-
-            @Override
-            public void messageUploaded(ChatMessage message) {
-                ChatFragment.this.messageUploaded(message);
-            }
-
-            @Override
-            public void messageUpdated(ChatMessage message) {
-                ChatFragment.this.messageUpdated(message);
-            }
-
-            @Override
-            public void messageCancelled(ChatMessage message) {
-                ChatFragment.this.messageCancelled(message);
-            }
-
-            @Override
-            public void messageDeleted(ChatMessage message) {
-                ChatFragment.this.messageDeleted(message);
-            }
-
-            @Override
-            public void eventTyping(ChatEvent event) {
-                ChatFragment.this.eventTyping(event);
-            }
-        });
-    }
-
-    private void checkDisableFreeText(ChatMessage message) {
-        disableFreeText(message.DisableFreeText != null && message.DisableFreeText);
-    }
-
-    private void disableFreeText(Boolean disable) {
-        sendText.setEnabled(!disable);
-        sendText.setFocusable(!disable);
-        sendText.setFocusableInTouchMode(!disable);
-        attachButton.setClickable(!disable);
-    }
-
-    private void messagesLoaded(List<ChatMessage> messages) {
-        if (messagesRequest == null) {
-            return;
-        }
-        messagesLoaded = true;
-
-        if (!messages.isEmpty()) {
-            ChatMessage lastMsg = messages.get(messages.size() - 1);
-            checkDisableFreeText(lastMsg);
-        }
-
-        enableSend();
-        adapter.loaded(messages);
-        recycler.scrollToPosition(messages.isEmpty() ? 0 : messages.size() - 1);
-
-        progress.setVisibility(View.GONE);
-        refresh.setRefreshing(false);
-        refresh.setEnabled(true);
-    }
-
-    private void messagesException(Exception e) {
-        if (messagesRequest == null) {
-            return;
-        }
-        messagesRequest = null;
-
-        progress.setVisibility(View.GONE);
-        refresh.setRefreshing(false);
-        refresh.setEnabled(true);
-
-        showMessagesErrorAlert(e);
-    }
-
-    private void messageReceived(ChatMessage message) {
-        if (messagesRequest == null) {
-            return;
-        }
-        checkDisableFreeText(message);
-        adapter.received(message);
-        maybeScrollToBottomOnNewMessage();
-    }
-
-    private void messageSent(ChatMessage message) {
-        if (messagesRequest == null) {
-            return;
-        }
-        adapter.sent(message);
-        maybeScrollToBottomOnNewMessage();
-    }
-
-    private void messageUploaded(ChatMessage message) {
-        if (messagesRequest == null) {
-            return;
-        }
-        adapter.updated(message);
-        maybeScrollToBottomOnNewMessage();
-    }
-
-    private void messageCancelled(ChatMessage message) {
-        if (messagesRequest == null) {
-            return;
-        }
-        adapter.cancelled(message);
-    }
-
-    private void messageDeleted(ChatMessage message) {
-        if (messagesRequest == null) {
-            return;
-        }
-        adapter.deleted(message);
-    }
-
-    private void eventTyping(ChatEvent event) {
-        adapter.typing(event);
-        maybeScrollToBottomOnNewMessage();
-    }
-
-    private void messageUpdated(ChatMessage message) {
-        if (messagesRequest == null) {
-            return;
-        }
-        checkDisableFreeText(message);
-        adapter.updated(message);
-    }
-
-    // More messages
-
-    private void clearMoreMessages() {
-        if (moreMessagesRequest != null) {
-            moreMessagesRequest.cancel();
-        }
-
-        moreMessagesRequest = null;
-    }
-
-    private void loadMoreMessages() {
-        if (!messagesLoaded) {
-            refresh.setRefreshing(false);
-            return;
-        }
-        if (moreMessagesRequest != null) {
-            return;
-        }
-
-        moreMessagesRequest = iqchannels.loadMoreMessages(new Callback<List<ChatMessage>>() {
-            @Override
-            public void onResult(List<ChatMessage> result) {
-                moreMessagesLoaded(result);
-            }
-
-            @Override
-            public void onException(Exception e) {
-                moreMessagesException(e);
-            }
-        });
-    }
-
-    private void moreMessagesException(Exception e) {
-        if (moreMessagesRequest == null) {
-            return;
-        }
-        moreMessagesRequest = null;
-        refresh.setRefreshing(false);
-
-        showMessagesErrorAlert(e);
-    }
-
-    private void moreMessagesLoaded(List<ChatMessage> moreMessages) {
-        if (moreMessagesRequest == null) {
-            return;
-        }
-        moreMessagesRequest = null;
-        refresh.setRefreshing(false);
-        adapter.loadedMore(moreMessages);
-    }
-
-    // Attach
-
-    private void showAttachChooser() {
-        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                ActivityCompat.requestPermissions(getActivity(), new String[] {
-                        Manifest.permission.CAMERA,
-                        Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE
-                }, REQUEST_CAMERA_PERMISSION);
-            }  else {
-                ActivityCompat.requestPermissions(getActivity(), new String[] {
-                        Manifest.permission.CAMERA,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE
-                }, REQUEST_CAMERA_PERMISSION);
-            }
-            return;
-        }
-
-        showAttachChooser(true);
-    }
-
-    private void showAttachChooser(boolean withCamera) {
-        // Try to create a camera intent.
-        Intent cameraIntent = null;
-        if (withCamera) {
-            Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            try {
-                if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
-                    File tmpDir = getActivity().getExternalCacheDir();
-
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                        tmpDir = Environment.getExternalStorageDirectory();
-                    }
-
-                    File tmp = File.createTempFile("image", ".jpg", tmpDir);
-                    tmp.deleteOnExit();
-
-                    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(tmp));
-                    intent.addFlags(FLAG_GRANT_READ_URI_PERMISSION);
-                    intent.addFlags(FLAG_GRANT_WRITE_URI_PERMISSION);
-
-                    cameraTempFile = tmp;
-                }
-                cameraIntent = intent;
-            } catch (IOException e) {
-                Log.e(TAG, String.format(
-                        "showAttachChooser: Failed to create a temp file for the camera, e=%s", e));
-            }
-        }
-
-        // Create a gallery intent.
-        Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
-        galleryIntent.setType("image/*");
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            galleryIntent.putExtra(Intent.EXTRA_MIME_TYPES, new String[]{
-                    "audio/*", "video/*", "text/*", "application/*", "file/*"});
-        }
-
-        // Create and start an intent chooser.
-        CharSequence title = getResources().getText(R.string.chat_camera_or_file);
-        Intent chooser = Intent.createChooser(galleryIntent, title);
-        if (cameraIntent != null) {
-            chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, new Parcelable[]{cameraIntent});
-        }
-
-        startActivityForResult(chooser, REQUEST_CAMERA_OR_GALLERY);
-    }
-
-    // Gallery
-
-    private void onGalleryResult(int resultCode, final Intent intent) {
-        if (resultCode != RESULT_OK || intent == null) {
-            Log.i(TAG, String.format(
-                    "onGalleryResult: Did not pick an image, activity result=%d", resultCode));
-            return;
-        }
-
-        Log.i(TAG, "onGalleryResult: Started processing a file from the gallery");
-        new AsyncTask<Void, Void, File>() {
-            @Override
-            protected File doInBackground(Void... params) {
-                try {
-                    final Uri uri = intent.getData();
-
-                    ContentResolver resolver = getActivity().getContentResolver();
-                    MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
-                    String mtype = resolver.getType(uri);
-                    String ext = mimeTypeMap.getExtensionFromMimeType(mtype);
-
-                    final File file = createGalleryTempFile(uri, ext);
-                    InputStream in = resolver.openInputStream(uri);
-                    if (in == null) {
-                        Log.e(TAG, "onGalleryResult: Failed to pick a file, no input stream");
-                        return null;
-                    }
-
-                    try {
-                        FileOutputStream out = new FileOutputStream(file);
-                        try {
-                            InternalIO.copy(in, out);
-                        } finally {
-                            out.close();
-                        }
-                    } finally {
-                        in.close();
-                    }
-                    return file;
-
-                } catch (IOException e) {
-                    Log.e(TAG, String.format("onGalleryResult: Failed to pick a file, e=%s", e));
-                    return null;
-                }
-            }
-
-            @Override
-            protected void onPostExecute(File file) {
-                if (file == null) {
-                    return;
-                }
-
-                showConfirmDialog(file);
-            }
-        }.execute();
-    }
-
-    private void showConfirmDialog(File file) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
-                .setTitle(R.string.chat_send_file_confirmation)
-                .setMessage(file.getName())
-                .setPositiveButton(R.string.ok, (dialogInterface, i) -> {
-                    Long replyToMessageId = null;
-                    if (replyingMessage != null) {
-                        replyToMessageId = replyingMessage.Id;
-                    }
-                    iqchannels.sendFile(file, replyToMessageId);
-                    hideReplying();
-                })
-                .setNegativeButton(R.string.cancel, null);
-
-        builder.show();
-    }
-
-    private void hideReplying() {
-        clReply.setVisibility(View.GONE);
-        replyingMessage = null;
-    }
-
-    private File createGalleryTempFile(Uri uri, String ext) throws IOException {
-        String filename = getGalleryFilename(uri);
-
-        if (filename != null) {
-            int i = filename.lastIndexOf(".");
-            if (i > -1) {
-                ext = filename.substring(i + 1);
-                filename = filename.substring(0, i - 1);
-            }
-        } else {
-            filename = "file";
-            String mimeType = getActivity().getContentResolver().getType(uri);
-            ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType);
-        }
-
-        if (filename.length() < 3) {
-            filename = "file-" + filename;
-        }
-
-        File file = File.createTempFile(filename, "." + ext, getActivity().getCacheDir());
-        file.deleteOnExit();
-        return file;
-    }
-
-    private String getGalleryFilename(Uri uri) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            String path = uri.getPath();
-
-            int i = path.lastIndexOf("/");
-            if (i > -1) {
-                path = path.substring(i+1);
-            }
-            return path;
-        }
-
-        String scheme = uri.getScheme();
-        if (scheme.equals("file")) {
-            return uri.getLastPathSegment();
-        }
-        if (!scheme.equals("content")) {
-            return null;
-        }
-
-        String[] projection = {MediaStore.Video.Media.TITLE};
-        ContentResolver resolver = getActivity().getContentResolver();
-
-        Cursor cursor = resolver.query(uri, projection, null, null, null);
-        if (cursor == null) {
-            return null;
-        }
-
-        try {
-            if (cursor.getCount() == 0) {
-                return null;
-            }
-
-            int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.TITLE);
-            cursor.moveToFirst();
-            return cursor.getString(columnIndex);
-        } finally {
-            cursor.close();
-        }
-    }
-
-    // Camera
-
-    private void onCameraResult(int resultCode) {
-        if (resultCode != RESULT_OK || cameraTempFile == null) {
-            Log.i(TAG, String.format(
-                    "onCameraResult: Did not capture a photo, activity result=%d", resultCode));
-            if (cameraTempFile != null) {
-                cameraTempFile.delete();
-            }
-            return;
-        }
-
-        File file;
-        try {
-            // Create a dst file.
-            File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-            String app = getResources().getString(R.string.app_name);
-            if (!app.isEmpty()) {
-                dir = new File(dir, app);
-                //noinspection ResultOfMethodCallIgnored
-                dir.mkdirs();
-            }
-
-            String timestamp = new SimpleDateFormat("yyyyMMdd_HHmmss_").format(new Date());
-            file = File.createTempFile(timestamp, ".jpg", dir);
-            InternalIO.copy(cameraTempFile, file);
-
-            //noinspection ResultOfMethodCallIgnored
-            cameraTempFile.delete();
-            cameraTempFile = null;
-        } catch (IOException e) {
-            Log.e(TAG, String.format("showCamera: Failed to save a captured file, error=%s", e));
-            return;
-        }
-
-        addCameraPhotoToGallery(file);
-        showConfirmDialog(file);
-    }
-
-    private void addCameraPhotoToGallery(File file) {
-        Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        Uri contentUri = Uri.fromFile(file);
-        scanIntent.setData(contentUri);
-        getActivity().sendBroadcast(scanIntent);
-    }
-
-    // Send
-
-    private void enableSend() {
-        sendText.setEnabled(true);
-        attachButton.setEnabled(true);
-        sendButton.setEnabled(true);
-    }
-
-    private void disableSend() {
-        sendText.setEnabled(false);
-        attachButton.setEnabled(false);
-        sendButton.setEnabled(false);
-    }
-
-    private void sendMessage() {
-        String text = sendText.getText().toString();
-        sendText.setText("");
-        if (Objects.equals(text, "/version_sdk")){
-            iqchannels.handleVersion();
-            return;
-        }
-        Long replyToMessageId = null;
-        if (replyingMessage != null) {
-            replyToMessageId = replyingMessage.Id;
-        }
-        iqchannels.send(text, replyToMessageId);
-        hideReplying();
-    }
-
-    private void sendMessage(String text) {
-        iqchannels.send(text, null);
-        hideReplying();
-    }
-
-    private void sendSingleChoice(SingleChoice singleChoice) {
-        iqchannels.sendPostbackReply(singleChoice.title, singleChoice.value);
-    }
-
-    private void sendAction(Action action) {
-        iqchannels.sendPostbackReply(action.Title, action.Payload);
-    }
-
-    // Error alerts
-
-    private void showMessagesErrorAlert(Exception e) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
-                .setTitle(R.string.chat_failed_to_load_messages)
-                .setNeutralButton(R.string.ok, null);
-
-        if (e != null) {
-            builder.setMessage(e.toString());
-        } else {
-            builder.setMessage(R.string.unknown_exception);
-        }
-        builder.show();
-    }
-
-    private void handleDownload(long downloadID, String fileName) {
-        if (downloadID > 0) {
-            onDownloadComplete = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    String action = intent.getAction();
-                    if (DownloadManager.ACTION_DOWNLOAD_COMPLETE.equals(action)) {
-                        long downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1);
-                        Log.d(TAG, "received: " + downloadId);
-                        if (downloadID != downloadId) return;
-
-                        DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
-                        DownloadManager.Query query = new DownloadManager.Query();
-                        query.setFilterById(downloadId);
-
-                        Cursor cursor = downloadManager.query(query);
-                        if (cursor.moveToFirst()) {
-                            int columnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
-                            int status = cursor.getInt(columnIndex);
-
-                            if (status == DownloadManager.STATUS_SUCCESSFUL) {
-                                // Загрузка завершена успешно
-                                Log.d(TAG, "SUCCESS");
-                                Toast.makeText(context, getString(R.string.file_saved_success_msg, fileName), Toast.LENGTH_LONG).show();
-                            } else if (status == DownloadManager.STATUS_FAILED) {
-                                int columnReason = cursor.getColumnIndex(DownloadManager.COLUMN_REASON);
-                                int reason = cursor.getInt(columnReason);
-                                // Обработка ошибки загрузки
-                                Log.d(TAG, "FAILED");
-                                Toast.makeText(context, getString(R.string.file_saved_fail_msg, fileName), Toast.LENGTH_LONG).show();
-                            }
-                        }
-                        cursor.close();
-                        getContext().unregisterReceiver(this);
-                    }
-                }
-            };
-
-            getContext().registerReceiver(
-                    onDownloadComplete,
-                    new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
-            );
-        }
-    }
-
-    private class ItemClickListener implements ChatMessagesAdapter.ItemClickListener {
-        @Override
-        public void onFileClick(String url, String fileName) {
-            FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
-            fragmentTransaction.add(FileActionsChooseFragment.newInstance(url, fileName), null);
-            fragmentTransaction.commit();
-        }
-
-        @Override
-        public void onImageClick(ChatMessage message) {
-            String senderName;
-            String imageUrl;
-            if (message.My) {
-                senderName = message.Client != null ? message.Client.Name : "";
-            } else {
-                senderName = message.User != null ? message.User.DisplayName : "";
-            }
-            imageUrl = message.File != null ? message.File.imageUrl : "";
-            Date date = message.Date;
-            String msg = message.Text;
-
-            FragmentTransaction transaction = getParentFragmentManager().beginTransaction();
-            ImagePreviewFragment fragment = ImagePreviewFragment.newInstance(
-                senderName, date, imageUrl, msg
-            );
-            transaction.replace(((ViewGroup)getView().getParent()).getId(), fragment);
-            transaction.addToBackStack(null);
-            transaction.commit();
-        }
-
-        @Override
-        public void onButtonClick(ChatMessage message, SingleChoice singleChoice) {
-            sendSingleChoice(singleChoice);
-            disableFreeText(false);
-        }
-
-        @Override
-        public void onActionClick(ChatMessage message, Action action) {
-            if (action.Action == null) return;
-
-            switch (action.Action) {
-                case POSTBACK:
-                    sendAction(action);
-                    break;
-                case OPEN_URL:
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setData(Uri.parse(action.URL));
-                    startActivity(intent);
-                    break;
-                case SAY_SOMETHING:
-                    sendMessage(action.Title);
-                    break;
-            }
-        }
-    }
+package ru.iqchannels.sdk.ui
+
+import android.Manifest
+import android.app.Activity
+import android.app.AlertDialog
+import android.app.DownloadManager
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.DialogInterface
+import android.content.Intent
+import android.content.IntentFilter
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.AsyncTask
+import android.os.Build
+import android.os.Bundle
+import android.os.Environment
+import android.os.Parcelable
+import android.provider.MediaStore
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.webkit.MimeTypeMap
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.ProgressBar
+import android.widget.RelativeLayout
+import android.widget.TextView
+import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import ru.iqchannels.sdk.Log
+import ru.iqchannels.sdk.Log.d
+import ru.iqchannels.sdk.Log.e
+import ru.iqchannels.sdk.Log.i
+import ru.iqchannels.sdk.R
+import ru.iqchannels.sdk.app.Callback
+import ru.iqchannels.sdk.app.Cancellable
+import ru.iqchannels.sdk.app.IQChannels
+import ru.iqchannels.sdk.app.IQChannelsListener
+import ru.iqchannels.sdk.app.MessagesListener
+import ru.iqchannels.sdk.lib.InternalIO.copy
+import ru.iqchannels.sdk.schema.Action
+import ru.iqchannels.sdk.schema.ActionType
+import ru.iqchannels.sdk.schema.ChatEvent
+import ru.iqchannels.sdk.schema.ChatMessage
+import ru.iqchannels.sdk.schema.ClientAuth
+import ru.iqchannels.sdk.schema.SingleChoice
+import ru.iqchannels.sdk.ui.images.ImagePreviewFragment
+import ru.iqchannels.sdk.ui.rv.SwipeController
+import ru.iqchannels.sdk.ui.widgets.ReplyMessageView
+
+class ChatFragment : Fragment() {
+
+	companion object {
+		private const val TAG = "iqchannels"
+		private const val SEND_FOCUS_SCROLL_THRESHOLD_PX = 300
+		private const val REQUEST_CAMERA_OR_GALLERY = 1
+		private const val REQUEST_CAMERA_PERMISSION = 2
+
+		/**
+		 * Use this factory method to create a new instance of
+		 * this fragment using the provided parameters.
+		 *
+		 * @return A new instance of fragment ChatFragment.
+		 */
+		fun newInstance(): ChatFragment {
+			val fragment = ChatFragment()
+			val args = Bundle()
+			fragment.arguments = args
+			return fragment
+		}
+	}
+
+	private var iqchannelsListenerCancellable: Cancellable? = null
+
+	// Messages
+	private var messagesLoaded = false
+	private var messagesRequest: Cancellable? = null
+	private var moreMessagesRequest: Cancellable? = null
+
+	// Auth layout
+	private var authLayout: RelativeLayout? = null
+
+	// Signup layout
+	private var signupLayout: LinearLayout? = null
+	private var signupText: EditText? = null
+	private var signupButton: Button? = null
+	private var signupError: TextView? = null
+
+	// Chat layout
+	private var chatLayout: RelativeLayout? = null
+
+	// Message views
+	private var progress: ProgressBar? = null
+	private var refresh: SwipeRefreshLayout? = null
+	private var adapter: ChatMessagesAdapter? = null
+	private var recycler: RecyclerView? = null
+
+	// Send views
+	private var sendText: EditText? = null
+	private var attachButton: ImageButton? = null
+	private var sendButton: ImageButton? = null
+	private var clReply: ReplyMessageView? = null
+
+	// Camera and gallery
+	private var cameraTempFile: File? = null
+	private var onDownloadComplete: BroadcastReceiver? = null
+	private var replyingMessage: ChatMessage? = null
+
+	override fun onCreateView(
+		inflater: LayoutInflater, container: ViewGroup?,
+		savedInstanceState: Bundle?
+	): View? {
+		val view = inflater.inflate(R.layout.fragment_chat, container, false)
+
+		// Auth views.
+		authLayout = view.findViewById<View>(R.id.authLayout) as RelativeLayout
+
+		// Login views.
+		signupLayout = view.findViewById<View>(R.id.signupLayout) as LinearLayout
+		signupText = view.findViewById<View>(R.id.signupName) as EditText
+		signupButton = view.findViewById<View>(R.id.signupButton) as Button
+		clReply = view.findViewById(R.id.reply)
+		signupButton?.setOnClickListener { signup() }
+		signupError = view.findViewById<View>(R.id.signupError) as TextView
+
+		// Chat.
+		chatLayout = view.findViewById<View>(R.id.chatLayout) as RelativeLayout
+
+		// Messages.
+		progress = view.findViewById<View>(R.id.messagesProgress) as ProgressBar
+		refresh = view.findViewById<View>(R.id.messagesRefresh) as SwipeRefreshLayout
+		refresh!!.isEnabled = false
+		refresh!!.setOnRefreshListener { refreshMessages() }
+		adapter = ChatMessagesAdapter(IQChannels, view, ItemClickListener())
+		recycler = view.findViewById(R.id.messages)
+		recycler?.adapter = adapter
+
+		recycler?.addOnLayoutChangeListener { _, _, _, _, bottom, _, _, _, oldBottom ->
+			maybeScrollToBottomOnKeyboardShown(
+				bottom,
+				oldBottom
+			)
+		}
+
+		val swipeController = SwipeController(object : SwipeController.SwipeListener {
+
+			override fun onSwiped(position: Int) {
+				val chatMessage = adapter?.getItem(position) ?: return
+				replyingMessage = chatMessage
+				clReply?.showReplyingMessage(chatMessage)
+				clReply?.post { maybeScrollToBottomOnNewMessage() }
+			}
+		})
+
+		val itemTouchHelper = ItemTouchHelper(swipeController)
+		itemTouchHelper.attachToRecyclerView(recycler)
+		clReply?.setCloseBtnClickListener { hideReplying() }
+
+		// Send.
+		sendText = view.findViewById(R.id.sendText)
+		sendText?.setOnEditorActionListener { v, actionId, event ->
+			var handled = false
+			if (actionId == EditorInfo.IME_ACTION_SEND) {
+				sendMessage()
+				handled = true
+			}
+			handled
+		}
+
+		sendText?.addTextChangedListener(object : TextWatcher {
+			override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
+				IQChannels.sendTyping()
+			}
+
+			override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+			override fun afterTextChanged(s: Editable) {}
+		})
+
+		attachButton = view.findViewById(R.id.attachButton)
+		attachButton?.setOnClickListener { showAttachChooser() }
+		sendButton = view.findViewById(R.id.sendButton)
+		sendButton?.setOnClickListener { sendMessage() }
+
+		if (!requireActivity().packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
+			attachButton?.visibility = View.GONE
+		}
+
+		return view
+	}
+
+	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+		super.onViewCreated(view, savedInstanceState)
+
+		childFragmentManager.setFragmentResultListener(
+			FileActionsChooseFragment.REQUEST_KEY,
+			this
+		) { _: String?, bundle: Bundle ->
+			val downloadID = bundle.getLong(FileActionsChooseFragment.KEY_DOWNLOAD_ID)
+			val fileName = bundle.getString(FileActionsChooseFragment.KEY_FILE_NAME)
+			handleDownload(downloadID, fileName)
+		}
+	}
+
+	override fun onDestroy() {
+		if (onDownloadComplete != null) {
+			context?.unregisterReceiver(onDownloadComplete)
+		}
+		super.onDestroy()
+	}
+
+	private fun updateViews() {
+		authLayout?.visibility =
+			if (IQChannels.auth == null && IQChannels.authRequest != null) View.VISIBLE else View.GONE
+		signupLayout?.visibility =
+			if (IQChannels.auth == null && IQChannels.authRequest == null) View.VISIBLE else View.GONE
+		signupButton?.isEnabled = IQChannels.authRequest == null
+		signupText?.isEnabled = IQChannels.authRequest == null
+		chatLayout?.visibility = if (IQChannels.auth != null) View.VISIBLE else View.GONE
+	}
+
+	override fun onStart() {
+		super.onStart()
+
+		iqchannelsListenerCancellable = IQChannels.addListener(object : IQChannelsListener {
+			override fun authenticating() {
+				signupError?.text = ""
+				updateViews()
+			}
+
+			override fun authComplete(auth: ClientAuth) {
+				signupError?.text = ""
+				loadMessages()
+				updateViews()
+			}
+
+			override fun authFailed(e: Exception) {
+				signupError?.text = String.format("Ошибка: %s", e.localizedMessage)
+				updateViews()
+			}
+		})
+
+		if (IQChannels.auth != null) {
+			loadMessages()
+		}
+		updateViews()
+	}
+
+	override fun onStop() {
+		super.onStop()
+
+		if (iqchannelsListenerCancellable != null) {
+			iqchannelsListenerCancellable?.cancel()
+			iqchannelsListenerCancellable = null
+		}
+
+		clearMessages()
+		clearMoreMessages()
+	}
+
+	override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
+		super.onActivityResult(requestCode, resultCode, intent)
+		when (requestCode) {
+			REQUEST_CAMERA_OR_GALLERY -> {
+				var isCamera = intent == null
+				if (!isCamera) {
+					val action = intent?.action
+					isCamera = MediaStore.ACTION_IMAGE_CAPTURE == action
+				}
+				if (!isCamera) {
+					val uri = intent?.data
+					isCamera = uri == null
+				}
+				if (isCamera) {
+					onCameraResult(resultCode)
+				} else {
+					onGalleryResult(resultCode, intent)
+				}
+			}
+		}
+	}
+
+	override fun onRequestPermissionsResult(
+		requestCode: Int,
+		permissions: Array<String>,
+		grantResults: IntArray
+	) {
+		super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+		if (requestCode == REQUEST_CAMERA_PERMISSION) {
+			if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+				showAttachChooser(true)
+			} else {
+				showAttachChooser(false)
+			}
+		}
+	}
+
+	// Messages scroll
+	private fun maybeScrollToBottomOnKeyboardShown(bottom: Int, oldBottom: Int) {
+		if (sendText?.hasFocus() != true) {
+			return
+		}
+
+		if (bottom >= oldBottom) {
+			return
+		}
+
+		recycler?.let { recycler ->
+			val extent = recycler.computeVerticalScrollExtent()
+			val offset = recycler.computeVerticalScrollOffset()
+			val range = recycler.computeVerticalScrollRange()
+			if (range - (oldBottom - bottom) - (extent + offset) > SEND_FOCUS_SCROLL_THRESHOLD_PX) {
+				return
+			}
+			val count = adapter!!.itemCount
+			recycler.smoothScrollToPosition(if (count == 0) 0 else count - 1)
+		}
+	}
+
+	private fun maybeScrollToBottomOnNewMessage() {
+		recycler?.let { recycler ->
+			val extent = recycler.computeVerticalScrollExtent()
+			val offset = recycler.computeVerticalScrollOffset()
+			val range = recycler.computeVerticalScrollRange()
+			if (range - (extent + offset) > SEND_FOCUS_SCROLL_THRESHOLD_PX) {
+				return
+			}
+			val count = adapter!!.itemCount
+			recycler.smoothScrollToPosition(if (count == 0) 0 else count - 1)
+		}
+	}
+
+	// Signup
+	private fun signup() {
+		val name = signupText?.text?.toString() ?: return
+		if (name.length < 3) {
+			signupError!!.text = "Ошибка: длина имени должна быть не менее 3-х символов."
+			return
+		}
+
+		signupError?.text = ""
+		IQChannels.signup(name)
+	}
+
+	// Messages
+	private fun clearMessages() {
+		messagesRequest?.cancel()
+		messagesLoaded = false
+		messagesRequest = null
+		adapter?.clear()
+		progress?.visibility = View.GONE
+		refresh?.isRefreshing = false
+		refresh?.isEnabled = false
+	}
+
+	private fun refreshMessages() {
+		if (!messagesLoaded) {
+			if (messagesRequest != null) {
+				refresh?.isRefreshing = false
+				return
+			}
+
+			// Load messages.
+			loadMessages()
+			return
+		}
+		loadMoreMessages()
+	}
+
+	private fun loadMessages() {
+		if (messagesLoaded) {
+			return
+		}
+		if (messagesRequest != null) {
+			return
+		}
+
+		// Show the progress bar only when the refresh control is not active already.
+		disableSend()
+		progress?.visibility = if (refresh?.isRefreshing == true) View.GONE else View.VISIBLE
+
+		messagesRequest = IQChannels.loadMessages(object : MessagesListener {
+			override fun messagesLoaded(messages: List<ChatMessage>) {
+				this@ChatFragment.messagesLoaded(messages)
+			}
+
+			override fun messagesException(e: Exception) {
+				this@ChatFragment.messagesException(e)
+			}
+
+			override fun messagesCleared() {
+				clearMessages()
+			}
+
+			override fun messageReceived(message: ChatMessage) {
+				this@ChatFragment.messageReceived(message)
+			}
+
+			override fun messageSent(message: ChatMessage) {
+				this@ChatFragment.messageSent(message)
+			}
+
+			override fun messageUploaded(message: ChatMessage) {
+				this@ChatFragment.messageUploaded(message)
+			}
+
+			override fun messageUpdated(message: ChatMessage) {
+				this@ChatFragment.messageUpdated(message)
+			}
+
+			override fun messageCancelled(message: ChatMessage) {
+				this@ChatFragment.messageCancelled(message)
+			}
+
+			override fun messageDeleted(message: ChatMessage) {
+				this@ChatFragment.messageDeleted(message)
+			}
+
+			override fun eventTyping(event: ChatEvent) {
+				this@ChatFragment.eventTyping(event)
+			}
+		})
+	}
+
+	private fun checkDisableFreeText(message: ChatMessage) {
+		disableFreeText(message.DisableFreeText == true)
+	}
+
+	private fun disableFreeText(disable: Boolean) {
+		sendText?.isEnabled = !disable
+		sendText?.isFocusable = !disable
+		sendText?.isFocusableInTouchMode = !disable
+		attachButton?.isClickable = !disable
+	}
+
+	private fun messagesLoaded(messages: List<ChatMessage>) {
+		if (messagesRequest == null) {
+			return
+		}
+
+		messagesLoaded = true
+		if (messages.isNotEmpty()) {
+			val lastMsg = messages[messages.size - 1]
+			checkDisableFreeText(lastMsg)
+		}
+		enableSend()
+
+		adapter?.loaded(messages)
+		recycler?.scrollToPosition(if (messages.isEmpty()) 0 else messages.size - 1)
+		progress?.visibility = View.GONE
+		refresh?.isRefreshing = false
+		refresh?.isEnabled = true
+	}
+
+	private fun messagesException(e: Exception) {
+		if (messagesRequest == null) {
+			return
+		}
+
+		messagesRequest = null
+		progress?.visibility = View.GONE
+		refresh?.isRefreshing = false
+		refresh?.isEnabled = true
+		showMessagesErrorAlert(e)
+	}
+
+	private fun messageReceived(message: ChatMessage) {
+		if (messagesRequest == null) {
+			return
+		}
+
+		checkDisableFreeText(message)
+		adapter?.received(message)
+		maybeScrollToBottomOnNewMessage()
+	}
+
+	private fun messageSent(message: ChatMessage) {
+		if (messagesRequest == null) {
+			return
+		}
+
+		adapter?.sent(message)
+		maybeScrollToBottomOnNewMessage()
+	}
+
+	private fun messageUploaded(message: ChatMessage) {
+		if (messagesRequest == null) {
+			return
+		}
+
+		adapter?.updated(message)
+		maybeScrollToBottomOnNewMessage()
+	}
+
+	private fun messageCancelled(message: ChatMessage) {
+		if (messagesRequest == null) {
+			return
+		}
+
+		adapter?.cancelled(message)
+	}
+
+	private fun messageDeleted(message: ChatMessage) {
+		if (messagesRequest == null) {
+			return
+		}
+
+		adapter?.deleted(message)
+	}
+
+	private fun eventTyping(event: ChatEvent) {
+		adapter?.typing(event)
+		maybeScrollToBottomOnNewMessage()
+	}
+
+	private fun messageUpdated(message: ChatMessage) {
+		if (messagesRequest == null) {
+			return
+		}
+
+		checkDisableFreeText(message)
+		adapter?.updated(message)
+	}
+
+	// More messages
+	private fun clearMoreMessages() {
+		moreMessagesRequest?.cancel()
+		moreMessagesRequest = null
+	}
+
+	private fun loadMoreMessages() {
+		if (!messagesLoaded) {
+			refresh?.isRefreshing = false
+			return
+		}
+		if (moreMessagesRequest != null) {
+			return
+		}
+
+		moreMessagesRequest = IQChannels.loadMoreMessages(object : Callback<List<ChatMessage>?> {
+			override fun onResult(result: List<ChatMessage>?) {
+				result?.let { moreMessagesLoaded(it) }
+			}
+
+			override fun onException(e: Exception) {
+				moreMessagesException(e)
+			}
+		})
+	}
+
+	private fun moreMessagesException(e: Exception) {
+		if (moreMessagesRequest == null) {
+			return
+		}
+
+		moreMessagesRequest = null
+		refresh?.isRefreshing = false
+		showMessagesErrorAlert(e)
+	}
+
+	private fun moreMessagesLoaded(moreMessages: List<ChatMessage>) {
+		if (moreMessagesRequest == null) {
+			return
+		}
+
+		moreMessagesRequest = null
+		refresh?.isRefreshing = false
+		adapter?.loadedMore(moreMessages)
+	}
+
+	// Attach
+	private fun showAttachChooser() {
+		if (ContextCompat.checkSelfPermission(
+				requireContext(),
+				Manifest.permission.CAMERA
+			) == PackageManager.PERMISSION_DENIED
+		) {
+			ActivityCompat.requestPermissions(
+				requireActivity(), arrayOf(
+					Manifest.permission.CAMERA,
+					Manifest.permission.READ_EXTERNAL_STORAGE,
+					Manifest.permission.WRITE_EXTERNAL_STORAGE
+				), REQUEST_CAMERA_PERMISSION
+			)
+
+			return
+		}
+
+		showAttachChooser(true)
+	}
+
+	private fun showAttachChooser(withCamera: Boolean) {
+		// Try to create a camera intent.
+		var cameraIntent: Intent? = null
+		if (withCamera) {
+			val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+			try {
+				if (intent.resolveActivity(requireActivity().packageManager) != null) {
+					val tmpDir: File? = Environment.getExternalStorageDirectory()
+					val tmp = File.createTempFile("image", ".jpg", tmpDir)
+					tmp.deleteOnExit()
+					intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(tmp))
+					intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+					intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+					cameraTempFile = tmp
+				}
+				cameraIntent = intent
+			} catch (e: IOException) {
+				Log.e(
+					TAG, String.format(
+						"showAttachChooser: Failed to create a temp file for the camera, e=%s", e
+					)
+				)
+			}
+		}
+
+		// Create a gallery intent.
+		val galleryIntent = Intent(Intent.ACTION_GET_CONTENT)
+		galleryIntent.setType("image/*")
+		galleryIntent.putExtra(
+			Intent.EXTRA_MIME_TYPES, arrayOf(
+				"audio/*", "video/*", "text/*", "application/*", "file/*"
+			)
+		)
+
+		// Create and start an intent chooser.
+		val title = resources.getText(R.string.chat_camera_or_file)
+		val chooser = Intent.createChooser(galleryIntent, title)
+		if (cameraIntent != null) {
+			chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf<Parcelable>(cameraIntent))
+		}
+		startActivityForResult(chooser, REQUEST_CAMERA_OR_GALLERY)
+	}
+
+	// Gallery
+	private fun onGalleryResult(resultCode: Int, intent: Intent?) {
+		if (resultCode != Activity.RESULT_OK || intent == null) {
+			Log.i(
+				TAG, String.format(
+					"onGalleryResult: Did not pick an image, activity result=%d", resultCode
+				)
+			)
+			return
+		}
+		Log.i(TAG, "onGalleryResult: Started processing a file from the gallery")
+
+		lifecycleScope.launch(Dispatchers.IO) {
+			val result = try {
+				val uri = intent.data ?: return@launch
+				val resolver = requireActivity().contentResolver
+				val mimeTypeMap = MimeTypeMap.getSingleton()
+				val mtype = resolver.getType(uri)
+				val ext = mimeTypeMap.getExtensionFromMimeType(mtype)
+				val file = createGalleryTempFile(uri, ext)
+				val `in` = resolver.openInputStream(uri)
+
+				if (`in` == null) {
+					Log.e(TAG, "onGalleryResult: Failed to pick a file, no input stream")
+					null
+				} else {
+					`in`.use { `in` ->
+						val out = FileOutputStream(file)
+						out.use { out ->
+							copy(`in`, out)
+						}
+					}
+					file
+				}
+			} catch (e: IOException) {
+				Log.e(TAG, String.format("onGalleryResult: Failed to pick a file, e=%s", e))
+				null
+			}
+
+			withContext(Dispatchers.Main) {
+				result?.let {
+					showConfirmDialog(it)
+				}
+			}
+		}
+	}
+
+	private fun showConfirmDialog(file: File) {
+		val builder = AlertDialog.Builder(context)
+			.setTitle(R.string.chat_send_file_confirmation)
+			.setMessage(file.name)
+			.setPositiveButton(R.string.ok) { dialogInterface: DialogInterface?, i: Int ->
+				var replyToMessageId: Long? = null
+				if (replyingMessage != null) {
+					replyToMessageId = replyingMessage?.Id
+				}
+				IQChannels.sendFile(file, replyToMessageId)
+				hideReplying()
+			}
+			.setNegativeButton(R.string.cancel, null)
+		builder.show()
+	}
+
+	private fun hideReplying() {
+		clReply?.visibility = View.GONE
+		replyingMessage = null
+	}
+
+	@Throws(IOException::class)
+	private fun createGalleryTempFile(uri: Uri, ext: String?): File {
+		var ext = ext
+		var filename = getGalleryFilename(uri)
+		if (filename != null) {
+			val i = filename.lastIndexOf(".")
+			if (i > -1) {
+				ext = filename.substring(i + 1)
+				filename = filename.substring(0, i - 1)
+			}
+		} else {
+			filename = "file"
+			val mimeType = activity?.contentResolver?.getType(uri)
+			ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType)
+		}
+
+		if (filename.length < 3) {
+			filename = "file-$filename"
+		}
+		val file = File.createTempFile(filename, ".$ext", activity?.cacheDir)
+		file.deleteOnExit()
+		return file
+	}
+
+	private fun getGalleryFilename(uri: Uri): String? {
+		var path = uri.path
+		val i = path?.lastIndexOf("/")
+		if (i != null) {
+			if (i > -1) {
+				path = path?.substring(i + 1)
+			}
+		}
+
+		return path
+	}
+
+	// Camera
+	private fun onCameraResult(resultCode: Int) {
+		if (resultCode != Activity.RESULT_OK || cameraTempFile == null) {
+			Log.i(
+				TAG, String.format(
+					"onCameraResult: Did not capture a photo, activity result=%d", resultCode
+				)
+			)
+
+			cameraTempFile?.delete()
+			return
+		}
+		val file: File
+
+		try {
+			// Create a dst file.
+			var dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
+			val app = resources.getString(R.string.app_name)
+			if (app.isNotEmpty()) {
+				dir = File(dir, app)
+				dir.mkdirs()
+			}
+			val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss_").format(Date())
+			file = File.createTempFile(timestamp, ".jpg", dir)
+			copy(cameraTempFile, file)
+			cameraTempFile?.delete()
+			cameraTempFile = null
+		} catch (e: IOException) {
+			Log.e(TAG, String.format("showCamera: Failed to save a captured file, error=%s", e))
+			return
+		}
+
+		addCameraPhotoToGallery(file)
+		showConfirmDialog(file)
+	}
+
+	private fun addCameraPhotoToGallery(file: File) {
+		val scanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
+		val contentUri = Uri.fromFile(file)
+		scanIntent.setData(contentUri)
+		activity?.sendBroadcast(scanIntent)
+	}
+
+	// Send
+	private fun enableSend() {
+		sendText?.isEnabled = true
+		attachButton?.isEnabled = true
+		sendButton?.isEnabled = true
+	}
+
+	private fun disableSend() {
+		sendText?.isEnabled = false
+		attachButton?.isEnabled = false
+		sendButton?.isEnabled = false
+	}
+
+	private fun sendMessage() {
+		val text = sendText?.text.toString()
+		sendText?.setText("")
+
+		if (text == "/version_sdk") {
+			IQChannels.handleVersion()
+			return
+		}
+
+		var replyToMessageId: Long? = null
+		if (replyingMessage != null) {
+			replyToMessageId = replyingMessage?.Id
+		}
+
+		IQChannels.send(text, replyToMessageId)
+		hideReplying()
+	}
+
+	private fun sendMessage(text: String?) {
+		IQChannels.send(text, null)
+		hideReplying()
+	}
+
+	private fun sendSingleChoice(singleChoice: SingleChoice) {
+		IQChannels.sendPostbackReply(singleChoice.title, singleChoice.value)
+	}
+
+	private fun sendAction(action: Action) {
+		IQChannels.sendPostbackReply(action.Title, action.Payload)
+	}
+
+	// Error alerts
+	private fun showMessagesErrorAlert(e: Exception?) {
+		val builder = AlertDialog.Builder(context)
+			.setTitle(R.string.chat_failed_to_load_messages)
+			.setNeutralButton(R.string.ok, null)
+
+		if (e != null) {
+			builder.setMessage(e.toString())
+		} else {
+			builder.setMessage(R.string.unknown_exception)
+		}
+
+		builder.show()
+	}
+
+	private fun handleDownload(downloadID: Long, fileName: String?) {
+		if (downloadID > 0) {
+			onDownloadComplete = object : BroadcastReceiver() {
+				override fun onReceive(context: Context, intent: Intent) {
+					val action = intent.action
+					if (DownloadManager.ACTION_DOWNLOAD_COMPLETE == action) {
+						val downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
+						Log.d(TAG, "received: $downloadId")
+						if (downloadID != downloadId) return
+						val downloadManager =
+							context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+						val query = DownloadManager.Query()
+						query.setFilterById(downloadId)
+						val cursor = downloadManager.query(query)
+						if (cursor.moveToFirst()) {
+							val columnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
+							val status = cursor.getInt(columnIndex)
+							if (status == DownloadManager.STATUS_SUCCESSFUL) {
+								// Загрузка завершена успешно
+								Log.d(TAG, "SUCCESS")
+								Toast.makeText(
+									context,
+									getString(R.string.file_saved_success_msg, fileName),
+									Toast.LENGTH_LONG
+								).show()
+							} else if (status == DownloadManager.STATUS_FAILED) {
+								val columnReason =
+									cursor.getColumnIndex(DownloadManager.COLUMN_REASON)
+								val reason = cursor.getInt(columnReason)
+								// Обработка ошибки загрузки
+								Log.d(TAG, "FAILED")
+								Toast.makeText(
+									context,
+									getString(R.string.file_saved_fail_msg, fileName),
+									Toast.LENGTH_LONG
+								).show()
+							}
+						}
+						cursor.close()
+						context.unregisterReceiver(this)
+					}
+				}
+			}
+
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+				context?.registerReceiver(
+					onDownloadComplete,
+					IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+					Context.RECEIVER_NOT_EXPORTED
+				)
+			} else {
+				context?.registerReceiver(
+					onDownloadComplete,
+					IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+				)
+			}
+		}
+	}
+
+	private inner class ItemClickListener : ChatMessagesAdapter.ItemClickListener {
+		override fun onFileClick(url: String, fileName: String) {
+			val fragmentTransaction = childFragmentManager.beginTransaction()
+			fragmentTransaction.add(FileActionsChooseFragment.newInstance(url, fileName), null)
+			fragmentTransaction.commit()
+		}
+
+		override fun onImageClick(message: ChatMessage) {
+			val senderName: String? = if (message.My) {
+				if (message.Client != null) message.Client?.Name else ""
+			} else {
+				if (message.User != null) message.User?.DisplayName else ""
+			}
+
+			val imageUrl: String? = if (message.File != null) message.File?.imageUrl else ""
+			val date = message.Date
+			val msg = message.Text
+
+			if (senderName != null && imageUrl != null && date != null && msg != null) {
+				val transaction = parentFragmentManager.beginTransaction()
+				val fragment = ImagePreviewFragment.newInstance(
+					senderName, date, imageUrl, msg
+				)
+
+				transaction.replace((view?.parent as ViewGroup).id, fragment)
+				transaction.addToBackStack(null)
+				transaction.commit()
+			}
+		}
+
+		override fun onButtonClick(message: ChatMessage, singleChoice: SingleChoice) {
+			sendSingleChoice(singleChoice)
+			disableFreeText(false)
+		}
+
+		override fun onActionClick(message: ChatMessage, action: Action) {
+			when (action.Action) {
+				ActionType.POSTBACK -> sendAction(action)
+				ActionType.OPEN_URL -> {
+					val intent = Intent(Intent.ACTION_VIEW)
+					intent.setData(Uri.parse(action.URL))
+					startActivity(intent)
+				}
+
+				ActionType.SAY_SOMETHING -> sendMessage(action.Title)
+				else -> Unit
+			}
+		}
+	}
 }

@@ -2,49 +2,43 @@
  * Copyright (c) 2017 iqstore.ru.
  * All rights reserved.
  */
+package ru.iqchannels.sdk.ui
 
-package ru.iqchannels.sdk.ui;
+internal object Colors {
 
+	private const val BLUE_GREY_400 = -0x876f64
 
-/**
- * Created by Ivan Korobkov i.korobkov@iqstore.ru on 27/01/2017.
- */
-class Colors {
-    private static final int BLUE_GREY_400 = 0xff78909c;
-    private static final int[] COLORS = {
-            0xffef5350, // red-400
-            0xffec407a, // pink-400
-            0xffab47bc, // purple-400
-            0xff7e57c2, // deep-purple-400
-            0xff5c6bc0, // indigo-400
-            0xff42a5f5, // blue-400
-            0xff29b6f6, // light-blue-400
-            0xff26c6da, // cyan-400
-            0xff26a69a, // teal-400
-            0xff66bb6a, // green-400
-            0xff9ccc65, // light-green-400
-            0xffd4e157, // lime-400
-            0xffffca28, // amber-400
-            0xffffa726, // orange-400
-            0xffff7043, // deep-orange-400
-    };
+	private val COLORS = intArrayOf(
+		-0x10acb0,  // red-400
+		-0x13bf86,  // pink-400
+		-0x54b844,  // purple-400
+		-0x81a83e,  // deep-purple-400
+		-0xa39440,  // indigo-400
+		-0xbd5a0b,  // blue-400
+		-0xd6490a,  // light-blue-400
+		-0xd93926,  // cyan-400
+		-0xd95966,  // teal-400
+		-0x994496,  // green-400
+		-0x63339b,  // light-green-400
+		-0x2b1ea9,  // lime-400
+		-0x35d8,  // amber-400
+		-0x58da,  // orange-400
+		-0x8fbd
+	)
 
-    private Colors() {}
+	fun paletteColor(letter: String?): Int {
+		if (letter.isNullOrEmpty()) {
+			return BLUE_GREY_400
+		}
+		val ch = letter[0]
+		return COLORS[ch.code % COLORS.size]
+	}
 
-    static int paletteColor(String letter) {
-        if (letter == null || letter.isEmpty()) {
-            return BLUE_GREY_400;
-        }
+	fun linkColor(): Int {
+		return -0x81a83e
+	}
 
-        char ch = letter.charAt(0);
-        return COLORS[ch % COLORS.length];
-    }
-
-    static int linkColor() {
-        return 0xff7e57c2;
-    }
-
-    static int textColor() {
-        return 0xff4c4c4c;
-    }
+	fun textColor(): Int {
+		return -0xb3b3b4
+	}
 }

@@ -2,428 +2,373 @@
  * Copyright (c) 2017 iqstore.ru.
  * All rights reserved.
  */
+package ru.iqchannels.sdk.http
 
-package ru.iqchannels.sdk.http;
+import android.annotation.SuppressLint
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import java.io.BufferedOutputStream
+import java.io.BufferedReader
+import java.io.ByteArrayOutputStream
+import java.io.FileInputStream
+import java.io.IOException
+import java.io.InputStreamReader
+import java.net.HttpURLConnection
+import java.net.URL
+import java.nio.charset.Charset
+import java.util.*
+import java.util.concurrent.ExecutorService
+import ru.iqchannels.sdk.Log.d
+import ru.iqchannels.sdk.lib.InternalIO
+import ru.iqchannels.sdk.schema.ChatException
+import ru.iqchannels.sdk.schema.Relations
+import ru.iqchannels.sdk.schema.Response
 
-import android.annotation.SuppressLint;
-import android.util.StringBuilderPrinter;
+class HttpRequest {
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+	companion object {
+		private const val CONNECT_TIMEOUT_MILLIS = 15000
+		private const val POST_READ_TIMEOUT_MILLIS = 15000
+		private const val SSE_READ_TIMEOUT_MILLIS = 120000
+		private const val TAG = "iqchannels.http"
+		private val UTF8 = Charset.forName("UTF-8")
+	}
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+	private val url: URL?
+	private val token: String?
+	private val gson: Gson?
+	private val executor: ExecutorService?
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicReference;
+	// Guarded by synchronized.
+	private var closed = false
+	private var conn: HttpURLConnection? = null
 
-import ru.iqchannels.sdk.Log;
-import ru.iqchannels.sdk.lib.InternalIO;
-import ru.iqchannels.sdk.schema.ChatException;
-import ru.iqchannels.sdk.schema.Relations;
-import ru.iqchannels.sdk.schema.Response;
-import ru.iqchannels.sdk.schema.ResponseError;
+	internal constructor() {
+		url = null
+		token = null
+		gson = null
+		executor = null
+		conn = null
+	}
 
-/**
- * Created by Ivan Korobkov i.korobkov@iqstore.ru on 26/01/2017.
- */
+	internal constructor(url: URL?, token: String?, gson: Gson?, executor: ExecutorService?) {
+		this.url = url
+		this.token = token
+		this.gson = gson
+		this.executor = executor
+	}
 
-public class HttpRequest {
-    private static final int CONNECT_TIMEOUT_MILLIS = 15_000;
-    private static final int POST_READ_TIMEOUT_MILLIS = 15_000;
-    private static final int SSE_READ_TIMEOUT_MILLIS = 120_000;
-    private static final String TAG = "iqchannels.http";
-    private static final Charset UTF8 = Charset.forName("UTF-8");
+	fun cancel() {
+		executor?.execute { closeConnection() }
+	}
 
-    private final URL url;
-    private final String token;
-    private final Gson gson;
-    private final ExecutorService executor;
+	@Synchronized
+	private fun closeConnection() {
+		closed = true
+		conn?.disconnect()
+	}
 
-    // Guarded by synchronized.
-    private boolean closed;
-    private HttpURLConnection conn;
+	@Synchronized
+	@Throws(IOException::class)
+	private fun openConnection(): HttpURLConnection? {
+		if (closed) {
+			return null
+		}
+		if (conn != null) {
+			return conn
+		}
+		conn = url?.openConnection() as HttpURLConnection
+		return conn
+	}
 
-    HttpRequest() {
-        url = null;
-        token = null;
-        gson = null;
-        executor = null;
-        conn = null;
-    }
+	@SuppressLint("DefaultLocale")
+	@Throws(IOException::class)
+	fun <T> postJSON(
+		body: Any?,
+		resultType: TypeToken<Response<T>?>?,
+		callback: HttpCallback<Response<T?>?>
+	) {
+		var conn: HttpURLConnection? = null
+		try {
+			conn = openConnection()
+			if (conn == null) {
+				return
+			}
+			conn.requestMethod = "POST"
+			conn.setRequestProperty("Content-Type", "application/json")
+			if (token != null) {
+				conn.setRequestProperty("Authorization", String.format("Client %s", token))
+			}
+			conn.readTimeout = POST_READ_TIMEOUT_MILLIS
+			conn.connectTimeout = CONNECT_TIMEOUT_MILLIS
+			conn.useCaches = false
+			conn.defaultUseCaches = false
+			conn.doInput = true
+			d(TAG, String.format("POST: %s", url))
 
-    HttpRequest(URL url, String token, Gson gson, ExecutorService executor) {
-        this.url = url;
-        this.token = token;
-        this.gson = gson;
-        this.executor = executor;
-    }
+			// Write a body if present.
+			if (body != null) {
+				conn.doOutput = true
+				val json = gson!!.toJson(body)
+				val bytes = json.toByteArray(UTF8)
+				conn.setRequestProperty("Content-Length", String.format("%d", bytes.size))
+				val out = BufferedOutputStream(conn.outputStream)
+				try {
+					out.write(bytes)
+					out.flush()
+				} finally {
+					out.close()
+				}
+			}
 
-    public void cancel() {
-        if (executor == null) {
-            return;
-        }
+			// Get a status code.
+			val status = conn.responseCode
+			val statusText = conn.responseMessage
+			if (status / 100 != 2) {
+				throw HttpException(statusText)
+			}
 
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                closeConnection();
-            }
-        });
-    }
+			// Assert an application/json response.
+			val ctype = conn.contentType
+			if (ctype == null || !ctype.contains("application/json")) {
+				throw HttpException(String.format("Unsupported response content type '%s'", ctype))
+			}
 
-    private synchronized void closeConnection() {
-        closed = true;
-        if (conn != null) {
-            conn.disconnect();
-        }
-    }
+			// Read a response when not void.
+			val result: Response<T?>
+			val clength = conn.contentLength
+			if (resultType == null) {
+				result = Response()
+				result.OK = true
+				result.Result = null
+				result.Rels = Relations()
+			} else {
+				if (clength == 0) {
+					throw HttpException("Empty server response")
+				}
+				val reader = BufferedReader(InputStreamReader(conn.inputStream))
+				try {
+					val builder = StringBuilder()
+					var line: String?
+					while (reader.readLine().also { line = it } != null) {
+						builder.append(line).append('\n')
+					}
+					result = gson!!.fromJson(builder.toString(), resultType.type)
+					// result = gson.fromJson(reader, resultType.getType());
+				} finally {
+					reader.close()
+				}
+			}
+			d(TAG, String.format("POST %d %s %db", status, url, clength))
+			if (result.OK) {
+				callback.onResult(result)
+				return
+			}
+			val error = result.Error
+			if (error == null) {
+				callback.onException(ChatException.unknown())
+				return
+			}
+			callback.onException(ChatException(error.Code, error.Text))
+		} finally {
+			conn?.disconnect()
+		}
+	}
 
-    private synchronized HttpURLConnection openConnection() throws IOException {
-        if (closed) {
-            return null;
-        }
-        if (conn != null) {
-            return conn;
-        }
+	@SuppressLint("DefaultLocale")
+	@Throws(IOException::class)
+	fun <T> multipart(
+		params: Map<String, String>?,
+		files: Map<String, HttpFile>?,
+		resultType: TypeToken<Response<T>?>?,
+		callback: HttpCallback<Response<T?>?>,
+		progressCallback: HttpProgressCallback?
+	) {
+		var conn: HttpURLConnection? = null
+		try {
+			conn = openConnection()
+			if (conn == null) {
+				return
+			}
+			val boundary = generateMultipartBoundary()
+			conn.requestMethod = "POST"
+			conn.setRequestProperty(
+				"Content-Type",
+				String.format("multipart/form-data;boundary=%s", boundary)
+			)
+			if (token != null) {
+				conn.setRequestProperty("Authorization", String.format("Client %s", token))
+			}
+			conn.readTimeout = POST_READ_TIMEOUT_MILLIS
+			conn.connectTimeout = CONNECT_TIMEOUT_MILLIS
+			conn.useCaches = false
+			conn.defaultUseCaches = false
+			conn.doInput = true
+			conn.doOutput = true
 
-        assert url != null;
-        conn = (HttpURLConnection) url.openConnection();
-        return conn;
-    }
+			// Write a multipart body.
+			val body = generateMultipartBody(boundary, params, files).toByteArray()
+			conn.setRequestProperty("Content-Length", String.format("%d", body.size))
+			val out = conn.outputStream
+			try {
+				InternalIO.copy(body, out) { progress -> progressCallback?.onProgress(progress) }
+			} finally {
+				out.close()
+			}
 
-    @SuppressLint("DefaultLocale")
-    <T> void postJSON(@Nullable Object body,
-                      @Nullable TypeToken<Response<T>> resultType,
-                      @NonNull HttpCallback<Response<T>> callback) throws IOException {
-        HttpURLConnection conn = null;
-        try {
-            conn = openConnection();
-            if (conn == null) {
-                return;
-            }
+			// Get a status code.
+			val status = conn.responseCode
+			val statusText = conn.responseMessage
+			if (status / 100 != 2) {
+				val exception = HttpException(statusText)
+				exception.code = status
+				throw exception
+			}
 
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/json");
-            if (token != null) {
-                conn.setRequestProperty("Authorization", String.format("Client %s", token));
-            }
+			// Assert an application/json response.
+			val ctype = conn.contentType
+			if (ctype == null || !ctype.contains("application/json")) {
+				throw HttpException(String.format("Unsupported response content type '%s'", ctype))
+			}
 
-            conn.setReadTimeout(POST_READ_TIMEOUT_MILLIS);
-            conn.setConnectTimeout(CONNECT_TIMEOUT_MILLIS);
-            conn.setUseCaches(false);
-            conn.setDefaultUseCaches(false);
-            conn.setDoInput(true);
-            Log.d(TAG, String.format("POST: %s", url));
+			// Read a response when not void.
+			val result: Response<T?>
+			val clength = conn.contentLength
+			if (resultType == null) {
+				result = Response()
+				result.OK = true
+				result.Result = null
+				result.Rels = Relations()
+			} else {
+				if (clength == 0) {
+					throw HttpException("Empty server response")
+				}
+				val reader = BufferedReader(InputStreamReader(conn.inputStream))
+				result = try {
+					gson!!.fromJson(reader, resultType.type)
+				} finally {
+					reader.close()
+				}
+			}
+			d(TAG, String.format("POST %d %s %db", status, url, clength))
+			if (result.OK) {
+				callback.onResult(result)
+				return
+			}
+			val error = result.Error
+			if (error == null) {
+				callback.onException(ChatException.unknown())
+				return
+			}
+			callback.onException(ChatException(error.Code, error.Text))
+		} finally {
+			conn?.disconnect()
+		}
+	}
 
-            // Write a body if present.
-            if (body != null) {
-                conn.setDoOutput(true);
-                String json = gson.toJson(body);
-                byte[] bytes = json.getBytes(UTF8);
-                conn.setRequestProperty("Content-Length", String.format("%d", bytes.length));
+	private fun generateMultipartBoundary(): String {
+		val uuid = UUID.randomUUID().toString()
+		return String.format("-----------iqchannels-boundary-%s", uuid)
+	}
 
-                BufferedOutputStream out = new BufferedOutputStream(conn.getOutputStream());
-                try {
-                    out.write(bytes);
-                    out.flush();
-                } finally {
-                    out.close();
-                }
-            }
+	@Throws(IOException::class)
+	private fun generateMultipartBody(
+		boundary: String,
+		params: Map<String, String>?,
+		files: Map<String, HttpFile>?
+	): ByteArrayOutputStream {
+		val out = ByteArrayOutputStream()
 
-            // Get a status code.
-            int status = conn.getResponseCode();
-            String statusText = conn.getResponseMessage();
-            if ((status / 100) != 2) {
-                throw new HttpException(statusText);
-            }
+		for (key in params!!.keys) {
+			val value = params[key]
+			out.write(String.format("--%s\r\n", boundary).toByteArray(UTF8))
+			out.write(
+				String.format(
+					"Content-Disposition: form-data; name=\"%s\"\r\n\r\n", key
+				).toByteArray(UTF8)
+			)
+			out.write(value!!.toByteArray(UTF8))
+			out.write("\r\n".toByteArray(UTF8))
+		}
 
-            // Assert an application/json response.
-            String ctype = conn.getContentType();
-            if (ctype == null || !ctype.contains("application/json")) {
-                throw new HttpException(String.format("Unsupported response content type '%s'", ctype));
-            }
+		for (key in files!!.keys) {
+			val httpFile = files[key]
+			out.write(String.format("--%s\r\n", boundary).toByteArray(UTF8))
+			out.write(
+				String.format(
+					"Content-Disposition: form-data; name=\"%s\"; filename=\"%s\"\r\n",
+					key, httpFile!!.file.name
+				).toByteArray(UTF8)
+			)
+			out.write(
+				String.format("Content-Type: %s\r\n\r\n", httpFile.mimeType).toByteArray(UTF8)
+			)
+			val `in` = FileInputStream(httpFile.file)
+			try {
+				InternalIO.copy(`in`, out)
+			} finally {
+				`in`.close()
+			}
+			out.write("\r\n".toByteArray(UTF8))
+		}
+		out.write(String.format("--%s--\r\n", boundary).toByteArray(UTF8))
+		return out
+	}
 
-            // Read a response when not void.
-            final Response<T> result;
-            int clength = conn.getContentLength();
-            if (resultType == null) {
-                result = new Response<>();
-                result.OK = true;
-                result.Result = null;
-                result.Rels = new Relations();
+	@Throws(IOException::class)
+	fun <T> sse(
+		eventType: TypeToken<Response<T>?>,
+		listener: HttpSseListener<Response<T>?>
+	) {
+		var conn: HttpURLConnection? = null
+		try {
+			conn = openConnection()
+			if (conn == null) {
+				return
+			}
+			conn.requestMethod = "GET"
+			if (token != null) {
+				conn.setRequestProperty("Authorization", String.format("Client %s", token))
+			}
+			conn.readTimeout = SSE_READ_TIMEOUT_MILLIS
+			conn.connectTimeout = CONNECT_TIMEOUT_MILLIS
+			conn.useCaches = false
+			conn.defaultUseCaches = false
+			d(TAG, String.format("SSE %s", url))
 
-            } else {
-                if (clength == 0) {
-                    throw new HttpException("Empty server response");
-                }
+			// Get a status code.
+			val status = conn.responseCode
+			val statusText = conn.responseMessage
+			if (status / 100 != 2) {
+				throw HttpException(statusText)
+			}
 
-                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                try {
-                    StringBuilder builder = new StringBuilder();
-                    String line;
-                    while((line = reader.readLine()) != null) {
-                        builder.append(line).append('\n');
-                    }
+			// Assert a text/event-stream response.
+			val ctype = conn.contentType
+			if (ctype == null || ctype != "text/event-stream") {
+				throw HttpException(String.format("Unsupported response content type '%s'", ctype))
+			}
 
-                    result = gson.fromJson(builder.toString(), resultType.getType());
-                    // result = gson.fromJson(reader, resultType.getType());
-                } finally {
-                    reader.close();
-                }
-            }
-            Log.d(TAG, String.format("POST %d %s %db", status, url, clength));
-
-            if (result.OK) {
-                callback.onResult(result);
-                return;
-            }
-
-            ResponseError error = result.Error;
-            if (error == null) {
-                callback.onException(ChatException.unknown());
-                return;
-            }
-
-            callback.onException(new ChatException(error.Code, error.Text));
-
-        } finally {
-            if (conn != null) {
-                conn.disconnect();
-            }
-        }
-    }
-
-    @SuppressLint("DefaultLocale")
-    <T> void multipart(
-            @Nullable Map<String, String> params,
-            @Nullable Map<String, HttpFile> files,
-            @Nullable TypeToken<Response<T>> resultType,
-            @NonNull HttpCallback<Response<T>> callback,
-            @Nullable final HttpProgressCallback progressCallback) throws IOException {
-        HttpURLConnection conn = null;
-        try {
-            conn = openConnection();
-            if (conn == null) {
-                return;
-            }
-
-            String boundary = generateMultipartBoundary();
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type",
-                    String.format("multipart/form-data;boundary=%s", boundary));
-            if (token != null) {
-                conn.setRequestProperty("Authorization", String.format("Client %s", token));
-            }
-
-            conn.setReadTimeout(POST_READ_TIMEOUT_MILLIS);
-            conn.setConnectTimeout(CONNECT_TIMEOUT_MILLIS);
-            conn.setUseCaches(false);
-            conn.setDefaultUseCaches(false);
-            conn.setDoInput(true);
-            conn.setDoOutput(true);
-
-            // Write a multipart body.
-            byte[] body = generateMultipartBody(boundary, params, files).toByteArray();
-            conn.setRequestProperty("Content-Length", String.format("%d", body.length));
-
-            OutputStream out = conn.getOutputStream();
-            try {
-                InternalIO.copy(body, out, new InternalIO.ProgressCallback() {
-                    @Override
-                    public void onProgress(int progress) {
-                        if (progressCallback != null) {
-                            progressCallback.onProgress(progress);
-                        }
-                    }
-                });
-            } finally {
-                out.close();
-            }
-
-            // Get a status code.
-            int status = conn.getResponseCode();
-            String statusText = conn.getResponseMessage();
-
-            if ((status / 100) != 2) {
-                HttpException exception = new HttpException(statusText);
-                exception.code = status;
-
-                throw exception;
-            }
-
-            // Assert an application/json response.
-            String ctype = conn.getContentType();
-            if (ctype == null || !ctype.contains("application/json")) {
-                throw new HttpException(String.format("Unsupported response content type '%s'", ctype));
-            }
-
-            // Read a response when not void.
-            final Response<T> result;
-            int clength = conn.getContentLength();
-            if (resultType == null) {
-                result = new Response<>();
-                result.OK = true;
-                result.Result = null;
-                result.Rels = new Relations();
-
-            } else {
-                if (clength == 0) {
-                    throw new HttpException("Empty server response");
-                }
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                try {
-                    result = gson.fromJson(reader, resultType.getType());
-                } finally {
-                    reader.close();
-                }
-            }
-            Log.d(TAG, String.format("POST %d %s %db", status, url, clength));
-
-            if (result.OK) {
-                callback.onResult(result);
-                return;
-            }
-
-            ResponseError error = result.Error;
-            if (error == null) {
-                callback.onException(ChatException.unknown());
-                return;
-            }
-
-            callback.onException(new ChatException(error.Code, error.Text));
-
-        } finally {
-            if (conn != null) {
-                conn.disconnect();
-            }
-        }
-    }
-
-    private String generateMultipartBoundary() {
-        String uuid = UUID.randomUUID().toString();
-        return String.format("-----------iqchannels-boundary-%s", uuid);
-    }
-
-    private ByteArrayOutputStream generateMultipartBody(
-            String boundary,
-            Map<String, String> params,
-            Map<String, HttpFile> files) throws IOException {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-
-        for (String key : params.keySet()) {
-            String value = params.get(key);
-            out.write(String.format("--%s\r\n", boundary).getBytes(UTF8));
-            out.write(String.format(
-                    "Content-Disposition: form-data; name=\"%s\"\r\n\r\n", key)
-                    .getBytes(UTF8));
-            out.write(value.getBytes(UTF8));
-            out.write("\r\n".getBytes(UTF8));
-        }
-
-        for (String key : files.keySet()) {
-            HttpFile httpFile = files.get(key);
-            out.write(String.format("--%s\r\n", boundary).getBytes(UTF8));
-            out.write(String.format(
-                    "Content-Disposition: form-data; name=\"%s\"; filename=\"%s\"\r\n",
-                    key, httpFile.file.getName())
-                    .getBytes(UTF8));
-            out.write(String.format("Content-Type: %s\r\n\r\n", httpFile.mimeType).getBytes(UTF8));
-
-            FileInputStream in = new FileInputStream(httpFile.file);
-            try {
-                InternalIO.copy(in, out);
-            } finally {
-                in.close();
-            }
-
-            out.write("\r\n".getBytes(UTF8));
-        }
-
-        out.write(String.format("--%s--\r\n", boundary).getBytes(UTF8));
-        return out;
-    }
-
-    <T> void sse(@NonNull TypeToken<Response<T>> eventType,
-                 @NonNull HttpSseListener<Response<T>> listener) throws IOException {
-        HttpURLConnection conn = null;
-        try {
-            conn = openConnection();
-            if (conn == null) {
-                return;
-            }
-
-            conn.setRequestMethod("GET");
-            if (token != null) {
-                conn.setRequestProperty("Authorization", String.format("Client %s", token));
-            }
-            conn.setReadTimeout(SSE_READ_TIMEOUT_MILLIS);
-            conn.setConnectTimeout(CONNECT_TIMEOUT_MILLIS);
-            conn.setUseCaches(false);
-            conn.setDefaultUseCaches(false);
-            Log.d(TAG, String.format("SSE %s", url));
-
-            // Get a status code.
-            int status = conn.getResponseCode();
-            String statusText = conn.getResponseMessage();
-            if ((status / 100) != 2) {
-                throw new HttpException(statusText);
-            }
-
-            // Assert a text/event-stream response.
-            String ctype = conn.getContentType();
-            if (ctype == null || !ctype.equals("text/event-stream")) {
-                throw new HttpException(String.format("Unsupported response content type '%s'", ctype));
-            }
-
-            // Read an event stream.
-            Log.d(TAG, String.format("SSE connected to %s", url));
-            listener.onConnected();
-
-            HttpSseReader reader = null;
-            try {
-                reader = new HttpSseReader(new BufferedReader(new InputStreamReader(conn.getInputStream())));
-                while (true) {
-                    HttpSseEvent sseEvent = reader.readEvent();
-                    if (sseEvent == null) {
-                        break;
-                    }
-
-                    assert gson != null;
-                    Response<T> event = gson.fromJson(sseEvent.data, eventType.getType());
-                    listener.onEvent(event);
-                }
-            } finally {
-                if (reader != null) {
-                    reader.close();
-                }
-            }
-
-        } finally {
-            if (conn != null) {
-                conn.disconnect();
-                listener.onDisconnected();
-            }
-        }
-    }
+			// Read an event stream.
+			d(TAG, String.format("SSE connected to %s", url))
+			listener.onConnected()
+			var reader: HttpSseReader? = null
+			try {
+				reader = HttpSseReader(BufferedReader(InputStreamReader(conn.inputStream)))
+				while (true) {
+					val sseEvent = reader.readEvent() ?: break
+					assert(gson != null)
+					val event = gson!!.fromJson<Response<T>>(sseEvent.data, eventType.type)
+					listener.onEvent(event)
+				}
+			} finally {
+				reader?.close()
+			}
+		} finally {
+			if (conn != null) {
+				conn.disconnect()
+				listener.onDisconnected()
+			}
+		}
+	}
 }

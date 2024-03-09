@@ -1,17 +1,13 @@
-package ru.iqchannels.sdk.http;
+package ru.iqchannels.sdk.http
 
+internal class HttpSseEvent(id: String?, name: String?, data: String?) {
+	val id: String
+	val name: String
+	val data: String
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-
-class HttpSseEvent {
-    @NonNull public final String id;
-    @NonNull public final String name;
-    @NonNull public final String data;
-
-    HttpSseEvent(@Nullable String id, @Nullable String name, @Nullable String data) {
-        this.id = id != null ? id : "";
-        this.name = name != null ? name : "";
-        this.data = data != null ? data : "";
-    }
+	init {
+		this.id = id ?: ""
+		this.name = name ?: ""
+		this.data = data ?: ""
+	}
 }

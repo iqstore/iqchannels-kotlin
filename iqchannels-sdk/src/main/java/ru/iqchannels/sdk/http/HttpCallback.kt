@@ -5,6 +5,6 @@
 package ru.iqchannels.sdk.http
 
 interface HttpCallback<T> {
-	fun onResult(result: T)
+	fun onResult(result: T?)
 	fun onException(exception: Exception)
 }

@@ -1,20 +1,9 @@
-package ru.iqchannels.sdk.http;
+package ru.iqchannels.sdk.http
 
-/**
- * Copyright Bigdev.ru. All Rights Reserved.
- */
-public class HttpException extends RuntimeException {
-    public HttpException() {
-        super();
-    }
+class HttpException : RuntimeException {
+	constructor() : super()
+	constructor(message: String?) : super(message)
+	constructor(message: String?, throwable: Throwable?) : super(message, throwable)
 
-    public HttpException(String message) {
-        super(message);
-    }
-
-    public HttpException(String message, Throwable throwable) {
-        super(message, throwable);
-    }
-
-    public int code = -1;
+	var code = -1
 }

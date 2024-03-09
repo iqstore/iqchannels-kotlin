@@ -215,8 +215,10 @@ object IQChannels {
 		}
 
 		val callback: HttpCallback<ClientAuth> = object : HttpCallback<ClientAuth> {
-			override fun onResult(result: ClientAuth) {
-				execute { authComplete(result) }
+			override fun onResult(result: ClientAuth?) {
+				result?.let {
+					execute { authComplete(result) }
+				}
 			}
 
 			override fun onException(exception: Exception) {
@@ -323,8 +325,10 @@ object IQChannels {
 		}
 
 		val callback: HttpCallback<ClientAuth> = object : HttpCallback<ClientAuth> {
-			override fun onResult(result: ClientAuth) {
-				execute { authComplete(result) }
+			override fun onResult(result: ClientAuth?) {
+				result?.let {
+					execute { authComplete(result) }
+				}
 			}
 
 			override fun onException(exception: Exception) {
@@ -393,8 +397,10 @@ object IQChannels {
 			val name = signupName
 			config.channel?.let { channel ->
 				authRequest = client!!.clientsSignup(name, channel, object : HttpCallback<ClientAuth> {
-					override fun onResult(result: ClientAuth) {
-						execute { signupComplete(result) }
+					override fun onResult(result: ClientAuth?) {
+						result?.let {
+							execute { signupComplete(result) }
+						}
 					}
 
 					override fun onException(exception: Exception) {
@@ -489,18 +495,20 @@ object IQChannels {
 		
 		client?.let { client ->
 			config?.channel?.let { channel ->
-				pushTokenAttempt++
-				pushTokenRequest =
-					client.pushChannelFCM(channel, pushToken!!, object : HttpCallback<Void> {
-						override fun onResult(result: Void) {
-							execute { onSentPushToken() }
-						}
+				pushToken?.let { pushToken ->
+					pushTokenAttempt++
+					pushTokenRequest =
+						client.pushChannelFCM(channel, pushToken, object : HttpCallback<Void> {
+							override fun onResult(result: Void?) {
+								execute { onSentPushToken() }
+							}
 
-						override fun onException(e: Exception) {
-							execute { onFailedToSendPushToken(e) }
-						}
-					})
-				Log.i(TAG, String.format("Sending a push token, attempt=%d", pushTokenAttempt))
+							override fun onException(e: Exception) {
+								execute { onFailedToSendPushToken(e) }
+							}
+						})
+					Log.i(TAG, String.format("Sending a push token, attempt=%d", pushTokenAttempt))
+				}
 			}
 		}
 	}
@@ -707,8 +715,10 @@ object IQChannels {
 					channel,
 					query,
 					object : HttpCallback<List<ChatMessage>> {
-						override fun onResult(messages: List<ChatMessage>) {
-							execute { messagesLoaded(messages) }
+						override fun onResult(messages: List<ChatMessage>?) {
+							messages?.let {
+								execute { messagesLoaded(messages) }
+							}
 						}
 
 						override fun onException(exception: Exception) {
@@ -802,8 +812,10 @@ object IQChannels {
 						channel,
 						query,
 						object : HttpCallback<List<ChatMessage>> {
-							override fun onResult(messages: List<ChatMessage>) {
-								execute { moreMessagesLoaded(messages) }
+							override fun onResult(messages: List<ChatMessage>?) {
+								messages?.let {
+									execute { moreMessagesLoaded(messages) }
+								}
 							}
 
 							override fun onException(exception: Exception) {
@@ -987,7 +999,7 @@ object IQChannels {
 		receivedQueue.clear()
 		receiveAttempt++
 		receivedRequest = client?.chatsMessagesReceived(messageIds, object : HttpCallback<Void> {
-			override fun onResult(result: Void) {
+			override fun onResult(result: Void?) {
 				execute { sentReceivedMessageIds(messageIds) }
 			}
 
@@ -1067,7 +1079,7 @@ object IQChannels {
 		readAttempt++
 
 		readRequest = client?.chatsMessagesRead(messageIds, object : HttpCallback<Void> {
-			override fun onResult(result: Void) {
+			override fun onResult(result: Void?) {
 				execute { sentReadMessageIds(messageIds) }
 			}
 
@@ -1231,7 +1243,7 @@ object IQChannels {
 		message.UploadExc = null
 		message.UploadRequest =
 			client?.filesUpload(file, mimetype, object : HttpCallback<UploadedFile> {
-				override fun onResult(uploadedFile: UploadedFile) {
+				override fun onResult(uploadedFile: UploadedFile?) {
 					execute(Runnable {
 						if (message.UploadRequest == null) {
 							return@Runnable
@@ -1243,10 +1255,10 @@ object IQChannels {
 						message.File = uploadedFile
 						Log.i(
 							TAG,
-							String.format("sendFile: Uploaded a file, fileId=%s", uploadedFile.Id)
+							String.format("sendFile: Uploaded a file, fileId=%s", uploadedFile?.Id)
 						)
 						val form =
-							ChatMessageForm.file(localId, uploadedFile.Id, message.ReplyToMessageId)
+							ChatMessageForm.file(localId, uploadedFile?.Id, message.ReplyToMessageId)
 						sendQueue.add(form)
 						Log.i(TAG, String.format("Enqueued an outgoing message, localId=%d", localId))
 						send()
@@ -1343,7 +1355,7 @@ object IQChannels {
 		config?.channel?.let { channel ->
 			sendRequest =
 				client?.chatsChannelSend(channel, form, object : HttpCallback<Void> {
-					override fun onResult(result: Void) {
+					override fun onResult(result: Void?) {
 						execute { sent(form) }
 					}
 
@@ -1407,7 +1419,7 @@ object IQChannels {
 		}
 
 		client?.ratingsRate(ratingId, value, object : HttpCallback<Void> {
-			override fun onResult(result: Void) {}
+			override fun onResult(result: Void?) {}
 			override fun onException(exception: Exception) {}
 		})
 
@@ -1425,8 +1437,8 @@ object IQChannels {
 
 		config?.channel?.let { channel ->
 			sendTypingRequest =
-				client!!.chatsChannelTyping(channel, object : HttpCallback<Void> {
-					override fun onResult(result: Void) {
+				client?.chatsChannelTyping(channel, object : HttpCallback<Void> {
+					override fun onResult(result: Void?) {
 						Log.d("sendTypingRequest", "successfully sent self 'Typing...'")
 					}
 

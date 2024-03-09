@@ -1,26 +1,23 @@
-package ru.iqchannels.sdk.download;
+package ru.iqchannels.sdk.download
 
-import android.app.DownloadManager;
-import android.content.Context;
-import android.net.Uri;
-import android.os.Environment;
-import ru.iqchannels.sdk.R;
+import android.app.DownloadManager
+import android.content.Context
+import android.net.Uri
+import android.os.Environment
+import ru.iqchannels.sdk.R
 
-public class FileDownloader {
+object FileDownloader {
 
-    public static Long downloadFile(Context context, String fileUrl, String fileName) {
-        DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+	fun downloadFile(context: Context, fileUrl: String?, fileName: String?): Long {
+		val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+		val uri = Uri.parse(fileUrl)
+		val request = DownloadManager.Request(uri)
+		request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
+			.setAllowedOverRoaming(false)
+			.setTitle(fileName)
+			.setDescription(context.getString(R.string.downloading))
+			.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
 
-        Uri uri = Uri.parse(fileUrl);
-
-        DownloadManager.Request request = new DownloadManager.Request(uri);
-        request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE)
-                .setAllowedOverRoaming(false)
-                .setTitle(fileName)
-                .setDescription(context.getString(R.string.downloading))
-                .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
-
-        return downloadManager.enqueue(request);
-    }
+		return downloadManager.enqueue(request)
+	}
 }
-

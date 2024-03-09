@@ -2,36 +2,20 @@
  * Copyright (c) 2017 iqstore.ru.
  * All rights reserved.
  */
+package ru.iqchannels.sdk.app
 
-package ru.iqchannels.sdk.app;
+import ru.iqchannels.sdk.schema.ChatEvent
+import ru.iqchannels.sdk.schema.ChatMessage
 
-import java.util.List;
-
-import ru.iqchannels.sdk.schema.ChatEvent;
-import ru.iqchannels.sdk.schema.ChatMessage;
-
-/**
- * Created by Ivan Korobkov i.korobkov@iqstore.ru on 26/01/2017.
- */
-
-public interface MessagesListener {
-    void messagesLoaded(List<ChatMessage> messages);
-
-    void messagesException(Exception e);
-
-    void messagesCleared();
-
-    void messageReceived(ChatMessage message);
-
-    void messageSent(ChatMessage message);
-
-    void messageUploaded(ChatMessage message);
-
-    void messageUpdated(ChatMessage message);
-
-    void eventTyping(ChatEvent event);
-
-    void messageCancelled(ChatMessage message);
-
-    void messageDeleted(ChatMessage message);
+interface MessagesListener {
+	fun messagesLoaded(messages: List<ChatMessage>)
+	fun messagesException(e: Exception)
+	fun messagesCleared()
+	fun messageReceived(message: ChatMessage)
+	fun messageSent(message: ChatMessage)
+	fun messageUploaded(message: ChatMessage)
+	fun messageUpdated(message: ChatMessage)
+	fun eventTyping(event: ChatEvent)
+	fun messageCancelled(message: ChatMessage)
+	fun messageDeleted(message: ChatMessage)
 }

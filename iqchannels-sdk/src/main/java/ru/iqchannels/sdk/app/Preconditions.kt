@@ -2,20 +2,17 @@
  * Copyright (c) 2017 iqstore.ru.
  * All rights reserved.
  */
+package ru.iqchannels.sdk.app
 
-package ru.iqchannels.sdk.app;
+object Preconditions {
+	fun <T> checkNotNull(v: T): T {
+		return checkNotNull<T>(v, "null value")
+	}
 
-public class Preconditions {
-    private Preconditions() {}
-
-    public static <T> T checkNotNull(T v) {
-        return checkNotNull(v, "null value");
-    }
-
-    public static <T> T checkNotNull(T v, String message) {
-        if (v == null) {
-            throw new NullPointerException(message != null ? message : "null value");
-        }
-        return v;
-    }
+	fun <T> checkNotNull(v: T?, message: String?): T {
+		if (v == null) {
+			throw NullPointerException(message ?: "null value")
+		}
+		return v
+	}
 }

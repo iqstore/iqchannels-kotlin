@@ -37,6 +37,7 @@ dependencies {
     implementation("androidx.fragment:fragment:1.3.6")
     implementation("androidx.legacy:legacy-support-v4:1.0.0")
     implementation("androidx.annotation:annotation:1.1.0")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.4.0")
 
     implementation("com.google.code.gson:gson:2.8.5")
     implementation("com.squareup.picasso:picasso:2.8")

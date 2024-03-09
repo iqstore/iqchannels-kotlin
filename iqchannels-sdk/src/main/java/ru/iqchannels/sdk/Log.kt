@@ -20,4 +20,9 @@ object Log {
 	fun e(tag: String, message: String) {
 		if (LOGGING) android.util.Log.e(tag, message)
 	}
+
+	@JvmStatic
+	fun e(tag: String, message: String?, throwable: Throwable?) {
+		if (LOGGING) android.util.Log.e(tag, message, throwable)
+	}
 }

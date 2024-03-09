@@ -1,81 +1,75 @@
-package ru.iqchannels.sdk.ui.rv;
+package ru.iqchannels.sdk.ui.rv
 
-import static androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_IDLE;
-import static androidx.recyclerview.widget.ItemTouchHelper.ACTION_STATE_SWIPE;
-import static androidx.recyclerview.widget.ItemTouchHelper.LEFT;
-import static androidx.recyclerview.widget.ItemTouchHelper.RIGHT;
+import android.annotation.SuppressLint
+import android.content.res.Resources
+import android.graphics.Canvas
+import android.util.TypedValue
+import android.view.MotionEvent
+import android.view.View
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
 
-import android.annotation.SuppressLint;
-import android.content.res.Resources;
-import android.graphics.Canvas;
-import android.util.TypedValue;
-import android.view.MotionEvent;
+class SwipeController(private val swipeListener: SwipeListener) : ItemTouchHelper.Callback() {
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.RecyclerView;
+	private var swipeBack = false
 
+	override fun getMovementFlags(
+		recyclerView: RecyclerView,
+		viewHolder: RecyclerView.ViewHolder
+	): Int {
+		return makeMovementFlags(ItemTouchHelper.ACTION_STATE_IDLE, ItemTouchHelper.RIGHT)
+	}
 
-public class SwipeController extends ItemTouchHelper.Callback {
+	override fun onMove(
+		recyclerView: RecyclerView,
+		viewHolder: RecyclerView.ViewHolder,
+		target: RecyclerView.ViewHolder
+	): Boolean {
+		return false
+	}
 
-    private boolean swipeBack = false;
+	override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {}
+	override fun convertToAbsoluteDirection(flags: Int, layoutDirection: Int): Int {
+		if (swipeBack) {
+			swipeBack = false
+			return 0
+		}
+		return super.convertToAbsoluteDirection(flags, layoutDirection)
+	}
 
-    private final SwipeListener swipeListener;
+	@SuppressLint("ClickableViewAccessibility")
+	override fun onChildDraw(
+		c: Canvas,
+		recyclerView: RecyclerView,
+		viewHolder: RecyclerView.ViewHolder,
+		dX: Float,
+		dY: Float,
+		actionState: Int,
+		isCurrentlyActive: Boolean
+	) {
+		if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
+			recyclerView.setOnTouchListener { v: View?, event: MotionEvent ->
+				swipeBack =
+					event.action == MotionEvent.ACTION_CANCEL || event.action == MotionEvent.ACTION_UP
+				if (swipeBack) {
+					if (Math.abs(viewHolder.itemView.translationX) >= toPx(100)) {
+						swipeListener.onSwiped(viewHolder.adapterPosition)
+					}
+				}
+				false
+			}
+		}
+		super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+	}
 
-    public SwipeController(SwipeListener swipeListener) {
-        this.swipeListener = swipeListener;
-    }
+	private fun toPx(dp: Int): Float {
+		return TypedValue.applyDimension(
+			TypedValue.COMPLEX_UNIT_DIP, dp.toFloat(),
+			Resources.getSystem().displayMetrics
+		)
+	}
 
-    @Override
-    public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
-        return makeMovementFlags(ACTION_STATE_IDLE, RIGHT);
-    }
-
-    @Override
-    public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-        return false;
-    }
-
-    @Override
-    public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {}
-
-    @Override
-    public int convertToAbsoluteDirection(int flags, int layoutDirection) {
-        if (swipeBack) {
-            swipeBack = false;
-            return 0;
-        }
-        return super.convertToAbsoluteDirection(flags, layoutDirection);
-    }
-
-    @SuppressLint("ClickableViewAccessibility")
-    @Override
-    public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-        if (actionState == ACTION_STATE_SWIPE) {
-            recyclerView.setOnTouchListener((v, event) -> {
-                swipeBack =
-                    event.getAction() == MotionEvent.ACTION_CANCEL || event.getAction() == MotionEvent.ACTION_UP;
-                if (swipeBack) {
-                    if (Math.abs(viewHolder.itemView.getTranslationX()) >= toPx(100)) {
-                        swipeListener.onSwiped(viewHolder.getAdapterPosition());
-                    }
-                }
-                return false;
-            });
-        }
-
-        super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
-    }
-
-    private float toPx(int dp) {
-        return TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP,
-            (float) dp,
-            Resources.getSystem().getDisplayMetrics()
-        );
-    }
-
-    public interface SwipeListener {
-        void onSwiped(int position);
-    }
+	interface SwipeListener {
+		fun onSwiped(position: Int)
+	}
 }

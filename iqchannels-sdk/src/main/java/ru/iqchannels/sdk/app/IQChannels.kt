@@ -589,12 +589,13 @@ object IQChannels {
 				unreadRequest =
 					client.chatsChannelUnread(channel, object : HttpSseListener<Int> {
 						override fun onConnected() {}
-						override fun onEvent(event: Int) {
-							execute { unreadReceived(event) }
+
+						override fun onException(e: Exception?) {
+							e?.let { execute { unreadException(e) } }
 						}
 
-						override fun onException(e: Exception) {
-							execute { unreadException(e) }
+						override fun onEvent(event: Int) {
+							execute { unreadReceived(event) }
 						}
 
 						override fun onDisconnected() {
@@ -909,8 +910,8 @@ object IQChannels {
 							execute { eventsReceived(events) }
 						}
 
-						override fun onException(e: Exception) {
-							execute { eventsException(e) }
+						override fun onException(e: Exception?) {
+							e?.let { execute { eventsException(e) } }
 						}
 
 						override fun onDisconnected() {
@@ -1234,16 +1235,17 @@ object IQChannels {
 			message.UploadExc = Exception("File does not exist")
 			return
 		}
-		var mimetype: String? = ""
+		var mimetype = ""
 		val ext = MimeTypeMap.getFileExtensionFromUrl(file.absolutePath)
 		if (ext != null) {
-			mimetype = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext)
+			mimetype = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext) ?: ""
 		}
+
 		message.Sending = true
 		message.UploadExc = null
 		message.UploadRequest =
 			client?.filesUpload(file, mimetype, object : HttpCallback<UploadedFile> {
-				override fun onResult(uploadedFile: UploadedFile?) {
+				override fun onResult(result: UploadedFile?) {
 					execute(Runnable {
 						if (message.UploadRequest == null) {
 							return@Runnable
@@ -1252,13 +1254,13 @@ object IQChannels {
 						message.UploadExc = null
 						message.UploadRequest = null
 						message.UploadProgress = 100
-						message.File = uploadedFile
+						message.File = result
 						Log.i(
 							TAG,
-							String.format("sendFile: Uploaded a file, fileId=%s", uploadedFile?.Id)
+							String.format("sendFile: Uploaded a file, fileId=%s", result?.Id)
 						)
 						val form =
-							ChatMessageForm.file(localId, uploadedFile?.Id, message.ReplyToMessageId)
+							ChatMessageForm.file(localId, result?.Id, message.ReplyToMessageId)
 						sendQueue.add(form)
 						Log.i(TAG, String.format("Enqueued an outgoing message, localId=%d", localId))
 						send()

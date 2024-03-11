@@ -31,7 +31,8 @@ object InternalIO {
 	@JvmOverloads
 	@Throws(IOException::class)
 	fun copy(
-		src: ByteArray, dst: OutputStream,
+		src: ByteArray,
+		dst: OutputStream,
 		callback: ProgressCallback? = null
 	) {
 		val input = ByteArrayInputStream(src)

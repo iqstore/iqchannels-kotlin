@@ -45,7 +45,9 @@ class Rels(address: String) {
 
 		rels.Files?.let {
 			for (file in it) {
-				map.Files[file.Id] = file
+				file.Id?.let { id ->
+					map.Files[id] = file
+				}
 			}
 		}
 
@@ -126,7 +128,7 @@ class Rels(address: String) {
 
 	// Files
 	fun file(file: UploadedFile, map: RelationMap?) {
-		file.Url = fileUrl(file.Id)
+		file.Url = file.Id?.let { fileUrl(it) }
 		if (file.Type == FileType.IMAGE) {
 			file.ImagePreviewUrl = fileImageUrl(file.Id, FileImageSize.PREVIEW)
 			file.imageUrl = fileImageUrl(file.Id, FileImageSize.ORIGINAL)

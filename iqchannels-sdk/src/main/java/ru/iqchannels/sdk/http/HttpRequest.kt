@@ -85,8 +85,8 @@ class HttpRequest {
 	@Throws(IOException::class)
 	fun <T> postJSON(
 		body: Any?,
-		resultType: TypeToken<Response<T>?>?,
-		callback: HttpCallback<Response<T?>?>
+		resultType: TypeToken<Response<T>>?,
+		callback: HttpCallback<Response<T>>
 	) {
 		var conn: HttpURLConnection? = null
 		try {
@@ -135,7 +135,7 @@ class HttpRequest {
 			}
 
 			// Read a response when not void.
-			val result: Response<T?>
+			val result: Response<T>
 			val clength = conn.contentLength
 			if (resultType == null) {
 				result = Response()
@@ -180,8 +180,8 @@ class HttpRequest {
 	fun <T> multipart(
 		params: Map<String, String>?,
 		files: Map<String, HttpFile>?,
-		resultType: TypeToken<Response<T>?>?,
-		callback: HttpCallback<Response<T?>?>,
+		resultType: TypeToken<Response<T>>?,
+		callback: HttpCallback<Response<T>>,
 		progressCallback: HttpProgressCallback?
 	) {
 		var conn: HttpURLConnection? = null
@@ -210,10 +210,12 @@ class HttpRequest {
 			val body = generateMultipartBody(boundary, params, files).toByteArray()
 			conn.setRequestProperty("Content-Length", String.format("%d", body.size))
 			val out = conn.outputStream
-			try {
-				InternalIO.copy(body, out) { progress -> progressCallback?.onProgress(progress) }
-			} finally {
-				out.close()
+			out.use { out ->
+				InternalIO.copy(body, out, object : InternalIO.ProgressCallback {
+					override fun onProgress(progress: Int) {
+						progressCallback?.onProgress(progress)
+					}
+				})
 			}
 
 			// Get a status code.
@@ -232,7 +234,7 @@ class HttpRequest {
 			}
 
 			// Read a response when not void.
-			val result: Response<T?>
+			val result: Response<T>
 			val clength = conn.contentLength
 			if (resultType == null) {
 				result = Response()
@@ -317,8 +319,8 @@ class HttpRequest {
 
 	@Throws(IOException::class)
 	fun <T> sse(
-		eventType: TypeToken<Response<T>?>,
-		listener: HttpSseListener<Response<T>?>
+		eventType: TypeToken<Response<T>>,
+		listener: HttpSseListener<Response<T>>
 	) {
 		var conn: HttpURLConnection? = null
 		try {

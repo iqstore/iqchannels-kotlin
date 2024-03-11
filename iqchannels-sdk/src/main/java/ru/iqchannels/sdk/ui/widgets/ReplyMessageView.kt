@@ -20,7 +20,7 @@ class ReplyMessageView @JvmOverloads constructor(
 	context: Context,
 	attrs: AttributeSet? = null,
 	defStyleAttr: Int = 0
-) : ConstraintLayout(context) {
+) : ConstraintLayout(context, attrs, defStyleAttr) {
 
 	private val tvSenderName: TextView
 	private val tvText: TextView

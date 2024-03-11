@@ -1,11 +1,11 @@
 package ru.iqchannels.sdk.schema
 
 class RelationMap {
-	val Clients: Map<Long, Client>
-	val ChatMessages: Map<Long, ChatMessage>
-	val Files: Map<String, UploadedFile>
-	val Ratings: Map<Long, Rating>
-	val Users: Map<Long, User>
+	val Clients: MutableMap<Long, Client>
+	val ChatMessages: MutableMap<Long, ChatMessage>
+	val Files: MutableMap<String, UploadedFile>
+	val Ratings: MutableMap<Long, Rating>
+	val Users: MutableMap<Long, User>
 
 	init {
 		Clients = HashMap()

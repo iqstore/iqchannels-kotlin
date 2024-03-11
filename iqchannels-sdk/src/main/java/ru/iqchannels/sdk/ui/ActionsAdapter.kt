@@ -58,6 +58,6 @@ class ActionsAdapter internal constructor(
 	}
 
 	internal interface ClickListener {
-		fun onClick(item: Action?)
+		fun onClick(item: Action)
 	}
 }

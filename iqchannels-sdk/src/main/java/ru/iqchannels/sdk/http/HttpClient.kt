@@ -112,9 +112,9 @@ class HttpClient(
 			null,
 			type,
 			object : HttpCallback<ru.iqchannels.sdk.schema.Response<Client>> {
-				override fun onResult(response: ru.iqchannels.sdk.schema.Response<Client>?) {
-					val map = rels.map(response?.Rels)
-					val client = response?.Result
+				override fun onResult(result: ru.iqchannels.sdk.schema.Response<Client>?) {
+					val map = result?.Rels?.let { rels.map(it) }
+					val client = result?.Result
 					rels.client(client, map)
 					callback.onResult(client)
 				}
@@ -142,9 +142,11 @@ class HttpClient(
 			type,
 			object : HttpCallback<ru.iqchannels.sdk.schema.Response<ClientAuth>> {
 				override fun onResult(response: ru.iqchannels.sdk.schema.Response<ClientAuth>?) {
-					val map = rels.map(response?.Rels)
+					val map = response?.Rels?.let { rels.map(it) }
 					val auth = response?.Result
-					rels.clientAuth(auth, map)
+					if (auth != null) {
+						rels.clientAuth(auth, map)
+					}
 					callback.onResult(auth)
 				}
 
@@ -170,9 +172,11 @@ class HttpClient(
 			type,
 			object : HttpCallback<ru.iqchannels.sdk.schema.Response<ClientAuth>> {
 				override fun onResult(response: ru.iqchannels.sdk.schema.Response<ClientAuth>?) {
-					val map = rels.map(response?.Rels)
+					val map = response?.Rels?.let { rels.map(it) }
 					val auth = response?.Result
-					rels.clientAuth(auth, map)
+					if (auth != null) {
+						rels.clientAuth(auth, map)
+					}
 					callback.onResult(auth)
 				}
 
@@ -199,9 +203,11 @@ class HttpClient(
 			type,
 			object : HttpCallback<ru.iqchannels.sdk.schema.Response<ClientAuth>> {
 				override fun onResult(response: ru.iqchannels.sdk.schema.Response<ClientAuth>?) {
-					val map = rels.map(response?.Rels)
+					val map = response?.Rels?.let { rels.map(it) }
 					val auth = response?.Result
-					rels.clientAuth(auth, map)
+					if (auth != null) {
+						rels.clientAuth(auth, map)
+					}
 					callback.onResult(auth)
 				}
 
@@ -272,10 +278,14 @@ class HttpClient(
 			type,
 			object : HttpCallback<ru.iqchannels.sdk.schema.Response<List<ChatMessage>>> {
 				override fun onResult(response: ru.iqchannels.sdk.schema.Response<List<ChatMessage>>?) {
-					val map = rels.map(response?.Rels)
+					val map = response?.Rels?.let { rels.map(it) }
 					val messages = response?.Result
-					rels.chatMessages(messages, map)
-					callback.onResult(messages)
+					map?.let {
+						messages?.let {
+							rels.chatMessages(messages, map)
+							callback.onResult(messages)
+						}
+					}
 				}
 
 				override fun onException(exception: Exception) {
@@ -338,14 +348,18 @@ class HttpClient(
 					listener.onConnected()
 				}
 
-				override fun onEvent(event: ru.iqchannels.sdk.schema.Response<List<ChatEvent>>?) {
-					val map = rels.map(event?.Rels)
-					val events = event?.Result
-					rels.chatEvents(events, map)
-					listener.onEvent(events)
+				override fun onEvent(event: ru.iqchannels.sdk.schema.Response<List<ChatEvent>>) {
+					val map = event.Rels?.let { rels.map(it) }
+					val events = event.Result
+					map?.let {
+						events?.let {
+							rels.chatEvents(events, map)
+							listener.onEvent(events)
+						}
+					}
 				}
 
-				override fun onException(e: Exception) {
+				override fun onException(e: Exception?) {
 					listener.onException(e)
 				}
 
@@ -372,11 +386,11 @@ class HttpClient(
 					listener.onConnected()
 				}
 
-				override fun onEvent(event: ru.iqchannels.sdk.schema.Response<Int>?) {
-					listener.onEvent(event?.Result)
+				override fun onEvent(event: ru.iqchannels.sdk.schema.Response<Int>) {
+					event.Result?.let { listener.onEvent(it) }
 				}
 
-				override fun onException(e: Exception) {
+				override fun onException(e: Exception?) {
 					listener.onException(e)
 				}
 
@@ -435,7 +449,7 @@ class HttpClient(
 	// Files
 	fun filesUpload(
 		file: File,
-		mimeType: String?,
+		mimeType: String,
 		callback: HttpCallback<UploadedFile>,
 		progressCallback: HttpProgressCallback?
 	): HttpRequest {
@@ -445,6 +459,7 @@ class HttpClient(
 		} else {
 			params["Type"] = "file"
 		}
+
 		val files: MutableMap<String, HttpFile> = HashMap()
 		files["File"] = HttpFile(mimeType, file)
 		val path = "/files/upload"
@@ -458,9 +473,11 @@ class HttpClient(
 			resultType,
 			object : HttpCallback<ru.iqchannels.sdk.schema.Response<UploadedFile>> {
 				override fun onResult(response: ru.iqchannels.sdk.schema.Response<UploadedFile>?) {
-					val map = rels.map(response?.Rels)
+					val map = response?.Rels?.let { rels.map(it) }
 					val file = response?.Result
-					rels.file(file, map)
+					if (file != null) {
+						rels.file(file, map)
+					}
 					callback.onResult(file)
 				}
 

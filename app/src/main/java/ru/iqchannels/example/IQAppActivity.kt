@@ -60,10 +60,10 @@ class IQAppActivity :
 
 				// Get new Instance ID token.
 				val token = task.result!!.token
-				val iq = IQChannels.instance()
+				val iq = IQChannels
 				iq.setPushToken(token)
 			})
-		val iq = IQChannels.instance()
+		val iq = IQChannels
 		// iq.configure(this, new IQChannelsConfig("http://52.57.77.143/", "support"));
 		iq.configure(this, IQChannelsConfig("https://iqchannels.isimplelab.com", "support"))
 		iq.loginAnonymous()
@@ -101,24 +101,24 @@ class IQAppActivity :
 			R.id.nav_index -> fragment = PlusOneFragment.newInstance()
 			R.id.nav_chat -> fragment = ChatFragment.newInstance()
 			R.id.nav_login -> {
-				IQChannels.instance().login("3")
+				IQChannels.login("3")
 				return false
 			}
 
 			R.id.nav_logout -> {
-				IQChannels.instance().logout()
-				IQChannels.instance().loginAnonymous()
+				IQChannels.logout()
+				IQChannels.loginAnonymous()
 				return false
 			}
 
 			R.id.nav_logout_anonymous -> {
-				IQChannels.instance().logoutAnonymous()
+				IQChannels.logoutAnonymous()
 				return false
 			}
 
 			R.id.nav_listen_to_unread -> {
 				if (unread == null) {
-					unread = IQChannels.instance().addUnreadListener(this)
+					unread = IQChannels.addUnreadListener(this)
 				}
 				return false
 			}

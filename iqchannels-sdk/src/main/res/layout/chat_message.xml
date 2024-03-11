@@ -218,7 +218,10 @@
                 android:orientation="vertical"
                 android:background="@drawable/my_msg_bg">
 
-            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
                 <ru.iqchannels.sdk.ui.widgets.ReplyMessageView
                         android:id="@+id/myReply"
                         android:layout_width="match_parent"
@@ -227,6 +230,7 @@
                         android:paddingTop="15dp"
                         android:background="@drawable/my_msg_reply_bg"
                 />
+
             </LinearLayout>
 
             <!-- Payload -->

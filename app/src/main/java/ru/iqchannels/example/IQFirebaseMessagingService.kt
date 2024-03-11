@@ -13,7 +13,7 @@ class IQFirebaseMessagingService : FirebaseMessagingService() {
 
 	override fun onNewToken(token: String) {
 		Log.d(TAG, "Refreshed token: $token")
-		IQChannels.instance().setPushToken(token)
+		IQChannels.setPushToken(token)
 	}
 
 	override fun onMessageReceived(remoteMessage: RemoteMessage) {

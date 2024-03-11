@@ -58,6 +58,6 @@ class ButtonsAdapter internal constructor(
 	}
 
 	internal interface ClickListener {
-		fun onClick(item: SingleChoice?)
+		fun onClick(item: SingleChoice)
 	}
 }

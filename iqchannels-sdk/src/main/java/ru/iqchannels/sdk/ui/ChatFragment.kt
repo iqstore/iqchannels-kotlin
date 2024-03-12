@@ -153,9 +153,16 @@ class ChatFragment : Fragment() {
 		// Messages.
 		progress = view.findViewById<View>(R.id.messagesProgress) as ProgressBar
 		refresh = view.findViewById<View>(R.id.messagesRefresh) as SwipeRefreshLayout
-		refresh!!.isEnabled = false
-		refresh!!.setOnRefreshListener { refreshMessages() }
-		adapter = ChatMessagesAdapter(IQChannels, view, ItemClickListener())
+		refresh?.isEnabled = false
+		refresh?.setOnRefreshListener { refreshMessages() }
+
+		adapter = ChatMessagesAdapter(
+			IQChannels,
+			view,
+			{ view.width to view.height },
+			ItemClickListener()
+		)
+
 		recycler = view.findViewById(R.id.messages)
 		recycler?.adapter = adapter
 

@@ -105,7 +105,7 @@ class ImagePreviewFragment : Fragment() {
 			.listener(object : RequestListener<Drawable?> {
 				override fun onLoadFailed(
 					e: GlideException?,
-					model: Any,
+					model: Any?,
 					target: Target<Drawable?>,
 					isFirstResource: Boolean
 				): Boolean {
@@ -114,9 +114,9 @@ class ImagePreviewFragment : Fragment() {
 				}
 
 				override fun onResourceReady(
-					resource: Drawable?,
+					resource: Drawable,
 					model: Any,
-					target: Target<Drawable?>,
+					target: Target<Drawable?>?,
 					dataSource: DataSource,
 					isFirstResource: Boolean
 				): Boolean {

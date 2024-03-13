@@ -15,7 +15,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
@@ -36,7 +35,7 @@ import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -52,9 +51,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.iqchannels.sdk.Log
-import ru.iqchannels.sdk.Log.d
-import ru.iqchannels.sdk.Log.e
-import ru.iqchannels.sdk.Log.i
 import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.app.Callback
 import ru.iqchannels.sdk.app.Cancellable
@@ -129,6 +125,15 @@ class ChatFragment : Fragment() {
 	private var cameraTempFile: File? = null
 	private var onDownloadComplete: BroadcastReceiver? = null
 	private var replyingMessage: ChatMessage? = null
+
+	private val requestAllPermissions =
+		registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+			if (permissions[Manifest.permission.CAMERA] == true) {
+				showAttachChooser(true)
+			} else {
+				showAttachChooser(false)
+			}
+		}
 
 	override fun onCreateView(
 		inflater: LayoutInflater, container: ViewGroup?,
@@ -306,21 +311,6 @@ class ChatFragment : Fragment() {
 				} else {
 					onGalleryResult(resultCode, intent)
 				}
-			}
-		}
-	}
-
-	override fun onRequestPermissionsResult(
-		requestCode: Int,
-		permissions: Array<String>,
-		grantResults: IntArray
-	) {
-		super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-		if (requestCode == REQUEST_CAMERA_PERMISSION) {
-			if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-				showAttachChooser(true)
-			} else {
-				showAttachChooser(false)
 			}
 		}
 	}
@@ -605,12 +595,12 @@ class ChatFragment : Fragment() {
 				Manifest.permission.CAMERA
 			) == PackageManager.PERMISSION_DENIED
 		) {
-			ActivityCompat.requestPermissions(
-				requireActivity(), arrayOf(
+			requestAllPermissions.launch(
+				arrayOf(
 					Manifest.permission.CAMERA,
 					Manifest.permission.READ_EXTERNAL_STORAGE,
 					Manifest.permission.WRITE_EXTERNAL_STORAGE
-				), REQUEST_CAMERA_PERMISSION
+				)
 			)
 
 			return

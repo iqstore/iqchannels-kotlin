@@ -47,7 +47,9 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.iqchannels.sdk.Log
@@ -73,8 +75,6 @@ class ChatFragment : Fragment() {
 	companion object {
 		private const val TAG = "iqchannels"
 		private const val SEND_FOCUS_SCROLL_THRESHOLD_PX = 300
-		private const val REQUEST_CAMERA_OR_GALLERY = 1
-		private const val REQUEST_CAMERA_PERMISSION = 2
 
 		/**
 		 * Use this factory method to create a new instance of
@@ -134,6 +134,45 @@ class ChatFragment : Fragment() {
 				showAttachChooser(false)
 			}
 		}
+
+	private val requestPickImageFromFiles =
+		registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+			if (it.resultCode == Activity.RESULT_OK) {
+				val intent = it.data
+				val uri = intent?.data
+
+				when(uri == null) {
+					true -> { // multiple choice
+						it.data?.clipData?.let { clipData ->
+							val uris = ArrayList<Uri>()
+							val itemCount = if (clipData.itemCount > 5) 5 else clipData.itemCount
+							for (i in 0 until itemCount) {
+								uris.add(clipData.getItemAt(i).uri)
+							}
+
+							sendMultipleFiles(uris)
+						}
+					}
+					false -> { // single choice
+						var isCamera = false
+						if (!isCamera) {
+							val action = intent.action
+							isCamera = MediaStore.ACTION_IMAGE_CAPTURE == action
+						}
+						if (!isCamera) {
+							isCamera = uri == null
+						}
+						if (isCamera) {
+							onCameraResult(it.resultCode)
+						} else {
+							onGalleryResult(uri)
+						}
+					}
+				}
+			}
+		}
+
+	private val multipleFilesQueue: MutableList<Uri> = mutableListOf()
 
 	override fun onCreateView(
 		inflater: LayoutInflater, container: ViewGroup?,
@@ -291,28 +330,6 @@ class ChatFragment : Fragment() {
 
 		clearMessages()
 		clearMoreMessages()
-	}
-
-	override fun onActivityResult(requestCode: Int, resultCode: Int, intent: Intent?) {
-		super.onActivityResult(requestCode, resultCode, intent)
-		when (requestCode) {
-			REQUEST_CAMERA_OR_GALLERY -> {
-				var isCamera = intent == null
-				if (!isCamera) {
-					val action = intent?.action
-					isCamera = MediaStore.ACTION_IMAGE_CAPTURE == action
-				}
-				if (!isCamera) {
-					val uri = intent?.data
-					isCamera = uri == null
-				}
-				if (isCamera) {
-					onCameraResult(resultCode)
-				} else {
-					onGalleryResult(resultCode, intent)
-				}
-			}
-		}
 	}
 
 	// Messages scroll
@@ -510,6 +527,11 @@ class ChatFragment : Fragment() {
 
 		adapter?.updated(message)
 		maybeScrollToBottomOnNewMessage()
+
+		runCatching { multipleFilesQueue.removeFirst() }
+			.getOrNull()
+			?.let { sendFile(it) }
+
 	}
 
 	private fun messageCancelled(message: ChatMessage) {
@@ -642,6 +664,7 @@ class ChatFragment : Fragment() {
 				"audio/*", "video/*", "text/*", "application/*", "file/*"
 			)
 		)
+		galleryIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
 
 		// Create and start an intent chooser.
 		val title = resources.getText(R.string.chat_camera_or_file)
@@ -649,47 +672,15 @@ class ChatFragment : Fragment() {
 		if (cameraIntent != null) {
 			chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf<Parcelable>(cameraIntent))
 		}
-		startActivityForResult(chooser, REQUEST_CAMERA_OR_GALLERY)
+
+		requestPickImageFromFiles.launch(chooser)
 	}
 
 	// Gallery
-	private fun onGalleryResult(resultCode: Int, intent: Intent?) {
-		if (resultCode != Activity.RESULT_OK || intent == null) {
-			Log.i(
-				TAG, String.format(
-					"onGalleryResult: Did not pick an image, activity result=%d", resultCode
-				)
-			)
-			return
-		}
-		Log.i(TAG, "onGalleryResult: Started processing a file from the gallery")
+	private fun onGalleryResult(uri: Uri) {
 
 		lifecycleScope.launch(Dispatchers.IO) {
-			val result = try {
-				val uri = intent.data ?: return@launch
-				val resolver = requireActivity().contentResolver
-				val mimeTypeMap = MimeTypeMap.getSingleton()
-				val mtype = resolver.getType(uri)
-				val ext = mimeTypeMap.getExtensionFromMimeType(mtype)
-				val file = createGalleryTempFile(uri, ext)
-				val `in` = resolver.openInputStream(uri)
-
-				if (`in` == null) {
-					Log.e(TAG, "onGalleryResult: Failed to pick a file, no input stream")
-					null
-				} else {
-					`in`.use { `in` ->
-						val out = FileOutputStream(file)
-						out.use { out ->
-							copy(`in`, out)
-						}
-					}
-					file
-				}
-			} catch (e: IOException) {
-				Log.e(TAG, String.format("onGalleryResult: Failed to pick a file, e=%s", e))
-				null
-			}
+			val result = prepareFile(uri)
 
 			withContext(Dispatchers.Main) {
 				result?.let {
@@ -697,6 +688,44 @@ class ChatFragment : Fragment() {
 				}
 			}
 		}
+	}
+
+	private fun sendMultipleFiles(fileUris: List<Uri>) {
+		lifecycleScope.launch {
+			multipleFilesQueue.addAll(fileUris)
+			val uri = multipleFilesQueue.removeFirst()
+			onGalleryResult(uri)
+		}
+	}
+
+	private fun sendFile(uri: Uri) {
+		val file = prepareFile(uri)
+		IQChannels.sendFile(file, null)
+	}
+
+	private fun prepareFile(uri: Uri) = try {
+		val resolver = requireActivity().contentResolver
+		val mimeTypeMap = MimeTypeMap.getSingleton()
+		val mtype = resolver.getType(uri)
+		val ext = mimeTypeMap.getExtensionFromMimeType(mtype)
+		val file = createGalleryTempFile(uri, ext)
+		val `in` = resolver.openInputStream(uri)
+
+		if (`in` == null) {
+			Log.e(TAG, "onGalleryResult: Failed to pick a file, no input stream")
+			null
+		} else {
+			`in`.use { `in` ->
+				val out = FileOutputStream(file)
+				out.use { out ->
+					copy(`in`, out)
+				}
+			}
+			file
+		}
+	} catch (e: IOException) {
+		Log.e(TAG, String.format("onGalleryResult: Failed to pick a file, e=%s", e))
+		null
 	}
 
 	private fun showConfirmDialog(file: File) {

@@ -594,8 +594,8 @@ class HttpClient(
 
 	private fun <T> multipart(
 		path: String,
-		params: Map<String, String>?,
-		files: Map<String, HttpFile>?,
+		params: Map<String, String>,
+		files: Map<String, HttpFile>,
 		resultType: TypeToken<ru.iqchannels.sdk.schema.Response<T>>?,
 		callback: HttpCallback<ru.iqchannels.sdk.schema.Response<T>>,
 		progressCallback: HttpProgressCallback?

@@ -89,6 +89,7 @@ class HttpRequest {
 		callback: HttpCallback<Response<T>>
 	) {
 		var conn: HttpURLConnection? = null
+		val gson = this.gson ?: return
 		try {
 			conn = openConnection()
 			if (conn == null) {
@@ -109,9 +110,9 @@ class HttpRequest {
 			// Write a body if present.
 			if (body != null) {
 				conn.doOutput = true
-				val json = gson!!.toJson(body)
-				val bytes = json.toByteArray(UTF8)
-				conn.setRequestProperty("Content-Length", String.format("%d", bytes.size))
+				val json = gson.toJson(body)
+				val bytes = json?.toByteArray(UTF8)
+				conn.setRequestProperty("Content-Length", String.format("%d", bytes?.size))
 				val out = BufferedOutputStream(conn.outputStream)
 				try {
 					out.write(bytes)
@@ -153,7 +154,7 @@ class HttpRequest {
 					while (reader.readLine().also { line = it } != null) {
 						builder.append(line).append('\n')
 					}
-					result = gson!!.fromJson(builder.toString(), resultType.type)
+					result = gson.fromJson(builder.toString(), resultType.type)
 					// result = gson.fromJson(reader, resultType.getType());
 				} finally {
 					reader.close()
@@ -178,13 +179,15 @@ class HttpRequest {
 	@SuppressLint("DefaultLocale")
 	@Throws(IOException::class)
 	fun <T> multipart(
-		params: Map<String, String>?,
-		files: Map<String, HttpFile>?,
+		params: Map<String, String>,
+		files: Map<String, HttpFile>,
 		resultType: TypeToken<Response<T>>?,
 		callback: HttpCallback<Response<T>>,
 		progressCallback: HttpProgressCallback?
 	) {
 		var conn: HttpURLConnection? = null
+		val gson = this.gson ?: return
+
 		try {
 			conn = openConnection()
 			if (conn == null) {
@@ -247,7 +250,7 @@ class HttpRequest {
 				}
 				val reader = BufferedReader(InputStreamReader(conn.inputStream))
 				result = try {
-					gson!!.fromJson(reader, resultType.type)
+					gson.fromJson(reader, resultType.type)
 				} finally {
 					reader.close()
 				}
@@ -276,12 +279,12 @@ class HttpRequest {
 	@Throws(IOException::class)
 	private fun generateMultipartBody(
 		boundary: String,
-		params: Map<String, String>?,
-		files: Map<String, HttpFile>?
+		params: Map<String, String>,
+		files: Map<String, HttpFile>
 	): ByteArrayOutputStream {
 		val out = ByteArrayOutputStream()
 
-		for (key in params!!.keys) {
+		for (key in params.keys) {
 			val value = params[key]
 			out.write(String.format("--%s\r\n", boundary).toByteArray(UTF8))
 			out.write(
@@ -289,17 +292,17 @@ class HttpRequest {
 					"Content-Disposition: form-data; name=\"%s\"\r\n\r\n", key
 				).toByteArray(UTF8)
 			)
-			out.write(value!!.toByteArray(UTF8))
+			out.write(value?.toByteArray(UTF8))
 			out.write("\r\n".toByteArray(UTF8))
 		}
 
-		for (key in files!!.keys) {
-			val httpFile = files[key]
+		for (key in files.keys) {
+			val httpFile = files[key] ?: continue
 			out.write(String.format("--%s\r\n", boundary).toByteArray(UTF8))
 			out.write(
 				String.format(
 					"Content-Disposition: form-data; name=\"%s\"; filename=\"%s\"\r\n",
-					key, httpFile!!.file.name
+					key, httpFile.file.name
 				).toByteArray(UTF8)
 			)
 			out.write(
@@ -359,8 +362,8 @@ class HttpRequest {
 				reader = HttpSseReader(BufferedReader(InputStreamReader(conn.inputStream)))
 				while (true) {
 					val sseEvent = reader.readEvent() ?: break
-					assert(gson != null)
-					val event = gson!!.fromJson<Response<T>>(sseEvent.data, eventType.type)
+					if (gson == null) throw Exception("Gson is null")
+					val event = gson.fromJson<Response<T>>(sseEvent.data, eventType.type)
 					listener.onEvent(event)
 				}
 			} finally {

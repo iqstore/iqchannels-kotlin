@@ -396,7 +396,7 @@ object IQChannels {
 		config?.let { config ->
 			val name = signupName
 			config.channel?.let { channel ->
-				authRequest = client!!.clientsSignup(name, channel, object : HttpCallback<ClientAuth> {
+				authRequest = client?.clientsSignup(name, channel, object : HttpCallback<ClientAuth> {
 					override fun onResult(result: ClientAuth?) {
 						result?.let {
 							execute { signupComplete(result) }
@@ -884,14 +884,15 @@ object IQChannels {
 
 		messages?.let { messages ->
 			for (message in messages) {
-				if (message.EventId == null) {
-					continue
-				}
-				if (query.LastEventId == null) {
+				val messageEventId = message.EventId ?: continue
+
+				val lastEventId = query.LastEventId
+				if (lastEventId == null) {
 					query.LastEventId = message.EventId
 					continue
 				}
-				if (query.LastEventId!! < message.EventId!!) {
+
+				if (lastEventId < messageEventId) {
 					query.LastEventId = message.EventId
 				}
 			}
@@ -1135,19 +1136,22 @@ object IQChannels {
 		if (auth == null) {
 			return
 		}
-		val localId = nextLocalId()
-		val message = ChatMessage(auth!!.Client!!, localId)
-		message.Sending = true
-		messages?.add(message)
 
-		for (listener in messageListeners) {
-			execute { listener.messageSent(message) }
+		auth?.Client?.let { client ->
+			val localId = nextLocalId()
+			val message = ChatMessage(client, localId)
+			message.Sending = true
+			messages?.add(message)
+
+			for (listener in messageListeners) {
+				execute { listener.messageSent(message) }
+			}
+
+			val form = ChatMessageForm.text(localId, text, replyToMessageId)
+			sendQueue.add(form)
+			Log.i(TAG, String.format("Enqueued an outgoing message, localId=%d", localId))
+			send()
 		}
-
-		val form = ChatMessageForm.text(localId, text, replyToMessageId)
-		sendQueue.add(form)
-		Log.i(TAG, String.format("Enqueued an outgoing message, localId=%d", localId))
-		send()
 	}
 
 	fun handleVersion() {
@@ -1403,7 +1407,7 @@ object IQChannels {
 	}
 
 	// File url
-	fun filesUrl(fileId: String, callback: HttpCallback<String?>?) {
+	fun filesUrl(fileId: String, callback: HttpCallback<String?>) {
 		if (auth == null) {
 			return
 		}
@@ -1411,7 +1415,7 @@ object IQChannels {
 			return
 		}
 
-		client?.filesUrl(fileId, callback!!)
+		client?.filesUrl(fileId, callback)
 	}
 
 	// Ratings
@@ -1602,7 +1606,8 @@ object IQChannels {
 		event.MessageId?.let { messageId ->
 			val message = getMessageById(messageId) ?: return
 
-			if (message.EventId != null && message.EventId!! >= event.Id) {
+			val messageEventId = message.EventId
+			if (messageEventId != null && messageEventId >= event.Id) {
 				return
 			}
 
@@ -1624,7 +1629,8 @@ object IQChannels {
 		event.MessageId?.let { messageId ->
 			val message = getMessageById(messageId) ?: return
 
-			if (message.EventId != null && message.EventId!! >= event.Id) {
+			val messageEventId = message.EventId
+			if (messageEventId != null && messageEventId >= event.Id) {
 				return
 			}
 

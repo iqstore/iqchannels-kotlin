@@ -34,10 +34,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="?selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_close_14"
-        android:tint="@color/divider_sending_reply"
+        android:src="@drawable/close_24"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/tvSenderName"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         />
 
     <TextView

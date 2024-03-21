@@ -37,6 +37,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -248,7 +249,9 @@ class ChatFragment : Fragment() {
 			}
 
 			override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
-			override fun afterTextChanged(s: Editable) {}
+			override fun afterTextChanged(s: Editable) {
+				sendButton?.isVisible = s.isNotEmpty()
+			}
 		})
 
 		attachButton = view.findViewById(R.id.attachButton)

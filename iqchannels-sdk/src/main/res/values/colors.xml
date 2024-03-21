@@ -7,9 +7,10 @@
     <color name="link_file_text_color">#3F51B5</color>
     <color name="divider_sending_reply">#A9A9A9</color>
     <color name="reply_typing_bg">#F9F9F9</color>
-    <color name="other_msg_bg">#fff0f0f0</color>
+    <color name="other_msg_bg">#F4F4F8</color>
     <color name="other_reply_text">#2D98F4</color>
-    <color name="my_msg_bg">#ffe8f9d4</color>
+    <color name="my_msg_bg">#242729</color>
+    <color name="my_text_color">#ffffff</color>
     <color name="my_msg_reply_text">#488445</color>
     <color name="drop_down_btn_border">#a3de62</color>
     <color name="drop_down_btn_text">#74b928</color>

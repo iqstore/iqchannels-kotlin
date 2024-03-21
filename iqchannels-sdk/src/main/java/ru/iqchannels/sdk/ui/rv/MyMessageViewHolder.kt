@@ -5,6 +5,7 @@ import android.text.util.Linkify
 import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.GranularRoundedCorners
@@ -177,10 +178,9 @@ class MyMessageViewHolder(
 			myUpload.visibility = View.GONE
 			clTextsMy.visibility = View.VISIBLE
 			myText.visibility = View.VISIBLE
-			myText.setBackgroundResource(R.drawable.my_msg_bg)
 			myText.autoLinkMask = Linkify.ALL
 			myText.text = message.Text
-			myText.setTextColor(Colors.textColor())
+			myText.setTextColor(ContextCompat.getColor(root.context, R.color.my_text_color))
 			myText.minWidth = 0
 			myText.maxWidth = Int.MAX_VALUE
 		}
@@ -202,7 +202,6 @@ class MyMessageViewHolder(
 				)
 				lp.gravity = Gravity.END
 				myReply.layoutParams = lp
-				myText.setBackgroundResource(R.drawable.my_msg_reply_text_bg)
 
 				myReply.post {
 					if (myReply.width > myText.width) {

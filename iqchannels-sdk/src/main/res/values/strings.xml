@@ -6,6 +6,7 @@
     <string name="chat_attach">Прикрепить</string>
     <string name="chat_camera_or_file">Отправить фото или документ</string>
     <string name="chat_send">Отпр.</string>
+    <string name="send">Отправить</string>
     <string name="chat_login_hint">Имя</string>
     <string name="chat_send_hint">Сообщение…</string>
     <string name="chat_failed_to_load_messages">Ошибка загрузки сообщений</string>

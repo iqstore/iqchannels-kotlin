@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import androidx.constraintlayout.helper.widget.Flow
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.GranularRoundedCorners
@@ -199,6 +200,7 @@ internal class OtherMessageViewHolder(
 			this.rating.root.visibility = View.VISIBLE
 			this.rating.ratingRate.visibility = View.GONE
 			this.rating.ratingRated.visibility = View.GONE
+			this.rating.btnSendRating.visibility = View.GONE
 			if (ChatMessagesAdapter.objectEquals(msgRating.State, RatingState.PENDING)) {
 				this.rating.ratingRate.visibility = View.VISIBLE
 				val value = msgRating.Value ?: 0
@@ -225,7 +227,13 @@ internal class OtherMessageViewHolder(
 							motionEvent
 						)
 					}
-					button.setOnClickListener { view -> onRateButtonClick(view) }
+				}
+
+				message.Rating?.Value?.takeIf { it > 0 }?.let { rate ->
+					this.rating.btnSendRating.isVisible = message.Rating?.Sent != true
+					this.rating.btnSendRating.setOnClickListener {
+						onRateButtonClick(rate)
+					}
 				}
 
 			} else if (ChatMessagesAdapter.objectEquals(msgRating.State, RatingState.RATED)) {
@@ -359,11 +367,11 @@ internal class OtherMessageViewHolder(
 		return false
 	}
 
-	private fun onRateButtonClick(view: View) {
-		val value = getRateButtonValue(view)
+	private fun onRateButtonClick(value: Int) {
 		if (value == 0) {
 			return
 		}
+
 		(bindingAdapter as? ChatMessagesAdapter)?.onRateClicked(adapterPosition, value)
 	}
 

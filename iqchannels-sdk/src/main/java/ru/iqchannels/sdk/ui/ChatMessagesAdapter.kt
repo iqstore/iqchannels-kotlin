@@ -184,7 +184,7 @@ internal class ChatMessagesAdapter(
 		return when(viewType) {
 			R.layout.item_my_message -> {
 				val binding = ItemMyMessageBinding.inflate(inflater, parent, false)
-				MyMessageViewHolder(binding)
+				MyMessageViewHolder(binding, itemClickListener)
 			}
 			else -> {
 				val binding = ItemOtherMessageBinding.inflate(inflater, parent, false)
@@ -363,5 +363,6 @@ internal class ChatMessagesAdapter(
 		fun onImageClick(message: ChatMessage)
 		fun onButtonClick(message: ChatMessage, singleChoice: SingleChoice)
 		fun onActionClick(message: ChatMessage, action: Action)
+		fun onMessageLongClick(message: ChatMessage)
 	}
 }

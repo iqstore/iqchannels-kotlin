@@ -20,8 +20,9 @@ import ru.iqchannels.sdk.ui.ChatMessagesAdapter
 import ru.iqchannels.sdk.ui.Colors
 import ru.iqchannels.sdk.ui.UiUtils
 
-class MyMessageViewHolder(
-	private val binding: ItemMyMessageBinding
+internal class MyMessageViewHolder(
+	private val binding: ItemMyMessageBinding,
+	private val itemClickListener: ChatMessagesAdapter.ItemClickListener
 ) : ViewHolder(binding.root) {
 
 	private val dateFormat: DateFormat = android.text.format.DateFormat.getDateFormat(binding.root.context)
@@ -216,6 +217,11 @@ class MyMessageViewHolder(
 					}
 				}
 			}
+		}
+
+		binding.root.setOnLongClickListener {
+			itemClickListener.onMessageLongClick(message)
+			true
 		}
 	}
 }

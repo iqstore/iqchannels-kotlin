@@ -343,6 +343,11 @@ internal class OtherMessageViewHolder(
 			rvCardButtons.adapter = actionsAdapter
 			rvCardButtons.visibility = View.VISIBLE
 		}
+
+		binding.root.setOnLongClickListener {
+			itemClickListener.onMessageLongClick(message)
+			true
+		}
 	}
 
 	private fun onRateButtonTouch(view: View, event: MotionEvent): Boolean {

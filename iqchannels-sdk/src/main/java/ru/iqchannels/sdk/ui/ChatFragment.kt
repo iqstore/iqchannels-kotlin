@@ -9,6 +9,8 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.app.DownloadManager
 import android.content.BroadcastReceiver
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
@@ -995,6 +997,20 @@ class ChatFragment : Fragment() {
 
 				ActionType.SAY_SOMETHING -> sendMessage(action.Title)
 				else -> Unit
+			}
+		}
+
+		override fun onMessageLongClick(message: ChatMessage) {
+			message.Text?.let { text ->
+				val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+				val clip = ClipData.newPlainText(text, text)
+				clipboard.setPrimaryClip(clip)
+
+				Toast.makeText(
+					requireContext(),
+					getString(R.string.message_copied),
+					Toast.LENGTH_LONG
+				).show()
 			}
 		}
 	}

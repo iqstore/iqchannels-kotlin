@@ -32,6 +32,7 @@ import android.webkit.MimeTypeMap
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
@@ -43,7 +44,9 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import java.io.File
 import java.io.FileOutputStream
@@ -119,6 +122,7 @@ class ChatFragment : Fragment() {
 	private var refresh: SwipeRefreshLayout? = null
 	private var adapter: ChatMessagesAdapter? = null
 	private var recycler: RecyclerView? = null
+	private var btnScrollToBottom: ImageView? = null
 
 	// Send views
 	private var sendText: EditText? = null
@@ -215,6 +219,13 @@ class ChatFragment : Fragment() {
 
 		recycler = view.findViewById(R.id.messages)
 		recycler?.adapter = adapter
+		btnScrollToBottom = view.findViewById(R.id.iv_scroll_down)
+
+		btnScrollToBottom?.setOnClickListener {
+			adapter?.itemCount?.let {
+				recycler?.scrollToPosition(it - 1)
+			}
+		}
 
 		recycler?.addOnLayoutChangeListener { _, _, _, _, bottom, _, _, _, oldBottom ->
 			maybeScrollToBottomOnKeyboardShown(
@@ -282,6 +293,26 @@ class ChatFragment : Fragment() {
 			val fileName = bundle.getString(FileActionsChooseFragment.KEY_FILE_NAME)
 			handleDownload(downloadID, fileName)
 		}
+
+		recycler?.addOnScrollListener(object : OnScrollListener() {
+			override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+				super.onScrolled(recyclerView, dx, dy)
+				val lm = recyclerView.layoutManager as? LinearLayoutManager ?: return
+				val messagesCount = adapter?.itemCount ?: return
+				val firstVisiblePosition = lm.findFirstVisibleItemPosition()
+				if (firstVisiblePosition < messagesCount - 20) {
+					btnScrollToBottom?.isVisible = true
+				} else {
+					btnScrollToBottom?.isVisible = false
+				}
+
+				val itemViewedPosition = lm.findFirstCompletelyVisibleItemPosition()
+//				if (itemViewedPosition < 1) {
+//					btnScrollToBottom?.isVisible = false
+//				}
+				Log.d("abctag", "onScrolled firstVisiblePosition: $firstVisiblePosition, itemViewedPosition: $itemViewedPosition")
+			}
+		})
 	}
 
 	override fun onDestroyView() {

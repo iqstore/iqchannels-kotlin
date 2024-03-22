@@ -6,6 +6,7 @@ import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.GranularRoundedCorners
@@ -76,6 +77,7 @@ internal class MyMessageViewHolder(
 			clTextsMy.visibility = View.GONE
 			tvMyFileName.visibility = View.GONE
 			tvMyFileSize.visibility = View.GONE
+			ivFile.isVisible = false
 		}
 
 		// Message
@@ -143,6 +145,7 @@ internal class MyMessageViewHolder(
 				tvMyFileName.autoLinkMask = 0
 				tvMyFileName.movementMethod = LinkMovementMethod.getInstance()
 				tvMyFileName.text = file?.Name
+				ivFile.isVisible = true
 				val size = file?.Size
 
 				if (size != null && size > 0) {

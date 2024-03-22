@@ -9,6 +9,17 @@
     android:layout_marginBottom="4dp"
     android:orientation="vertical">
 
+    <!-- Day -->
+    <TextView
+        android:id="@+id/date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:paddingBottom="6dp"
+        android:textColor="#ff979fa7"
+        android:textSize="12sp"
+        android:textStyle="bold"/>
+
     <LinearLayout
         android:id="@+id/my"
         android:layout_width="wrap_content"
@@ -16,17 +27,6 @@
         android:layout_gravity="end"
         android:layout_marginLeft="88dp"
         android:orientation="vertical">
-
-        <!-- Day -->
-        <TextView
-            android:id="@+id/date"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:paddingBottom="6dp"
-            android:textColor="#ff979fa7"
-            android:textSize="12sp"
-            android:textStyle="bold"/>
 
         <LinearLayout
             android:id="@+id/myMsgContainer"

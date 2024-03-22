@@ -106,7 +106,12 @@
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-
+        <ru.iqchannels.sdk.ui.widgets.TopNotificationWidget
+            android:id="@+id/tnw_msg_copied"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:visibility="invisible"/>
 
         <!-- Send textbox and button -->
         <RelativeLayout

@@ -19,4 +19,5 @@
     <color name="color_action_btn_bg">#D9D9D9</color>
     <color name="color_single_choice_btn">#abb8c0</color>
     <color name="text_field">#F4F4F8</color>
+    <color name="top_success_notification">#57B22F</color>
 </resources>

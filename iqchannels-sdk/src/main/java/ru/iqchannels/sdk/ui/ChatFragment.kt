@@ -72,6 +72,7 @@ import ru.iqchannels.sdk.schema.SingleChoice
 import ru.iqchannels.sdk.ui.images.ImagePreviewFragment
 import ru.iqchannels.sdk.ui.rv.SwipeController
 import ru.iqchannels.sdk.ui.widgets.ReplyMessageView
+import ru.iqchannels.sdk.ui.widgets.TopNotificationWidget
 
 class ChatFragment : Fragment() {
 
@@ -111,6 +112,7 @@ class ChatFragment : Fragment() {
 
 	// Chat layout
 	private var chatLayout: RelativeLayout? = null
+	private var tnwMsgCopied: TopNotificationWidget? = null
 
 	// Message views
 	private var progress: ProgressBar? = null
@@ -196,6 +198,7 @@ class ChatFragment : Fragment() {
 
 		// Chat.
 		chatLayout = view.findViewById<View>(R.id.chatLayout) as RelativeLayout
+		tnwMsgCopied = view.findViewById(R.id.tnw_msg_copied)
 
 		// Messages.
 		progress = view.findViewById<View>(R.id.messagesProgress) as ProgressBar
@@ -279,6 +282,11 @@ class ChatFragment : Fragment() {
 			val fileName = bundle.getString(FileActionsChooseFragment.KEY_FILE_NAME)
 			handleDownload(downloadID, fileName)
 		}
+	}
+
+	override fun onDestroyView() {
+		tnwMsgCopied?.destroy()
+		super.onDestroyView()
 	}
 
 	override fun onDestroy() {
@@ -1006,11 +1014,7 @@ class ChatFragment : Fragment() {
 				val clip = ClipData.newPlainText(text, text)
 				clipboard.setPrimaryClip(clip)
 
-				Toast.makeText(
-					requireContext(),
-					getString(R.string.message_copied),
-					Toast.LENGTH_LONG
-				).show()
+				tnwMsgCopied?.show()
 			}
 		}
 	}

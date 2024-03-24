@@ -49,8 +49,7 @@ internal class MyMessageViewHolder(
 			)
 		}
 
-		myUploadCancel.setOnClickListener { adapter.onUploadCancelClicked(adapterPosition) }
-		myUploadRetry.setOnClickListener { adapter.onUploadRetryClicked(adapterPosition) }
+		myUpload.setOnClickListener { adapter.onUploadCancelClicked(adapterPosition) }
 
 		// Time
 		if (adapter.isGroupEnd(bindingAdapterPosition)) {
@@ -84,28 +83,33 @@ internal class MyMessageViewHolder(
 		if (message.Upload != null) {
 			myText.visibility = View.GONE
 			myImageFrame.visibility = View.GONE
+			clTextsMy.visibility = View.VISIBLE
 			myUpload.visibility = View.VISIBLE
-			myUploadProgress.max = 100
-			myUploadProgress.progress = message.UploadProgress
+
 			if (message.UploadExc != null) {
 				myUploadProgress.visibility = View.GONE
-				myUploadError.visibility = View.VISIBLE
 				val exception = message.UploadExc
-				var errMessage = exception!!.localizedMessage
+				var errMessage = exception?.localizedMessage
 
 				if (exception is HttpException && exception.code == 413) {
 					errMessage = root.resources.getString(R.string.file_size_too_large)
 				}
-
-				myUploadError.text = errMessage
-				myUploadCancel.visibility = View.VISIBLE
-				myUploadRetry.visibility = View.VISIBLE
-			} else {
-				myUploadError.visibility = View.GONE
-				myUploadRetry.visibility = View.GONE
-				myUploadProgress.visibility = View.VISIBLE
-				myUploadCancel.visibility = View.VISIBLE
 			}
+
+			val file = message.Upload ?: return@with
+			myImageFrame.visibility = View.GONE
+			clTextsMy.visibility = View.VISIBLE
+			myText.visibility = View.GONE
+			tvMyFileName.visibility = View.VISIBLE
+			tvMyFileName.autoLinkMask = 0
+			tvMyFileName.movementMethod = LinkMovementMethod.getInstance()
+			tvMyFileName.text = file.name
+			val size = file.length()
+
+			showFileSize(size)
+
+			myText.text = file.name
+			myText.setTextColor(Colors.linkColor())
 		} else if (message.File != null) {
 			myUpload.visibility = View.GONE
 			val file = message.File
@@ -148,32 +152,7 @@ internal class MyMessageViewHolder(
 				ivFile.isVisible = true
 				val size = file?.Size
 
-				if (size != null && size > 0) {
-					tvMyFileSize.visibility = View.VISIBLE
-					val sizeKb = (file.Size / 1024).toFloat()
-					var sizeMb = 0f
-					if (sizeKb > 1024) {
-						sizeMb = sizeKb / 1024
-					}
-					val strRes: Int
-					val fileSize: String
-					if (sizeMb > 0) {
-						strRes = R.string.file_size_mb_placeholder
-						val df = DecimalFormat("0.00")
-						fileSize = df.format(sizeMb.toDouble())
-					} else {
-						strRes = R.string.file_size_kb_placeholder
-						fileSize = sizeKb.toString()
-					}
-
-					tvMyFileSize.text = root.resources.getString(
-						strRes,
-						fileSize
-					)
-				} else {
-					tvMyFileSize.text = null
-				}
-
+				size?.let { showFileSize(it) }
 				myText.text = file?.Name
 				myText.setTextColor(Colors.linkColor())
 			}
@@ -225,6 +204,34 @@ internal class MyMessageViewHolder(
 		binding.root.setOnLongClickListener {
 			itemClickListener.onMessageLongClick(message)
 			true
+		}
+	}
+
+	private fun ItemMyMessageBinding.showFileSize(size: Long) {
+		if (size != null && size > 0) {
+			tvMyFileSize.visibility = View.VISIBLE
+			val sizeKb = (size / 1024).toFloat()
+			var sizeMb = 0f
+			if (sizeKb > 1024) {
+				sizeMb = sizeKb / 1024
+			}
+			val strRes: Int
+			val fileSize: String
+			if (sizeMb > 0) {
+				strRes = R.string.file_size_mb_placeholder
+				val df = DecimalFormat("0.00")
+				fileSize = df.format(sizeMb.toDouble())
+			} else {
+				strRes = R.string.file_size_kb_placeholder
+				fileSize = sizeKb.toString()
+			}
+
+			tvMyFileSize.text = root.resources.getString(
+				strRes,
+				fileSize
+			)
+		} else {
+			tvMyFileSize.text = null
 		}
 	}
 }

@@ -42,6 +42,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -72,6 +73,7 @@ import ru.iqchannels.sdk.schema.ChatEvent
 import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.schema.ClientAuth
 import ru.iqchannels.sdk.schema.SingleChoice
+import ru.iqchannels.sdk.ui.backdrop.ErrorPageBackdropDialog
 import ru.iqchannels.sdk.ui.images.ImagePreviewFragment
 import ru.iqchannels.sdk.ui.rv.SwipeController
 import ru.iqchannels.sdk.ui.widgets.ReplyMessageView
@@ -1047,6 +1049,11 @@ class ChatFragment : Fragment() {
 
 				tnwMsgCopied?.show()
 			}
+		}
+
+		override fun fileUploadException(errorMessage: String?) {
+			val backdrop = ErrorPageBackdropDialog.newInstance(errorMessage)
+			backdrop.show(childFragmentManager, ErrorPageBackdropDialog.TRANSACTION_TAG)
 		}
 	}
 }

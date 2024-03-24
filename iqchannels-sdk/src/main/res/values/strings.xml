@@ -29,4 +29,5 @@
     <string name="today">Сегодня</string>
     <string name="image_saved">Изображение сохранено в Галерею</string>
     <string name="message_copied">Сообщение скопировано</string>
+    <string name="clear">Понятно</string>
 </resources>

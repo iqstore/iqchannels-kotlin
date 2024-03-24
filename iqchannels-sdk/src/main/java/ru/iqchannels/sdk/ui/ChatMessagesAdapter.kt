@@ -364,5 +364,6 @@ internal class ChatMessagesAdapter(
 		fun onButtonClick(message: ChatMessage, singleChoice: SingleChoice)
 		fun onActionClick(message: ChatMessage, action: Action)
 		fun onMessageLongClick(message: ChatMessage)
+		fun fileUploadException(errorMessage: String?)
 	}
 }

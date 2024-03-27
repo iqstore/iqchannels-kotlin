@@ -301,18 +301,8 @@ class ChatFragment : Fragment() {
 				super.onScrolled(recyclerView, dx, dy)
 				val lm = recyclerView.layoutManager as? LinearLayoutManager ?: return
 				val messagesCount = adapter?.itemCount ?: return
-				val firstVisiblePosition = lm.findFirstVisibleItemPosition()
-				if (firstVisiblePosition < messagesCount - 20) {
-					btnScrollToBottom?.isVisible = true
-				} else {
-					btnScrollToBottom?.isVisible = false
-				}
-
-				val itemViewedPosition = lm.findFirstCompletelyVisibleItemPosition()
-//				if (itemViewedPosition < 1) {
-//					btnScrollToBottom?.isVisible = false
-//				}
-				Log.d("abctag", "onScrolled firstVisiblePosition: $firstVisiblePosition, itemViewedPosition: $itemViewedPosition")
+				val lastVisibleItemPosition = lm.findLastVisibleItemPosition()
+				btnScrollToBottom?.isVisible = lastVisibleItemPosition < messagesCount - 5
 			}
 		})
 	}
@@ -408,7 +398,7 @@ class ChatFragment : Fragment() {
 			if (range - (extent + offset) > SEND_FOCUS_SCROLL_THRESHOLD_PX) {
 				return
 			}
-			val count = adapter!!.itemCount
+			val count = adapter?.itemCount ?: 0
 			recycler.smoothScrollToPosition(if (count == 0) 0 else count - 1)
 		}
 	}

@@ -58,6 +58,8 @@ internal class MyMessageViewHolder(
 				myDate.visibility = View.INVISIBLE
 				myReceived.visibility = View.GONE
 				myRead.visibility = View.GONE
+				myDate.text = message.Date?.let { timeFormat.format(it) } ?: ""
+				myDate.visibility = if (message.Date != null) View.VISIBLE else View.GONE
 			} else {
 				mySending.visibility = View.GONE
 				myFlags.visibility = View.VISIBLE
@@ -65,6 +67,10 @@ internal class MyMessageViewHolder(
 				myDate.visibility = if (message.Date != null) View.VISIBLE else View.GONE
 				myReceived.visibility = if (message.Received) View.VISIBLE else View.GONE
 				myRead.visibility = if (message.Read) View.VISIBLE else View.GONE
+
+				val isRead = message.Read
+				myRead.isVisible = isRead
+				myReceived.isVisible = !isRead && message.Received == true
 			}
 		} else {
 			mySending.visibility = View.GONE

@@ -1139,7 +1139,7 @@ object IQChannels {
 
 		auth?.Client?.let { client ->
 			val localId = nextLocalId()
-			val message = ChatMessage(client, localId)
+			val message = ChatMessage(client, localId, text)
 			message.Sending = true
 			messages?.add(message)
 

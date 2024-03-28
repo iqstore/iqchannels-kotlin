@@ -78,6 +78,54 @@
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
                         tools:ignore="ContentDescription"/>
+
+                    <!-- Flags -->
+                    <LinearLayout
+                        android:id="@+id/myImgFlags"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end|bottom"
+                        android:layout_margin="8dp"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="2dp"
+                        android:gravity="end|center_vertical"
+                        android:orientation="horizontal"
+                        android:background="@drawable/bg_img_status"
+                        >
+
+                        <!-- Date -->
+                        <TextView
+                            android:id="@+id/myImgDate"
+                            android:layout_height="wrap_content"
+                            android:layout_width="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginEnd="4dp"
+                            android:textColor="@color/white_transparent_54"
+                            android:textSize="12sp"
+                            />
+
+                        <!-- Read -->
+                        <ImageView
+                            android:id="@+id/myImgRead"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:src="@drawable/ic_read_16"
+                            app:tint="@color/white_transparent_54"
+                            tools:ignore="HardcodedText,SmallSp"/>
+
+                        <!-- Received -->
+                        <ImageView
+                            android:id="@+id/myImgReceived"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:src="@drawable/ic_delivered_12x16"
+                            app:tint="@color/white_transparent_54"
+                            tools:ignore="HardcodedText,SmallSp"/>
+
+                    </LinearLayout>
+
                 </FrameLayout>
 
                 <!-- Text -->

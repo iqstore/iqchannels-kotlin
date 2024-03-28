@@ -133,6 +133,17 @@ internal class MyMessageViewHolder(
 					myText.visibility = View.GONE
 				}
 
+				myImgFlags.isVisible = true
+				myFlags.isVisible = false
+
+				myImgDate.text = message.Date?.let { timeFormat.format(it) } ?: ""
+				myImgDate.visibility = if (message.Date != null) View.VISIBLE else View.GONE
+				myImgReceived.visibility = if (message.Received) View.VISIBLE else View.GONE
+				myImgRead.visibility = if (message.Read) View.VISIBLE else View.GONE
+				val isRead = message.Read
+				myImgRead.isVisible = isRead
+				myImgReceived.isVisible = !isRead && message.Received == true
+
 				myImageFrame.visibility = View.VISIBLE
 				myImageFrame.layoutParams.width = size[0]
 				myImageFrame.layoutParams.height = size[1]

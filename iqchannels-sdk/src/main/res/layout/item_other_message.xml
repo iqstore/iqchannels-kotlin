@@ -164,6 +164,17 @@
                     app:layout_constraintStart_toStartOf="parent"
                     />
 
+                <!-- Date -->
+                <TextView
+                    android:id="@+id/otherDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#ff979fa7"
+                    android:textSize="12sp"
+                    app:layout_constraintTop_toBottomOf="@id/rv_card_buttons"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    />
+
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.recyclerview.widget.RecyclerView
@@ -181,15 +192,6 @@
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:layout_marginRight="40dp" />
-
-            <!-- Date -->
-            <TextView
-                android:id="@+id/otherDate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingBottom="8dp"
-                android:textColor="#ff979fa7"
-                android:textSize="12sp"/>
 
         </LinearLayout>
     </LinearLayout>

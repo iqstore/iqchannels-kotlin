@@ -91,6 +91,7 @@ internal class MyMessageViewHolder(
 			myImageFrame.visibility = View.GONE
 			clTextsMy.visibility = View.VISIBLE
 			myUpload.visibility = View.VISIBLE
+			mySending.isVisible = false
 
 			if (message.UploadExc != null) {
 				myUploadProgress.visibility = View.GONE

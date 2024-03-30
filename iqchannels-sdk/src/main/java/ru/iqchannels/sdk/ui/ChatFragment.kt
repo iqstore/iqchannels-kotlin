@@ -31,6 +31,7 @@ import android.view.inputmethod.EditorInfo
 import android.webkit.MimeTypeMap
 import android.widget.Button
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -127,7 +128,8 @@ class ChatFragment : Fragment() {
 	private var refresh: SwipeRefreshLayout? = null
 	private var adapter: ChatMessagesAdapter? = null
 	private var recycler: RecyclerView? = null
-	private var btnScrollToBottom: ImageView? = null
+	private var btnScrollToBottom: FrameLayout? = null
+	private var btnScrollToBottomDot: ImageView? = null
 
 	// Send views
 	private var sendText: EditText? = null
@@ -226,12 +228,14 @@ class ChatFragment : Fragment() {
 
 		recycler = view.findViewById(R.id.messages)
 		recycler?.adapter = adapter
-		btnScrollToBottom = view.findViewById(R.id.iv_scroll_down)
+		btnScrollToBottom = view.findViewById(R.id.fl_scroll_down)
+		btnScrollToBottomDot = view.findViewById(R.id.iv_scroll_down_dot)
 
 		btnScrollToBottom?.setOnClickListener {
 			adapter?.itemCount?.let {
 				recycler?.scrollToPosition(it - 1)
 			}
+			btnScrollToBottomDot?.isVisible = true
 		}
 
 		recycler?.addOnLayoutChangeListener { _, _, _, _, bottom, _, _, _, oldBottom ->
@@ -307,7 +311,12 @@ class ChatFragment : Fragment() {
 				val lm = recyclerView.layoutManager as? LinearLayoutManager ?: return
 				val messagesCount = adapter?.itemCount ?: return
 				val lastVisibleItemPosition = lm.findLastVisibleItemPosition()
-				btnScrollToBottom?.isVisible = lastVisibleItemPosition < messagesCount - 5
+				val isVisible = lastVisibleItemPosition < messagesCount - 5
+				btnScrollToBottom?.isVisible = isVisible
+
+				if (!isVisible) {
+					btnScrollToBottomDot?.isVisible = false
+				}
 			}
 		})
 
@@ -565,6 +574,10 @@ class ChatFragment : Fragment() {
 		checkDisableFreeText(message)
 		adapter?.received(message)
 		maybeScrollToBottomOnNewMessage()
+
+		if (btnScrollToBottom?.isVisible == true) {
+			btnScrollToBottomDot?.isVisible = true
+		}
 	}
 
 	private fun messageSent(message: ChatMessage) {

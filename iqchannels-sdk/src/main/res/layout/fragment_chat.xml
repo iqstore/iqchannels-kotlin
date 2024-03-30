@@ -113,16 +113,35 @@
             android:layout_marginHorizontal="16dp"
             android:visibility="invisible"/>
 
-        <ImageView
-            android:id="@+id/iv_scroll_down"
+        <FrameLayout
+            android:id="@+id/fl_scroll_down"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:layout_above="@id/send"
             android:layout_alignParentEnd="true"
-            android:src="@drawable/scroll_down_40"
             android:visibility="gone"
-            />
+            >
+
+            <ImageView
+                android:id="@+id/iv_scroll_down"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/scroll_down_40"
+                />
+
+            <ImageView
+                android:id="@+id/iv_scroll_down_dot"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|end"
+                android:layout_margin="2dp"
+                android:src="@drawable/ellipse_8"
+                android:visibility="gone"
+                app:tint="@color/red"
+                />
+
+        </FrameLayout>
 
         <!-- Send textbox and button -->
         <RelativeLayout

@@ -12,6 +12,7 @@
     <color name="red">#DD0A34</color>
     <color name="reply_typing_bg">#F9F9F9</color>
     <color name="other_msg_bg">#F4F4F8</color>
+    <color name="secondary_btn_bg">#F4F4F8</color>
     <color name="other_reply_text">#2D98F4</color>
     <color name="my_msg_bg">#242729</color>
     <color name="my_text_color">#ffffff</color>

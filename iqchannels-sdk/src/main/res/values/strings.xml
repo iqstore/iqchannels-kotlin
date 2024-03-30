@@ -31,4 +31,7 @@
     <string name="image_saved">Изображение сохранено в Галерею</string>
     <string name="message_copied">Сообщение скопировано</string>
     <string name="clear">Понятно</string>
+    <string name="chat_unavailable">Чат временно недоступен</string>
+    <string name="chat_unavailable_description">Мы уже все исправляем. Обновите страницу или попробуйте позже</string>
+    <string name="go_back">Вернуться</string>
 </resources>

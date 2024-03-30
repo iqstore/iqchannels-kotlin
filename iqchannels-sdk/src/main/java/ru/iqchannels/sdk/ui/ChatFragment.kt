@@ -156,7 +156,7 @@ class ChatFragment : Fragment() {
 					true -> { // multiple choice
 						it.data?.clipData?.let { clipData ->
 							val uris = ArrayList<Uri>()
-							val itemCount = if (clipData.itemCount > 5) 5 else clipData.itemCount
+							val itemCount = if (clipData.itemCount > 10) 10 else clipData.itemCount
 							for (i in 0 until itemCount) {
 								uris.add(clipData.getItemAt(i).uri)
 							}
@@ -720,7 +720,20 @@ class ChatFragment : Fragment() {
 
 			withContext(Dispatchers.Main) {
 				result?.let {
-					showConfirmDialog(it)
+					showConfirmDialog(it, it.name)
+				}
+			}
+		}
+	}
+
+	private fun onGalleryMutipleFilesResult(uri: Uri) {
+
+		lifecycleScope.launch(Dispatchers.IO) {
+			val result = prepareFile(uri)
+
+			withContext(Dispatchers.Main) {
+				result?.let {
+					showConfirmDialog(it, getString(R.string.chat_send_multiple_file_confirmation))
 				}
 			}
 		}
@@ -730,7 +743,7 @@ class ChatFragment : Fragment() {
 		lifecycleScope.launch {
 			multipleFilesQueue.addAll(fileUris)
 			val uri = multipleFilesQueue.removeFirst()
-			onGalleryResult(uri)
+			onGalleryMutipleFilesResult(uri)
 		}
 	}
 
@@ -764,10 +777,10 @@ class ChatFragment : Fragment() {
 		null
 	}
 
-	private fun showConfirmDialog(file: File) {
+	private fun showConfirmDialog(file: File, message: String) {
 		val builder = AlertDialog.Builder(context)
 			.setTitle(R.string.chat_send_file_confirmation)
-			.setMessage(file.name)
+			.setMessage(message)
 			.setPositiveButton(R.string.ok) { dialogInterface: DialogInterface?, i: Int ->
 				var replyToMessageId: Long? = null
 				if (replyingMessage != null) {
@@ -854,7 +867,7 @@ class ChatFragment : Fragment() {
 		}
 
 		addCameraPhotoToGallery(file)
-		showConfirmDialog(file)
+		showConfirmDialog(file, file.name)
 	}
 
 	private fun addCameraPhotoToGallery(file: File) {

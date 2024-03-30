@@ -202,7 +202,6 @@ internal class OtherMessageViewHolder(
 			this.rating.root.visibility = View.VISIBLE
 			this.rating.ratingRate.visibility = View.GONE
 			this.rating.ratingRated.visibility = View.GONE
-			this.rating.btnSendRating.visibility = View.GONE
 			if (ChatMessagesAdapter.objectEquals(msgRating.State, RatingState.PENDING)) {
 				this.rating.ratingRate.visibility = View.VISIBLE
 				val value = msgRating.Value ?: 0
@@ -232,7 +231,7 @@ internal class OtherMessageViewHolder(
 				}
 
 				message.Rating?.Value?.takeIf { it > 0 }?.let { rate ->
-					this.rating.btnSendRating.isVisible = message.Rating?.Sent != true
+					this.rating.btnSendRating.isEnabled = message.Rating?.Sent != true
 					this.rating.btnSendRating.setOnClickListener {
 						onRateButtonClick(rate)
 					}

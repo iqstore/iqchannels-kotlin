@@ -23,21 +23,21 @@
             android:layout_marginRight="40dp"
             android:autoLink="all"
             android:textColor="#ff4c4c4c"
-            android:textSize="12sp"
-            android:text="@string/chat_ratings_rate"/>
+            android:textSize="17sp"
+            android:text="@string/chat_ratings_rate_msg"/>
 
         <LinearLayout
             android:id="@+id/rating_rates"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="3pt"
+            android:layout_marginTop="10dp"
             android:orientation="horizontal">
 
             <ImageButton
                 android:id="@+id/rating_rate_1"
                 android:layout_width="@dimen/rating_button_size"
                 android:layout_height="@dimen/rating_button_size"
-                android:layout_marginRight="3pt"
+                android:layout_marginRight="10dp"
                 android:background="@null"
                 android:scaleType="centerCrop"
                 android:src="@drawable/star_empty"
@@ -47,7 +47,7 @@
                 android:id="@+id/rating_rate_2"
                 android:layout_width="@dimen/rating_button_size"
                 android:layout_height="@dimen/rating_button_size"
-                android:layout_marginRight="3pt"
+                android:layout_marginRight="10dp"
                 android:background="@null"
                 android:scaleType="centerCrop"
                 android:src="@drawable/star_empty"
@@ -57,7 +57,7 @@
                 android:id="@+id/rating_rate_3"
                 android:layout_width="@dimen/rating_button_size"
                 android:layout_height="@dimen/rating_button_size"
-                android:layout_marginRight="3pt"
+                android:layout_marginRight="10dp"
                 android:background="@null"
                 android:scaleType="centerCrop"
                 android:src="@drawable/star_empty"
@@ -67,7 +67,7 @@
                 android:id="@+id/rating_rate_4"
                 android:layout_width="@dimen/rating_button_size"
                 android:layout_height="@dimen/rating_button_size"
-                android:layout_marginRight="3pt"
+                android:layout_marginRight="10dp"
                 android:background="@null"
                 android:scaleType="centerCrop"
                 android:src="@drawable/star_empty"
@@ -77,7 +77,7 @@
                 android:id="@+id/rating_rate_5"
                 android:layout_width="@dimen/rating_button_size"
                 android:layout_height="@dimen/rating_button_size"
-                android:layout_marginRight="3pt"
+                android:layout_marginRight="5dp"
                 android:background="@null"
                 android:scaleType="centerCrop"
                 android:src="@drawable/star_empty"
@@ -89,9 +89,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
+            android:paddingVertical="10dp"
+            android:minHeight="0dp"
+            android:enabled="false"
             android:text="@string/send"
             android:textAllCaps="false"
-            android:backgroundTint="@color/red"
+            android:textSize="15sp"
+            android:background="@drawable/bg_button_rate"
+            android:backgroundTint="@color/bg_btn_rate"
             android:textColor="@color/light_text_color"
             />
 

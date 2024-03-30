@@ -24,13 +24,18 @@ class ButtonsAdapter internal constructor(
 			LinearLayout.LayoutParams.WRAP_CONTENT
 		)
 		lp.setMargins(0, UiUtils.toPx(5), 0, 0)
-		btn.layoutParams = lp
-		btn.setBackgroundResource(R.drawable.bg_single_choice_btn)
-		btn.setTextColor(ContextCompat.getColor(parent.context, R.color.light_text_color))
-		btn.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-		btn.isAllCaps = false
-		btn.elevation = 0f
-		btn.stateListAnimator = null
+		btn.run {
+			layoutParams = lp
+			minHeight = 0
+			minimumHeight = 0
+			setPadding(0, UiUtils.toPx(8), 0, UiUtils.toPx(8))
+			setBackgroundResource(R.drawable.bg_single_choice_btn)
+			setTextColor(ContextCompat.getColor(parent.context, R.color.light_text_color))
+			setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+			isAllCaps = false
+			elevation = 0f
+			stateListAnimator = null
+		}
 
 		return ButtonsVH(btn)
 	}

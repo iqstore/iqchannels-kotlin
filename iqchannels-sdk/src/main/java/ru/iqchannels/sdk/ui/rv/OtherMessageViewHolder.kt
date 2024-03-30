@@ -55,8 +55,6 @@ internal class OtherMessageViewHolder(
 		otherImageSrc.setOnClickListener { adapter.onImageClicked(bindingAdapterPosition) }
 		tvOtherFileName.setOnClickListener { adapter.onTextMessageClicked(bindingAdapterPosition) }
 
-		rvCardButtons.addItemDecoration(MarginItemDecoration())
-
 		// Name and avatar
 		val user = message.User
 		if (groupStart && user != null) {

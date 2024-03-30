@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.util.AttributeSet
 import android.util.TypedValue
+import android.view.Gravity
 import android.view.ViewGroup
 import androidx.appcompat.widget.AppCompatButton
 import androidx.core.content.ContextCompat
@@ -27,6 +28,7 @@ class DropDownButton @JvmOverloads constructor(
 		elevation = 0f
 		val vertical = UiUtils.toPx(4)
 		val horizontal = UiUtils.toPx(4)
+		gravity = Gravity.CENTER
 		setPadding(horizontal, vertical, horizontal, vertical)
 	}
 

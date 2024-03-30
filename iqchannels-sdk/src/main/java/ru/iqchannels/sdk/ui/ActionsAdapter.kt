@@ -24,13 +24,19 @@ class ActionsAdapter internal constructor(
 			LinearLayout.LayoutParams.MATCH_PARENT,
 			LinearLayout.LayoutParams.WRAP_CONTENT
 		)
-		btn.layoutParams = lp
-		btn.setBackgroundResource(R.drawable.bg_action_btn)
-		btn.setTextColor(ContextCompat.getColor(parent.context, R.color.dark_text_color))
-		btn.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
-		btn.isAllCaps = false
-		btn.elevation = 0f
-		btn.stateListAnimator = null
+		btn.run {
+			lp.setMargins(0, 0, 0, UiUtils.toPx(5))
+			layoutParams = lp
+			minHeight = 0
+			minimumHeight = 0
+			setPadding(0, UiUtils.toPx(8), 0, UiUtils.toPx(8))
+			setBackgroundResource(R.drawable.bg_action_btn)
+			setTextColor(ContextCompat.getColor(parent.context, R.color.dark_text_color))
+			setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+			isAllCaps = false
+			elevation = 0f
+			stateListAnimator = null
+		}
 
 		return ButtonsVH(btn)
 	}

@@ -127,7 +127,8 @@ internal class OtherMessageViewHolder(
 				}
 				otherImageFrame.visibility = View.VISIBLE
 
-				if (!text.isNullOrEmpty()) {
+				val withText = !text.isNullOrEmpty()
+				if (withText) {
 					otherImageFrame.setBackgroundResource(R.drawable.other_msg_reply_bg)
 				} else {
 					otherImageFrame.setBackgroundResource(R.drawable.other_msg_bg)
@@ -136,14 +137,15 @@ internal class OtherMessageViewHolder(
 				otherImageFrame.layoutParams.width = size[0]
 				otherImageFrame.layoutParams.height = size[1]
 				otherImageFrame.requestLayout()
+				val radius = UiUtils.toPx(12).toFloat()
 				Glide.with(otherImageFrame.context)
 					.load(imageUrl)
 					.transform(
 						GranularRoundedCorners(
-							UiUtils.toPx(12).toFloat(),
-							UiUtils.toPx(12).toFloat(),
-							0f,
-							0f
+							radius,
+							radius,
+							if (withText) 0f else radius,
+							if (withText) 0f else radius,
 						)
 					)
 					.into(otherImageSrc)

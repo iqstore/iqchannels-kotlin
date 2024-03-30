@@ -136,7 +136,7 @@ class IQAppActivity :
 
 		// Insert the fragment by replacing any existing fragment
 		val fragmentManager = supportFragmentManager
-		fragmentManager.beginTransaction().replace(R.id.content, fragment).commit()
+		fragmentManager.beginTransaction().replace(R.id.content, fragment).addToBackStack(null).commit()
 		val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
 		drawer.closeDrawer(GravityCompat.START)
 		return true

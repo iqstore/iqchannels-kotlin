@@ -260,7 +260,7 @@ object IQChannels {
 		}
 
 		for (listener in listeners) {
-			execute { listener.authFailed(exception) }
+			execute { listener.authFailed(exception, authAttempt) }
 		}
 
 		handler?.let { handler ->
@@ -356,7 +356,7 @@ object IQChannels {
 		}
 
 		for (listener in listeners) {
-			execute { listener.authFailed(exception) }
+			execute { listener.authFailed(exception, authAttempt) }
 		}
 
 		if (exception is ChatException) {
@@ -442,7 +442,7 @@ object IQChannels {
 		authRequest = null
 		Log.e(TAG, String.format("Failed to sign up anonymous client, exc=%s", exception))
 		for (listener in listeners) {
-			execute { listener.authFailed(exception) }
+			execute { listener.authFailed(exception, authAttempt) }
 		}
 
 		handler?.let { handler ->

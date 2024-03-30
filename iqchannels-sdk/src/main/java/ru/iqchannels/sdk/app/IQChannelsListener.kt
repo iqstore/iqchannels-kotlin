@@ -9,5 +9,5 @@ import ru.iqchannels.sdk.schema.ClientAuth
 interface IQChannelsListener {
 	fun authenticating()
 	fun authComplete(auth: ClientAuth)
-	fun authFailed(e: Exception)
+	fun authFailed(e: Exception, attempt: Int)
 }

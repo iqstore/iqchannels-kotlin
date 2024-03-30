@@ -338,6 +338,13 @@ class ChatFragment : Fragment() {
 		chatLayout?.visibility = if (IQChannels.auth != null) View.VISIBLE else View.GONE
 	}
 
+	private fun showUnavailableView() {
+		authLayout?.visibility = View.GONE
+		signupLayout?.visibility = View.GONE
+		chatLayout?.visibility = View.GONE
+		chatUnavailableLayout?.isVisible = true
+	}
+
 	override fun onStart() {
 		super.onStart()
 
@@ -353,9 +360,13 @@ class ChatFragment : Fragment() {
 				updateViews()
 			}
 
-			override fun authFailed(e: Exception) {
+			override fun authFailed(e: Exception, attempt: Int) {
 				signupError?.text = String.format("Ошибка: %s", e.localizedMessage)
-				updateViews()
+				if (attempt >= 5) {
+					showUnavailableView()
+				} else {
+					updateViews()
+				}
 			}
 		})
 

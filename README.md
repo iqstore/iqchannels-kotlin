@@ -5,7 +5,7 @@ SDK для Андроида сделано как обычная андроид-
 
 Требования:
 * minSdkVersion 26.
-* targetSdkVersion 30.
+* targetSdkVersion 34.
 
 
 # Установка
@@ -48,11 +48,11 @@ allprojects {
 }
 ```
 
-5. Добавьте зависимосить `compile 'ru.iqstore:iqchannels-sdk:1.8.5'` в `build.gradle` модуля приложения.
+5. Добавьте зависимосить `implementation 'ru.iqstore:iqchannels-sdk:1.8.5'` в `build.gradle` модуля приложения.
 ```build.gradle
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])   
-    compile 'ru.iqstore:iqchannels-sdk:1.8.5'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])   
+    implementation 'ru.iqstore:iqchannels-sdk:1.8.5'
     // etc...
 }
 ```
@@ -83,24 +83,22 @@ buildscript {
 
 Для использования SDK его нужно сконфигурировать. Конфигурировать можно в любом месте приложения, 
 где доступен контекст андроида. `ChatFragment` можно спокойно использовать до конфигурации.
-Для конфигурации нужно передать адрес чат-сервера и английское название канала в `IQChannels.instance().configure()`.
+Для конфигурации нужно передать адрес чат-сервера и английское название канала в `IQChannels.configure()`.
 
 Пример конфигурации в `Activity.onCreate`.
-```java
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+```kotlin
+class MainActivity : AppCompatActivity(),
+         NavigationView.OnNavigationItemSelectedListener {
+			 
+    override fun onCreate(savedInstanceState: Bundle) {
+        super.onCreate(savedInstanceState)
         
-        setupIQChannels();
+        setupIQChannels()
     }
 
-    private void setupIQChannels() {
+    private fun setupIQChannels() {
         // Настраиваем сервер и канал iqchannels.
-        IQChannels iqchannels = IQChannels.instance();
-        iqchannels.configure(this, new IQChannelsConfig("http://192.168.31.158:3001/", "support"));
+        IQChannels.configure(this, IQChannelsConfig("http://192.168.31.158:3001/", "support"))
     }
 }
 ```
@@ -109,15 +107,15 @@ public class MainActivity extends AppCompatActivity
 По умолчанию в анонимном режиме пользователю предлагается представиться, чтобы начать чать.
 Для автоматического создания анонимного пользователя нужно вызвать:
 
-```java
-IQChannels.instance().loginAnonymous();
+```kotlin
+IQChannels.loginAnonymous()
 ```
 
 Анонимный пользователь привязывается к устройству. Если требуется удалить анонимный чат, тогда
 нужно вызывать:
 
-```java
-IQChannels.instance().logoutAnonymous();
+```kotlin
+IQChannels.logoutAnonymous()
 ```
 
 # Логин
@@ -128,13 +126,13 @@ IQChannels.instance().logoutAnonymous();
 Логин/логаут пользователя осуществляется по внешнему токену, специфичному для конкретного приложения.
 Для логина требуется вызвать в любом месте приложения:
 
-```java
-IQChannels.instance().login("isimple chat token");
+```kotlin
+IQChannels.login("isimple chat token")
 ```
 
 Для логаута:
-```java
-IQChannels.instance().logout();
+```kotlin
+IQChannels.logout()
 ```
 
 После логина внутри SDK авторизуется сессия пользователя и начинается бесконечный цикл, который подключается
@@ -147,37 +145,35 @@ IQChannels.instance().logout();
 Интерфейс чата корректно обрабатывает логины/логаут, обнуляет сообщения.
 
 Пример использования в стандартном боковом меню:
-```java
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
-    
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        Fragment fragment;
-        switch (item.getItemId()) {
-            case R.id.nav_index:
-                fragment = PlusOneFragment.newInstance();
-                break;
 
-            case R.id.nav_chat:
-                // Пользователь выбрал чат в меню.
-                fragment = ChatFragment.newInstance();
-                break;
+```kotlin
+class MainActivity : AppCompatActivity(),
+	NavigationView.OnNavigationItemSelectedListener {
 
-            default:
-                fragment = PlusOneFragment.newInstance();
-                break;
-        }
+	override fun onNavigationItemSelected(item: MenuItem): Boolean {
+		val fragment: Fragment = when (item.getItemId()) {
+			R.id.nav_index -> {
+				PlusOneFragment.newInstance()
+			}
+			R.id.nav_chat -> {
+				// Пользователь выбрал чат в меню.
+				ChatFragment.newInstance()
+			}
+			else -> {
+				PlusOneFragment.newInstance()
+			}
+		}
 
-        // Заменяем фрагмент в нашей активити.
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.content, fragment).commit();
+		// Заменяем фрагмент в нашей активити.
+		val fragmentManager = supportFragmentManager
+		fragmentManager.beginTransaction().replace(R.id.content, fragment).commit()
 
-        // Сворачиваем меню.
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
-    }
+		// Сворачиваем меню.
+		val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
+		drawer.closeDrawer(GravityCompat.START)
+
+		return true
+	}
 }
 ```
 
@@ -188,28 +184,25 @@ public class MainActivity extends AppCompatActivity
 логин, логаут.
 
 Пример добавления слушателя в `Activity.onCreate`:
-```java
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener,
+```kotlin
+class MainActivity : AppCompatActivity,
+        NavigationView.OnNavigationItemSelectedListener,
                    UnreadListener {
 
-    private Cancellable unreadSubscription;
+    private var unreadSubscription : Cancellable? = null
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        listenToUnread();
+    override fun onCreate(savedInstanceState: Bundle) {
+        super.onCreate(savedInstanceState)
+        listenToUnread()
     }
 
     // Добавляем слушателя непрочитанных сообщений.
-    private void listenToUnread() {
-        unreadSubscription = IQChannels.instance().addUnreadListener(this);
+    private fun listenToUnread() {
+        unreadSubscription = IQChannels.addUnreadListener(this)
     }
 
     // Показывает текущие количество непрочитанных сообщений.
-    @Override
-    public void unreadChanged(int unread) {
+    override fun unreadChanged(unread: Int) {
 
     }
 }
@@ -221,28 +214,25 @@ SDK поддерживает пуш-уведомления о новых соо�
 и передать его в IQChannels.
 
 Передача токена в `Activity.onCreate`:
-```
-@Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        String token = FirebaseInstanceId.getInstance().getToken();
+```kotlin
+    override fun onCreate(savedInstanceState: Bundle) {
+        super.onCreate(savedInstanceState)
+        val token = FirebaseInstanceId.getInstance().getToken()
 
-        IQChannels iq = IQChannels.instance();
-        iq.configure(this, new IQChannelsConfig("https://chat.example.com/", "support"));
-        iq.setPushToken(token);
+	    IQChannels.configure(this, IQChannelsConfig("https://chat.example.com/", "support"))
+	    IQChannels.setPushToken(token)
     }
 ```
 
 Обновление токена в наследнике `FirebaseInstanceIdService`:
-```
-public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
+```kotlin
+class MyFirebaseInstanceIDService : FirebaseInstanceIdService {
 
-    @Override
-    public void onTokenRefresh() {
-        super.onTokenRefresh();
+    override fun onTokenRefresh() {
+        super.onTokenRefresh()
 
-        String token = FirebaseInstanceId.getInstance().getToken();
-        IQChannels.instance().setPushToken(token);
+        val token = FirebaseInstanceId.getInstance().getToken()
+        IQChannels.setPushToken(token)
     }
 }
 ```

@@ -223,16 +223,3 @@ SDK поддерживает пуш-уведомления о новых соо�
 	    IQChannels.setPushToken(token)
     }
 ```
-
-Обновление токена в наследнике `FirebaseInstanceIdService`:
-```kotlin
-class MyFirebaseInstanceIDService : FirebaseInstanceIdService {
-
-    override fun onTokenRefresh() {
-        super.onTokenRefresh()
-
-        val token = FirebaseInstanceId.getInstance().getToken()
-        IQChannels.setPushToken(token)
-    }
-}
-```

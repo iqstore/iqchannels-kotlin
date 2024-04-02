@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Handler
 import android.webkit.MimeTypeMap
-import com.squareup.picasso.Picasso
 import java.io.File
 import java.util.*
 import java.util.concurrent.CancellationException
@@ -103,6 +102,8 @@ object IQChannels {
 		sendQueue = ArrayList()
 	}
 
+	internal fun getCurrentToken() = client?.getCurrentToken()
+
 	fun addListener(listener: IQChannelsListener): Cancellable {
 		listeners.add(listener)
 		return object : Cancellable {
@@ -129,12 +130,6 @@ object IQChannels {
 				"IQChannels", Context.MODE_PRIVATE
 			)
 		}
-	}
-
-	fun picasso(): Picasso? {
-		return if (client == null) {
-			Picasso.get()
-		} else client?.picasso()
 	}
 
 	fun signup(name: String?) {

@@ -4,10 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.squareup.picasso.OkHttp3Downloader
-import com.squareup.picasso.Picasso
 import java.io.File
-import java.io.IOException
 import java.io.InterruptedIOException
 import java.net.MalformedURLException
 import java.net.URL
@@ -15,9 +12,6 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.Volatile
-import okhttp3.Interceptor
-import okhttp3.OkHttpClient
-import okhttp3.Response
 import ru.iqchannels.sdk.Log.d
 import ru.iqchannels.sdk.Log.e
 import ru.iqchannels.sdk.rels.Rels
@@ -50,7 +44,6 @@ class HttpClient(
 	private val gson: Gson
 	private val rels: Rels
 	private val executor: ExecutorService
-	private val picasso: Picasso
 
 	private val address: String
 
@@ -73,20 +66,10 @@ class HttpClient(
 			thread.name = String.format("%s-%d", pkg, threadCounter.incrementAndGet())
 			thread
 		}
-		picasso = buildPicasso(context)
 	}
 
-	fun picasso(): Picasso {
-		return picasso
-	}
+	internal fun getCurrentToken() = token
 
-	private fun buildPicasso(context: Context): Picasso {
-		val auth: Interceptor = PicassoAuth()
-		val client = OkHttpClient().newBuilder().addInterceptor(auth).build()
-		val downloader = OkHttp3Downloader(client)
-
-		return Picasso.Builder(context).downloader(downloader).build()
-	}
 
 	fun setToken(token: String?) {
 		this.token = token
@@ -647,18 +630,5 @@ class HttpClient(
 		}
 
 		return request
-	}
-
-	private inner class PicassoAuth : Interceptor {
-		@Throws(IOException::class)
-		override fun intercept(chain: Interceptor.Chain): Response {
-			val header = String.format("Client %s", token)
-			val request = chain.request()
-				.newBuilder()
-				.addHeader("Authorization", header)
-				.build()
-
-			return chain.proceed(request)
-		}
 	}
 }

@@ -68,10 +68,11 @@ internal class OtherMessageViewHolder(
 				// Avatar image
 				otherAvatarText.visibility = View.GONE
 				otherAvatarImage.visibility = View.VISIBLE
-				IQChannels.picasso()
-					?.load(avatarUrl)
-					?.placeholder(R.drawable.avatar_placeholder)
-					?.into(otherAvatarImage)
+
+				Glide.with(root.context)
+					.load(avatarUrl)
+					.placeholder(R.drawable.avatar_placeholder)
+					.into(otherAvatarImage)
 			} else {
 				// Avatar circle with a letter inside
 				otherAvatarImage.visibility = View.GONE

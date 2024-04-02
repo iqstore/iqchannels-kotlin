@@ -12,6 +12,7 @@ import androidx.annotation.ColorRes
 import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import com.bumptech.glide.Glide
 import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.app.IQChannels
 import ru.iqchannels.sdk.schema.ChatMessage
@@ -66,9 +67,10 @@ class ReplyMessageView @JvmOverloads constructor(
 			if (imageUrl != null) {
 				tvFileName.visibility = GONE
 				imageView.visibility = VISIBLE
-				IQChannels.picasso()
-					?.load(imageUrl)
-					?.into(imageView)
+
+				Glide.with(context)
+					.load(imageUrl)
+					.into(imageView)
 			} else {
 				imageView.visibility = GONE
 				tvFileName.visibility = VISIBLE

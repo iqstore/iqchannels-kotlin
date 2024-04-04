@@ -53,8 +53,11 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeoutException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -65,6 +68,7 @@ import ru.iqchannels.sdk.app.Cancellable
 import ru.iqchannels.sdk.app.IQChannels
 import ru.iqchannels.sdk.app.IQChannelsListener
 import ru.iqchannels.sdk.app.MessagesListener
+import ru.iqchannels.sdk.http.HttpException
 import ru.iqchannels.sdk.lib.InternalIO.copy
 import ru.iqchannels.sdk.schema.Action
 import ru.iqchannels.sdk.schema.ActionType
@@ -635,6 +639,33 @@ class ChatFragment : Fragment() {
 
 		checkDisableFreeText(message)
 		adapter?.updated(message)
+
+		checkException(message)
+	}
+
+	private fun checkException(message: ChatMessage) {
+		val exception = message.UploadExc ?: return
+		var errMessage = exception.localizedMessage
+
+		if (exception is HttpException && exception.code == 413) {
+			errMessage = getString(R.string.file_size_too_large)
+		}
+
+		when(exception) {
+			is HttpException -> {
+				if (exception.code == 413) {
+					errMessage = getString(R.string.file_size_too_large)
+				}
+			}
+			is UnknownHostException -> {
+				errMessage = getString(R.string.check_connection)
+			}
+			is SocketTimeoutException, is TimeoutException -> {
+				errMessage = getString(R.string.timeout_message)
+			}
+		}
+
+		ItemClickListener().fileUploadException(errMessage)
 	}
 
 	// More messages

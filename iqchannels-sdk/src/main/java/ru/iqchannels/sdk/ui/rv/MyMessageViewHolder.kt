@@ -99,14 +99,6 @@ internal class MyMessageViewHolder(
 
 			if (message.UploadExc != null) {
 				myUploadProgress.visibility = View.GONE
-				val exception = message.UploadExc
-				var errMessage = exception?.localizedMessage
-
-				if (exception is HttpException && exception.code == 413) {
-					errMessage = root.resources.getString(R.string.file_size_too_large)
-				}
-
-				itemClickListener.fileUploadException(errMessage)
 			}
 
 			val file = message.Upload ?: return@with

@@ -26,6 +26,8 @@
     <string name="open_file">Открыть файл</string>
     <string name="download_file">Сохранить в \"Загрузки\"</string>
     <string name="file_size_too_large">Превышен максимально допустимый размер файла</string>
+    <string name="check_connection">Проверьте соединение с Интернетом</string>
+    <string name="timeout_message">Превышен лимит ожидания</string>
     <string name="file_saved_success_msg">Файл \"%1$s\" успешно сохранен в папку \"Загрузки\"</string>
     <string name="file_saved_fail_msg">Не удалось сохранить файл \"%1$s\" в папку \"Загрузки\"</string>
     <string name="file_size_kb_placeholder">%1$s кб</string>
@@ -38,4 +40,5 @@
     <string name="chat_unavailable">Чат временно недоступен</string>
     <string name="chat_unavailable_description">Мы уже все исправляем. Обновите страницу или попробуйте позже</string>
     <string name="go_back">Вернуться</string>
+    <string name="file_not_uploaded">Файл не загрузился</string>
 </resources>

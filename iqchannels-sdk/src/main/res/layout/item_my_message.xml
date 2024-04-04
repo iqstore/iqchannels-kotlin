@@ -77,6 +77,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
+                        android:cropToPadding="true"
+                        android:adjustViewBounds="true"
                         tools:ignore="ContentDescription"/>
 
                     <!-- Flags -->

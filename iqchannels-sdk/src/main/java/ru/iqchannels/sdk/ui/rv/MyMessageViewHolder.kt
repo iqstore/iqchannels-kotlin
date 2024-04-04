@@ -9,9 +9,12 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.GranularRoundedCorners
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import java.text.DateFormat
 import java.text.DecimalFormat
+import kotlin.math.roundToInt
 import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.databinding.ItemMyMessageBinding
 import ru.iqchannels.sdk.http.HttpException
@@ -20,6 +23,7 @@ import ru.iqchannels.sdk.schema.ChatPayloadType
 import ru.iqchannels.sdk.ui.ChatMessagesAdapter
 import ru.iqchannels.sdk.ui.Colors
 import ru.iqchannels.sdk.ui.UiUtils
+import ru.iqchannels.sdk.ui.widgets.toPx
 
 internal class MyMessageViewHolder(
 	private val binding: ItemMyMessageBinding,
@@ -150,17 +154,14 @@ internal class MyMessageViewHolder(
 				myImageFrame.layoutParams.height = size[1]
 				myImageFrame.requestLayout()
 
-				Glide.with(root.context)
-					.load(imageUrl)
-					.transform(
-						GranularRoundedCorners(
-							UiUtils.toPx(12).toFloat(),
-							UiUtils.toPx(12).toFloat(),
-							0f,
-							0f
+				myImageFrame.post {
+					Glide.with(root.context)
+						.load(imageUrl)
+						.transform(
+							RoundedCorners(12.toPx.roundToInt()), CenterCrop()
 						)
-					)
-					.into(myImageSrc)
+						.into(myImageSrc)
+				}
 			} else {
 				myImageFrame.visibility = View.GONE
 				clTextsMy.visibility = View.VISIBLE

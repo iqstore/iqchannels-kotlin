@@ -158,12 +158,19 @@ class ChatFragment : Fragment() {
 					true -> { // multiple choice
 						it.data?.clipData?.let { clipData ->
 							val uris = ArrayList<Uri>()
-							val itemCount = if (clipData.itemCount > 10) 10 else clipData.itemCount
+							val itemCount = clipData.itemCount
 							for (i in 0 until itemCount) {
 								uris.add(clipData.getItemAt(i).uri)
 							}
 
-							sendMultipleFiles(uris)
+							when (itemCount) {
+								1 -> {
+									onGalleryResult(uris.first())
+								}
+								else -> {
+									sendMultipleFiles(uris)
+								}
+							}
 						}
 					}
 					false -> { // single choice
@@ -750,20 +757,20 @@ class ChatFragment : Fragment() {
 
 			withContext(Dispatchers.Main) {
 				result?.let {
-					showConfirmDialog(it, it.name)
+					showConfirmDialog(it, getString(R.string.chat_send_file_confirmation_description, it.name))
 				}
 			}
 		}
 	}
 
-	private fun onGalleryMutipleFilesResult(uri: Uri) {
+	private fun onGalleryMutipleFilesResult(uri: Uri, message: String) {
 
 		lifecycleScope.launch(Dispatchers.IO) {
 			val result = prepareFile(uri)
 
 			withContext(Dispatchers.Main) {
 				result?.let {
-					showConfirmDialog(it, getString(R.string.chat_send_multiple_file_confirmation))
+					showConfirmDialog(it, message)
 				}
 			}
 		}
@@ -771,9 +778,19 @@ class ChatFragment : Fragment() {
 
 	private fun sendMultipleFiles(fileUris: List<Uri>) {
 		lifecycleScope.launch {
-			multipleFilesQueue.addAll(fileUris)
+			multipleFilesQueue.addAll(fileUris.take(10))
 			val uri = multipleFilesQueue.removeFirst()
-			onGalleryMutipleFilesResult(uri)
+
+			val message = if (fileUris.size <= 10) {
+				getString(
+					R.string.chat_send_file_confirmation_description_multiple,
+					fileUris.size.toString()
+				)
+			} else {
+				getString(R.string.chat_send_file_confirmation_description_multiple_cut)
+			}
+
+			onGalleryMutipleFilesResult(uri, message)
 		}
 	}
 
@@ -819,7 +836,13 @@ class ChatFragment : Fragment() {
 				IQChannels.sendFile(file, replyToMessageId)
 				hideReplying()
 			}
-			.setNegativeButton(R.string.cancel, null)
+			.setNegativeButton(R.string.cancel) { dialogInterface: DialogInterface?, i: Int ->
+				multipleFilesQueue.clear()
+			}
+			.setOnCancelListener {
+				multipleFilesQueue.clear()
+			}
+
 		builder.show()
 	}
 

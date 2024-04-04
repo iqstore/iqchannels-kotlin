@@ -121,6 +121,7 @@ class ChatFragment : Fragment() {
 	// Chat layout
 	private var chatLayout: RelativeLayout? = null
 	private var chatUnavailableLayout: ConstraintLayout? = null
+	private var chatUnavailableErrorText: TextView? = null
 	private var tnwMsgCopied: TopNotificationWidget? = null
 	private var btnGoBack: Button? = null
 
@@ -218,6 +219,7 @@ class ChatFragment : Fragment() {
 		// Chat.
 		chatLayout = view.findViewById<View>(R.id.chatLayout) as RelativeLayout
 		chatUnavailableLayout = view.findViewById(R.id.chatUnavailableLayout)
+		chatUnavailableErrorText = view.findViewById(R.id.tv_text)
 		tnwMsgCopied = view.findViewById(R.id.tnw_msg_copied)
 		btnGoBack = view.findViewById(R.id.btn_go_back)
 
@@ -355,11 +357,12 @@ class ChatFragment : Fragment() {
 		chatLayout?.visibility = if (IQChannels.auth != null) View.VISIBLE else View.GONE
 	}
 
-	private fun showUnavailableView() {
+	private fun showUnavailableView(errorMessage: String) {
 		authLayout?.visibility = View.GONE
 		signupLayout?.visibility = View.GONE
 		chatLayout?.visibility = View.GONE
 		chatUnavailableLayout?.isVisible = true
+		chatUnavailableErrorText?.text = errorMessage
 	}
 
 	override fun onStart() {
@@ -380,10 +383,22 @@ class ChatFragment : Fragment() {
 			override fun authFailed(e: Exception, attempt: Int) {
 				signupError?.text = String.format("Ошибка: %s", e.localizedMessage)
 				if (attempt >= 5) {
-					showUnavailableView()
+					showUnavailableView(getString(R.string.chat_unavailable_description))
 				} else {
 					updateViews()
 				}
+
+				val message = when(e) {
+					is UnknownHostException -> {
+						getString(R.string.check_connection)
+					}
+					is SocketTimeoutException, is TimeoutException -> {
+						getString(R.string.timeout_message)
+					}
+					else -> return
+				}
+
+				showUnavailableView(message)
 			}
 		})
 

@@ -268,9 +268,9 @@ internal class OtherMessageViewHolder(
 			if (replyMsg != null) {
 				otherReply.showReplyingMessage(replyMsg)
 				otherReply.setCloseBtnVisibility(View.GONE)
-				otherReply.setVerticalDividerColor(R.color.other_reply_text)
-				otherReply.setTvSenderNameColor(R.color.other_reply_text)
-				otherReply.setTvTextColor(R.color.other_reply_text)
+				otherReply.setVerticalDividerColor(R.color.red)
+				otherReply.setTvSenderNameColor(R.color.dark_text_color)
+				otherReply.setTvTextColor(R.color.other_name)
 				otherReply.layoutParams = lp
 				clTexts.setBackgroundResource(R.drawable.other_msg_reply_text_bg)
 				otherReply.post {

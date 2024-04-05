@@ -186,9 +186,9 @@ internal class MyMessageViewHolder(
 			if (replyMsg != null) {
 				myReply.showReplyingMessage(replyMsg)
 				myReply.setCloseBtnVisibility(View.GONE)
-				myReply.setVerticalDividerColor(R.color.my_msg_reply_text)
-				myReply.setTvSenderNameColor(R.color.my_msg_reply_text)
-				myReply.setTvTextColor(R.color.my_msg_reply_text)
+				myReply.setVerticalDividerColor(R.color.white)
+				myReply.setTvSenderNameColor(R.color.white)
+				myReply.setTvTextColor(R.color.white_transparent_54)
 				val lp = LinearLayout.LayoutParams(
 					LinearLayout.LayoutParams.WRAP_CONTENT,
 					LinearLayout.LayoutParams.WRAP_CONTENT

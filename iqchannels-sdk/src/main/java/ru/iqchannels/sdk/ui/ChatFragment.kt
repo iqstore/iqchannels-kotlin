@@ -1157,5 +1157,13 @@ class ChatFragment : Fragment() {
 			val backdrop = ErrorPageBackdropDialog.newInstance(errorMessage)
 			backdrop.show(childFragmentManager, ErrorPageBackdropDialog.TRANSACTION_TAG)
 		}
+
+		override fun onReplyMessageClick(message: ChatMessage) {
+			adapter?.getItemPosition(message)?.let {
+				if (it >= 0) {
+					recycler?.smoothScrollToPosition(it)
+				}
+			}
+		}
 	}
 }

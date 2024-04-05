@@ -153,6 +153,12 @@ internal class ChatMessagesAdapter(
 		return messages[position]
 	}
 
+	fun getItemPosition(message: ChatMessage): Int {
+		return messages.find { it.Id == message.Id }?.let {
+			messages.indexOf(it)
+		} ?: -1
+	}
+
 	private fun getIndexByMessage(message: ChatMessage): Int {
 		if (message.My) {
 			for (i in messages.indices) {
@@ -365,5 +371,6 @@ internal class ChatMessagesAdapter(
 		fun onActionClick(message: ChatMessage, action: Action)
 		fun onMessageLongClick(message: ChatMessage)
 		fun fileUploadException(errorMessage: String?)
+		fun onReplyMessageClick(message: ChatMessage)
 	}
 }

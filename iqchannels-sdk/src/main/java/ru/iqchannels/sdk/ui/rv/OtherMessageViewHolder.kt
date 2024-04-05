@@ -288,6 +288,10 @@ internal class OtherMessageViewHolder(
 						otherReply.layoutParams = layoutParams
 					}
 				}
+
+				otherReply.setOnClickListener {
+					itemClickListener.onReplyMessageClick(replyMsg)
+				}
 			}
 		}
 

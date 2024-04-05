@@ -211,6 +211,10 @@ internal class MyMessageViewHolder(
 						myReply.layoutParams = layoutParams
 					}
 				}
+
+				myReply.setOnClickListener {
+					itemClickListener.onReplyMessageClick(replyMsg)
+				}
 			}
 		}
 

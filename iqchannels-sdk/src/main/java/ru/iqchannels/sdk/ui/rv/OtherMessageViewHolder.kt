@@ -100,6 +100,7 @@ internal class OtherMessageViewHolder(
 			clTexts.visibility = View.GONE
 			otherText.visibility = View.GONE
 			tvOtherFileName.visibility = View.GONE
+			ivFile.visibility = View.GONE
 			tvOtherFileSize.visibility = View.GONE
 			otherImageFrame.visibility = View.GONE
 			rating.root.visibility = View.GONE
@@ -161,6 +162,7 @@ internal class OtherMessageViewHolder(
 				clTexts.visibility = View.VISIBLE
 				clTexts.setBackgroundResource(R.drawable.other_msg_bg)
 				tvOtherFileName.visibility = View.VISIBLE
+				ivFile.visibility = View.VISIBLE
 				tvOtherFileName.autoLinkMask = 0
 				tvOtherFileName.movementMethod = LinkMovementMethod.getInstance()
 				tvOtherFileName.text = file.Name

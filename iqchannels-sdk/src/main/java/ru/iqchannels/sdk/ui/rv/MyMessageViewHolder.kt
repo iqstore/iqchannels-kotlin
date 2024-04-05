@@ -10,19 +10,16 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
-import com.bumptech.glide.load.resource.bitmap.GranularRoundedCorners
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import java.text.DateFormat
 import java.text.DecimalFormat
 import kotlin.math.roundToInt
 import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.databinding.ItemMyMessageBinding
-import ru.iqchannels.sdk.http.HttpException
 import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.schema.ChatPayloadType
 import ru.iqchannels.sdk.ui.ChatMessagesAdapter
 import ru.iqchannels.sdk.ui.Colors
-import ru.iqchannels.sdk.ui.UiUtils
 import ru.iqchannels.sdk.ui.widgets.toPx
 
 internal class MyMessageViewHolder(
@@ -98,7 +95,7 @@ internal class MyMessageViewHolder(
 			mySending.isVisible = false
 
 			if (message.UploadExc != null) {
-				myUploadProgress.visibility = View.GONE
+				myUpload.visibility = View.GONE
 			}
 
 			val file = message.Upload ?: return@with

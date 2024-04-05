@@ -187,6 +187,7 @@
                         android:id="@+id/barrier_icon_file"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        app:barrierMargin="8dp"
                         app:barrierDirection="end"
                         app:constraint_referenced_ids="iv_file, myUpload"
                         />
@@ -211,7 +212,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="#ff979fa7"
-                        android:textSize="12sp"
+                        android:textSize="15sp"
                         app:layout_constraintTop_toBottomOf="@id/tvMyFileName"
                         app:layout_constraintStart_toEndOf="@id/barrier_icon_file"
                         tools:text="15.0 кб"

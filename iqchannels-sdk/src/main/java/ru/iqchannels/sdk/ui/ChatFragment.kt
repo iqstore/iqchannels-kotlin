@@ -87,6 +87,7 @@ class ChatFragment : Fragment() {
 	companion object {
 		private const val TAG = "iqchannels"
 		private const val SEND_FOCUS_SCROLL_THRESHOLD_PX = 300
+		private const val PARAM_LM_STATE = "ChatFragment#lmState"
 
 		/**
 		 * Use this factory method to create a new instance of
@@ -199,6 +200,8 @@ class ChatFragment : Fragment() {
 
 	private val multipleFilesQueue: MutableList<Uri> = mutableListOf()
 
+	private var lmState: Parcelable? = null
+
 	override fun onCreateView(
 		inflater: LayoutInflater, container: ViewGroup?,
 		savedInstanceState: Bundle?
@@ -305,6 +308,14 @@ class ChatFragment : Fragment() {
 
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
+
+		savedInstanceState?.let {
+			lmState = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+				it.getParcelable(PARAM_LM_STATE, Parcelable::class.java)
+			} else {
+				it.getParcelable(PARAM_LM_STATE)
+			}
+		}
 
 		childFragmentManager.setFragmentResultListener(
 			FileActionsChooseFragment.REQUEST_KEY,
@@ -416,8 +427,15 @@ class ChatFragment : Fragment() {
 			iqchannelsListenerCancellable = null
 		}
 
+		lmState = (recycler?.layoutManager as? LinearLayoutManager)?.onSaveInstanceState()
+
 		clearMessages()
 		clearMoreMessages()
+	}
+
+	override fun onSaveInstanceState(outState: Bundle) {
+		super.onSaveInstanceState(outState)
+		outState.putParcelable(PARAM_LM_STATE, lmState)
 	}
 
 	// Messages scroll
@@ -444,12 +462,6 @@ class ChatFragment : Fragment() {
 
 	private fun maybeScrollToBottomOnNewMessage() {
 		recycler?.let { recycler ->
-			val extent = recycler.computeVerticalScrollExtent()
-			val offset = recycler.computeVerticalScrollOffset()
-			val range = recycler.computeVerticalScrollRange()
-			if (range - (extent + offset) > SEND_FOCUS_SCROLL_THRESHOLD_PX) {
-				return
-			}
 			val count = adapter?.itemCount ?: 0
 			recycler.smoothScrollToPosition(if (count == 0) 0 else count - 1)
 		}
@@ -571,7 +583,13 @@ class ChatFragment : Fragment() {
 		enableSend()
 
 		adapter?.loaded(messages)
-		recycler?.scrollToPosition(if (messages.isEmpty()) 0 else messages.size - 1)
+
+		lmState?.let {
+			(recycler?.layoutManager as? LinearLayoutManager)?.onRestoreInstanceState(it)
+		} ?: run {
+			recycler?.scrollToPosition(if (messages.isEmpty()) 0 else messages.size - 1)
+		}
+
 		progress?.visibility = View.GONE
 		refresh?.isRefreshing = false
 		refresh?.isEnabled = true

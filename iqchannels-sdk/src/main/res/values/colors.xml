@@ -27,4 +27,5 @@
     <color name="text_field">#F4F4F8</color>
     <color name="top_success_notification">#57B22F</color>
     <color name="other_name">#919399</color>
+    <color name="date">#919399</color>
 </resources>

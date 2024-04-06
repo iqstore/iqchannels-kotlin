@@ -15,16 +15,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
-        android:paddingBottom="6dp"
-        android:textColor="#ff979fa7"
-        android:textSize="12sp"
-        android:textStyle="bold"/>
+        android:textColor="@color/date"
+        android:textSize="13sp"
+        />
 
     <!-- Other message -->
     <LinearLayout
         android:id="@+id/other"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp">
 
         <!-- Avatar -->
         <FrameLayout

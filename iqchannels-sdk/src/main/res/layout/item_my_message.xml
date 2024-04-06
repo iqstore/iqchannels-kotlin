@@ -15,10 +15,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
-        android:paddingBottom="6dp"
-        android:textColor="#ff979fa7"
-        android:textSize="12sp"
-        android:textStyle="bold"/>
+        android:textColor="@color/date"
+        android:textSize="13sp"
+        tools:text="12 April"/>
 
     <LinearLayout
         android:id="@+id/my"
@@ -26,6 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:layout_marginLeft="88dp"
+        android:layout_marginTop="12dp"
         android:orientation="vertical">
 
         <LinearLayout

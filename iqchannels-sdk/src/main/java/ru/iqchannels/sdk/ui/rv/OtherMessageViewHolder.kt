@@ -11,6 +11,7 @@ import androidx.constraintlayout.helper.widget.Flow
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.GranularRoundedCorners
 import java.text.DateFormat
 import java.text.DecimalFormat
@@ -141,6 +142,7 @@ internal class OtherMessageViewHolder(
 				Glide.with(otherImageFrame.context)
 					.load(imageUrl)
 					.transform(
+						CenterCrop(),
 						GranularRoundedCorners(
 							radius,
 							radius,
@@ -203,7 +205,7 @@ internal class OtherMessageViewHolder(
 			this.rating.root.visibility = View.VISIBLE
 			this.rating.ratingRate.visibility = View.GONE
 			this.rating.ratingRated.visibility = View.GONE
-			if (ChatMessagesAdapter.objectEquals(msgRating.State, RatingState.PENDING)) {
+			if (msgRating.State == RatingState.PENDING) {
 				this.rating.ratingRate.visibility = View.VISIBLE
 				val value = msgRating.Value ?: 0
 				val ratingButtons = arrayOf(
@@ -238,7 +240,7 @@ internal class OtherMessageViewHolder(
 					}
 				}
 
-			} else if (ChatMessagesAdapter.objectEquals(msgRating.State, RatingState.RATED)) {
+			} else if (msgRating.State == RatingState.RATED) {
 				val value = msgRating.Value ?: 0
 				val text = root.resources.getString(R.string.chat_ratings_rated, value)
 				this.rating.ratingRated.visibility = View.VISIBLE

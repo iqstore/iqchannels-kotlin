@@ -147,7 +147,8 @@ internal class MyMessageViewHolder(
 					Glide.with(root.context)
 						.load(imageUrl)
 						.transform(
-							RoundedCorners(12.toPx.roundToInt()), CenterCrop()
+							CenterCrop(),
+							RoundedCorners(11.toPx.roundToInt())
 						)
 						.into(myImageSrc)
 				}

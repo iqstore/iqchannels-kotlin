@@ -666,7 +666,7 @@ class ChatFragment : Fragment() {
 
 	private fun eventTyping(event: ChatEvent) {
 		adapter?.typing(event)
-		maybeScrollToBottomOnNewMessage()
+		//maybeScrollToBottomOnNewMessage()
 	}
 
 	private fun messageUpdated(message: ChatMessage) {

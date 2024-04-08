@@ -366,6 +366,7 @@ class ChatFragment : Fragment() {
 		signupButton?.isEnabled = IQChannels.authRequest == null
 		signupText?.isEnabled = IQChannels.authRequest == null
 		chatLayout?.visibility = if (IQChannels.auth != null) View.VISIBLE else View.GONE
+		chatUnavailableLayout?.isVisible = false
 	}
 
 	private fun showUnavailableView(errorMessage: String) {
@@ -405,6 +406,9 @@ class ChatFragment : Fragment() {
 					}
 					is SocketTimeoutException, is TimeoutException -> {
 						getString(R.string.timeout_message)
+					}
+					is HttpException -> {
+						getString(R.string.chat_unavailable_description)
 					}
 					else -> return
 				}

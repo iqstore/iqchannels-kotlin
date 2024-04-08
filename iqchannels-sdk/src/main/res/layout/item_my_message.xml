@@ -16,6 +16,7 @@
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:textColor="@color/date"
+        android:paddingVertical="12dp"
         android:textSize="13sp"
         tools:text="12 April"/>
 
@@ -25,7 +26,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:layout_marginLeft="88dp"
-        android:layout_marginTop="12dp"
         android:orientation="vertical">
 
         <LinearLayout

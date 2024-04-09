@@ -682,16 +682,14 @@ class ChatFragment : Fragment() {
 
 	private fun checkException(message: ChatMessage) {
 		val exception = message.UploadExc ?: return
-		var errMessage = exception.localizedMessage
-
-		if (exception is HttpException && exception.code == 413) {
-			errMessage = getString(R.string.file_size_too_large)
-		}
+		val errMessage: String?
 
 		when(exception) {
 			is HttpException -> {
-				if (exception.code == 413) {
-					errMessage = getString(R.string.file_size_too_large)
+				errMessage = if (exception.code == 413) {
+					getString(R.string.file_size_too_large)
+				} else {
+					getString(R.string.check_connection)
 				}
 			}
 			is UnknownHostException -> {
@@ -699,6 +697,10 @@ class ChatFragment : Fragment() {
 			}
 			is SocketTimeoutException, is TimeoutException -> {
 				errMessage = getString(R.string.timeout_message)
+			}
+			else -> {
+				Log.d("UploadException", "Message load exception. Type: ${exception.javaClass}. Body: ${exception.stackTraceToString()}")
+				errMessage = getString(R.string.error_occured)
 			}
 		}
 

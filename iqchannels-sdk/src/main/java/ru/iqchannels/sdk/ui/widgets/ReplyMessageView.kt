@@ -58,6 +58,11 @@ class ReplyMessageView @JvmOverloads constructor(
 		if (message.Text != null && message.Text?.isNotEmpty() == true) {
 			tvText.visibility = VISIBLE
 			tvText.text = message.Text
+		} else if (message.Rating != null) {
+			val value = message.Rating?.Value ?: 0
+			val text = resources.getString(R.string.chat_ratings_rated, value)
+			tvText.visibility = VISIBLE
+			tvText.text = text
 		} else {
 			tvText.visibility = GONE
 		}

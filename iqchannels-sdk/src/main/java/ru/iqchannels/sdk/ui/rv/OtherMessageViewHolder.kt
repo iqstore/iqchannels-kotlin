@@ -205,7 +205,12 @@ internal class OtherMessageViewHolder(
 			this.rating.root.visibility = View.VISIBLE
 			this.rating.ratingRate.visibility = View.GONE
 			this.rating.ratingRated.visibility = View.GONE
-			if (msgRating.State == RatingState.PENDING) {
+			if ((msgRating.State == RatingState.PENDING && msgRating.Sent) || msgRating.State == RatingState.RATED) {
+				val value = msgRating.Value ?: 0
+				val text = root.resources.getString(R.string.chat_ratings_rated, value)
+				this.rating.ratingRated.visibility = View.VISIBLE
+				this.rating.ratingRated.text = text
+			} else if (msgRating.State == RatingState.PENDING) {
 				this.rating.ratingRate.visibility = View.VISIBLE
 				val value = msgRating.Value ?: 0
 				val ratingButtons = arrayOf(
@@ -240,11 +245,6 @@ internal class OtherMessageViewHolder(
 					}
 				}
 
-			} else if (msgRating.State == RatingState.RATED) {
-				val value = msgRating.Value ?: 0
-				val text = root.resources.getString(R.string.chat_ratings_rated, value)
-				this.rating.ratingRated.visibility = View.VISIBLE
-				this.rating.ratingRated.text = text
 			} else {
 				rating.root.visibility = View.GONE
 			}

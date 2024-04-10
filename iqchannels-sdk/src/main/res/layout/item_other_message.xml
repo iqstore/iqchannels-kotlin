@@ -78,7 +78,7 @@
                 android:id="@+id/otherReply"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="40dp"
+                android:layout_marginRight="20dp"
                 android:paddingHorizontal="15dp"
                 android:paddingTop="15dp"
                 android:background="@drawable/other_msg_reply_bg"
@@ -109,7 +109,7 @@
                 android:id="@+id/cl_texts"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="40dp"
+                android:layout_marginRight="20dp"
                 android:paddingHorizontal="16dp"
                 android:paddingBottom="10dp"
                 android:paddingTop="8dp"
@@ -188,7 +188,7 @@
                 android:id="@+id/rv_buttons"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="40dp"
+                android:layout_marginRight="20dp"
                 android:paddingBottom="1dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 />
@@ -198,7 +198,7 @@
                 android:id="@+id/rating"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:layout_marginRight="40dp" />
+                android:layout_marginRight="20dp" />
 
         </LinearLayout>
     </LinearLayout>

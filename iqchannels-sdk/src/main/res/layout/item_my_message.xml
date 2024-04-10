@@ -25,7 +25,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
-        android:layout_marginLeft="88dp"
+        android:layout_marginLeft="40dp"
         android:orientation="vertical">
 
         <LinearLayout

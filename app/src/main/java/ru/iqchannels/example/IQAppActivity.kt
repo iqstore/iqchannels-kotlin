@@ -65,7 +65,7 @@ class IQAppActivity :
 			})
 		val iq = IQChannels
 		// iq.configure(this, new IQChannelsConfig("http://52.57.77.143/", "support"));
-		iq.configure(this, IQChannelsConfig("https://sandbox.iqstore.ru", "support"))
+		iq.configure(this, IQChannelsConfig("https://iqchannels.isimplelab.com", "support"))
 		iq.loginAnonymous()
 		// iq.configure(this, new IQChannelsConfig("http://88.99.143.201/", "support"));
 	}

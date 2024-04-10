@@ -9,7 +9,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "ru.iqchannels.example"
+        applicationId = "ru.iqchannels.example.new"
         minSdk = 26
         targetSdk = 34
         versionCode = 2

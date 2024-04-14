@@ -369,12 +369,23 @@ class ChatFragment : Fragment() {
 		chatUnavailableLayout?.isVisible = false
 	}
 
+	private fun showLoading() {
+		if (chatUnavailableLayout?.isVisible == false) {
+			authLayout?.isVisible = true
+			signupLayout?.isVisible = false
+			chatLayout?.isVisible = false
+			chatUnavailableLayout?.isVisible = false
+		}
+	}
+
 	private fun showUnavailableView(errorMessage: String) {
-		authLayout?.visibility = View.GONE
-		signupLayout?.visibility = View.GONE
-		chatLayout?.visibility = View.GONE
-		chatUnavailableLayout?.isVisible = true
-		chatUnavailableErrorText?.text = errorMessage
+		if (chatUnavailableLayout?.isVisible == false) {
+			authLayout?.visibility = View.GONE
+			signupLayout?.visibility = View.GONE
+			chatLayout?.visibility = View.GONE
+			chatUnavailableLayout?.isVisible = true
+			chatUnavailableErrorText?.text = errorMessage
+		}
 	}
 
 	override fun onStart() {
@@ -383,7 +394,7 @@ class ChatFragment : Fragment() {
 		iqchannelsListenerCancellable = IQChannels.addListener(object : IQChannelsListener {
 			override fun authenticating() {
 				signupError?.text = ""
-				updateViews()
+				showLoading()
 			}
 
 			override fun authComplete(auth: ClientAuth) {
@@ -396,8 +407,6 @@ class ChatFragment : Fragment() {
 				signupError?.text = String.format("Ошибка: %s", e.localizedMessage)
 				if (attempt >= 5) {
 					showUnavailableView(getString(R.string.chat_unavailable_description))
-				} else {
-					updateViews()
 				}
 
 				val message = when(e) {

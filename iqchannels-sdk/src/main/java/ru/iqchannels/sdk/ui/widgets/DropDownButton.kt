@@ -23,7 +23,7 @@ class DropDownButton @JvmOverloads constructor(
 	init {
 		setBackgroundResource(R.drawable.bg_single_choice_btn_dropdown)
 		setTextColor(ContextCompat.getColor(getContext(), R.color.drop_down_btn_text))
-		setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f)
+		setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
 		isAllCaps = false
 		elevation = 0f
 		val vertical = UiUtils.toPx(4)

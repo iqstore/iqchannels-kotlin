@@ -4,7 +4,7 @@ SDK для Андроида сделано как обычная андроид-
 Библиотека легко интегрируется как обычная зависимость в существующее приложение.
 
 Требования:
-* minSdkVersion 26.
+* minSdkVersion 21.
 * targetSdkVersion 34.
 
 
@@ -24,7 +24,7 @@ gpr.key=<ghp_token>
 local.properties
 ```
 
-4. Добавьте репозиторий `https://maven.pkg.github.com/iqstore/iqchannels-android` в `build.gradle` всего проекта в раздел `allProjects`.
+4. Добавьте репозиторий `https://maven.pkg.github.com/iqstore/iqchannels-kotlin` в `build.gradle` всего проекта в раздел `allProjects`.
 Загрузите `local.properties` и укажите `username` и `password` из них:
 
 ```build.gradle
@@ -37,7 +37,7 @@ allprojects {
 
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/iqstore/iqchannels-android")
+            url = uri("https://maven.pkg.github.com/iqstore/iqchannels-kotlin")
 
             credentials(PasswordCredentials) {
                 username = properties['gpr.user'] ?: System.getenv("GPR_USER")

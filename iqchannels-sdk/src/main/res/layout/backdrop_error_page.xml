@@ -13,7 +13,6 @@
         android:layout_marginHorizontal="16dp"
         android:textSize="20sp"
         android:textColor="@color/dark_text_color"
-        android:textFontWeight="700"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"
         />

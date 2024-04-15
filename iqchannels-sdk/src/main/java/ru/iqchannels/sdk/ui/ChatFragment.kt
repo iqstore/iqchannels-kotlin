@@ -40,6 +40,7 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -290,6 +291,7 @@ class ChatFragment : Fragment() {
 		return view
 	}
 
+	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
 
@@ -966,6 +968,7 @@ class ChatFragment : Fragment() {
 		builder.show()
 	}
 
+	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 	private fun handleDownload(downloadID: Long, fileName: String?) {
 		if (downloadID > 0) {
 			onDownloadComplete = object : BroadcastReceiver() {
@@ -1020,6 +1023,7 @@ class ChatFragment : Fragment() {
 				context?.registerReceiver(
 					onDownloadComplete,
 					IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
+					Context.RECEIVER_NOT_EXPORTED,
 				)
 			}
 		}

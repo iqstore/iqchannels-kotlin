@@ -1536,6 +1536,7 @@ object IQChannels {
 				existing.File = message.File
 				existing.Client = message.Client
 				existing.Sending = false
+				existing.Received = true
 				existing.ReplyToMessageId = message.ReplyToMessageId
 				Log.i(
 					TAG, String.format(

@@ -53,6 +53,8 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging:23.4.1")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("androidx.core:core-ktx:1.12.0")
+
     testImplementation("junit:junit:4.13.2")
+    testImplementation("io.mockk:mockk:1.13.10")
 
 }

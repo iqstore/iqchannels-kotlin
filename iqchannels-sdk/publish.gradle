@@ -10,7 +10,7 @@ publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/iqstore/iqchannels-android")
+            url = uri("https://maven.pkg.github.com/iqstore/iqchannels-kotlin")
 
             credentials(PasswordCredentials) {
                 username = properties['gpr.user'] ?: System.getenv("GPR_USER")
@@ -22,7 +22,7 @@ publishing {
     publications {
         iqchannelsSDK(MavenPublication) {
             groupId this.group
-            artifactId 'iqchannels-sdk'
+            artifactId 'iqchannels-sdk-2'
             version this.version
 
             artifact("$buildDir/outputs/aar/iqchannels-sdk-release.aar") {

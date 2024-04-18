@@ -627,7 +627,10 @@ class ChatFragment : Fragment() {
 
 		checkDisableFreeText(message)
 		adapter?.received(message)
-		maybeScrollToBottomOnNewMessage()
+
+		if (!message.My) {
+			maybeScrollToBottomOnNewMessage()
+		}
 
 		if (btnScrollToBottom?.isVisible == true) {
 			btnScrollToBottomDot?.isVisible = true

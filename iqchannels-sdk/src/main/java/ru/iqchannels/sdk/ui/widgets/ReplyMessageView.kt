@@ -39,7 +39,7 @@ class ReplyMessageView @JvmOverloads constructor(
 		ibClose = findViewById(R.id.ib_close)
 		dividerStart = findViewById(R.id.divider_start)
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-			tvSenderName.setTypeface(Typeface.create(null, 700, false))
+			tvSenderName.setTypeface(Typeface.create(null, 400, false))
 			tvText.setTypeface(Typeface.create(null, 400, false))
 			tvFileName.setTypeface(Typeface.create(null, 400, false))
 		}
@@ -58,6 +58,11 @@ class ReplyMessageView @JvmOverloads constructor(
 		if (message.Text != null && message.Text?.isNotEmpty() == true) {
 			tvText.visibility = VISIBLE
 			tvText.text = message.Text
+		} else if (message.Rating != null) {
+			val value = message.Rating?.Value ?: 0
+			val text = resources.getString(R.string.chat_ratings_rated, value)
+			tvText.visibility = VISIBLE
+			tvText.text = text
 		} else {
 			tvText.visibility = GONE
 		}

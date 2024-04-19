@@ -54,8 +54,11 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeoutException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -66,6 +69,7 @@ import ru.iqchannels.sdk.app.Cancellable
 import ru.iqchannels.sdk.app.IQChannels
 import ru.iqchannels.sdk.app.IQChannelsListener
 import ru.iqchannels.sdk.app.MessagesListener
+import ru.iqchannels.sdk.http.HttpException
 import ru.iqchannels.sdk.lib.InternalIO.copy
 import ru.iqchannels.sdk.schema.Action
 import ru.iqchannels.sdk.schema.ActionType
@@ -84,6 +88,7 @@ class ChatFragment : Fragment() {
 	companion object {
 		private const val TAG = "iqchannels"
 		private const val SEND_FOCUS_SCROLL_THRESHOLD_PX = 300
+		private const val PARAM_LM_STATE = "ChatFragment#lmState"
 
 		/**
 		 * Use this factory method to create a new instance of
@@ -118,6 +123,7 @@ class ChatFragment : Fragment() {
 	// Chat layout
 	private var chatLayout: RelativeLayout? = null
 	private var chatUnavailableLayout: ConstraintLayout? = null
+	private var chatUnavailableErrorText: TextView? = null
 	private var tnwMsgCopied: TopNotificationWidget? = null
 	private var btnGoBack: Button? = null
 
@@ -159,12 +165,19 @@ class ChatFragment : Fragment() {
 					true -> { // multiple choice
 						it.data?.clipData?.let { clipData ->
 							val uris = ArrayList<Uri>()
-							val itemCount = if (clipData.itemCount > 10) 10 else clipData.itemCount
+							val itemCount = clipData.itemCount
 							for (i in 0 until itemCount) {
 								uris.add(clipData.getItemAt(i).uri)
 							}
 
-							sendMultipleFiles(uris)
+							when (itemCount) {
+								1 -> {
+									onGalleryResult(uris.first())
+								}
+								else -> {
+									sendMultipleFiles(uris)
+								}
+							}
 						}
 					}
 					false -> { // single choice
@@ -188,6 +201,8 @@ class ChatFragment : Fragment() {
 
 	private val multipleFilesQueue: MutableList<Uri> = mutableListOf()
 
+	private var lmState: Parcelable? = null
+
 	override fun onCreateView(
 		inflater: LayoutInflater, container: ViewGroup?,
 		savedInstanceState: Bundle?
@@ -208,6 +223,7 @@ class ChatFragment : Fragment() {
 		// Chat.
 		chatLayout = view.findViewById<View>(R.id.chatLayout) as RelativeLayout
 		chatUnavailableLayout = view.findViewById(R.id.chatUnavailableLayout)
+		chatUnavailableErrorText = view.findViewById(R.id.tv_text)
 		tnwMsgCopied = view.findViewById(R.id.tnw_msg_copied)
 		btnGoBack = view.findViewById(R.id.btn_go_back)
 
@@ -295,6 +311,14 @@ class ChatFragment : Fragment() {
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
 
+		savedInstanceState?.let {
+			lmState = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+				it.getParcelable(PARAM_LM_STATE, Parcelable::class.java)
+			} else {
+				it.getParcelable(PARAM_LM_STATE)
+			}
+		}
+
 		childFragmentManager.setFragmentResultListener(
 			FileActionsChooseFragment.REQUEST_KEY,
 			this
@@ -344,13 +368,26 @@ class ChatFragment : Fragment() {
 		signupButton?.isEnabled = IQChannels.authRequest == null
 		signupText?.isEnabled = IQChannels.authRequest == null
 		chatLayout?.visibility = if (IQChannels.auth != null) View.VISIBLE else View.GONE
+		chatUnavailableLayout?.isVisible = false
 	}
 
-	private fun showUnavailableView() {
-		authLayout?.visibility = View.GONE
-		signupLayout?.visibility = View.GONE
-		chatLayout?.visibility = View.GONE
-		chatUnavailableLayout?.isVisible = true
+	private fun showLoading() {
+		if (chatUnavailableLayout?.isVisible == false) {
+			authLayout?.isVisible = true
+			signupLayout?.isVisible = false
+			chatLayout?.isVisible = false
+			chatUnavailableLayout?.isVisible = false
+		}
+	}
+
+	private fun showUnavailableView(errorMessage: String) {
+		if (chatUnavailableLayout?.isVisible == false) {
+			authLayout?.visibility = View.GONE
+			signupLayout?.visibility = View.GONE
+			chatLayout?.visibility = View.GONE
+			chatUnavailableLayout?.isVisible = true
+			chatUnavailableErrorText?.text = errorMessage
+		}
 	}
 
 	override fun onStart() {
@@ -359,7 +396,7 @@ class ChatFragment : Fragment() {
 		iqchannelsListenerCancellable = IQChannels.addListener(object : IQChannelsListener {
 			override fun authenticating() {
 				signupError?.text = ""
-				updateViews()
+				showLoading()
 			}
 
 			override fun authComplete(auth: ClientAuth) {
@@ -371,10 +408,23 @@ class ChatFragment : Fragment() {
 			override fun authFailed(e: Exception, attempt: Int) {
 				signupError?.text = String.format("Ошибка: %s", e.localizedMessage)
 				if (attempt >= 5) {
-					showUnavailableView()
-				} else {
-					updateViews()
+					showUnavailableView(getString(R.string.chat_unavailable_description))
 				}
+
+				val message = when(e) {
+					is UnknownHostException -> {
+						getString(R.string.check_connection)
+					}
+					is SocketTimeoutException, is TimeoutException -> {
+						getString(R.string.timeout_message)
+					}
+					is HttpException -> {
+						getString(R.string.chat_unavailable_description)
+					}
+					else -> return
+				}
+
+				showUnavailableView(message)
 			}
 		})
 
@@ -392,8 +442,15 @@ class ChatFragment : Fragment() {
 			iqchannelsListenerCancellable = null
 		}
 
+		lmState = (recycler?.layoutManager as? LinearLayoutManager)?.onSaveInstanceState()
+
 		clearMessages()
 		clearMoreMessages()
+	}
+
+	override fun onSaveInstanceState(outState: Bundle) {
+		super.onSaveInstanceState(outState)
+		outState.putParcelable(PARAM_LM_STATE, lmState)
 	}
 
 	// Messages scroll
@@ -420,12 +477,6 @@ class ChatFragment : Fragment() {
 
 	private fun maybeScrollToBottomOnNewMessage() {
 		recycler?.let { recycler ->
-			val extent = recycler.computeVerticalScrollExtent()
-			val offset = recycler.computeVerticalScrollOffset()
-			val range = recycler.computeVerticalScrollRange()
-			if (range - (extent + offset) > SEND_FOCUS_SCROLL_THRESHOLD_PX) {
-				return
-			}
 			val count = adapter?.itemCount ?: 0
 			recycler.smoothScrollToPosition(if (count == 0) 0 else count - 1)
 		}
@@ -547,7 +598,13 @@ class ChatFragment : Fragment() {
 		enableSend()
 
 		adapter?.loaded(messages)
-		recycler?.scrollToPosition(if (messages.isEmpty()) 0 else messages.size - 1)
+
+		lmState?.let {
+			(recycler?.layoutManager as? LinearLayoutManager)?.onRestoreInstanceState(it)
+		} ?: run {
+			recycler?.scrollToPosition(if (messages.isEmpty()) 0 else messages.size - 1)
+		}
+
 		progress?.visibility = View.GONE
 		refresh?.isRefreshing = false
 		refresh?.isEnabled = true
@@ -572,7 +629,10 @@ class ChatFragment : Fragment() {
 
 		checkDisableFreeText(message)
 		adapter?.received(message)
-		maybeScrollToBottomOnNewMessage()
+
+		if (!message.My) {
+			maybeScrollToBottomOnNewMessage()
+		}
 
 		if (btnScrollToBottom?.isVisible == true) {
 			btnScrollToBottomDot?.isVisible = true
@@ -620,7 +680,7 @@ class ChatFragment : Fragment() {
 
 	private fun eventTyping(event: ChatEvent) {
 		adapter?.typing(event)
-		maybeScrollToBottomOnNewMessage()
+		//maybeScrollToBottomOnNewMessage()
 	}
 
 	private fun messageUpdated(message: ChatMessage) {
@@ -630,6 +690,35 @@ class ChatFragment : Fragment() {
 
 		checkDisableFreeText(message)
 		adapter?.updated(message)
+
+		checkException(message)
+	}
+
+	private fun checkException(message: ChatMessage) {
+		val exception = message.UploadExc ?: return
+		val errMessage: String?
+
+		when(exception) {
+			is HttpException -> {
+				errMessage = if (exception.code == 413) {
+					getString(R.string.file_size_too_large)
+				} else {
+					getString(R.string.check_connection)
+				}
+			}
+			is UnknownHostException -> {
+				errMessage = getString(R.string.check_connection)
+			}
+			is SocketTimeoutException, is TimeoutException -> {
+				errMessage = getString(R.string.timeout_message)
+			}
+			else -> {
+				Log.d("UploadException", "Message load exception. Type: ${exception.javaClass}. Body: ${exception.stackTraceToString()}")
+				errMessage = getString(R.string.error_occured)
+			}
+		}
+
+		ItemClickListener().fileUploadException(errMessage)
 	}
 
 	// More messages
@@ -752,20 +841,20 @@ class ChatFragment : Fragment() {
 
 			withContext(Dispatchers.Main) {
 				result?.let {
-					showConfirmDialog(it, it.name)
+					showConfirmDialog(it, getString(R.string.chat_send_file_confirmation_description, it.name))
 				}
 			}
 		}
 	}
 
-	private fun onGalleryMutipleFilesResult(uri: Uri) {
+	private fun onGalleryMutipleFilesResult(uri: Uri, message: String) {
 
 		lifecycleScope.launch(Dispatchers.IO) {
 			val result = prepareFile(uri)
 
 			withContext(Dispatchers.Main) {
 				result?.let {
-					showConfirmDialog(it, getString(R.string.chat_send_multiple_file_confirmation))
+					showConfirmDialog(it, message)
 				}
 			}
 		}
@@ -773,9 +862,19 @@ class ChatFragment : Fragment() {
 
 	private fun sendMultipleFiles(fileUris: List<Uri>) {
 		lifecycleScope.launch {
-			multipleFilesQueue.addAll(fileUris)
+			multipleFilesQueue.addAll(fileUris.take(10))
 			val uri = multipleFilesQueue.removeFirst()
-			onGalleryMutipleFilesResult(uri)
+
+			val message = if (fileUris.size <= 10) {
+				getString(
+					R.string.chat_send_file_confirmation_description_multiple,
+					fileUris.size.toString()
+				)
+			} else {
+				getString(R.string.chat_send_file_confirmation_description_multiple_cut)
+			}
+
+			onGalleryMutipleFilesResult(uri, message)
 		}
 	}
 
@@ -821,7 +920,13 @@ class ChatFragment : Fragment() {
 				IQChannels.sendFile(file, replyToMessageId)
 				hideReplying()
 			}
-			.setNegativeButton(R.string.cancel, null)
+			.setNegativeButton(R.string.cancel) { dialogInterface: DialogInterface?, i: Int ->
+				multipleFilesQueue.clear()
+			}
+			.setOnCancelListener {
+				multipleFilesQueue.clear()
+			}
+
 		builder.show()
 	}
 
@@ -1091,6 +1196,14 @@ class ChatFragment : Fragment() {
 		override fun fileUploadException(errorMessage: String?) {
 			val backdrop = ErrorPageBackdropDialog.newInstance(errorMessage)
 			backdrop.show(childFragmentManager, ErrorPageBackdropDialog.TRANSACTION_TAG)
+		}
+
+		override fun onReplyMessageClick(message: ChatMessage) {
+			adapter?.getItemPosition(message)?.let {
+				if (it >= 0) {
+					recycler?.smoothScrollToPosition(it)
+				}
+			}
 		}
 	}
 }

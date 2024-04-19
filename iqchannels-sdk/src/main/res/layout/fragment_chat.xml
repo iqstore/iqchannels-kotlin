@@ -99,8 +99,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:clipToPadding="false"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingHorizontal="8dp"
                 android:paddingTop="@dimen/activity_vertical_margin"
                 app:layoutManager="LinearLayoutManager"/>
 
@@ -157,16 +156,16 @@
                 android:id="@+id/reply"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/reply_typing_bg"
+                android:background="@color/white"
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="15dp"
+                android:layout_below="@id/divider"
                 android:visibility="gone" />
 
             <ImageView
                 android:id="@+id/divider"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/reply"
+                android:layout_height="1dp"
                 android:scaleType="fitXY"
                 android:src="@android:drawable/divider_horizontal_bright"
                 tools:ignore="ContentDescription"/>
@@ -178,10 +177,10 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_alignParentLeft="true"
-                android:layout_below="@id/divider"
+                android:layout_alignBottom="@id/sendText"
                 android:background="@null"
                 android:contentDescription="@string/chat_attach"
-                android:paddingRight="8sp"
+                android:paddingRight="8dp"
                 android:paddingTop="12dp"
                 android:src="@drawable/attach_40"/>
 
@@ -192,17 +191,18 @@
                 android:layout_marginTop="12dp"
                 android:layout_marginEnd="12dp"
                 android:minHeight="40dp"
-                android:layout_alignTop="@+id/attachButton"
+                android:layout_below="@id/reply"
                 android:layout_toLeftOf="@+id/sendButton"
                 android:layout_toRightOf="@+id/attachButton"
                 android:background="@drawable/bg_text_field"
                 android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp"
                 android:gravity="center_vertical"
                 android:hint="@string/chat_send_hint"
                 android:imeOptions="actionSend"
                 android:inputType="textShortMessage|textCapSentences|textAutoCorrect|textAutoComplete|textMultiLine"
                 android:maxLength="4096"
-                android:maxLines="3"/>
+                android:maxLines="4"/>
 
             <ImageButton
                 android:id="@+id/sendButton"
@@ -210,7 +210,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
                 android:layout_alignParentRight="true"
-                android:layout_below="@id/divider"
+                android:layout_alignBottom="@id/sendText"
                 android:background="@null"
                 android:contentDescription="@string/chat_send"
                 android:paddingLeft="4sp"

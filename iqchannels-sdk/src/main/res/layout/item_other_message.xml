@@ -14,11 +14,11 @@
         android:id="@+id/date"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingVertical="12dp"
         android:gravity="center_horizontal"
-        android:paddingBottom="6dp"
-        android:textColor="#ff979fa7"
-        android:textSize="12sp"
-        android:textStyle="bold"/>
+        android:textColor="@color/date"
+        android:textSize="13sp"
+        />
 
     <!-- Other message -->
     <LinearLayout
@@ -31,6 +31,7 @@
             android:id="@+id/otherAvatar"
             android:layout_width="40dp"
             android:layout_height="40dp"
+            android:layout_gravity="bottom"
             android:layout_marginRight="8dp">
 
             <ImageView
@@ -69,15 +70,15 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="4dp"
-                android:textColor="#ff000000"
-                android:textSize="16sp"
-                android:textStyle="bold"/>
+                android:textColor="@color/other_name"
+                android:textSize="13sp"
+                />
 
             <ru.iqchannels.sdk.ui.widgets.ReplyMessageView
                 android:id="@+id/otherReply"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="40dp"
+                android:layout_marginRight="20dp"
                 android:paddingHorizontal="15dp"
                 android:paddingTop="15dp"
                 android:background="@drawable/other_msg_reply_bg"
@@ -100,7 +101,6 @@
                     android:id="@+id/otherImageSrc"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
                     tools:ignore="ContentDescription"/>
             </FrameLayout>
 
@@ -109,12 +109,22 @@
                 android:id="@+id/cl_texts"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="40dp"
+                android:layout_marginRight="20dp"
                 android:paddingHorizontal="16dp"
                 android:paddingBottom="10dp"
                 android:paddingTop="8dp"
                 android:background="@drawable/other_msg_bg"
                 >
+
+                <ImageView
+                    android:id="@+id/iv_file"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:src="@drawable/doc_32"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:tint="#ff4c4c4c" />
 
                 <TextView
                     android:id="@+id/tvOtherFileName"
@@ -123,10 +133,8 @@
                     android:autoLink="all"
                     android:textColor="#3F51B5"
                     android:textSize="16sp"
-                    android:drawableStart="@drawable/file_16"
-                    android:drawablePadding="4dp"
                     app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/iv_file"
                     tools:text="CJM.pdf"
                     />
 
@@ -134,11 +142,10 @@
                     android:id="@+id/tvOtherFileSize"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="20dp"
                     android:textColor="#ff979fa7"
-                    android:textSize="12sp"
+                    android:textSize="15sp"
                     app:layout_constraintTop_toBottomOf="@id/tvOtherFileName"
-                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/iv_file"
                     tools:text="15.0 кб"
                     />
 
@@ -181,7 +188,7 @@
                 android:id="@+id/rv_buttons"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="40dp"
+                android:layout_marginRight="20dp"
                 android:paddingBottom="1dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 />
@@ -191,7 +198,7 @@
                 android:id="@+id/rating"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:layout_marginRight="40dp" />
+                android:layout_marginRight="20dp" />
 
         </LinearLayout>
     </LinearLayout>

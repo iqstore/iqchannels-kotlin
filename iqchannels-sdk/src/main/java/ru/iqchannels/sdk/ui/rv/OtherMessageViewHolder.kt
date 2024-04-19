@@ -11,6 +11,7 @@ import androidx.constraintlayout.helper.widget.Flow
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.GranularRoundedCorners
 import java.text.DateFormat
 import java.text.DecimalFormat
@@ -100,6 +101,7 @@ internal class OtherMessageViewHolder(
 			clTexts.visibility = View.GONE
 			otherText.visibility = View.GONE
 			tvOtherFileName.visibility = View.GONE
+			ivFile.visibility = View.GONE
 			tvOtherFileSize.visibility = View.GONE
 			otherImageFrame.visibility = View.GONE
 			rating.root.visibility = View.GONE
@@ -140,6 +142,7 @@ internal class OtherMessageViewHolder(
 				Glide.with(otherImageFrame.context)
 					.load(imageUrl)
 					.transform(
+						CenterCrop(),
 						GranularRoundedCorners(
 							radius,
 							radius,
@@ -161,6 +164,7 @@ internal class OtherMessageViewHolder(
 				clTexts.visibility = View.VISIBLE
 				clTexts.setBackgroundResource(R.drawable.other_msg_bg)
 				tvOtherFileName.visibility = View.VISIBLE
+				ivFile.visibility = View.VISIBLE
 				tvOtherFileName.autoLinkMask = 0
 				tvOtherFileName.movementMethod = LinkMovementMethod.getInstance()
 				tvOtherFileName.text = file.Name
@@ -201,7 +205,12 @@ internal class OtherMessageViewHolder(
 			this.rating.root.visibility = View.VISIBLE
 			this.rating.ratingRate.visibility = View.GONE
 			this.rating.ratingRated.visibility = View.GONE
-			if (ChatMessagesAdapter.objectEquals(msgRating.State, RatingState.PENDING)) {
+			if ((msgRating.State == RatingState.PENDING && msgRating.Sent) || msgRating.State == RatingState.RATED) {
+				val value = msgRating.Value ?: 0
+				val text = root.resources.getString(R.string.chat_ratings_rated, value)
+				this.rating.ratingRated.visibility = View.VISIBLE
+				this.rating.ratingRated.text = text
+			} else if (msgRating.State == RatingState.PENDING) {
 				this.rating.ratingRate.visibility = View.VISIBLE
 				val value = msgRating.Value ?: 0
 				val ratingButtons = arrayOf(
@@ -236,11 +245,6 @@ internal class OtherMessageViewHolder(
 					}
 				}
 
-			} else if (ChatMessagesAdapter.objectEquals(msgRating.State, RatingState.RATED)) {
-				val value = msgRating.Value ?: 0
-				val text = root.resources.getString(R.string.chat_ratings_rated, value)
-				this.rating.ratingRated.visibility = View.VISIBLE
-				this.rating.ratingRated.text = text
 			} else {
 				rating.root.visibility = View.GONE
 			}
@@ -266,9 +270,9 @@ internal class OtherMessageViewHolder(
 			if (replyMsg != null) {
 				otherReply.showReplyingMessage(replyMsg)
 				otherReply.setCloseBtnVisibility(View.GONE)
-				otherReply.setVerticalDividerColor(R.color.other_reply_text)
-				otherReply.setTvSenderNameColor(R.color.other_reply_text)
-				otherReply.setTvTextColor(R.color.other_reply_text)
+				otherReply.setVerticalDividerColor(R.color.red)
+				otherReply.setTvSenderNameColor(R.color.dark_text_color)
+				otherReply.setTvTextColor(R.color.other_name)
 				otherReply.layoutParams = lp
 				clTexts.setBackgroundResource(R.drawable.other_msg_reply_text_bg)
 				otherReply.post {
@@ -287,6 +291,10 @@ internal class OtherMessageViewHolder(
 						layoutParams.setMargins(0, 0, UiUtils.toPx(40), 0)
 						otherReply.layoutParams = layoutParams
 					}
+				}
+
+				otherReply.setOnClickListener {
+					itemClickListener.onReplyMessageClick(replyMsg)
 				}
 			}
 		}

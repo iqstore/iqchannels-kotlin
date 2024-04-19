@@ -38,7 +38,7 @@ class ErrorPageBackdropDialog : BottomSheetDialogFragment() {
 		val binding = BackdropErrorPageBinding.inflate(inflater, container, false)
 
 		binding.run {
-			tvTitle.text = "Файл не загрузился"
+			tvTitle.text = getString(R.string.file_not_uploaded)
 			tvDescription.text = requireArguments().getString(ARG_DESCRIPTION)
 
 			btnAction.setOnClickListener {

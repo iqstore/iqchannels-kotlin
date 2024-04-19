@@ -17,7 +17,7 @@ import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.navigation.NavigationView
-import com.google.firebase.installations.FirebaseInstallations
+import com.google.firebase.messaging.FirebaseMessaging
 import ru.iqchannels.sdk.app.Cancellable
 import ru.iqchannels.sdk.app.IQChannels
 import ru.iqchannels.sdk.app.IQChannelsConfig
@@ -52,14 +52,14 @@ class IQAppActivity :
 	}
 
 	private fun setupIQChannels() {
-		FirebaseInstallations.getInstance().getToken(false)
+		FirebaseMessaging.getInstance().token
 			.addOnCompleteListener(OnCompleteListener { task ->
 				if (!task.isSuccessful) {
 					return@OnCompleteListener
 				}
 
 				// Get new Instance ID token.
-				val token = task.result!!.token
+				val token = task.result
 				val iq = IQChannels
 				iq.setPushToken(token)
 			})

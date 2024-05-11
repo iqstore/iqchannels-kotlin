@@ -74,6 +74,7 @@ import ru.iqchannels.sdk.lib.InternalIO.copy
 import ru.iqchannels.sdk.schema.Action
 import ru.iqchannels.sdk.schema.ActionType
 import ru.iqchannels.sdk.schema.ChatEvent
+import ru.iqchannels.sdk.schema.ChatException
 import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.schema.ClientAuth
 import ru.iqchannels.sdk.schema.SingleChoice
@@ -680,7 +681,7 @@ class ChatFragment : Fragment() {
 
 	private fun eventTyping(event: ChatEvent) {
 		adapter?.typing(event)
-		//maybeScrollToBottomOnNewMessage()
+		maybeScrollToBottomOnNewMessage()
 	}
 
 	private fun messageUpdated(message: ChatMessage) {
@@ -709,8 +710,11 @@ class ChatFragment : Fragment() {
 			is UnknownHostException -> {
 				errMessage = getString(R.string.check_connection)
 			}
-			is SocketTimeoutException, is TimeoutException -> {
+			is SocketTimeoutException, is TimeoutException, is java.net.SocketException -> {
 				errMessage = getString(R.string.timeout_message)
+			}
+			is ChatException -> {
+				errMessage = exception.message ?: getString(R.string.error_occured)
 			}
 			else -> {
 				Log.d("UploadException", "Message load exception. Type: ${exception.javaClass}. Body: ${exception.stackTraceToString()}")

@@ -48,11 +48,11 @@ allprojects {
 }
 ```
 
-5. Добавьте зависимосить `implementation 'ru.iqstore:iqchannels-sdk-2:2.0.0-beta1'` в `build.gradle` модуля приложения.
+5. Добавьте зависимосить `implementation 'ru.iqstore:iqchannels-sdk-2:2.0.0-beta2'` в `build.gradle` модуля приложения.
 ```build.gradle
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])   
-    implementation 'ru.iqstore:iqchannels-sdk-2:2.0.0-beta1'
+    implementation 'ru.iqstore:iqchannels-sdk-2:2.0.0-beta2'
     // etc...
 }
 ```

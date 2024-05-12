@@ -224,7 +224,7 @@ class ChatFragment : Fragment() {
 		// Chat.
 		chatLayout = view.findViewById<View>(R.id.chatLayout) as RelativeLayout
 		chatUnavailableLayout = view.findViewById(R.id.chatUnavailableLayout)
-		chatUnavailableErrorText = view.findViewById(R.id.tv_text)
+		chatUnavailableErrorText = view.findViewById(R.id.tv_description)
 		tnwMsgCopied = view.findViewById(R.id.tnw_msg_copied)
 		btnGoBack = view.findViewById(R.id.btn_go_back)
 

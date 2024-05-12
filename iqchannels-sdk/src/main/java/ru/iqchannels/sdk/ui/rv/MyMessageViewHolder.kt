@@ -50,7 +50,7 @@ internal class MyMessageViewHolder(
 			)
 		}
 
-		myUpload.setOnClickListener { adapter.onUploadCancelClicked(adapterPosition) }
+		myUpload.setOnClickListener { adapter.onUploadCancelClicked(bindingAdapterPosition) }
 
 		// Time
 		if (adapter.isGroupEnd(bindingAdapterPosition)) {

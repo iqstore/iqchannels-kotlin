@@ -225,6 +225,29 @@ class HttpClient(
 			})
 	}
 
+	fun pushChannelHMS(
+		channel: String,
+		token: String,
+		callback: HttpCallback<Void>
+	): HttpRequest {
+		val path = "/push/channel/hcm/$channel"
+		val input = PushTokenInput(token)
+
+		return post(
+			path,
+			input,
+			null,
+			object : HttpCallback<ru.iqchannels.sdk.schema.Response<Any>> {
+				override fun onResult(result: ru.iqchannels.sdk.schema.Response<Any>?) {
+					callback.onResult(null)
+				}
+
+				override fun onException(exception: Exception) {
+					callback.onException(exception)
+				}
+			})
+	}
+
 	// Channel chat messages
 	fun chatsChannelTyping(
 		channel: String,

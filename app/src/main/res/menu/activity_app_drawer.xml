@@ -33,5 +33,8 @@
         <item
             android:id="@+id/nav_remove_unread_listener"
             android:title="Remove unread listener"/>
+        <item
+            android:id="@+id/send_huawei_token"
+            android:title="Send Huawei token"/>
     </group>
 </menu>

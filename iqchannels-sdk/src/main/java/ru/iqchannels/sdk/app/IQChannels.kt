@@ -52,6 +52,7 @@ object IQChannels {
 
 	// Push token
 	private var pushToken: String? = null
+	private var isHuawei: Boolean = false
 	private var pushTokenSent = false
 	private var pushTokenAttempt = 0
 	private var pushTokenRequest: HttpRequest? = null
@@ -453,10 +454,12 @@ object IQChannels {
 	}
 
 	// Push token
-	fun setPushToken(token: String?) {
+	fun setPushToken(token: String?, isHuawei: Boolean = false) {
 		if (token != null && pushToken != null && token == pushToken) {
 			return
 		}
+
+		this.isHuawei = isHuawei
 		pushToken = token
 		pushTokenSent = false
 		if (pushTokenRequest != null) {
@@ -492,7 +495,17 @@ object IQChannels {
 			config?.channel?.let { channel ->
 				pushToken?.let { pushToken ->
 					pushTokenAttempt++
-					pushTokenRequest =
+					pushTokenRequest = if (isHuawei) {
+						client.pushChannelHMS(channel, pushToken, object : HttpCallback<Void> {
+							override fun onResult(result: Void?) {
+								execute { onSentPushToken() }
+							}
+
+							override fun onException(e: Exception) {
+								execute { onFailedToSendPushToken(e) }
+							}
+						})
+					} else {
 						client.pushChannelFCM(channel, pushToken, object : HttpCallback<Void> {
 							override fun onResult(result: Void?) {
 								execute { onSentPushToken() }
@@ -502,6 +515,7 @@ object IQChannels {
 								execute { onFailedToSendPushToken(e) }
 							}
 						})
+					}
 					Log.i(TAG, String.format("Sending a push token, attempt=%d", pushTokenAttempt))
 				}
 			}

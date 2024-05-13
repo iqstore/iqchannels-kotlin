@@ -131,6 +131,11 @@ class IQAppActivity :
 				return false
 			}
 
+			R.id.send_huawei_token -> {
+				IQChannels.setPushToken("test", isHuawei = true)
+				return false
+			}
+
 			else -> return false
 		}
 

@@ -10,9 +10,14 @@
         <item
             android:id="@+id/nav_index"
             android:title="Main"/>
+
         <item
             android:id="@+id/nav_chat"
             android:title="Chat"/>
+
+        <item
+            android:id="@+id/nav_multi_chat"
+            android:title="MultiChat"/>
 
         <item
             android:id="@+id/nav_login"

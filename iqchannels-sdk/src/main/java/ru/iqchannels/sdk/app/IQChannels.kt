@@ -7,6 +7,9 @@ import android.webkit.MimeTypeMap
 import java.io.File
 import java.util.*
 import java.util.concurrent.CancellationException
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 import ru.iqchannels.sdk.Log
 import ru.iqchannels.sdk.http.HttpCallback
 import ru.iqchannels.sdk.http.HttpClient
@@ -126,10 +129,28 @@ object IQChannels {
 
 			handler = Handler(context.applicationContext.mainLooper)
 			this.config = config
-			client = HttpClient(context, config.address, Rels(config.address))
+			client = HttpClient(config.address, Rels(config.address))
 			preferences = context.applicationContext.getSharedPreferences(
 				"IQChannels", Context.MODE_PRIVATE
 			)
+		}
+	}
+
+	fun configureSystem(context: Context) {
+		handler = Handler(context.applicationContext.mainLooper)
+		preferences = context.applicationContext.getSharedPreferences(
+			"IQChannels", Context.MODE_PRIVATE
+		)
+	}
+
+	fun configureClient(config: IQChannelsConfig) {
+		config.address?.let {
+			if (this.config != null) {
+				clear()
+			}
+
+			this.config = config
+			client = HttpClient(config.address, Rels(config.address))
 		}
 	}
 
@@ -139,10 +160,16 @@ object IQChannels {
 		signupAnonymous()
 	}
 
-	fun login(credentials: String?) {
+	fun login(credentials: String) {
 		logout()
 		this.credentials = credentials
 		auth()
+	}
+
+	internal suspend fun login2(credentials: String): ClientAuth {
+		logout()
+		this.credentials = credentials
+		return auth2()
 	}
 
 	fun loginAnonymous() {
@@ -240,6 +267,38 @@ object IQChannels {
 			for (listener in listeners) {
 				execute { listener.authenticating() }
 			}
+		}
+	}
+
+	private suspend fun auth2(): ClientAuth = suspendCoroutine { continuation ->
+
+		val callback: HttpCallback<ClientAuth> = object : HttpCallback<ClientAuth> {
+			override fun onResult(result: ClientAuth?) {
+				result?.let {
+					continuation.resume(it)
+				}
+			}
+
+			override fun onException(exception: Exception) {
+				continuation.resumeWithException(exception)
+			}
+		}
+
+		client?.let { client ->
+			authAttempt++
+			authRequest = if (credentials != null) {
+				config?.channel?.let {  channel ->
+					credentials?.let { credentials ->
+						client.clientsIntegrationAuth(credentials, channel, callback)
+					}
+				}
+			} else {
+				token?.let {
+					client.clientsAuth(it, callback)
+				}
+			}
+
+			Log.i(TAG, String.format("Authenticating, attempt=%d", authAttempt))
 		}
 	}
 
@@ -1135,7 +1194,7 @@ object IQChannels {
 	}
 
 	// Send
-	fun send(text: String?, replyToMessageId: Long?) {
+	internal fun send(text: String?, replyToMessageId: Long?) {
 		if (text == null) {
 			return
 		}
@@ -1185,7 +1244,7 @@ object IQChannels {
 		}
 	}
 
-	fun sendPostbackReply(title: String?, botpressPayload: String?) {
+	internal fun sendPostbackReply(title: String?, botpressPayload: String?) {
 		if (botpressPayload == null || title == null) {
 			return
 		}
@@ -1210,7 +1269,7 @@ object IQChannels {
 		}
 	}
 
-	fun sendFile(file: File?, replyToMessageId: Long?) {
+	internal fun sendFile(file: File?, replyToMessageId: Long?) {
 		if (file == null) {
 			return
 		}
@@ -1232,7 +1291,7 @@ object IQChannels {
 		}
 	}
 
-	fun sendFile(message: ChatMessage) {
+	internal fun sendFile(message: ChatMessage) {
 		if (auth == null) {
 			return
 		}
@@ -1321,7 +1380,7 @@ object IQChannels {
 		}
 	}
 
-	fun cancelUpload(message: ChatMessage) {
+	internal fun cancelUpload(message: ChatMessage) {
 		if (auth == null) {
 			return
 		}
@@ -1428,7 +1487,7 @@ object IQChannels {
 	}
 
 	// Ratings
-	fun ratingsRate(ratingId: Long, value: Int) {
+	internal fun ratingsRate(ratingId: Long, value: Int) {
 		if (auth == null) {
 			return
 		}
@@ -1442,7 +1501,7 @@ object IQChannels {
 	}
 
 	// Typing
-	fun sendTyping() {
+	internal fun sendTyping() {
 		if (auth == null) {
 			return
 		}

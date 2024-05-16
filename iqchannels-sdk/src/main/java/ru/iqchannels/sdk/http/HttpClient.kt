@@ -1,7 +1,6 @@
 package ru.iqchannels.sdk.http
 
 import android.annotation.SuppressLint
-import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.File
@@ -31,7 +30,6 @@ import ru.iqchannels.sdk.schema.RateRequest
 import ru.iqchannels.sdk.schema.UploadedFile
 
 class HttpClient(
-	context: Context,
 	address: String,
 	rels: Rels
 ) {

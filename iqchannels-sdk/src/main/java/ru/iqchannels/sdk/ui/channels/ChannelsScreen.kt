@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -40,7 +41,7 @@ private fun ChannelsScreenContent(
 			modifier = Modifier.fillMaxWidth()
 		) {
 			items(channels) {
-				ChannelTime(channel = it)
+				ChannelItem(channel = it)
 			}
 		}
 	}
@@ -65,7 +66,9 @@ private fun ChannelItem(channel: Channel) {
 			)
 		}
 
-		Column {
+		Column(
+			modifier = Modifier.padding(start = 16.dp)
+		) {
 			FirstRow(channel = channel)
 			
 			Text(text = "message")
@@ -76,16 +79,16 @@ private fun ChannelItem(channel: Channel) {
 @Composable
 private fun FirstRow(channel: Channel) {
 	Row {
-		Text(text = channel.name)
+		Text(text = channel.name ?: "")
 
-		if (channel.lastMessage?.My == true) {
-			Icon(
-				painter = painterResource(id = R.drawable.ic_channel_read),
-				contentDescription = null
-			)
-		}
+//		if (channel.lastMessage?.My == true) {
+//			Icon(
+//				painter = painterResource(id = R.drawable.ic_channel_read),
+//				contentDescription = null
+//			)
+//		}
 
-		ChannelTime(channel = channel)
+		//ChannelTime(channel = channel)
 	}
 }
 
@@ -97,7 +100,7 @@ private fun ChannelTime(channel: Channel) {
 @Composable
 private fun SecondRow(channel: Channel) {
 	Row {
-		Text(text = channel.lastMessage?.Text ?: "")
+		//Text(text = channel.lastMessage?.Text ?: "")
 
 		Text(
 			text = "1",

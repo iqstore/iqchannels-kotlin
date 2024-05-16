@@ -21,8 +21,11 @@ import com.google.firebase.installations.FirebaseInstallations
 import ru.iqchannels.sdk.app.Cancellable
 import ru.iqchannels.sdk.app.IQChannels
 import ru.iqchannels.sdk.app.IQChannelsConfig
+import ru.iqchannels.sdk.app.IQChannelsConfig2
+import ru.iqchannels.sdk.app.IQChannelsFactory
 import ru.iqchannels.sdk.app.UnreadListener
 import ru.iqchannels.sdk.ui.ChatFragment
+import ru.iqchannels.sdk.ui.channels.ChannelsFragment
 
 class IQAppActivity :
 	AppCompatActivity(),
@@ -63,11 +66,21 @@ class IQAppActivity :
 				val iq = IQChannels
 				iq.setPushToken(token)
 			})
-		val iq = IQChannels
+
 		// iq.configure(this, new IQChannelsConfig("http://52.57.77.143/", "support"));
-		iq.configure(this, IQChannelsConfig("https://iqchannels.isimplelab.com", "support"))
-		iq.loginAnonymous()
+		//iq.configure(this, IQChannelsConfig("https://iqchannels.isimplelab.com", "support"))
+		//iq.loginAnonymous()
 		// iq.configure(this, new IQChannelsConfig("http://88.99.143.201/", "support"));
+
+		IQChannelsFactory().create(
+			context = this,
+			config = IQChannelsConfig2(
+				address = "https://sandbox.iqstore.ru",
+				channels = listOf("support", "finance")
+			),
+			credentials = "3"
+		)
+
 	}
 
 	override fun onBackPressed() {
@@ -134,6 +147,10 @@ class IQAppActivity :
 			R.id.send_huawei_token -> {
 				IQChannels.setPushToken("test", isHuawei = true)
 				return false
+			}
+
+			R.id.nav_multi_chat -> {
+				fragment = ChannelsFragment()
 			}
 
 			else -> return false

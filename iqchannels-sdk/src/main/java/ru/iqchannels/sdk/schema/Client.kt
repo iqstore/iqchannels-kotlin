@@ -6,4 +6,5 @@ class Client {
 	var IntegrationId: String? = null
 	var CreatedAt: Long = 0
 	var UpdatedAt: Long = 0
+	var MultiChatsInfo: MultiChatsInfo? = null
 }

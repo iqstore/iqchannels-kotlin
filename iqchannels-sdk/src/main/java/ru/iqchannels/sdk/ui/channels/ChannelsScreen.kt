@@ -1,6 +1,7 @@
 package ru.iqchannels.sdk.ui.channels
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,28 +30,33 @@ fun ChannelsScreen(channelsViewModel: ChannelsViewModel) {
 
 	val channels by channelsViewModel.channels.collectAsState()
 
-	ChannelsScreenContent(channels = channels)
+	ChannelsScreenContent(
+		channels = channels,
+		onChannelClick = channelsViewModel::onChannelClick
+	)
 }
 
 @Composable
 private fun ChannelsScreenContent(
-	channels: List<Channel>
+	channels: List<Channel>,
+	onChannelClick: (Channel) -> Unit
 ) {
 	Surface {
 		LazyColumn(
 			modifier = Modifier.fillMaxWidth()
 		) {
 			items(channels) {
-				ChannelItem(channel = it)
+				ChannelItem(channel = it, onClick = onChannelClick)
 			}
 		}
 	}
 }
 
 @Composable
-private fun ChannelItem(channel: Channel) {
+private fun ChannelItem(channel: Channel, onClick: (Channel) -> Unit) {
 	Row(
 		modifier = Modifier.fillMaxWidth()
+			.clickable { onClick(channel) }
 	) {
 		Box(
 			modifier = Modifier

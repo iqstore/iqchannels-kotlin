@@ -11,6 +11,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 import ru.iqchannels.sdk.Log
+import ru.iqchannels.sdk.domain.models.ChatType
 import ru.iqchannels.sdk.http.HttpCallback
 import ru.iqchannels.sdk.http.HttpClient
 import ru.iqchannels.sdk.http.HttpProgressCallback
@@ -25,6 +26,7 @@ import ru.iqchannels.sdk.schema.ChatExceptionCode
 import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.schema.ChatMessageForm
 import ru.iqchannels.sdk.schema.ClientAuth
+import ru.iqchannels.sdk.schema.ClientTypingForm
 import ru.iqchannels.sdk.schema.MaxIdQuery
 import ru.iqchannels.sdk.schema.UploadedFile
 import ru.iqchannels.sdk.schema.User
@@ -95,6 +97,9 @@ object IQChannels {
 	private val sendQueue: MutableList<ChatMessageForm>
 	private var sendRequest: HttpRequest? = null
 	private var sendTypingRequest: HttpRequest? = null
+
+	@Volatile
+	internal var chatType: ChatType = ChatType.REGULAR
 
 	init {
 		listeners = HashSet()
@@ -776,7 +781,9 @@ object IQChannels {
 		if (messageListeners.isEmpty()) {
 			return
 		}
-		val query = MaxIdQuery()
+		val query = MaxIdQuery().apply {
+			ChatType = chatType.name.lowercase()
+		}
 
 		client?.let { client ->
 			config?.channel?.let { channel ->
@@ -948,7 +955,9 @@ object IQChannels {
 		if (messages == null) {
 			return
 		}
-		val query = ChatEventQuery()
+		val query = ChatEventQuery().apply {
+			ChatType = chatType.name.lowercase()
+		}
 
 		messages?.let { messages ->
 			for (message in messages) {
@@ -1217,6 +1226,7 @@ object IQChannels {
 
 			val form = ChatMessageForm.text(localId, text, replyToMessageId)
 			sendQueue.add(form)
+			form.ChatType = chatType.name.lowercase()
 			Log.i(TAG, String.format("Enqueued an outgoing message, localId=%d", localId))
 			send()
 		}
@@ -1264,6 +1274,7 @@ object IQChannels {
 
 			val form = ChatMessageForm.payloadReply(localId, title, botpressPayload)
 			sendQueue.add(form)
+			form.ChatType = chatType.name.lowercase()
 			Log.i(TAG, String.format("Enqueued an outgoing message, localId=%d", localId))
 			send()
 		}
@@ -1333,6 +1344,7 @@ object IQChannels {
 						)
 						val form =
 							ChatMessageForm.file(localId, result?.Id, message.ReplyToMessageId)
+						form.ChatType = chatType.name.lowercase()
 						sendQueue.add(form)
 						Log.i(TAG, String.format("Enqueued an outgoing message, localId=%d", localId))
 						send()
@@ -1509,9 +1521,13 @@ object IQChannels {
 			return
 		}
 
+		val body = ClientTypingForm().apply {
+			ChatType = chatType.name.lowercase()
+		}
+
 		config?.channel?.let { channel ->
 			sendTypingRequest =
-				client?.chatsChannelTyping(channel, object : HttpCallback<Void> {
+				client?.chatsChannelTyping(channel, body, object : HttpCallback<Void> {
 					override fun onResult(result: Void?) {
 						Log.d("sendTypingRequest", "successfully sent self 'Typing...'")
 					}

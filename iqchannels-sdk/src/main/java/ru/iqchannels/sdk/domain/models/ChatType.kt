@@ -1,6 +1,6 @@
 package ru.iqchannels.sdk.domain.models
 
 enum class ChatType {
-	COMMON,
+	REGULAR,
 	PERSONAL_MANAGER
 }

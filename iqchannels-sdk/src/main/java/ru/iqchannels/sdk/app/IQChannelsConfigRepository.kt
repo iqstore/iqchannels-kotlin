@@ -12,11 +12,14 @@ internal object IQChannelsConfigRepository {
 
 	var config: IQChannelsConfig2? = null
 
+	var credentials: String? = null
+
 	private val _channels = MutableStateFlow<List<Channel>?>(null)
 	val channels = _channels.asStateFlow()
 
 	internal fun applyConfig(config: IQChannelsConfig2, credentials: String) {
 		this.config = config
+		this.credentials = credentials
 		val channels = mutableListOf<Channel>()
 
 		if (config.channels.size > 1) {
@@ -29,8 +32,9 @@ internal object IQChannelsConfigRepository {
 						if (multiChatsInfo.EnableChat) {
 							channels.add(
 								Channel(
+									id = channel,
 									name = multiChatsInfo.ChannelName,
-									chatType = ChatType.COMMON
+									chatType = ChatType.REGULAR
 								)
 							)
 						}
@@ -38,6 +42,7 @@ internal object IQChannelsConfigRepository {
 						if (multiChatsInfo.EnableForPersonalManagers) {
 							channels.add(
 								Channel(
+									id = channel,
 									name = multiChatsInfo.ChannelName,
 									chatType = ChatType.PERSONAL_MANAGER
 								)

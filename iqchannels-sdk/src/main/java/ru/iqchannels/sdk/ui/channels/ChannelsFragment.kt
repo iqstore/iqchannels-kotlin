@@ -46,7 +46,7 @@ class ChannelsFragment : Fragment() {
 					}
 				}
 			}
-			.launchIn(lifecycleScope)
+			.launchIn(viewLifecycleOwner.lifecycleScope)
 
 		viewModel.onViewCreated()
 	}

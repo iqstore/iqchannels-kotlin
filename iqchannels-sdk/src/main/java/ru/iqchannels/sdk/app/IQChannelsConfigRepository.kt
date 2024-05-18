@@ -34,7 +34,8 @@ internal object IQChannelsConfigRepository {
 								Channel(
 									id = channel,
 									name = multiChatsInfo.ChannelName,
-									chatType = ChatType.REGULAR
+									chatType = ChatType.REGULAR,
+									iconColor = multiChatsInfo.ChannelIconColor
 								)
 							)
 						}
@@ -44,7 +45,8 @@ internal object IQChannelsConfigRepository {
 								Channel(
 									id = channel,
 									name = multiChatsInfo.ChannelName,
-									chatType = ChatType.PERSONAL_MANAGER
+									chatType = ChatType.PERSONAL_MANAGER,
+									iconColor = multiChatsInfo.ChannelIconColor
 								)
 							)
 						}

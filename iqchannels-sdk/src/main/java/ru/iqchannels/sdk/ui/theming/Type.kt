@@ -44,3 +44,8 @@ val Typography = Typography(
         fontSize = 14.sp
     )
 )
+
+val Regular16 = TextStyle(
+    fontWeight = FontWeight.Normal,
+    fontSize = 16.sp,
+)

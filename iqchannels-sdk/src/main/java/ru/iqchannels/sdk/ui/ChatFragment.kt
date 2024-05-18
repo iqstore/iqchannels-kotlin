@@ -98,6 +98,7 @@ class ChatFragment : Fragment() {
 		 * @return A new instance of fragment ChatFragment.
 		 */
 		fun newInstance(): ChatFragment {
+			Log.d("abctag", "ChatFragment newInstance")
 			val fragment = ChatFragment()
 			val args = Bundle()
 			fragment.arguments = args

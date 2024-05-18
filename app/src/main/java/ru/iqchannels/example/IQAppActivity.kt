@@ -76,7 +76,7 @@ class IQAppActivity :
 			context = this,
 			config = IQChannelsConfig2(
 				address = "https://sandbox.iqstore.ru",
-				channels = listOf("support", "finance")
+				channels = listOf( "finance")
 			),
 			credentials = "3"
 		)

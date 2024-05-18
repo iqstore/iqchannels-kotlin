@@ -39,9 +39,13 @@ class ChannelsFragment : Fragment() {
 				when(it) {
 					is ChannelsViewModel.Navigate2Chat -> {
 						parentFragmentManager.commit {
+							setReorderingAllowed(true)
 							val fragment = ChatFragment.newInstance()
 							replace((this@ChannelsFragment.view?.parent as ViewGroup).id, fragment)
-							addToBackStack(null)
+
+							if (!it.clearStack) {
+								addToBackStack(null)
+							}
 						}
 					}
 				}

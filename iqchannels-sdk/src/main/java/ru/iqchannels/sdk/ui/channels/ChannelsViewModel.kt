@@ -32,7 +32,7 @@ class ChannelsViewModel : ViewModel() {
 
 	fun onViewCreated() {
 		if (channels.value.size == 1) {
-			openChat(channels.value.first())
+			openChat(channels.value.first(), true)
 		}
 	}
 
@@ -40,7 +40,7 @@ class ChannelsViewModel : ViewModel() {
 		openChat(channel)
 	}
 
-	private fun openChat(channel: Channel) = viewModelScope.launch {
+	private fun openChat(channel: Channel, clearStack: Boolean = false) = viewModelScope.launch {
 		IQChannels.configureClient(
 			IQChannelsConfig(
 				address = IQChannelsConfigRepository.config?.address,
@@ -49,10 +49,10 @@ class ChannelsViewModel : ViewModel() {
 		)
 		IQChannels.chatType = channel.chatType
 		IQChannelsConfigRepository.credentials?.let { IQChannels.login(it) }
-		_events.emit(Navigate2Chat(channel))
+		_events.emit(Navigate2Chat(channel, clearStack))
 	}
 
 	sealed class Event
 
-	data class Navigate2Chat(val channel: Channel) : Event()
+	data class Navigate2Chat(val channel: Channel, val clearStack: Boolean) : Event()
 }

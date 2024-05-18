@@ -21,31 +21,35 @@ class ChannelsViewModel : ViewModel() {
 	val events = _events.asSharedFlow()
 
 	init {
-
 		viewModelScope.launch {
 			IQChannelsConfigRepository.channels.collect { list ->
-				when {
-					list?.isNotEmpty() == true -> {
-						_channels.value = list
-					}
-
+				if (list != null) {
+					_channels.value = list
 				}
 			}
 		}
 	}
 
-	fun onChannelClick(channel: Channel) {
-		viewModelScope.launch {
-			IQChannels.configureClient(
-				IQChannelsConfig(
-					address = IQChannelsConfigRepository.config?.address,
-					channel = channel.id
-				)
-			)
-			IQChannels.chatType = channel.chatType
-			IQChannelsConfigRepository.credentials?.let { IQChannels.login(it) }
-			_events.emit(Navigate2Chat(channel))
+	fun onViewCreated() {
+		if (channels.value.size == 1) {
+			openChat(channels.value.first())
 		}
+	}
+
+	fun onChannelClick(channel: Channel) {
+		openChat(channel)
+	}
+
+	private fun openChat(channel: Channel) = viewModelScope.launch {
+		IQChannels.configureClient(
+			IQChannelsConfig(
+				address = IQChannelsConfigRepository.config?.address,
+				channel = channel.id
+			)
+		)
+		IQChannels.chatType = channel.chatType
+		IQChannelsConfigRepository.credentials?.let { IQChannels.login(it) }
+		_events.emit(Navigate2Chat(channel))
 	}
 
 	sealed class Event

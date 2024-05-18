@@ -22,7 +22,7 @@ internal object IQChannelsConfigRepository {
 		this.credentials = credentials
 		val channels = mutableListOf<Channel>()
 
-		if (config.channels.size > 1) {
+		if (config.channels.isNotEmpty()) {
 			CoroutineScope(SupervisorJob()).launch {
 				config.channels.forEach { channel ->
 					IQChannels.configureClient(IQChannelsConfig(config.address, channel))
@@ -51,8 +51,6 @@ internal object IQChannelsConfigRepository {
 					}
 				}
 			}
-		} else {
-
 		}
 
 		_channels.value = channels

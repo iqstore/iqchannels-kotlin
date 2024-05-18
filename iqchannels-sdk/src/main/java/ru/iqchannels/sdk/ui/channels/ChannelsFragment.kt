@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.launchIn
@@ -33,7 +34,7 @@ class ChannelsFragment : Fragment() {
 		super.onViewCreated(view, savedInstanceState)
 
 		viewModel.events
-			.flowWithLifecycle(viewLifecycleOwner.lifecycle)
+			.flowWithLifecycle(lifecycle, Lifecycle.State.CREATED)
 			.onEach {
 				when(it) {
 					is ChannelsViewModel.Navigate2Chat -> {
@@ -45,6 +46,8 @@ class ChannelsFragment : Fragment() {
 					}
 				}
 			}
-			.launchIn(viewLifecycleOwner.lifecycleScope)
+			.launchIn(lifecycleScope)
+
+		viewModel.onViewCreated()
 	}
 }

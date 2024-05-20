@@ -41,6 +41,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.ui.platform.ComposeView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -80,7 +81,9 @@ import ru.iqchannels.sdk.schema.ClientAuth
 import ru.iqchannels.sdk.schema.SingleChoice
 import ru.iqchannels.sdk.ui.backdrop.ErrorPageBackdropDialog
 import ru.iqchannels.sdk.ui.images.ImagePreviewFragment
+import ru.iqchannels.sdk.ui.nav_bar.NavBar
 import ru.iqchannels.sdk.ui.rv.SwipeController
+import ru.iqchannels.sdk.ui.theming.IQChannelsTheme
 import ru.iqchannels.sdk.ui.widgets.ReplyMessageView
 import ru.iqchannels.sdk.ui.widgets.TopNotificationWidget
 
@@ -90,6 +93,7 @@ class ChatFragment : Fragment() {
 		private const val TAG = "iqchannels"
 		private const val SEND_FOCUS_SCROLL_THRESHOLD_PX = 300
 		private const val PARAM_LM_STATE = "ChatFragment#lmState"
+		private const val ARG_TITLE = "ChatFragment#title"
 
 		/**
 		 * Use this factory method to create a new instance of
@@ -97,10 +101,11 @@ class ChatFragment : Fragment() {
 		 *
 		 * @return A new instance of fragment ChatFragment.
 		 */
-		fun newInstance(): ChatFragment {
-			Log.d("abctag", "ChatFragment newInstance")
+		fun newInstance(title: String? = null): ChatFragment {
 			val fragment = ChatFragment()
-			val args = Bundle()
+			val args = Bundle().apply {
+				putString(ARG_TITLE, title)
+			}
 			fragment.arguments = args
 			return fragment
 		}
@@ -304,6 +309,19 @@ class ChatFragment : Fragment() {
 
 		if (!requireActivity().packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
 			attachButton?.visibility = View.GONE
+		}
+
+		arguments?.getString(ARG_TITLE)?.let { title ->
+			view.findViewById<ComposeView>(R.id.nav_bar)?.let {
+
+				it.setContent {
+					IQChannelsTheme {
+						NavBar(title = title) {
+							parentFragmentManager.popBackStack()
+						}
+					}
+				}
+			}
 		}
 
 		return view

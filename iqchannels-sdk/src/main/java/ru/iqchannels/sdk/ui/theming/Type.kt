@@ -49,3 +49,13 @@ val Regular16 = TextStyle(
     fontWeight = FontWeight.Normal,
     fontSize = 16.sp,
 )
+
+val Regular13 = TextStyle(
+    fontWeight = FontWeight.Normal,
+    fontSize = 13.sp,
+)
+
+val Medium15 = TextStyle(
+    fontWeight = FontWeight.Medium,
+    fontSize = 15.sp,
+)

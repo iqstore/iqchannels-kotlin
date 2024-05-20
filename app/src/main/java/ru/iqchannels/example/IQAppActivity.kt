@@ -38,6 +38,8 @@ class IQAppActivity :
 
 	private var unread: Cancellable? = null
 
+	private var customNavBarEnabled = false
+
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_app)
@@ -150,7 +152,22 @@ class IQAppActivity :
 			}
 
 			R.id.nav_multi_chat -> {
-				fragment = ChannelsFragment()
+				fragment = ChannelsFragment.newInstance(customNavBarEnabled)
+			}
+
+			R.id.hide_action_bar -> {
+				supportActionBar?.hide()
+				return false
+			}
+
+			R.id.show_action_bar -> {
+				supportActionBar?.show()
+				return false
+			}
+
+			R.id.enable_cutom_title -> {
+				customNavBarEnabled = !customNavBarEnabled
+				return false
 			}
 
 			else -> return false

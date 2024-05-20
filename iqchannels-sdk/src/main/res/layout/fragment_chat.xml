@@ -74,6 +74,11 @@
         android:layout_height="match_parent"
         android:visibility="gone">
 
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/nav_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
         <!-- Progress bar-->
         <ProgressBar
             android:id="@+id/messagesProgress"
@@ -88,11 +93,11 @@
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/messagesRefresh"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
             android:layout_above="@+id/send"
+            android:layout_below="@id/nav_bar"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true">
+            android:layout_alignParentRight="true">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/messages"

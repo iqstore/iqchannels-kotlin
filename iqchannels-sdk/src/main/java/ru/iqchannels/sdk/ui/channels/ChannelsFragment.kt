@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
@@ -17,6 +18,17 @@ import ru.iqchannels.sdk.ui.images.ImagePreviewFragment
 import ru.iqchannels.sdk.ui.theming.IQChannelsCompose
 
 class ChannelsFragment : Fragment() {
+
+	companion object {
+
+		private const val ARG_NAV_BAR_ENABLED = "ChannelsFragment#navBarEnabled"
+
+		fun newInstance(navBarEnabled: Boolean = true) = ChannelsFragment().apply {
+			arguments = bundleOf(
+				ARG_NAV_BAR_ENABLED to navBarEnabled
+			)
+		}
+	}
 
 	private val viewModel: ChannelsViewModel by viewModels()
 
@@ -32,6 +44,7 @@ class ChannelsFragment : Fragment() {
 
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
+		val navBarEnabled = requireArguments().getBoolean(ARG_NAV_BAR_ENABLED)
 
 		viewModel.events
 			.flowWithLifecycle(lifecycle, Lifecycle.State.CREATED)
@@ -40,7 +53,13 @@ class ChannelsFragment : Fragment() {
 					is ChannelsViewModel.Navigate2Chat -> {
 						parentFragmentManager.commit {
 							setReorderingAllowed(true)
-							val fragment = ChatFragment.newInstance()
+							val title = if (navBarEnabled) {
+								it.channel.name
+							} else {
+								null
+							}
+
+							val fragment = ChatFragment.newInstance(title)
 							replace((this@ChannelsFragment.view?.parent as ViewGroup).id, fragment)
 
 							if (!it.clearStack) {

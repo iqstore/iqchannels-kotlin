@@ -42,4 +42,5 @@
     <string name="chat_unavailable_description">Мы уже все исправляем. Обновите страницу или попробуйте позже</string>
     <string name="go_back">Вернуться</string>
     <string name="file_not_uploaded">Файл не загрузился</string>
+    <string name="online">На связи</string>
 </resources>

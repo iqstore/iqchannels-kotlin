@@ -4,6 +4,7 @@
  */
 package ru.iqchannels.example
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -34,6 +35,9 @@ class IQAppActivity :
 
 	companion object {
 		private const val TAG = "iqchannels-app"
+
+		const val PREFS = "IQAppActivity#prefs"
+		const val TESTING_TYPE = "IQAppActivity#testingType"
 	}
 
 	private var unread: Cancellable? = null
@@ -69,20 +73,33 @@ class IQAppActivity :
 				iq.setPushToken(token)
 			})
 
-		// iq.configure(this, new IQChannelsConfig("http://52.57.77.143/", "support"));
-		//iq.configure(this, IQChannelsConfig("https://iqchannels.isimplelab.com", "support"))
-		//iq.loginAnonymous()
-		// iq.configure(this, new IQChannelsConfig("http://88.99.143.201/", "support"));
+		val testingType = getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+			.getString(TESTING_TYPE, TestingType.MultiChat.name)?.let {
+				TestingType.valueOf(it)
+			}
 
-		IQChannelsFactory().create(
-			context = this,
-			config = IQChannelsConfig2(
-				address = "https://sandbox.iqstore.ru",
-				channels = listOf("support", "finance")
-			),
-			credentials = "3"
-		)
+		when (testingType) {
+			TestingType.SingleChat -> {
+				IQChannels.configure(
+					this,
+					IQChannelsConfig("https://iqchannels.isimplelab.com", "support")
+				)
+				IQChannels.loginAnonymous()
+			}
 
+			TestingType.MultiChat -> {
+				IQChannelsFactory().create(
+					context = this,
+					config = IQChannelsConfig2(
+						address = "https://sandbox.iqstore.ru",
+						channels = listOf("support", "finance")
+					),
+					credentials = "3"
+				)
+			}
+
+			null -> Unit
+		}
 	}
 
 	override fun onBackPressed() {
@@ -113,7 +130,7 @@ class IQAppActivity :
 	override fun onNavigationItemSelected(item: MenuItem): Boolean {
 		val fragment: Fragment
 		when (item.itemId) {
-			R.id.nav_index -> fragment = PlusOneFragment.newInstance()
+			R.id.nav_index -> fragment = PlusOneFragment()
 			R.id.nav_chat -> fragment = ChatFragment.newInstance()
 			R.id.nav_login -> {
 				IQChannels.login("3")
@@ -175,7 +192,8 @@ class IQAppActivity :
 
 		// Insert the fragment by replacing any existing fragment
 		val fragmentManager = supportFragmentManager
-		fragmentManager.beginTransaction().replace(R.id.content, fragment).addToBackStack(null).commit()
+		fragmentManager.beginTransaction().replace(R.id.content, fragment).addToBackStack(null)
+			.commit()
 		val drawer = findViewById<DrawerLayout>(R.id.drawer_layout)
 		drawer.closeDrawer(GravityCompat.START)
 		return true

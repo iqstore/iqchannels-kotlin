@@ -3,9 +3,11 @@ package ru.iqchannels.sdk.app
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.commit
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ru.iqchannels.sdk.domain.models.ChatType
 import ru.iqchannels.sdk.ui.ChatFragment
 
@@ -31,10 +33,12 @@ object IQChannelsShortCuts {
 						IQChannels.chatType = chatType
 						IQChannelsConfigRepository.credentials?.let { IQChannels.login(it) }
 
-						fragmentManager.commit {
-							setReorderingAllowed(true)
-							replace(containerId, ChatFragment.newInstance(title))
-							addToBackStack(null)
+						withContext(Dispatchers.Main) {
+							fragmentManager.commit {
+								setReorderingAllowed(true)
+								replace(containerId, ChatFragment.newInstance(title))
+								addToBackStack(null)
+							}
 						}
 
 						this.cancel()

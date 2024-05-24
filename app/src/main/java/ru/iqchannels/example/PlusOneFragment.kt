@@ -16,10 +16,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -54,6 +56,8 @@ class PlusOneFragment : Fragment() {
 		Surface {
 
 			val testingType by viewModel.testingType.collectAsState()
+			val address by viewModel.address.collectAsState()
+			val channels by viewModel.channels.collectAsState()
 
 			Column(
 				modifier = Modifier.padding(16.dp)
@@ -68,6 +72,20 @@ class PlusOneFragment : Fragment() {
 						.clickable { openShortCuts() }
 						.padding(16.dp)
 				)
+				Divider(Modifier.fillMaxWidth())
+
+				Spacer(modifier = Modifier.height(16.dp))
+
+				Text(text = "Server:")
+				TextField(value = address, onValueChange = viewModel::onAddressChange)
+
+				Text(text = "Channels:")
+				TextField(value = channels.joinToString(), onValueChange = viewModel::onChannelsChange)
+
+				Button(onClick = { saveConfigs(address, channels) }) {
+					Text(text = "Save configs")
+				}
+
 				Divider(Modifier.fillMaxWidth())
 
 				Spacer(modifier = Modifier.height(16.dp))
@@ -114,10 +132,24 @@ class PlusOneFragment : Fragment() {
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
 
+		val prefs = requireContext().getSharedPreferences(IQAppActivity.PREFS, Context.MODE_PRIVATE)
+
+		prefs.getString(IQAppActivity.TESTING_TYPE, TestingType.MultiChat.name)?.let {
+			viewModel.onTestingChange(TestingType.valueOf(it))
+		}
+
+		prefs.getString(IQAppActivity.ADDRESS, "https://sandbox.iqstore.ru")?.let {
+			viewModel.onAddressChange(it)
+		}
+
+		prefs.getStringSet(IQAppActivity.CHANNELS, setOf("support", "finance"))?.let {
+			viewModel.onChannelsChange(it.joinToString())
+		}
+
 		viewModel.testingType
 			.flowWithLifecycle(viewLifecycleOwner.lifecycle)
 			.onEach {
-				requireContext().getSharedPreferences(IQAppActivity.PREFS, Context.MODE_PRIVATE)
+				prefs
 					.edit()
 					.putString(IQAppActivity.TESTING_TYPE, it.name)
 					.apply()
@@ -130,6 +162,14 @@ class PlusOneFragment : Fragment() {
 			.replace(R.id.content, ShortCutsFragment())
 			.addToBackStack(null)
 			.commit()
+	}
+
+	private fun saveConfigs(address: String, channels: List<String>) {
+		requireContext().getSharedPreferences(IQAppActivity.PREFS, Context.MODE_PRIVATE)
+			.edit()
+			.putString(IQAppActivity.ADDRESS, address)
+			.putStringSet(IQAppActivity.CHANNELS, channels.toSet())
+			.apply()
 	}
 
 }

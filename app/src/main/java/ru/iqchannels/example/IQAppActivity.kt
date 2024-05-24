@@ -38,6 +38,8 @@ class IQAppActivity :
 
 		const val PREFS = "IQAppActivity#prefs"
 		const val TESTING_TYPE = "IQAppActivity#testingType"
+		const val ADDRESS = "IQAppActivity#address"
+		const val CHANNELS = "IQAppActivity#channels"
 	}
 
 	private var unread: Cancellable? = null
@@ -73,32 +75,25 @@ class IQAppActivity :
 				iq.setPushToken(token)
 			})
 
-		val testingType = getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+		val prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+		val testingType = prefs
 			.getString(TESTING_TYPE, TestingType.MultiChat.name)?.let {
 				TestingType.valueOf(it)
 			}
+
+		val address = prefs.getString(ADDRESS, null) ?: "https://sandbox.iqstore.ru"
+		val channels = prefs.getStringSet(CHANNELS, null) ?: setOf("support", "finance")
 
 		when (testingType) {
 			TestingType.SingleChat -> {
 				IQChannels.configure(
 					this,
-					IQChannelsConfig("https://iqchannels.isimplelab.com", "support")
+					IQChannelsConfig(address, channels.first())
 				)
 				IQChannels.loginAnonymous()
 			}
 
-			TestingType.MultiChat -> {
-				IQChannelsFactory().create(
-					context = this,
-					config = IQChannelsConfig2(
-						address = "https://sandbox.iqstore.ru",
-						channels = listOf("support", "finance")
-					),
-					credentials = "3"
-				)
-			}
-
-			null -> Unit
+			else -> Unit
 		}
 	}
 
@@ -133,7 +128,31 @@ class IQAppActivity :
 			R.id.nav_index -> fragment = PlusOneFragment()
 			R.id.nav_chat -> fragment = ChatFragment.newInstance()
 			R.id.nav_login -> {
-				IQChannels.login("3")
+				val prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+				val testingType = prefs
+					.getString(TESTING_TYPE, TestingType.MultiChat.name)?.let {
+						TestingType.valueOf(it)
+					}
+
+				val address = prefs.getString(ADDRESS, null) ?: "https://sandbox.iqstore.ru"
+				val channels = prefs.getStringSet(CHANNELS, null) ?: setOf("support", "finance")
+
+				when(testingType) {
+					TestingType.SingleChat -> {
+						IQChannels.login("3")
+					}
+					TestingType.MultiChat -> {
+						IQChannelsFactory().create(
+							context = this,
+							config = IQChannelsConfig2(
+								address = address,
+								channels = channels.toList()
+							),
+							credentials = "3"
+						)
+					}
+					null -> Unit
+				}
 				return false
 			}
 

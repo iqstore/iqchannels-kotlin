@@ -13,6 +13,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import io.noties.markwon.Markwon
 import java.util.*
 import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.app.IQChannels
@@ -33,6 +34,7 @@ internal class ChatMessagesAdapter(
 	private val iqchannels: IQChannels,
 	private val rootView: View,
 	private val rootViewDimens: () -> Pair<Int, Int>,
+	private val markwon: Markwon,
 	private val itemClickListener: ItemClickListener
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -212,7 +214,7 @@ internal class ChatMessagesAdapter(
 
 		when(holder) {
 			is MyMessageViewHolder -> holder.bind(message, rootViewDimens())
-			is OtherMessageViewHolder -> holder.bind(message, rootViewDimens())
+			is OtherMessageViewHolder -> holder.bind(message, rootViewDimens(), markwon)
 			else -> Unit
 		}
 

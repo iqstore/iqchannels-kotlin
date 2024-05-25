@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.GranularRoundedCorners
+import io.noties.markwon.Markwon
+import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import java.text.DateFormat
 import java.text.DecimalFormat
 import ru.iqchannels.sdk.R
@@ -38,7 +40,7 @@ internal class OtherMessageViewHolder(
 	private val dateFormat: DateFormat = android.text.format.DateFormat.getDateFormat(binding.root.context)
 	private val timeFormat: DateFormat = android.text.format.DateFormat.getTimeFormat(binding.root.context)
 
-	fun bind(message: ChatMessage, rootViewDimens: Pair<Int, Int>) = with(binding) {
+	fun bind(message: ChatMessage, rootViewDimens: Pair<Int, Int>, markwon: Markwon) = with(binding) {
 		val adapter = bindingAdapter as? ChatMessagesAdapter ?: return@with
 
 		// Day
@@ -122,7 +124,9 @@ internal class OtherMessageViewHolder(
 					clTexts.visibility = View.VISIBLE
 					clTexts.setBackgroundResource(R.drawable.other_msg_reply_text_bg)
 					otherText.visibility = View.VISIBLE
-					otherText.text = message.Text
+					message.Text?.let {
+						markwon.setMarkdown(otherText, it)
+					}
 				} else {
 					otherText.visibility = View.GONE
 				}
@@ -196,7 +200,9 @@ internal class OtherMessageViewHolder(
 				val text = message.Text
 				if (!text.isNullOrEmpty()) {
 					otherText.visibility = View.VISIBLE
-					otherText.text = message.Text
+					message.Text?.let {
+						markwon.setMarkdown(otherText, it)
+					}
 				}
 
 //                holder.otherText.setText(makeFileLink(file));
@@ -253,8 +259,10 @@ internal class OtherMessageViewHolder(
 			clTexts.setBackgroundResource(R.drawable.other_msg_bg)
 			otherText.visibility = View.VISIBLE
 			otherText.autoLinkMask = Linkify.ALL
-			otherText.text = message.Text
 			otherText.setTextColor(Colors.textColor())
+			message.Text?.let {
+				markwon.setMarkdown(otherText, it)
+			}
 		}
 		val lp = LinearLayout.LayoutParams(
 			LinearLayout.LayoutParams.WRAP_CONTENT,

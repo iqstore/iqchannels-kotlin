@@ -52,6 +52,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import io.noties.markwon.Markwon
+import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -243,10 +245,15 @@ class ChatFragment : Fragment() {
 		refresh?.isEnabled = false
 		refresh?.setOnRefreshListener { refreshMessages() }
 
+		val markwon = Markwon.builder(requireContext())
+			.usePlugin(StrikethroughPlugin.create())
+			.build()
+
 		adapter = ChatMessagesAdapter(
 			IQChannels,
 			view,
 			{ view.width to view.height },
+			markwon,
 			ItemClickListener()
 		)
 

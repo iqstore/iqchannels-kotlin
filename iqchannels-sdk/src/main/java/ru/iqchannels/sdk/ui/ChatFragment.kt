@@ -68,8 +68,11 @@ import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.app.Callback
 import ru.iqchannels.sdk.app.Cancellable
 import ru.iqchannels.sdk.app.IQChannels
+import ru.iqchannels.sdk.app.IQChannelsConfig
+import ru.iqchannels.sdk.app.IQChannelsConfigRepository
 import ru.iqchannels.sdk.app.IQChannelsListener
 import ru.iqchannels.sdk.app.MessagesListener
+import ru.iqchannels.sdk.domain.models.ChatType
 import ru.iqchannels.sdk.http.HttpException
 import ru.iqchannels.sdk.lib.InternalIO.copy
 import ru.iqchannels.sdk.schema.Action
@@ -586,6 +589,10 @@ class ChatFragment : Fragment() {
 
 			override fun messageDeleted(message: ChatMessage) {
 				this@ChatFragment.messageDeleted(message)
+			}
+
+			override fun eventChangeChannel(channel: String) {
+				this@ChatFragment.onChannelChange(channel)
 			}
 
 			override fun eventTyping(event: ChatEvent) {
@@ -1155,6 +1162,17 @@ class ChatFragment : Fragment() {
 				)
 			}
 		}
+	}
+
+	private fun onChannelChange(channel: String) {
+		IQChannels.configureClient(
+			IQChannelsConfig(
+				address = IQChannelsConfigRepository.config?.address,
+				channel = channel
+			)
+		)
+		IQChannels.chatType = ChatType.REGULAR
+		IQChannelsConfigRepository.credentials?.let { IQChannels.login(it) }
 	}
 
 	private inner class ItemClickListener : ChatMessagesAdapter.ItemClickListener {

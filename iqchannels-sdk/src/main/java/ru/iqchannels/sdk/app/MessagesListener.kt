@@ -18,4 +18,5 @@ interface MessagesListener {
 	fun eventTyping(event: ChatEvent)
 	fun messageCancelled(message: ChatMessage)
 	fun messageDeleted(message: ChatMessage)
+	fun eventChangeChannel(channel: String)
 }

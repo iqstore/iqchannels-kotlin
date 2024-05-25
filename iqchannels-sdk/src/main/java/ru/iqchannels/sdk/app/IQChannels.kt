@@ -1608,6 +1608,7 @@ object IQChannels {
 			ChatEventType.MESSAGE_RECEIVED -> messageReceived(event)
 			ChatEventType.MESSAGE_READ -> messageRead(event)
 			ChatEventType.TYPING -> messageTyping(event)
+			ChatEventType.CHAT_CHANNEL_CHANGE -> changeChannel(event)
 			else -> Log.i(TAG, String.format("applyEvent: %s", event.Type))
 		}
 	}
@@ -1737,6 +1738,14 @@ object IQChannels {
 	private fun messageTyping(event: ChatEvent) {
 		for (listener in messageListeners) {
 			execute { listener.eventTyping(event) }
+		}
+	}
+
+	private fun changeChannel(event: ChatEvent) {
+		event.NextChannelName?.let { channel ->
+			for (listener in messageListeners) {
+				execute { listener.eventChangeChannel(channel) }
+			}
 		}
 	}
 }

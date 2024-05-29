@@ -25,40 +25,42 @@ internal object IQChannelsConfigRepository {
 		this.config = config
 		this.credentials = credentials
 
-		if (config.channels.isNotEmpty() && job?.isActive == false) {
-			job = CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
-				val channels = mutableListOf<Channel>()
-				config.channels.forEach { channel ->
-					IQChannels.configureClient(IQChannelsConfig(config.address, channel))
-					val clientAuth = IQChannels.login2(credentials)
+		if (config.channels.isNotEmpty()) {
+			if (job == null || job?.isActive == false) {
+				job = CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+					val channels = mutableListOf<Channel>()
+					config.channels.forEach { channel ->
+						IQChannels.configureClient(IQChannelsConfig(config.address, channel))
+						val clientAuth = IQChannels.login2(credentials)
 
-					clientAuth.Client?.MultiChatsInfo?.let { multiChatsInfo ->
-						if (multiChatsInfo.EnableChat) {
-							channels.add(
-								Channel(
-									id = channel,
-									name = multiChatsInfo.ChannelName,
-									chatType = ChatType.REGULAR,
-									iconColor = multiChatsInfo.ChannelIconColor
+						clientAuth.Client?.MultiChatsInfo?.let { multiChatsInfo ->
+							if (multiChatsInfo.EnableChat) {
+								channels.add(
+									Channel(
+										id = channel,
+										name = multiChatsInfo.ChannelName,
+										chatType = ChatType.REGULAR,
+										iconColor = multiChatsInfo.ChannelIconColor
+									)
 								)
-							)
-						}
+							}
 
-						if (multiChatsInfo.EnableForPersonalManagers) {
-							channels.add(
-								Channel(
-									id = channel,
-									name = multiChatsInfo.ChannelName,
-									chatType = ChatType.PERSONAL_MANAGER,
-									iconColor = multiChatsInfo.ChannelIconColor
+							if (multiChatsInfo.EnableForPersonalManagers) {
+								channels.add(
+									Channel(
+										id = channel,
+										name = multiChatsInfo.ChannelName,
+										chatType = ChatType.PERSONAL_MANAGER,
+										iconColor = multiChatsInfo.ChannelIconColor
+									)
 								)
-							)
+							}
 						}
 					}
-				}
 
-				channels.takeIf { it.isNotEmpty() }?.let {
-					_channels.value = it
+					channels.takeIf { it.isNotEmpty() }?.let {
+						_channels.value = it
+					}
 				}
 			}
 		}

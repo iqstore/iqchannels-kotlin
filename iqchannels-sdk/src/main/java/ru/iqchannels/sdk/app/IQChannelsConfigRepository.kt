@@ -2,6 +2,7 @@ package ru.iqchannels.sdk.app
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -18,12 +19,14 @@ internal object IQChannelsConfigRepository {
 	private val _channels = MutableStateFlow<List<Channel>?>(null)
 	val channels = _channels.asStateFlow()
 
+	private var job: Job? = null
+
 	internal fun applyConfig(config: IQChannelsConfig2, credentials: String) {
 		this.config = config
 		this.credentials = credentials
 
-		if (config.channels.isNotEmpty()) {
-			CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+		if (config.channels.isNotEmpty() && job?.isActive == false) {
+			job = CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
 				val channels = mutableListOf<Channel>()
 				config.channels.forEach { channel ->
 					IQChannels.configureClient(IQChannelsConfig(config.address, channel))

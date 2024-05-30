@@ -2,29 +2,28 @@ package ru.iqchannels.sdk.ui.rv
 
 import android.text.method.LinkMovementMethod
 import android.text.util.Linkify
+import android.util.TypedValue
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import androidx.constraintlayout.helper.widget.Flow
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.GranularRoundedCorners
 import io.noties.markwon.Markwon
-import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import java.text.DateFormat
 import java.text.DecimalFormat
 import ru.iqchannels.sdk.R
-import ru.iqchannels.sdk.app.IQChannels
 import ru.iqchannels.sdk.databinding.ItemOtherMessageBinding
 import ru.iqchannels.sdk.schema.Action
 import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.schema.ChatPayloadType
 import ru.iqchannels.sdk.schema.RatingState
 import ru.iqchannels.sdk.schema.SingleChoice
+import ru.iqchannels.sdk.styling.IQStyles
 import ru.iqchannels.sdk.ui.ActionsAdapter
 import ru.iqchannels.sdk.ui.ButtonsAdapter
 import ru.iqchannels.sdk.ui.ChatMessagesAdapter
@@ -47,6 +46,13 @@ internal class OtherMessageViewHolder(
 		if (adapter.isNewDay(bindingAdapterPosition) && message.Payload !== ChatPayloadType.TYPING) {
 			date.text = message.Date?.let { dateFormat.format(it) }
 			date.visibility = View.VISIBLE
+			IQStyles.iqChannelsStyles?.chat?.dateText?.color?.getColorInt(root.context)?.let {
+				date.setTextColor(it)
+			}
+
+			IQStyles.iqChannelsStyles?.chat?.dateText?.textSize?.let {
+				date.setTextSize(TypedValue.COMPLEX_UNIT_SP, it)
+			}
 		} else {
 			date.visibility = View.GONE
 		}

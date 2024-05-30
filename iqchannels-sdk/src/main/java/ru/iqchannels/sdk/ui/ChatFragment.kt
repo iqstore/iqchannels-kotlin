@@ -52,6 +52,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import io.noties.markwon.Markwon
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import java.io.File
@@ -84,6 +86,8 @@ import ru.iqchannels.sdk.schema.ChatException
 import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.schema.ClientAuth
 import ru.iqchannels.sdk.schema.SingleChoice
+import ru.iqchannels.sdk.styling.IQChannelsStyles
+import ru.iqchannels.sdk.styling.IQStyles
 import ru.iqchannels.sdk.ui.backdrop.ErrorPageBackdropDialog
 import ru.iqchannels.sdk.ui.images.ImagePreviewFragment
 import ru.iqchannels.sdk.ui.nav_bar.NavBar
@@ -99,6 +103,7 @@ class ChatFragment : Fragment() {
 		private const val SEND_FOCUS_SCROLL_THRESHOLD_PX = 300
 		private const val PARAM_LM_STATE = "ChatFragment#lmState"
 		private const val ARG_TITLE = "ChatFragment#title"
+		private const val ARG_STYLES = "ChatFragment#styles"
 
 		/**
 		 * Use this factory method to create a new instance of
@@ -106,10 +111,11 @@ class ChatFragment : Fragment() {
 		 *
 		 * @return A new instance of fragment ChatFragment.
 		 */
-		fun newInstance(title: String? = null): ChatFragment {
+		fun newInstance(title: String? = null, stylesJson: String? = null): ChatFragment {
 			val fragment = ChatFragment()
 			val args = Bundle().apply {
 				putString(ARG_TITLE, title)
+				putString(ARG_STYLES, stylesJson)
 			}
 			fragment.arguments = args
 			return fragment
@@ -173,7 +179,7 @@ class ChatFragment : Fragment() {
 				val intent = it.data
 				val uri = intent?.data
 
-				when(uri == null) {
+				when (uri == null) {
 					true -> { // multiple choice
 						it.data?.clipData?.let { clipData ->
 							val uris = ArrayList<Uri>()
@@ -186,12 +192,14 @@ class ChatFragment : Fragment() {
 								1 -> {
 									onGalleryResult(uris.first())
 								}
+
 								else -> {
 									sendMultipleFiles(uris)
 								}
 							}
 						}
 					}
+
 					false -> { // single choice
 						var isCamera = false
 						if (!isCamera) {
@@ -219,7 +227,19 @@ class ChatFragment : Fragment() {
 		inflater: LayoutInflater, container: ViewGroup?,
 		savedInstanceState: Bundle?
 	): View? {
+
+		arguments?.getString(ARG_STYLES)?.let { json ->
+			Gson().fromJson(json, TypeToken.get(IQChannelsStyles::class.java))?.also {
+				IQStyles.iqChannelsStyles = it
+			}
+		}
+
 		val view = inflater.inflate(R.layout.fragment_chat, container, false)
+
+		view.setBackgroundColor(
+			IQStyles.iqChannelsStyles?.chat?.background?.getColorInt(requireContext())
+				?: ContextCompat.getColor(requireContext(), R.color.white)
+		)
 
 		// Auth views.
 		authLayout = view.findViewById<View>(R.id.authLayout) as RelativeLayout
@@ -244,6 +264,9 @@ class ChatFragment : Fragment() {
 		refresh = view.findViewById<View>(R.id.messagesRefresh) as SwipeRefreshLayout
 		refresh?.isEnabled = false
 		refresh?.setOnRefreshListener { refreshMessages() }
+		IQStyles.iqChannelsStyles?.chat?.chatHistory?.getColorInt(requireContext())?.let {
+			refresh?.setColorSchemeColors(it)
+		}
 
 		val markwon = Markwon.builder(requireContext())
 			.usePlugin(StrikethroughPlugin.create())
@@ -441,16 +464,19 @@ class ChatFragment : Fragment() {
 					showUnavailableView(getString(R.string.chat_unavailable_description))
 				}
 
-				val message = when(e) {
+				val message = when (e) {
 					is UnknownHostException -> {
 						getString(R.string.check_connection)
 					}
+
 					is SocketTimeoutException, is TimeoutException -> {
 						getString(R.string.timeout_message)
 					}
+
 					is HttpException -> {
 						getString(R.string.chat_unavailable_description)
 					}
+
 					else -> return
 				}
 
@@ -732,7 +758,7 @@ class ChatFragment : Fragment() {
 		val exception = message.UploadExc ?: return
 		val errMessage: String?
 
-		when(exception) {
+		when (exception) {
 			is HttpException -> {
 				errMessage = if (exception.code == 413) {
 					getString(R.string.file_size_too_large)
@@ -740,17 +766,24 @@ class ChatFragment : Fragment() {
 					getString(R.string.check_connection)
 				}
 			}
+
 			is UnknownHostException -> {
 				errMessage = getString(R.string.check_connection)
 			}
+
 			is SocketTimeoutException, is TimeoutException, is java.net.SocketException -> {
 				errMessage = getString(R.string.timeout_message)
 			}
+
 			is ChatException -> {
 				errMessage = exception.message ?: getString(R.string.error_occured)
 			}
+
 			else -> {
-				Log.d("UploadException", "Message load exception. Type: ${exception.javaClass}. Body: ${exception.stackTraceToString()}")
+				Log.d(
+					"UploadException",
+					"Message load exception. Type: ${exception.javaClass}. Body: ${exception.stackTraceToString()}"
+				)
 				errMessage = getString(R.string.error_occured)
 			}
 		}
@@ -878,7 +911,10 @@ class ChatFragment : Fragment() {
 
 			withContext(Dispatchers.Main) {
 				result?.let {
-					showConfirmDialog(it, getString(R.string.chat_send_file_confirmation_description, it.name))
+					showConfirmDialog(
+						it,
+						getString(R.string.chat_send_file_confirmation_description, it.name)
+					)
 				}
 			}
 		}
@@ -1233,7 +1269,8 @@ class ChatFragment : Fragment() {
 
 		override fun onMessageLongClick(message: ChatMessage) {
 			message.Text?.let { text ->
-				val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+				val clipboard =
+					requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 				val clip = ClipData.newPlainText(text, text)
 				clipboard.setPrimaryClip(clip)
 

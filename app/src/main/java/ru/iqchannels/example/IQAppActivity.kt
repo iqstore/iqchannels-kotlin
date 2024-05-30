@@ -126,7 +126,10 @@ class IQAppActivity :
 		val fragment: Fragment
 		when (item.itemId) {
 			R.id.nav_index -> fragment = PlusOneFragment()
-			R.id.nav_chat -> fragment = ChatFragment.newInstance()
+			R.id.nav_chat -> {
+				val stylesJson = getJSFromAssets("styles_new.json")?.toString()
+				fragment = ChatFragment.newInstance(stylesJson = stylesJson)
+			}
 			R.id.nav_login -> {
 				val prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE)
 				val testingType = prefs

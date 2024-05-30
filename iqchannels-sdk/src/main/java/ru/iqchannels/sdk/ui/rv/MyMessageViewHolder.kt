@@ -2,6 +2,7 @@ package ru.iqchannels.sdk.ui.rv
 
 import android.text.method.LinkMovementMethod
 import android.text.util.Linkify
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
@@ -18,6 +19,7 @@ import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.databinding.ItemMyMessageBinding
 import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.schema.ChatPayloadType
+import ru.iqchannels.sdk.styling.IQStyles
 import ru.iqchannels.sdk.ui.ChatMessagesAdapter
 import ru.iqchannels.sdk.ui.Colors
 import ru.iqchannels.sdk.ui.widgets.toPx
@@ -39,6 +41,13 @@ internal class MyMessageViewHolder(
 		if (adapter.isNewDay(bindingAdapterPosition) && message.Payload !== ChatPayloadType.TYPING) {
 			date.text = message.Date?.let { dateFormat.format(it) }
 			date.visibility = View.VISIBLE
+			IQStyles.iqChannelsStyles?.chat?.dateText?.color?.getColorInt(root.context)?.let {
+				date.setTextColor(it)
+			}
+
+			IQStyles.iqChannelsStyles?.chat?.dateText?.textSize?.let {
+				date.setTextSize(TypedValue.COMPLEX_UNIT_SP, it)
+			}
 		} else {
 			date.visibility = View.GONE
 		}

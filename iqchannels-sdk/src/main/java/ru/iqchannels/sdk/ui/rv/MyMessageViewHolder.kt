@@ -2,7 +2,6 @@ package ru.iqchannels.sdk.ui.rv
 
 import android.text.method.LinkMovementMethod
 import android.text.util.Linkify
-import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
@@ -16,9 +15,11 @@ import java.text.DateFormat
 import java.text.DecimalFormat
 import kotlin.math.roundToInt
 import ru.iqchannels.sdk.R
+import ru.iqchannels.sdk.applyIQStyles
 import ru.iqchannels.sdk.databinding.ItemMyMessageBinding
 import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.schema.ChatPayloadType
+import ru.iqchannels.sdk.setBackgroundDrawable
 import ru.iqchannels.sdk.styling.IQStyles
 import ru.iqchannels.sdk.ui.ChatMessagesAdapter
 import ru.iqchannels.sdk.ui.Colors
@@ -29,8 +30,10 @@ internal class MyMessageViewHolder(
 	private val itemClickListener: ChatMessagesAdapter.ItemClickListener
 ) : ViewHolder(binding.root) {
 
-	private val dateFormat: DateFormat = android.text.format.DateFormat.getDateFormat(binding.root.context)
-	private val timeFormat: DateFormat = android.text.format.DateFormat.getTimeFormat(binding.root.context)
+	private val dateFormat: DateFormat =
+		android.text.format.DateFormat.getDateFormat(binding.root.context)
+	private val timeFormat: DateFormat =
+		android.text.format.DateFormat.getTimeFormat(binding.root.context)
 
 	fun bind(message: ChatMessage, rootViewDimens: Pair<Int, Int>) = with(binding) {
 		my.visibility = View.VISIBLE
@@ -41,13 +44,7 @@ internal class MyMessageViewHolder(
 		if (adapter.isNewDay(bindingAdapterPosition) && message.Payload !== ChatPayloadType.TYPING) {
 			date.text = message.Date?.let { dateFormat.format(it) }
 			date.visibility = View.VISIBLE
-			IQStyles.iqChannelsStyles?.chat?.dateText?.color?.getColorInt(root.context)?.let {
-				date.setTextColor(it)
-			}
-
-			IQStyles.iqChannelsStyles?.chat?.dateText?.textSize?.let {
-				date.setTextSize(TypedValue.COMPLEX_UNIT_SP, it)
-			}
+			date.applyIQStyles(IQStyles.iqChannelsStyles?.chat?.dateText)
 		} else {
 			date.visibility = View.GONE
 		}
@@ -85,6 +82,21 @@ internal class MyMessageViewHolder(
 		} else {
 			mySending.visibility = View.GONE
 			myFlags.visibility = View.GONE
+		}
+
+		run {
+			IQStyles.iqChannelsStyles?.messages?.backgroundClient
+				?.let {
+					myMsgContainer.setBackgroundDrawable(it, R.drawable.my_msg_bg)
+					clTextsMy.setBackgroundDrawable(it, R.drawable.my_msg_bg)
+					myReply.setBackgroundDrawable(it, R.drawable.my_msg_reply_bg)
+				}
+
+			myDate.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textTime)
+
+			IQStyles.iqChannelsStyles?.messages?.textClient?.textSize?.let {
+				myReply.setTextSizes(it)
+			}
 		}
 
 		// Reset the visibility.
@@ -184,6 +196,7 @@ internal class MyMessageViewHolder(
 			myText.autoLinkMask = Linkify.ALL
 			myText.text = message.Text
 			myText.setTextColor(ContextCompat.getColor(root.context, R.color.my_text_color))
+			myText.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textClient)
 			myText.minWidth = 0
 			myText.maxWidth = Int.MAX_VALUE
 		}

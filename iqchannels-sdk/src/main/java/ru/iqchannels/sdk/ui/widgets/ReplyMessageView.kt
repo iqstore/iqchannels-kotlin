@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Typeface
 import android.os.Build
 import android.util.AttributeSet
+import android.util.TypedValue
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -111,5 +112,10 @@ class ReplyMessageView @JvmOverloads constructor(
 
 	fun setCloseBtnClickListener(listener: OnClickListener?) {
 		ibClose.setOnClickListener(listener)
+	}
+
+	fun setTextSizes(size: Float) {
+		tvText.setTextSize(TypedValue.COMPLEX_UNIT_SP, size)
+		tvFileName.setTextSize(TypedValue.COMPLEX_UNIT_SP, size)
 	}
 }

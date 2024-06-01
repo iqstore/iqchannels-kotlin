@@ -24,5 +24,43 @@
       "text_size": 10
     }
   },
+  "messages": {
+    "background_operator": {
+      "light": "#FFFFE0",
+      "dark": "#808080"
+    },
+    "background_client": {
+      "light": "#242729",
+      "dark": "#808080"
+    },
+    "text_operator": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_client": {
+      "color": {
+        "light": "#ffffff",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_time": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_up": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    }
+  },
   "theme": "light"
 }

@@ -23,7 +23,7 @@ class Color(
 		}
 	}
 
-	fun getColorInt(context: Context): Int? {
+	fun getColorInt(context: Context): Int {
 		return Color.parseColor(getColor(context))
 	}
 }

@@ -24,11 +24,11 @@ class ReplyMessageView @JvmOverloads constructor(
 	defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
 
-	private val tvSenderName: TextView
-	private val tvText: TextView
-	private val tvFileName: TextView
+	val tvSenderName: TextView
+	val tvText: TextView
+	val tvFileName: TextView
+	val ibClose: ImageButton
 	private val imageView: ImageView
-	private val ibClose: ImageButton
 	private val dividerStart: View
 
 	init {
@@ -96,6 +96,10 @@ class ReplyMessageView @JvmOverloads constructor(
 		dividerStart.setBackgroundColor(
 			ContextCompat.getColor(context, id)
 		)
+	}
+
+	fun setVerticalDividerColorInt(color: Int) {
+		dividerStart.setBackgroundColor(color)
 	}
 
 	fun setTvSenderNameColor(@ColorRes id: Int) {

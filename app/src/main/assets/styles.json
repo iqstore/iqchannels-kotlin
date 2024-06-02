@@ -60,7 +60,14 @@
     }
   },
   "answer": {
-    "text_up_message": {
+    "text_sender": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "10pt"
+    },
+    "text_message": {
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
@@ -79,11 +86,9 @@
       "text_size": "10pt"
     },
     "icon_cancel": "https://w7.pngwing.com/pngs/21/486/png-transparent-undo-common-toolbar-icon.png",
-    "right_line": {
-      "color": {
-        "light": "#FF0000",
-        "dark": "#FF0000"
-      }
+    "left_line": {
+      "light": "#FF0000",
+      "dark": "#FF0000"
     }
   },
   "messages_file": {

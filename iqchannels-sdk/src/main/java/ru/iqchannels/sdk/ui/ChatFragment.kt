@@ -24,6 +24,7 @@ import android.os.Parcelable
 import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -52,6 +53,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.bumptech.glide.Glide
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import io.noties.markwon.Markwon
@@ -76,6 +78,7 @@ import ru.iqchannels.sdk.app.IQChannelsConfig
 import ru.iqchannels.sdk.app.IQChannelsConfigRepository
 import ru.iqchannels.sdk.app.IQChannelsListener
 import ru.iqchannels.sdk.app.MessagesListener
+import ru.iqchannels.sdk.applyIQStyles
 import ru.iqchannels.sdk.domain.models.ChatType
 import ru.iqchannels.sdk.http.HttpException
 import ru.iqchannels.sdk.lib.InternalIO.copy
@@ -248,7 +251,11 @@ class ChatFragment : Fragment() {
 		signupLayout = view.findViewById<View>(R.id.signupLayout) as LinearLayout
 		signupText = view.findViewById<View>(R.id.signupName) as EditText
 		signupButton = view.findViewById<View>(R.id.signupButton) as Button
-		clReply = view.findViewById(R.id.reply)
+
+		clReply = view.findViewById<ReplyMessageView?>(R.id.reply).apply {
+			applyReplyStyles()
+		}
+
 		signupButton?.setOnClickListener { signup() }
 		signupError = view.findViewById<View>(R.id.signupError) as TextView
 
@@ -314,7 +321,17 @@ class ChatFragment : Fragment() {
 		clReply?.setCloseBtnClickListener { hideReplying() }
 
 		// Send.
-		sendText = view.findViewById(R.id.sendText)
+		sendText = view.findViewById<EditText?>(R.id.sendText)?.apply {
+			IQStyles.iqChannelsStyles?.answer?.textAnswer?.let {
+				it.color?.let {
+					setTextColor(it.getColorInt(context))
+				}
+
+				it.textSize?.let {
+					setTextSize(TypedValue.COMPLEX_UNIT_SP, it)
+				}
+			}
+		}
 		sendText?.setOnEditorActionListener { v, actionId, event ->
 			var handled = false
 			if (actionId == EditorInfo.IME_ACTION_SEND) {
@@ -358,6 +375,26 @@ class ChatFragment : Fragment() {
 		}
 
 		return view
+	}
+
+	private fun ReplyMessageView.applyReplyStyles() {
+		tvFileName.applyIQStyles(IQStyles.iqChannelsStyles?.answer?.textMessage)
+		tvText.applyIQStyles(IQStyles.iqChannelsStyles?.answer?.textMessage)
+		tvSenderName.applyIQStyles(IQStyles.iqChannelsStyles?.answer?.textSender)
+		setBackgroundColor(
+			IQStyles.iqChannelsStyles?.answer?.backgroundTextUpMessage?.getColorInt(context)
+				?: ContextCompat.getColor(requireContext(), R.color.white)
+		)
+
+		IQStyles.iqChannelsStyles?.answer?.iconCancel?.let {
+			Glide.with(context)
+				.load(it)
+				.into(ibClose)
+		}
+
+		IQStyles.iqChannelsStyles?.answer?.leftLine?.getColorInt(context)?.let {
+			setVerticalDividerColorInt(it)
+		}
 	}
 
 	@RequiresApi(Build.VERSION_CODES.TIRAMISU)

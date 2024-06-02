@@ -75,20 +75,6 @@
       },
       "text_size": 10
     },
-    "text_file_size_client": {
-      "color": {
-        "light": "#ffffff",
-        "dark": "#FFFFFF"
-      },
-      "text_size": 10
-    },
-    "text_file_size_operator": {
-      "color": {
-        "light": "#ffffff",
-        "dark": "#FFFFFF"
-      },
-      "text_size": 10
-    },
     "text_time": {
       "color": {
         "light": "#000000",
@@ -134,6 +120,38 @@
     "left_line": {
       "light": "#FF0000",
       "dark": "#FF0000"
+    }
+  },
+  "messages_file": {
+    "text_filename_client": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_filename_operator": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "icon_file_client": "https://1000logos.net/wp-content/uploads/2023/01/Google-Docs-logo.png",
+    "icon_file_operator": "https://1000logos.net/wp-content/uploads/2023/01/Google-Docs-logo.png",
+    "text_file_size_client": {
+      "color": {
+        "light": "#ffffff",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_file_size_operator": {
+      "color": {
+        "light": "#ffffff",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
     }
   },
   "theme": "light"

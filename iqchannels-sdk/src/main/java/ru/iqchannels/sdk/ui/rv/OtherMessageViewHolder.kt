@@ -1,5 +1,6 @@
 package ru.iqchannels.sdk.ui.rv
 
+import android.content.res.ColorStateList
 import android.text.method.LinkMovementMethod
 import android.text.util.Linkify
 import android.view.MotionEvent
@@ -8,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import androidx.constraintlayout.helper.widget.Flow
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
@@ -114,7 +116,18 @@ internal class OtherMessageViewHolder(
 				otherReply.tvText.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.replyTextOperator)
 				otherReply.tvFileName.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.replyTextOperator)
 
-				tvOtherFileSize.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textFileSizeOperator)
+				tvOtherFileSize.applyIQStyles(IQStyles.iqChannelsStyles?.messageFile?.textFileSizeOperator)
+				tvOtherFileName.applyIQStyles(IQStyles.iqChannelsStyles?.messageFile?.textFilenameOperator)
+
+				IQStyles.iqChannelsStyles?.messageFile?.iconFileOperator?.let {
+					Glide.with(root.context)
+						.load(it)
+						.into(ivFile)
+				} ?: run {
+					ivFile.imageTintList = ColorStateList.valueOf(
+						ContextCompat.getColor(root.context, R.color.other_file_icon)
+					)
+				}
 			}
 
 			// Reset the visibility.
@@ -202,8 +215,6 @@ internal class OtherMessageViewHolder(
 
 					tvOtherFileName.visibility = View.VISIBLE
 					ivFile.visibility = View.VISIBLE
-					tvOtherFileName.autoLinkMask = 0
-					tvOtherFileName.movementMethod = LinkMovementMethod.getInstance()
 					tvOtherFileName.text = file.Name
 					if (file.Size > 0) {
 						tvOtherFileSize.visibility = View.VISIBLE

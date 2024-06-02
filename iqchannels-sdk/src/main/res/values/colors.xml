@@ -32,4 +32,5 @@
     <color name="unread_msg_count_bg">#2D98F4</color>
     <color name="text_color_h1">#494949</color>
     <color name="text_color_description">#969696</color>
+    <color name="other_file_icon">#ff4c4c4c</color>
 </resources>

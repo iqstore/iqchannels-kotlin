@@ -98,7 +98,14 @@ internal class MyMessageViewHolder(
 			myReply.tvText.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.replyTextClient)
 			myReply.tvFileName.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.replyTextClient)
 
-			tvMyFileSize.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textFileSizeClient)
+			tvMyFileSize.applyIQStyles(IQStyles.iqChannelsStyles?.messageFile?.textFileSizeClient)
+			tvMyFileName.applyIQStyles(IQStyles.iqChannelsStyles?.messageFile?.textFilenameClient)
+
+			IQStyles.iqChannelsStyles?.messageFile?.iconFileClient?.let {
+				Glide.with(root.context)
+					.load(it)
+					.into(ivFile)
+			}
 		}
 
 		// Reset the visibility.
@@ -126,8 +133,6 @@ internal class MyMessageViewHolder(
 			clTextsMy.visibility = View.VISIBLE
 			myText.visibility = View.GONE
 			tvMyFileName.visibility = View.VISIBLE
-			tvMyFileName.autoLinkMask = 0
-			tvMyFileName.movementMethod = LinkMovementMethod.getInstance()
 			tvMyFileName.text = file.name
 			val size = file.length()
 
@@ -180,8 +185,6 @@ internal class MyMessageViewHolder(
 				clTextsMy.visibility = View.VISIBLE
 				myText.visibility = View.GONE
 				tvMyFileName.visibility = View.VISIBLE
-				tvMyFileName.autoLinkMask = 0
-				tvMyFileName.movementMethod = LinkMovementMethod.getInstance()
 				tvMyFileName.text = file?.Name
 				ivFile.isVisible = true
 				val size = file?.Size

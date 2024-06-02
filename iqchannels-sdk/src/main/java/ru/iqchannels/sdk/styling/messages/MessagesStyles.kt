@@ -25,8 +25,4 @@ class MessagesStyles(
 	val textTime: Text?,
 	@SerializedName("text_up")
 	val textUp: Text?,
-	@SerializedName("text_file_size_client")
-	val textFileSizeClient: Text?,
-	@SerializedName("text_file_size_operator")
-	val textFileSizeOperator: Text?
 )

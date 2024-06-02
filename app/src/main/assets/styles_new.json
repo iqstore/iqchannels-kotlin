@@ -47,6 +47,48 @@
       },
       "text_size": 10
     },
+    "reply_text_client": {
+      "color": {
+        "light": "#ffffff",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "reply_sender_text_client": {
+      "color": {
+        "light": "#ffffff",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "reply_text_operator": {
+      "color": {
+        "light": "#ffffff",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "reply_sender_text_operator": {
+      "color": {
+        "light": "#ffffff",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_file_size_client": {
+      "color": {
+        "light": "#ffffff",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_file_size_operator": {
+      "color": {
+        "light": "#ffffff",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
     "text_time": {
       "color": {
         "light": "#000000",

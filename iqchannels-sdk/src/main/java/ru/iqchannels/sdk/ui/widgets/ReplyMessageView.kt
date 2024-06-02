@@ -4,18 +4,15 @@ import android.content.Context
 import android.graphics.Typeface
 import android.os.Build
 import android.util.AttributeSet
-import android.util.TypedValue
 import android.view.View
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.ColorRes
-import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import ru.iqchannels.sdk.R
-import ru.iqchannels.sdk.app.IQChannels
 import ru.iqchannels.sdk.schema.ChatMessage
 
 class ReplyMessageView @JvmOverloads constructor(
@@ -118,8 +115,4 @@ class ReplyMessageView @JvmOverloads constructor(
 		ibClose.setOnClickListener(listener)
 	}
 
-	fun setTextSizes(size: Float) {
-		tvText.setTextSize(TypedValue.COMPLEX_UNIT_SP, size)
-		tvFileName.setTextSize(TypedValue.COMPLEX_UNIT_SP, size)
-	}
 }

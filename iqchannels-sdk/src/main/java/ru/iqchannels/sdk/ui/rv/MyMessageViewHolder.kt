@@ -94,9 +94,11 @@ internal class MyMessageViewHolder(
 
 			myDate.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textTime)
 
-			IQStyles.iqChannelsStyles?.messages?.textClient?.textSize?.let {
-				myReply.setTextSizes(it)
-			}
+			myReply.tvSenderName.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.replySenderTextClient)
+			myReply.tvText.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.replyTextClient)
+			myReply.tvFileName.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.replyTextClient)
+
+			tvMyFileSize.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textFileSizeClient)
 		}
 
 		// Reset the visibility.

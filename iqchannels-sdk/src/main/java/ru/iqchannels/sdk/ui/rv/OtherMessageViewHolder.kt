@@ -110,9 +110,11 @@ internal class OtherMessageViewHolder(
 				otherDate.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textTime)
 				otherName.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textUp)
 
-				IQStyles.iqChannelsStyles?.messages?.textOperator?.textSize?.let {
-					otherReply.setTextSizes(it)
-				}
+				otherReply.tvSenderName.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.replySenderTextOperator)
+				otherReply.tvText.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.replyTextOperator)
+				otherReply.tvFileName.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.replyTextOperator)
+
+				tvOtherFileSize.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textFileSizeOperator)
 			}
 
 			// Reset the visibility.

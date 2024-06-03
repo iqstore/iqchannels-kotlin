@@ -179,15 +179,6 @@
       }
     }
   },
-  "typing": {
-    "text": {
-      "color": {
-        "light": "#000000",
-        "dark": "#FFFFFF"
-      },
-      "text_size": 10
-    }
-  },
   "tools_to_message": {
     "icon_sent": "https://e7.pngegg.com/pngimages/414/329/png-clipart-computer-icons-share-icon-edit-angle-triangle.png",
     "background_icon": {

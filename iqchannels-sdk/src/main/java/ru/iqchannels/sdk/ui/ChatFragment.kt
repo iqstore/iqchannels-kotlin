@@ -16,6 +16,8 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -322,14 +324,13 @@ class ChatFragment : Fragment() {
 
 		// Send.
 		sendText = view.findViewById<EditText?>(R.id.sendText)?.apply {
-			IQStyles.iqChannelsStyles?.answer?.textAnswer?.let {
-				it.color?.let {
-					setTextColor(it.getColorInt(context))
-				}
-
-				it.textSize?.let {
-					setTextSize(TypedValue.COMPLEX_UNIT_SP, it)
-				}
+			applyIQStyles(IQStyles.iqChannelsStyles?.toolsToMessage?.textChat)
+			IQStyles.iqChannelsStyles?.toolsToMessage?.backgroundChat?.getColorInt(context)?.let {
+				background = ContextCompat.getDrawable(context, R.drawable.bg_text_field)
+					?.apply {
+						colorFilter =
+							PorterDuffColorFilter(it, PorterDuff.Mode.SRC_ATOP)
+					}
 			}
 		}
 		sendText?.setOnEditorActionListener { v, actionId, event ->
@@ -352,9 +353,25 @@ class ChatFragment : Fragment() {
 			}
 		})
 
-		attachButton = view.findViewById(R.id.attachButton)
+		attachButton = view.findViewById<ImageButton?>(R.id.attachButton)?.apply {
+			IQStyles.iqChannelsStyles?.toolsToMessage?.iconClip?.let {
+				Glide.with(context)
+					.load(it)
+					.into(this)
+			}
+		}
 		attachButton?.setOnClickListener { showAttachChooser() }
-		sendButton = view.findViewById(R.id.sendButton)
+		sendButton = view.findViewById<ImageButton?>(R.id.sendButton)?.apply {
+			IQStyles.iqChannelsStyles?.toolsToMessage?.iconSent?.let {
+				Glide.with(context)
+					.load(it)
+					.into(this)
+			}
+
+			IQStyles.iqChannelsStyles?.toolsToMessage?.backgroundIcon?.getColorInt(context)?.let {
+				this.setBackgroundColor(it)
+			}
+		}
 		sendButton?.setOnClickListener { sendMessage() }
 
 		if (!requireActivity().packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {

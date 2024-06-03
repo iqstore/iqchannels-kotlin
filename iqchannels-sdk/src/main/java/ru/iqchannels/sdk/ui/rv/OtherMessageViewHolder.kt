@@ -108,6 +108,9 @@ internal class OtherMessageViewHolder(
 						otherReply.setBackgroundDrawable(it, R.drawable.other_msg_reply_bg)
 						rating.root.setBackgroundDrawable(it, R.drawable.other_msg_bg)
 					}
+				IQStyles.iqChannelsStyles?.ratingStyles?.backgroundContainer
+					?.let { rating.root.setBackgroundDrawable(it, R.drawable.other_msg_bg) }
+
 				otherText.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textOperator)
 				otherDate.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textTime)
 				otherName.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textUp)
@@ -255,12 +258,34 @@ internal class OtherMessageViewHolder(
 				this.rating.root.visibility = View.VISIBLE
 				this.rating.ratingRate.visibility = View.GONE
 				this.rating.ratingRated.visibility = View.GONE
+				this.rating.ratingRateText.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textOperator)
 				if ((msgRating.State == RatingState.PENDING && msgRating.Sent) || msgRating.State == RatingState.RATED) {
 					val value = msgRating.Value ?: 0
 					val text = root.resources.getString(R.string.chat_ratings_rated, value)
 					this.rating.ratingRated.visibility = View.VISIBLE
 					this.rating.ratingRated.text = text
+					this.rating.ratingRated.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textOperator)
 				} else if (msgRating.State == RatingState.PENDING) {
+					IQStyles.iqChannelsStyles?.ratingStyles?.sentRating?.let {
+						val states = arrayOf(
+							intArrayOf(android.R.attr.state_enabled),
+							intArrayOf(-android.R.attr.state_enabled),
+						)
+
+						val btnColors = intArrayOf(
+							it.colorEnabled?.getColorInt(root.context) ?: ContextCompat.getColor(
+								root.context,
+								R.color.red
+							),
+							it.colorDisabled?.getColorInt(root.context) ?: ContextCompat.getColor(
+								root.context,
+								R.color.disabled_grey
+							)
+						)
+
+						rating.btnSendRating.backgroundTintList = ColorStateList(states, btnColors)
+					}
+
 					this.rating.ratingRate.visibility = View.VISIBLE
 					val value = msgRating.Value ?: 0
 					val ratingButtons = arrayOf(
@@ -273,9 +298,21 @@ internal class OtherMessageViewHolder(
 					for (i in ratingButtons.indices) {
 						val button = ratingButtons[i]
 						if (value >= i + 1) {
-							button.setImageResource(R.drawable.star_filled)
+							IQStyles.iqChannelsStyles?.ratingStyles?.fullStar?.let {
+								Glide.with(root.context)
+									.load(it)
+									.into(button)
+							} ?: run {
+								button.setImageResource(R.drawable.star_filled)
+							}
 						} else {
-							button.setImageResource(R.drawable.star_empty)
+							IQStyles.iqChannelsStyles?.ratingStyles?.emptyStar?.let {
+								Glide.with(root.context)
+									.load(it)
+									.into(button)
+							} ?: run {
+								button.setImageResource(R.drawable.star_empty)
+							}
 						}
 					}
 
@@ -295,6 +332,17 @@ internal class OtherMessageViewHolder(
 						}
 					}
 
+					run {
+						if (rating.btnSendRating.isEnabled) {
+							rating.btnSendRating.applyIQStyles(
+								IQStyles.iqChannelsStyles?.ratingStyles?.sentRating?.textEnabled
+							)
+						} else {
+							rating.btnSendRating.applyIQStyles(
+								IQStyles.iqChannelsStyles?.ratingStyles?.sentRating?.textDisabled
+							)
+						}
+					}
 				} else {
 					rating.root.visibility = View.GONE
 				}
@@ -431,7 +479,7 @@ internal class OtherMessageViewHolder(
 			return false
 		}
 		val value = getRateButtonValue(view)
-		(bindingAdapter as? ChatMessagesAdapter)?.onRateDown(adapterPosition, value)
+		(bindingAdapter as? ChatMessagesAdapter)?.onRateDown(bindingAdapterPosition, value)
 		return false
 	}
 

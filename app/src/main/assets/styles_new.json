@@ -109,13 +109,6 @@
       "light": "#FFFACD",
       "dark": "#808080"
     },
-    "text_answer": {
-      "color": {
-        "light": "#000000",
-        "dark": "#FFFFFF"
-      },
-      "text_size": 10
-    },
     "icon_cancel": "https://w7.pngwing.com/pngs/21/486/png-transparent-undo-common-toolbar-icon.png",
     "left_line": {
       "light": "#FF0000",
@@ -152,6 +145,123 @@
         "dark": "#FFFFFF"
       },
       "text_size": 10
+    }
+  },
+  "rating": {
+    "background_container": {
+      "light": "#FFFACD",
+      "dark": "#808080"
+    },
+    "full_star": "https://img2.freepng.ru/20180621/itr/kisspng-business-5-star-probot-artistry-hotel-farah-5b2bdea0157717.8623271415296016960879.jpg",
+    "empty_star": "https://www.downloadclipart.net/large/rating-star-background-png.png",
+    "sent_rating": {
+      "color_enabled": {
+        "light": "#008080",
+        "dark": "#008080"
+      },
+      "color_disabled": {
+        "light": "#B7B7CA",
+        "dark": "#B7B7CA"
+      },
+      "text_enabled": {
+        "color": {
+          "light": "#ffffff",
+          "dark": "#FFFFFF"
+        },
+        "text_size": 10
+      },
+      "text_disabled": {
+        "color": {
+          "light": "#ffffff",
+          "dark": "#FFFFFF"
+        },
+        "text_size": 10
+      }
+    }
+  },
+  "typing": {
+    "text": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    }
+  },
+  "tools_to_message": {
+    "icon_sent": "https://e7.pngegg.com/pngimages/414/329/png-clipart-computer-icons-share-icon-edit-angle-triangle.png",
+    "background_icon": {
+      "light": "#DEB887",
+      "dark": "#696969"
+    },
+    "background_chat": {
+      "light": "#DEB887",
+      "dark": "#696969"
+    },
+    "text_chat": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "icon_clip": "https://cdn-icons-png.flaticon.com/512/84/84281.png"
+  },
+  "error": {
+    "title_error": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 16
+    },
+    "text_error": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "icon_error": "https://w7.pngwing.com/pngs/285/84/png-transparent-computer-icons-error-super-8-film-angle-triangle-computer-icons.png"
+  },
+  "single-choice": {
+    "background_button": {
+      "light": "#FFFF00",
+      "dark": "#00FFFF"
+    },
+    "border_button": {
+      "size": "3pt",
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "border-radius": "10pt"
+    },
+    "text_button": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "10pt"
+    },
+    "background_IVR": {
+      "light": "#FFFF00",
+      "dark": "#00FFFF"
+    },
+    "border_IVR": {
+      "size": "3pt",
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "border-radius": "10pt"
+    },
+    "text_IVR": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "10pt"
     }
   },
   "theme": "light"

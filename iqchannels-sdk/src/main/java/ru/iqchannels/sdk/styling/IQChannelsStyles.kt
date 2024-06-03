@@ -5,6 +5,7 @@ import ru.iqchannels.sdk.styling.answer.AnswerStyles
 import ru.iqchannels.sdk.styling.chat.ChatStyles
 import ru.iqchannels.sdk.styling.messages.MessagesFileStyles
 import ru.iqchannels.sdk.styling.messages.MessagesStyles
+import ru.iqchannels.sdk.styling.messages.RatingStyles
 
 class IQChannelsStyles(
 	val chat: ChatStyles?,
@@ -12,5 +13,7 @@ class IQChannelsStyles(
 	val answer: AnswerStyles?,
 	@SerializedName("messages_file")
 	val messageFile: MessagesFileStyles?,
+	@SerializedName("rating")
+	val ratingStyles: RatingStyles?,
 	val theme: Theme?
 )

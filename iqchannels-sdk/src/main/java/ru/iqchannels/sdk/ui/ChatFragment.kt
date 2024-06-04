@@ -264,7 +264,21 @@ class ChatFragment : Fragment() {
 		// Chat.
 		chatLayout = view.findViewById<View>(R.id.chatLayout) as RelativeLayout
 		chatUnavailableLayout = view.findViewById(R.id.chatUnavailableLayout)
-		chatUnavailableErrorText = view.findViewById(R.id.tv_description)
+		chatUnavailableErrorText = view.findViewById<TextView?>(R.id.tv_description)?.apply {
+			applyIQStyles(IQStyles.iqChannelsStyles?.error?.textError)
+		}
+		view.findViewById<TextView?>(R.id.tv_title)?.apply {
+			applyIQStyles(IQStyles.iqChannelsStyles?.error?.titleError)
+		}
+
+		IQStyles.iqChannelsStyles?.error?.iconError?.let {
+			view.findViewById<ImageView?>(R.id.iv_error)?.apply {
+				Glide.with(context)
+					.load(it)
+					.into(this)
+			}
+		}
+
 		tnwMsgCopied = view.findViewById(R.id.tnw_msg_copied)
 		btnGoBack = view.findViewById(R.id.btn_go_back)
 

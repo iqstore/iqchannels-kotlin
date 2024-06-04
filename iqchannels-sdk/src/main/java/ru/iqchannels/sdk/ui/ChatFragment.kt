@@ -234,8 +234,12 @@ class ChatFragment : Fragment() {
 	): View? {
 
 		arguments?.getString(ARG_STYLES)?.let { json ->
-			Gson().fromJson(json, TypeToken.get(IQChannelsStyles::class.java))?.also {
-				IQStyles.iqChannelsStyles = it
+			try {
+				Gson().fromJson(json, TypeToken.get(IQChannelsStyles::class.java))?.also {
+					IQStyles.iqChannelsStyles = it
+				}
+			} catch (e: Exception) {
+				Log.e("ChatFragment", "Error on parsing", e)
 			}
 		}
 

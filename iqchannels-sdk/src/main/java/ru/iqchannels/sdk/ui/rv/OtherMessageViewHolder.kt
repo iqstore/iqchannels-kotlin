@@ -26,6 +26,7 @@ import ru.iqchannels.sdk.schema.ChatPayloadType
 import ru.iqchannels.sdk.schema.RatingState
 import ru.iqchannels.sdk.schema.SingleChoice
 import ru.iqchannels.sdk.setBackgroundDrawable
+import ru.iqchannels.sdk.setBackgroundStyle
 import ru.iqchannels.sdk.styling.IQStyles
 import ru.iqchannels.sdk.ui.ActionsAdapter
 import ru.iqchannels.sdk.ui.ButtonsAdapter
@@ -428,7 +429,18 @@ internal class OtherMessageViewHolder(
 						clDropdownBtns.addView(flow)
 
 						for (singleChoice: SingleChoice in singleChoices) {
-							val btn = DropDownButton(itemView.context)
+							val btn = DropDownButton(itemView.context).apply {
+								setBackgroundStyle(
+									IQStyles.iqChannelsStyles?.singleChoiceBtnStyles?.backgroundIvr,
+									IQStyles.iqChannelsStyles?.singleChoiceBtnStyles?.borderIvr,
+									android.R.color.transparent,
+									R.color.drop_down_btn_border,
+									1,
+									10f
+								)
+
+								applyIQStyles(IQStyles.iqChannelsStyles?.singleChoiceBtnStyles?.textIvr)
+							}
 							btn.id = View.generateViewId()
 							btn.setSingleChoice(singleChoice)
 							btn.setOnClickListener { v: View? ->

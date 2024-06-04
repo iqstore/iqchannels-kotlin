@@ -221,38 +221,38 @@
       "dark": "#00FFFF"
     },
     "border_button": {
-      "size": "3pt",
+      "size": 3,
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "border-radius": "10pt"
+      "border-radius": 10
     },
     "text_button": {
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "text_size": "10pt"
+      "text_size": 10
     },
     "background_IVR": {
-      "light": "#FFFF00",
-      "dark": "#00FFFF"
+      "light": "#00000000",
+      "dark": "#00000000"
     },
     "border_IVR": {
-      "size": "3pt",
+      "size": 1,
       "color": {
-        "light": "#000000",
-        "dark": "#FFFFFF"
+        "light": "#74b928",
+        "dark": "#74b928"
       },
-      "border-radius": "10pt"
+      "border-radius": 10
     },
     "text_IVR": {
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "text_size": "10pt"
+      "text_size": 10
     }
   },
   "theme": "light"

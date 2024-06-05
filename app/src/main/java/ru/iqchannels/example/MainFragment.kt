@@ -37,14 +37,10 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import ru.iqchannels.example.shortcuts.ShortCutsFragment
-import ru.iqchannels.sdk.domain.models.ChatType
+import ru.iqchannels.example.styles.StylesEditFragment
 import ru.iqchannels.sdk.ui.theming.IQChannelsCompose
 
-class PlusOneFragment : Fragment() {
-
-	companion object {
-
-	}
+class MainFragment : Fragment() {
 
 	private val viewModel: PlusOneViewModel by viewModels()
 
@@ -62,6 +58,18 @@ class PlusOneFragment : Fragment() {
 			Column(
 				modifier = Modifier.padding(16.dp)
 			) {
+				Text(
+					text = "Edit styles",
+					textDecoration = TextDecoration.Underline,
+					color = Color.Blue,
+					fontSize = 20.sp,
+					modifier = Modifier
+						.fillMaxWidth()
+						.clickable { openStylesEdit() }
+						.padding(16.dp)
+				)
+				Divider(Modifier.fillMaxWidth())
+
 				Text(
 					text = "Open short cuts",
 					textDecoration = TextDecoration.Underline,
@@ -160,6 +168,13 @@ class PlusOneFragment : Fragment() {
 	private fun openShortCuts() {
 		parentFragmentManager.beginTransaction()
 			.replace(R.id.content, ShortCutsFragment())
+			.addToBackStack(null)
+			.commit()
+	}
+
+	private fun openStylesEdit() {
+		parentFragmentManager.beginTransaction()
+			.replace(R.id.content, StylesEditFragment())
 			.addToBackStack(null)
 			.commit()
 	}

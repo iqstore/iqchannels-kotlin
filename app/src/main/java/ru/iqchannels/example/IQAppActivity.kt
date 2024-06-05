@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.installations.FirebaseInstallations
+import ru.iqchannels.example.styles.StylesEditFragment
 import ru.iqchannels.sdk.app.Cancellable
 import ru.iqchannels.sdk.app.IQChannels
 import ru.iqchannels.sdk.app.IQChannelsConfig
@@ -60,6 +61,7 @@ class IQAppActivity :
 		val navigationView = findViewById<NavigationView>(R.id.nav_view)
 		navigationView.setNavigationItemSelectedListener(this)
 		setupIQChannels()
+		setStylesPrefs()
 	}
 
 	private fun setupIQChannels() {
@@ -125,9 +127,10 @@ class IQAppActivity :
 	override fun onNavigationItemSelected(item: MenuItem): Boolean {
 		val fragment: Fragment
 		when (item.itemId) {
-			R.id.nav_index -> fragment = PlusOneFragment()
+			R.id.nav_index -> fragment = MainFragment()
 			R.id.nav_chat -> {
-				val stylesJson = getJSFromAssets("styles_new.json")?.toString()
+				val stylesJson = getSharedPreferences(StylesEditFragment.PREFS_STYLES, Context.MODE_PRIVATE)
+					.getString(StylesEditFragment.CONFIG_STYLES, null)
 				fragment = ChatFragment.newInstance(stylesJson = stylesJson)
 			}
 			R.id.nav_login -> {
@@ -230,6 +233,17 @@ class IQAppActivity :
 			item.setTitle("Chat")
 		} else {
 			item.setTitle(String.format("Chat (%d)", unread))
+		}
+	}
+
+	private fun setStylesPrefs() {
+		val prefs = getSharedPreferences(StylesEditFragment.PREFS_STYLES, Context.MODE_PRIVATE)
+
+		if (prefs.getString(StylesEditFragment.CONFIG_STYLES, null) == null) {
+			val stylesJson = getJSFromAssets("styles_new.json")?.toString()
+			prefs.edit()
+				.putString(StylesEditFragment.CONFIG_STYLES, stylesJson)
+				.apply()
 		}
 	}
 }

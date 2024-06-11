@@ -604,9 +604,11 @@ class ChatFragment : Fragment() {
 	}
 
 	private fun maybeScrollToBottomOnNewMessage() {
-		recycler?.let { recycler ->
-			val count = adapter?.itemCount ?: 0
-			recycler.smoothScrollToPosition(if (count == 0) 0 else count - 1)
+		if (btnScrollToBottom?.isVisible != true) {
+			recycler?.let { recycler ->
+				val count = adapter?.itemCount ?: 0
+				recycler.smoothScrollToPosition(if (count == 0) 0 else count - 1)
+			}
 		}
 	}
 

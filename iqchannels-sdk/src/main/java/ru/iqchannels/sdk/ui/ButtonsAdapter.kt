@@ -9,7 +9,10 @@ import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import ru.iqchannels.sdk.R
+import ru.iqchannels.sdk.applyIQStyles
 import ru.iqchannels.sdk.schema.SingleChoice
+import ru.iqchannels.sdk.setBackgroundStyle
+import ru.iqchannels.sdk.styling.IQStyles
 
 class ButtonsAdapter internal constructor(
 	private val clickListener: ClickListener
@@ -29,9 +32,17 @@ class ButtonsAdapter internal constructor(
 			minHeight = 0
 			minimumHeight = 0
 			setPadding(0, UiUtils.toPx(8), 0, UiUtils.toPx(8))
-			setBackgroundResource(R.drawable.bg_single_choice_btn)
+			setBackgroundStyle(
+				IQStyles.iqChannelsStyles?.singleChoiceBtnStyles?.backgroundButton,
+				IQStyles.iqChannelsStyles?.singleChoiceBtnStyles?.borderButton,
+				R.color.color_single_choice_btn,
+				R.color.color_single_choice_btn_border,
+				1,
+				4f
+			)
 			setTextColor(ContextCompat.getColor(parent.context, R.color.light_text_color))
 			setTextSize(TypedValue.COMPLEX_UNIT_SP, 14f)
+			applyIQStyles(IQStyles.iqChannelsStyles?.singleChoiceBtnStyles?.textButton)
 			isAllCaps = false
 			elevation = 0f
 			stateListAnimator = null

@@ -1,7 +1,6 @@
 package ru.iqchannels.sdk.http
 
 import android.annotation.SuppressLint
-import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.File
@@ -24,6 +23,7 @@ import ru.iqchannels.sdk.schema.ClientAuth
 import ru.iqchannels.sdk.schema.ClientAuthRequest
 import ru.iqchannels.sdk.schema.ClientIntegrationAuthRequest
 import ru.iqchannels.sdk.schema.ClientSignupRequest
+import ru.iqchannels.sdk.schema.ClientTypingForm
 import ru.iqchannels.sdk.schema.FileToken
 import ru.iqchannels.sdk.schema.MaxIdQuery
 import ru.iqchannels.sdk.schema.PushTokenInput
@@ -31,7 +31,6 @@ import ru.iqchannels.sdk.schema.RateRequest
 import ru.iqchannels.sdk.schema.UploadedFile
 
 class HttpClient(
-	context: Context,
 	address: String,
 	rels: Rels
 ) {
@@ -251,12 +250,13 @@ class HttpClient(
 	// Channel chat messages
 	fun chatsChannelTyping(
 		channel: String,
+		body: ClientTypingForm,
 		callback: HttpCallback<Void>
 	): HttpRequest {
 		val path = "/chats/channel/typing/$channel"
 		return post<Any>(
 			path,
-			null,
+			body,
 			null,
 			object : HttpCallback<ru.iqchannels.sdk.schema.Response<Any>> {
 				override fun onResult(result: ru.iqchannels.sdk.schema.Response<Any>?) {
@@ -331,10 +331,12 @@ class HttpClient(
 		query: ChatEventQuery,
 		listener: HttpSseListener<List<ChatEvent>>
 	): HttpRequest {
-		var path = "/sse/chats/channel/events/$channel"
+		var path = "/sse/chats/channel/events/$channel?ChatType=${query.ChatType}"
+
 		if (query.LastEventId != null) {
 			path = String.format("%s?LastEventId=%d", path, query.LastEventId)
 		}
+
 		if (query.Limit != null) {
 			path = if (path.contains("?")) {
 				"$path&"
@@ -343,6 +345,7 @@ class HttpClient(
 			}
 			path = String.format("%sLimit=%d", path, query.Limit)
 		}
+
 		val type: TypeToken<ru.iqchannels.sdk.schema.Response<List<ChatEvent>>> =
 			object : TypeToken<ru.iqchannels.sdk.schema.Response<List<ChatEvent>>>() {}
 

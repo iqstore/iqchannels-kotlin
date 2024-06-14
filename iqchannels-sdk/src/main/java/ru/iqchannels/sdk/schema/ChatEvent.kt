@@ -17,6 +17,8 @@ class ChatEvent {
 	var Messages: List<ChatMessage>? = null
 	var CreatedAt: Long = 0
 
+	var NextChannelName: String? = null
+
 	// Local
 	var Client: Client? = null
 	var User: User? = null

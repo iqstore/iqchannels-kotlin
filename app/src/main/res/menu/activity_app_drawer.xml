@@ -10,9 +10,14 @@
         <item
             android:id="@+id/nav_index"
             android:title="Main"/>
+
         <item
             android:id="@+id/nav_chat"
             android:title="Chat"/>
+
+        <item
+            android:id="@+id/nav_multi_chat"
+            android:title="MultiChat"/>
 
         <item
             android:id="@+id/nav_login"
@@ -36,5 +41,17 @@
         <item
             android:id="@+id/send_huawei_token"
             android:title="Send Huawei token"/>
+
+        <item
+            android:id="@+id/hide_action_bar"
+            android:title="Скрыть ActionBar"/>
+
+        <item
+            android:id="@+id/show_action_bar"
+            android:title="Показать ActionBar"/>
+
+        <item
+            android:id="@+id/enable_cutom_title"
+            android:title="Показать свою шапку"/>
     </group>
 </menu>

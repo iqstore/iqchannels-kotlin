@@ -31,6 +31,11 @@ android {
 
     buildFeatures {
         viewBinding = true
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.5"
     }
 }
 
@@ -54,7 +59,26 @@ dependencies {
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("androidx.core:core-ktx:1.12.0")
 
+    implementation("io.noties.markwon:core:4.6.2")
+    implementation("io.noties.markwon:ext-strikethrough:4.6.2")
+
     testImplementation("junit:junit:4.13.2")
     testImplementation("io.mockk:mockk:1.13.10")
+
+    // Compose
+    implementation("androidx.compose.runtime:runtime:1.4.0")
+    implementation("androidx.compose.ui:ui:1.4.0")
+    implementation("androidx.compose.foundation:foundation:1.4.0")
+    implementation("androidx.compose.material:material:1.4.0")
+    implementation("androidx.compose.material:material-icons-extended:1.4.0")
+    implementation("androidx.compose.runtime:runtime-livedata:1.4.0")
+    implementation("com.github.bumptech.glide:compose:1.0.0-alpha.1")
+    implementation("androidx.navigation:navigation-compose:2.5.3")
+    implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.4.0")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.4.0")
+    implementation("com.google.android.material:compose-theme-adapter:1.2.1")
+    implementation("io.coil-kt:coil-compose:2.1.0")
+    implementation("io.coil-kt:coil:2.2.2")
 
 }

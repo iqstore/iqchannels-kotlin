@@ -22,5 +22,7 @@ enum class ChatEventType {
 	@SerializedName("message_read")
 	MESSAGE_READ,
 	@SerializedName("delete-messages")
-	MESSAGE_DELETED
+	MESSAGE_DELETED,
+	@SerializedName("chat-channel-change")
+	CHAT_CHANNEL_CHANGE
 }

@@ -9,12 +9,10 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.ColorRes
-import androidx.annotation.RequiresApi
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import ru.iqchannels.sdk.R
-import ru.iqchannels.sdk.app.IQChannels
 import ru.iqchannels.sdk.schema.ChatMessage
 
 class ReplyMessageView @JvmOverloads constructor(
@@ -23,11 +21,11 @@ class ReplyMessageView @JvmOverloads constructor(
 	defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
 
-	private val tvSenderName: TextView
-	private val tvText: TextView
-	private val tvFileName: TextView
+	val tvSenderName: TextView
+	val tvText: TextView
+	val tvFileName: TextView
+	val ibClose: ImageButton
 	private val imageView: ImageView
-	private val ibClose: ImageButton
 	private val dividerStart: View
 
 	init {
@@ -97,6 +95,10 @@ class ReplyMessageView @JvmOverloads constructor(
 		)
 	}
 
+	fun setVerticalDividerColorInt(color: Int) {
+		dividerStart.setBackgroundColor(color)
+	}
+
 	fun setTvSenderNameColor(@ColorRes id: Int) {
 		tvSenderName.setTextColor(
 			ContextCompat.getColor(context, id)
@@ -112,4 +114,5 @@ class ReplyMessageView @JvmOverloads constructor(
 	fun setCloseBtnClickListener(listener: OnClickListener?) {
 		ibClose.setOnClickListener(listener)
 	}
+
 }

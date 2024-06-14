@@ -1,0 +1,302 @@
+{
+  "chat": {
+    "background": {
+      "light": "#FFFFE0",
+      "dark": "#FFFFFF"
+    },
+    "date_text": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "10pt"
+    },
+    "chat_history": "#008080",
+    "icon_operator": "https://gas-kvas.com/grafic/uploads/posts/2024-01/gas-kvas-com-p-logotip-cheloveka-na-prozrachnom-fone-4.png",
+    "system_text": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "10pt"
+    }
+  },
+  "messages": {
+    "background_operator": {
+      "light": "#FFFFE0",
+      "dark": "#808080"
+    },
+    "background_client": {
+      "light": "#FFFFE0",
+      "dark": "#808080"
+    },
+    "text_operator": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "10pt"
+    },
+    "text_client": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "10pt"
+    },
+    "text_time": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "10pt"
+    },
+    "text_up": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "10pt"
+    }
+  },
+  "answer": {
+    "text_sender": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "10pt"
+    },
+    "text_message": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "10pt"
+    },
+    "background_text_up_message": {
+      "light": "#FFFACD",
+      "dark": "#808080"
+    },
+    "text_answer": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "10pt"
+    },
+    "icon_cancel": "https://w7.pngwing.com/pngs/21/486/png-transparent-undo-common-toolbar-icon.png",
+    "left_line": {
+      "light": "#FF0000",
+      "dark": "#FF0000"
+    }
+  },
+  "messages_file": {
+    "background_operator": {
+      "light": "#FFFACD",
+      "dark": "#808080"
+    },
+    "background_client": {
+      "light": "#FFFACD",
+      "dark": "#808080"
+    },
+    "text": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "10pt"
+    },
+    "icon_file": "https://1000logos.net/wp-content/uploads/2023/01/Google-Docs-logo.png",
+    "text_time": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "10pt"
+    },
+    "text_up": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "10pt"
+    }
+  },
+  "messages_image": {
+    "background_operator": {
+      "light": "#FFFACD",
+      "dark": "#808080"
+    },
+    "background_client": {
+      "light": "#FFFACD",
+      "dark": "#808080"
+    },
+    "text": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "10pt"
+    },
+    "icon_load": {
+      "color": {
+        "light": "#008080",
+        "dark": "#008080"
+      }
+    },
+    "text_time": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "10pt"
+    },
+    "text_up": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "10pt"
+    }
+  },
+  "single-choice": {
+    "background_button": {
+      "light": "#FFFF00",
+      "dark": "#00FFFF"
+    },
+    "border_button": {
+      "size": "3pt",
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "border-radius": "10pt"
+    },
+    "text_button": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "10pt"
+    },
+    "background_IVR": {
+      "light": "#FFFF00",
+      "dark": "#00FFFF"
+    },
+    "border_IVR": {
+      "size": "3pt",
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "border-radius": "10pt"
+    },
+    "text_IVR": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "10pt"
+    }
+  },
+  "rating": {
+    "background_container": {
+      "light": "#FFFACD",
+      "dark": "#808080"
+    },
+    "text": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "10pt"
+    },
+    "text_rating": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "10pt"
+    },
+    "text_time": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "10pt"
+    },
+    "full_star": "https://img2.freepng.ru/20180621/itr/kisspng-business-5-star-probot-artistry-hotel-farah-5b2bdea0157717.8623271415296016960879.jpg",
+    "empty_star": "https://www.downloadclipart.net/large/rating-star-background-png.png",
+    "sent_rating": {
+      "color": {
+        "light": "#008080",
+        "dark": "#008080"
+      },
+      "borders": "3pt",
+      "borders_color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "border-radius": "8pt"
+    }
+  },
+  "tiping": {
+    "background": {
+      "light": "#00008B",
+      "dark": "#F0FFF0"
+    },
+    "text": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "10pt"
+    }
+  },
+  "tools_to_message": {
+    "icon_sent": "https://e7.pngegg.com/pngimages/414/329/png-clipart-computer-icons-share-icon-edit-angle-triangle.png",
+    "background_icon": {
+      "light": "#DEB887",
+      "dark": "#696969"
+    },
+    "background_chat": {
+      "light": "#DEB887",
+      "dark": "#696969"
+    },
+    "border_chat": {
+      "size": "3pt",
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "border-radius": "8pt"
+    },
+    "text_chat": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "10pt"
+    },
+    "icon_clip": "https://cdn-icons-png.flaticon.com/512/84/84281.png"
+  },
+  "dark_theme": true,
+  "error": {
+    "title_error": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "16pt"
+    },
+    "text_error": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": "10pt"
+    },
+    "icon_error": "https://w7.pngwing.com/pngs/285/84/png-transparent-computer-icons-error-super-8-film-angle-triangle-computer-icons.png"
+  }
+}

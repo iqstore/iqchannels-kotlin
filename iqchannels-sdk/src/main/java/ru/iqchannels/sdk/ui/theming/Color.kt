@@ -1,0 +1,16 @@
+import androidx.compose.ui.graphics.Color
+
+val Black = Color(0xFF000000)
+val Black30 = Color(0x4C000000)
+val Black40 = Color(0x66000000)
+val White = Color(0xFFFFFFFF)
+val LightGrey = Color(0xFFF0F9FF)
+val Blue = Color(0xFF5F95FF)
+val Pink = Color(0xFFFF007A)
+val LightPink = Color(0xFFFFECF9)
+val Green = Color(0xFF6EB64C)
+val Description = Color(0xFFA8AEB3)
+val Purple = Color(0xFFBDCAFF)
+val Caption = Color(0xFF868686)
+val InputStroke = Color(0xFFD3E2FF)
+val InputStroke50 = Color(0x80D3E2FF)

@@ -7,6 +7,7 @@ class ChatMessageForm {
 	var FileId: String? = null
 	var ReplyToMessageId: Long? = null
 	var BotpressPayload: String? = null
+	var ChatType: String = ru.iqchannels.sdk.domain.models.ChatType.REGULAR.name.lowercase()
 
 	companion object {
 		fun text(localId: Long, text: String?, replyToMessageId: Long?): ChatMessageForm {

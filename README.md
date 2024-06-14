@@ -228,3 +228,274 @@ SDK поддерживает пуш-уведомления о новых соо�
 ```kotlin
     IQChannels.setPushToken(token, isHuawei = true)
 ```
+
+# Пример использования стилизации
+Для того чтобы поменять стили элементов внутри SDK, нужно передать поддерживаемый JSON файл при инициализации как в примере ниже:
+```kotlin
+    val stylesJson = // JSON в формате String
+    ChatFragment.newInstance(stylesJson = stylesJson)
+```
+
+# Пример JSON для передачи в SDK
+
+```json
+{
+  "chat": {
+    "background": {
+      "light": "#FFFFFF",
+      "dark": "#FFFFE0"
+    },
+    "date_text": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 13
+    },
+    "chat_history": {
+      "light": "#008080",
+      "dark": "#008080"
+    },
+    "icon_operator": "https://gas-kvas.com/grafic/uploads/posts/2024-01/gas-kvas-com-p-logotip-cheloveka-na-prozrachnom-fone-4.png",
+    "system_text": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    }
+  },
+  "messages": {
+    "background_operator": {
+      "light": "#FFFFE0",
+      "dark": "#808080"
+    },
+    "background_client": {
+      "light": "#242729",
+      "dark": "#808080"
+    },
+    "text_operator": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_client": {
+      "color": {
+        "light": "#ffffff",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "reply_text_client": {
+      "color": {
+        "light": "#ffffff",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "reply_sender_text_client": {
+      "color": {
+        "light": "#ffffff",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "reply_text_operator": {
+      "color": {
+        "light": "#ffffff",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "reply_sender_text_operator": {
+      "color": {
+        "light": "#ffffff",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_time": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_up": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    }
+  },
+  "answer": {
+    "text_sender": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_message": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "background_text_up_message": {
+      "light": "#FFFACD",
+      "dark": "#808080"
+    },
+    "icon_cancel": "https://w7.pngwing.com/pngs/21/486/png-transparent-undo-common-toolbar-icon.png",
+    "left_line": {
+      "light": "#FF0000",
+      "dark": "#FF0000"
+    }
+  },
+  "messages_file": {
+    "text_filename_client": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_filename_operator": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "icon_file_client": "https://1000logos.net/wp-content/uploads/2023/01/Google-Docs-logo.png",
+    "icon_file_operator": "https://1000logos.net/wp-content/uploads/2023/01/Google-Docs-logo.png",
+    "text_file_size_client": {
+      "color": {
+        "light": "#ffffff",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_file_size_operator": {
+      "color": {
+        "light": "#ffffff",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    }
+  },
+  "rating": {
+    "background_container": {
+      "light": "#FFFACD",
+      "dark": "#808080"
+    },
+    "full_star": "https://img2.freepng.ru/20180621/itr/kisspng-business-5-star-probot-artistry-hotel-farah-5b2bdea0157717.8623271415296016960879.jpg",
+    "empty_star": "https://www.downloadclipart.net/large/rating-star-background-png.png",
+    "sent_rating": {
+      "color_enabled": {
+        "light": "#008080",
+        "dark": "#008080"
+      },
+      "color_disabled": {
+        "light": "#B7B7CA",
+        "dark": "#B7B7CA"
+      },
+      "text_enabled": {
+        "color": {
+          "light": "#ffffff",
+          "dark": "#FFFFFF"
+        },
+        "text_size": 10
+      },
+      "text_disabled": {
+        "color": {
+          "light": "#ffffff",
+          "dark": "#FFFFFF"
+        },
+        "text_size": 10
+      }
+    }
+  },
+  "tools_to_message": {
+    "icon_sent": "https://e7.pngegg.com/pngimages/414/329/png-clipart-computer-icons-share-icon-edit-angle-triangle.png",
+    "background_icon": {
+      "light": "#DEB887",
+      "dark": "#696969"
+    },
+    "background_chat": {
+      "light": "#DEB887",
+      "dark": "#696969"
+    },
+    "text_chat": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "icon_clip": "https://cdn-icons-png.flaticon.com/512/84/84281.png"
+  },
+  "error": {
+    "title_error": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 16
+    },
+    "text_error": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "icon_error": "https://w7.pngwing.com/pngs/285/84/png-transparent-computer-icons-error-super-8-film-angle-triangle-computer-icons.png"
+  },
+  "single-choice": {
+    "background_button": {
+      "light": "#FFFF00",
+      "dark": "#00FFFF"
+    },
+    "border_button": {
+      "size": 3,
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "border-radius": 10
+    },
+    "text_button": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "background_IVR": {
+      "light": "#00000000",
+      "dark": "#00000000"
+    },
+    "border_IVR": {
+      "size": 1,
+      "color": {
+        "light": "#74b928",
+        "dark": "#74b928"
+      },
+      "border-radius": 10
+    },
+    "text_IVR": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    }
+  },
+  "theme": "light"
+}
+```

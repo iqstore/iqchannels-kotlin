@@ -16,6 +16,8 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -24,6 +26,7 @@ import android.os.Parcelable
 import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -41,6 +44,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.ui.platform.ComposeView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -51,6 +55,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.bumptech.glide.Glide
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import io.noties.markwon.Markwon
+import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -67,8 +76,12 @@ import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.app.Callback
 import ru.iqchannels.sdk.app.Cancellable
 import ru.iqchannels.sdk.app.IQChannels
+import ru.iqchannels.sdk.app.IQChannelsConfig
+import ru.iqchannels.sdk.app.IQChannelsConfigRepository
 import ru.iqchannels.sdk.app.IQChannelsListener
 import ru.iqchannels.sdk.app.MessagesListener
+import ru.iqchannels.sdk.applyIQStyles
+import ru.iqchannels.sdk.domain.models.ChatType
 import ru.iqchannels.sdk.http.HttpException
 import ru.iqchannels.sdk.lib.InternalIO.copy
 import ru.iqchannels.sdk.schema.Action
@@ -78,9 +91,13 @@ import ru.iqchannels.sdk.schema.ChatException
 import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.schema.ClientAuth
 import ru.iqchannels.sdk.schema.SingleChoice
+import ru.iqchannels.sdk.styling.IQChannelsStyles
+import ru.iqchannels.sdk.styling.IQStyles
 import ru.iqchannels.sdk.ui.backdrop.ErrorPageBackdropDialog
 import ru.iqchannels.sdk.ui.images.ImagePreviewFragment
+import ru.iqchannels.sdk.ui.nav_bar.NavBar
 import ru.iqchannels.sdk.ui.rv.SwipeController
+import ru.iqchannels.sdk.ui.theming.IQChannelsTheme
 import ru.iqchannels.sdk.ui.widgets.ReplyMessageView
 import ru.iqchannels.sdk.ui.widgets.TopNotificationWidget
 
@@ -90,6 +107,8 @@ class ChatFragment : Fragment() {
 		private const val TAG = "iqchannels"
 		private const val SEND_FOCUS_SCROLL_THRESHOLD_PX = 300
 		private const val PARAM_LM_STATE = "ChatFragment#lmState"
+		private const val ARG_TITLE = "ChatFragment#title"
+		private const val ARG_STYLES = "ChatFragment#styles"
 
 		/**
 		 * Use this factory method to create a new instance of
@@ -97,9 +116,12 @@ class ChatFragment : Fragment() {
 		 *
 		 * @return A new instance of fragment ChatFragment.
 		 */
-		fun newInstance(): ChatFragment {
+		fun newInstance(title: String? = null, stylesJson: String? = null): ChatFragment {
 			val fragment = ChatFragment()
-			val args = Bundle()
+			val args = Bundle().apply {
+				putString(ARG_TITLE, title)
+				putString(ARG_STYLES, stylesJson)
+			}
 			fragment.arguments = args
 			return fragment
 		}
@@ -162,7 +184,7 @@ class ChatFragment : Fragment() {
 				val intent = it.data
 				val uri = intent?.data
 
-				when(uri == null) {
+				when (uri == null) {
 					true -> { // multiple choice
 						it.data?.clipData?.let { clipData ->
 							val uris = ArrayList<Uri>()
@@ -175,12 +197,14 @@ class ChatFragment : Fragment() {
 								1 -> {
 									onGalleryResult(uris.first())
 								}
+
 								else -> {
 									sendMultipleFiles(uris)
 								}
 							}
 						}
 					}
+
 					false -> { // single choice
 						var isCamera = false
 						if (!isCamera) {
@@ -208,7 +232,23 @@ class ChatFragment : Fragment() {
 		inflater: LayoutInflater, container: ViewGroup?,
 		savedInstanceState: Bundle?
 	): View? {
+
+		arguments?.getString(ARG_STYLES)?.let { json ->
+			try {
+				Gson().fromJson(json, TypeToken.get(IQChannelsStyles::class.java))?.also {
+					IQStyles.iqChannelsStyles = it
+				}
+			} catch (e: Exception) {
+				Log.e("ChatFragment", "Error on parsing", e)
+			}
+		}
+
 		val view = inflater.inflate(R.layout.fragment_chat, container, false)
+
+		view.setBackgroundColor(
+			IQStyles.iqChannelsStyles?.chat?.background?.getColorInt(requireContext())
+				?: ContextCompat.getColor(requireContext(), R.color.white)
+		)
 
 		// Auth views.
 		authLayout = view.findViewById<View>(R.id.authLayout) as RelativeLayout
@@ -217,14 +257,32 @@ class ChatFragment : Fragment() {
 		signupLayout = view.findViewById<View>(R.id.signupLayout) as LinearLayout
 		signupText = view.findViewById<View>(R.id.signupName) as EditText
 		signupButton = view.findViewById<View>(R.id.signupButton) as Button
-		clReply = view.findViewById(R.id.reply)
+
+		clReply = view.findViewById<ReplyMessageView?>(R.id.reply).apply {
+			applyReplyStyles()
+		}
+
 		signupButton?.setOnClickListener { signup() }
 		signupError = view.findViewById<View>(R.id.signupError) as TextView
 
 		// Chat.
 		chatLayout = view.findViewById<View>(R.id.chatLayout) as RelativeLayout
 		chatUnavailableLayout = view.findViewById(R.id.chatUnavailableLayout)
-		chatUnavailableErrorText = view.findViewById(R.id.tv_description)
+		chatUnavailableErrorText = view.findViewById<TextView?>(R.id.tv_description)?.apply {
+			applyIQStyles(IQStyles.iqChannelsStyles?.error?.textError)
+		}
+		view.findViewById<TextView?>(R.id.tv_title)?.apply {
+			applyIQStyles(IQStyles.iqChannelsStyles?.error?.titleError)
+		}
+
+		IQStyles.iqChannelsStyles?.error?.iconError?.let {
+			view.findViewById<ImageView?>(R.id.iv_error)?.apply {
+				Glide.with(context)
+					.load(it)
+					.into(this)
+			}
+		}
+
 		tnwMsgCopied = view.findViewById(R.id.tnw_msg_copied)
 		btnGoBack = view.findViewById(R.id.btn_go_back)
 
@@ -233,11 +291,19 @@ class ChatFragment : Fragment() {
 		refresh = view.findViewById<View>(R.id.messagesRefresh) as SwipeRefreshLayout
 		refresh?.isEnabled = false
 		refresh?.setOnRefreshListener { refreshMessages() }
+		IQStyles.iqChannelsStyles?.chat?.chatHistory?.getColorInt(requireContext())?.let {
+			refresh?.setColorSchemeColors(it)
+		}
+
+		val markwon = Markwon.builder(requireContext())
+			.usePlugin(StrikethroughPlugin.create())
+			.build()
 
 		adapter = ChatMessagesAdapter(
 			IQChannels,
 			view,
 			{ view.width to view.height },
+			markwon,
 			ItemClickListener()
 		)
 
@@ -275,7 +341,16 @@ class ChatFragment : Fragment() {
 		clReply?.setCloseBtnClickListener { hideReplying() }
 
 		// Send.
-		sendText = view.findViewById(R.id.sendText)
+		sendText = view.findViewById<EditText?>(R.id.sendText)?.apply {
+			applyIQStyles(IQStyles.iqChannelsStyles?.toolsToMessage?.textChat)
+			IQStyles.iqChannelsStyles?.toolsToMessage?.backgroundChat?.getColorInt(context)?.let {
+				background = ContextCompat.getDrawable(context, R.drawable.bg_text_field)
+					?.apply {
+						colorFilter =
+							PorterDuffColorFilter(it, PorterDuff.Mode.SRC_ATOP)
+					}
+			}
+		}
 		sendText?.setOnEditorActionListener { v, actionId, event ->
 			var handled = false
 			if (actionId == EditorInfo.IME_ACTION_SEND) {
@@ -296,16 +371,65 @@ class ChatFragment : Fragment() {
 			}
 		})
 
-		attachButton = view.findViewById(R.id.attachButton)
+		attachButton = view.findViewById<ImageButton?>(R.id.attachButton)?.apply {
+			IQStyles.iqChannelsStyles?.toolsToMessage?.iconClip?.let {
+				Glide.with(context)
+					.load(it)
+					.into(this)
+			}
+		}
 		attachButton?.setOnClickListener { showAttachChooser() }
-		sendButton = view.findViewById(R.id.sendButton)
+		sendButton = view.findViewById<ImageButton?>(R.id.sendButton)?.apply {
+			IQStyles.iqChannelsStyles?.toolsToMessage?.iconSent?.let {
+				Glide.with(context)
+					.load(it)
+					.into(this)
+			}
+
+			IQStyles.iqChannelsStyles?.toolsToMessage?.backgroundIcon?.getColorInt(context)?.let {
+				this.setBackgroundColor(it)
+			}
+		}
 		sendButton?.setOnClickListener { sendMessage() }
 
 		if (!requireActivity().packageManager.hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY)) {
 			attachButton?.visibility = View.GONE
 		}
 
+		arguments?.getString(ARG_TITLE)?.let { title ->
+			view.findViewById<ComposeView>(R.id.nav_bar)?.let {
+
+				it.setContent {
+					IQChannelsTheme {
+						NavBar(title = title) {
+							parentFragmentManager.popBackStack()
+						}
+					}
+				}
+			}
+		}
+
 		return view
+	}
+
+	private fun ReplyMessageView.applyReplyStyles() {
+		tvFileName.applyIQStyles(IQStyles.iqChannelsStyles?.answer?.textMessage)
+		tvText.applyIQStyles(IQStyles.iqChannelsStyles?.answer?.textMessage)
+		tvSenderName.applyIQStyles(IQStyles.iqChannelsStyles?.answer?.textSender)
+		setBackgroundColor(
+			IQStyles.iqChannelsStyles?.answer?.backgroundTextUpMessage?.getColorInt(context)
+				?: ContextCompat.getColor(requireContext(), R.color.white)
+		)
+
+		IQStyles.iqChannelsStyles?.answer?.iconCancel?.let {
+			Glide.with(context)
+				.load(it)
+				.into(ibClose)
+		}
+
+		IQStyles.iqChannelsStyles?.answer?.leftLine?.getColorInt(context)?.let {
+			setVerticalDividerColorInt(it)
+		}
 	}
 
 	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -412,16 +536,19 @@ class ChatFragment : Fragment() {
 					showUnavailableView(getString(R.string.chat_unavailable_description))
 				}
 
-				val message = when(e) {
+				val message = when (e) {
 					is UnknownHostException -> {
 						getString(R.string.check_connection)
 					}
+
 					is SocketTimeoutException, is TimeoutException -> {
 						getString(R.string.timeout_message)
 					}
+
 					is HttpException -> {
 						getString(R.string.chat_unavailable_description)
 					}
+
 					else -> return
 				}
 
@@ -476,10 +603,12 @@ class ChatFragment : Fragment() {
 		}
 	}
 
-	private fun maybeScrollToBottomOnNewMessage() {
-		recycler?.let { recycler ->
-			val count = adapter?.itemCount ?: 0
-			recycler.smoothScrollToPosition(if (count == 0) 0 else count - 1)
+	private fun maybeScrollToBottomOnNewMessage(force: Boolean = false) {
+		if (btnScrollToBottom?.isVisible != true || force) {
+			recycler?.let { recycler ->
+				val count = adapter?.itemCount ?: 0
+				recycler.smoothScrollToPosition(if (count == 0) 0 else count - 1)
+			}
 		}
 	}
 
@@ -569,6 +698,10 @@ class ChatFragment : Fragment() {
 				this@ChatFragment.messageDeleted(message)
 			}
 
+			override fun eventChangeChannel(channel: String) {
+				this@ChatFragment.onChannelChange(channel)
+			}
+
 			override fun eventTyping(event: ChatEvent) {
 				this@ChatFragment.eventTyping(event)
 			}
@@ -646,7 +779,7 @@ class ChatFragment : Fragment() {
 		}
 
 		adapter?.sent(message)
-		maybeScrollToBottomOnNewMessage()
+		maybeScrollToBottomOnNewMessage(true)
 	}
 
 	private fun messageUploaded(message: ChatMessage) {
@@ -699,7 +832,7 @@ class ChatFragment : Fragment() {
 		val exception = message.UploadExc ?: return
 		val errMessage: String?
 
-		when(exception) {
+		when (exception) {
 			is HttpException -> {
 				errMessage = if (exception.code == 413) {
 					getString(R.string.file_size_too_large)
@@ -707,17 +840,24 @@ class ChatFragment : Fragment() {
 					getString(R.string.check_connection)
 				}
 			}
+
 			is UnknownHostException -> {
 				errMessage = getString(R.string.check_connection)
 			}
+
 			is SocketTimeoutException, is TimeoutException, is java.net.SocketException -> {
 				errMessage = getString(R.string.timeout_message)
 			}
+
 			is ChatException -> {
 				errMessage = exception.message ?: getString(R.string.error_occured)
 			}
+
 			else -> {
-				Log.d("UploadException", "Message load exception. Type: ${exception.javaClass}. Body: ${exception.stackTraceToString()}")
+				Log.d(
+					"UploadException",
+					"Message load exception. Type: ${exception.javaClass}. Body: ${exception.stackTraceToString()}"
+				)
 				errMessage = getString(R.string.error_occured)
 			}
 		}
@@ -845,7 +985,10 @@ class ChatFragment : Fragment() {
 
 			withContext(Dispatchers.Main) {
 				result?.let {
-					showConfirmDialog(it, getString(R.string.chat_send_file_confirmation_description, it.name))
+					showConfirmDialog(
+						it,
+						getString(R.string.chat_send_file_confirmation_description, it.name)
+					)
 				}
 			}
 		}
@@ -1138,6 +1281,17 @@ class ChatFragment : Fragment() {
 		}
 	}
 
+	private fun onChannelChange(channel: String) {
+		IQChannels.configureClient(
+			IQChannelsConfig(
+				address = IQChannelsConfigRepository.config?.address,
+				channel = channel
+			)
+		)
+		IQChannels.chatType = ChatType.REGULAR
+		IQChannelsConfigRepository.credentials?.let { IQChannels.login(it) }
+	}
+
 	private inner class ItemClickListener : ChatMessagesAdapter.ItemClickListener {
 		override fun onFileClick(url: String, fileName: String) {
 			val fragmentTransaction = childFragmentManager.beginTransaction()
@@ -1189,7 +1343,8 @@ class ChatFragment : Fragment() {
 
 		override fun onMessageLongClick(message: ChatMessage) {
 			message.Text?.let { text ->
-				val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+				val clipboard =
+					requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 				val clip = ClipData.newPlainText(text, text)
 				clipboard.setPrimaryClip(clip)
 

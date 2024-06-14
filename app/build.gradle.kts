@@ -9,11 +9,11 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "ru.iqchannels.example"
+        applicationId = "ru.iqchannels.example.new"
         minSdk = 26
         targetSdk = 34
         versionCode = 2
-        versionName = "2.0"
+        versionName = "2.0.0-rc1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
     }
@@ -28,6 +28,15 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    buildFeatures {
+        compose = true
+        viewBinding = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.5"
     }
 }
 
@@ -48,8 +57,28 @@ dependencies {
     implementation("androidx.coordinatorlayout:coordinatorlayout:1.1.0")
     implementation("androidx.core:core-ktx:1.12.0")
 
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("androidx.fragment:fragment-ktx:1.6.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+
     testImplementation("junit:junit:4.12")
 //    androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
 //        exclude group: 'com.android.support', module: 'support-annotations'
 //    })
+
+    // Compose
+    implementation("androidx.compose.runtime:runtime:1.4.0")
+    implementation("androidx.compose.ui:ui:1.4.0")
+    implementation("androidx.compose.foundation:foundation:1.4.0")
+    implementation("androidx.compose.material:material:1.4.0")
+    implementation("androidx.compose.material:material-icons-extended:1.4.0")
+    implementation("androidx.compose.runtime:runtime-livedata:1.4.0")
+    implementation("com.github.bumptech.glide:compose:1.0.0-alpha.1")
+    implementation("androidx.navigation:navigation-compose:2.5.3")
+    implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.4.0")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.4.0")
+    implementation("com.google.android.material:compose-theme-adapter:1.2.1")
+    implementation("io.coil-kt:coil-compose:2.1.0")
+    implementation("io.coil-kt:coil:2.2.2")
 }

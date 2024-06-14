@@ -15,9 +15,12 @@ import java.text.DateFormat
 import java.text.DecimalFormat
 import kotlin.math.roundToInt
 import ru.iqchannels.sdk.R
+import ru.iqchannels.sdk.applyIQStyles
 import ru.iqchannels.sdk.databinding.ItemMyMessageBinding
 import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.schema.ChatPayloadType
+import ru.iqchannels.sdk.setBackgroundDrawable
+import ru.iqchannels.sdk.styling.IQStyles
 import ru.iqchannels.sdk.ui.ChatMessagesAdapter
 import ru.iqchannels.sdk.ui.Colors
 import ru.iqchannels.sdk.ui.widgets.toPx
@@ -27,8 +30,10 @@ internal class MyMessageViewHolder(
 	private val itemClickListener: ChatMessagesAdapter.ItemClickListener
 ) : ViewHolder(binding.root) {
 
-	private val dateFormat: DateFormat = android.text.format.DateFormat.getDateFormat(binding.root.context)
-	private val timeFormat: DateFormat = android.text.format.DateFormat.getTimeFormat(binding.root.context)
+	private val dateFormat: DateFormat =
+		android.text.format.DateFormat.getDateFormat(binding.root.context)
+	private val timeFormat: DateFormat =
+		android.text.format.DateFormat.getTimeFormat(binding.root.context)
 
 	fun bind(message: ChatMessage, rootViewDimens: Pair<Int, Int>) = with(binding) {
 		my.visibility = View.VISIBLE
@@ -39,6 +44,7 @@ internal class MyMessageViewHolder(
 		if (adapter.isNewDay(bindingAdapterPosition) && message.Payload !== ChatPayloadType.TYPING) {
 			date.text = message.Date?.let { dateFormat.format(it) }
 			date.visibility = View.VISIBLE
+			date.applyIQStyles(IQStyles.iqChannelsStyles?.chat?.dateText)
 		} else {
 			date.visibility = View.GONE
 		}
@@ -78,6 +84,30 @@ internal class MyMessageViewHolder(
 			myFlags.visibility = View.GONE
 		}
 
+		run {
+			IQStyles.iqChannelsStyles?.messages?.backgroundClient
+				?.let {
+					myMsgContainer.setBackgroundDrawable(it, R.drawable.my_msg_bg)
+					clTextsMy.setBackgroundDrawable(it, R.drawable.my_msg_bg)
+					myReply.setBackgroundDrawable(it, R.drawable.my_msg_reply_bg)
+				}
+
+			myDate.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textTime)
+
+			myReply.tvSenderName.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.replySenderTextClient)
+			myReply.tvText.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.replyTextClient)
+			myReply.tvFileName.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.replyTextClient)
+
+			tvMyFileSize.applyIQStyles(IQStyles.iqChannelsStyles?.messageFile?.textFileSizeClient)
+			tvMyFileName.applyIQStyles(IQStyles.iqChannelsStyles?.messageFile?.textFilenameClient)
+
+			IQStyles.iqChannelsStyles?.messageFile?.iconFileClient?.let {
+				Glide.with(root.context)
+					.load(it)
+					.into(ivFile)
+			}
+		}
+
 		// Reset the visibility.
 		run {
 			clTextsMy.visibility = View.GONE
@@ -103,8 +133,6 @@ internal class MyMessageViewHolder(
 			clTextsMy.visibility = View.VISIBLE
 			myText.visibility = View.GONE
 			tvMyFileName.visibility = View.VISIBLE
-			tvMyFileName.autoLinkMask = 0
-			tvMyFileName.movementMethod = LinkMovementMethod.getInstance()
 			tvMyFileName.text = file.name
 			val size = file.length()
 
@@ -157,8 +185,6 @@ internal class MyMessageViewHolder(
 				clTextsMy.visibility = View.VISIBLE
 				myText.visibility = View.GONE
 				tvMyFileName.visibility = View.VISIBLE
-				tvMyFileName.autoLinkMask = 0
-				tvMyFileName.movementMethod = LinkMovementMethod.getInstance()
 				tvMyFileName.text = file?.Name
 				ivFile.isVisible = true
 				val size = file?.Size
@@ -175,6 +201,7 @@ internal class MyMessageViewHolder(
 			myText.autoLinkMask = Linkify.ALL
 			myText.text = message.Text
 			myText.setTextColor(ContextCompat.getColor(root.context, R.color.my_text_color))
+			myText.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textClient)
 			myText.minWidth = 0
 			myText.maxWidth = Int.MAX_VALUE
 		}

@@ -229,6 +229,31 @@ SDK поддерживает пуш-уведомления о новых соо�
     IQChannels.setPushToken(token, isHuawei = true)
 ```
 
+# Кроссегментация
+Для того, чтобы запустить режим с несколькими каналами, нужно вызвать инициализацию через IQChannelsFactory:
+```kotlin
+    IQChannelsFactory().create(
+        context = this,
+        config = IQChannelsConfig2(
+            address = address,
+            channels = channels.toList()
+        ),
+        credentials = ...
+    )
+
+    ChannelsFragment.newInstance(navBarEnabled = false)
+```
+
+Также можно открыть конкретный канал после инициализации:
+```kotlin
+    IQChannelsShortCuts.showChat(
+        channel = channelName,
+        chatType = ChatType.REGULAR,
+        fragmentManager,
+        containerId = R.id.content
+	)
+```
+
 # Пример использования стилизации
 Для того чтобы поменять стили элементов внутри SDK, нужно передать поддерживаемый JSON файл при инициализации как в примере ниже:
 ```kotlin

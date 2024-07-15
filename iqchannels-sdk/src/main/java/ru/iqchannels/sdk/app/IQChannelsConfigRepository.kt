@@ -1,5 +1,7 @@
 package ru.iqchannels.sdk.app
 
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -7,6 +9,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import ru.iqchannels.sdk.Log
 import ru.iqchannels.sdk.domain.models.Channel
 import ru.iqchannels.sdk.domain.models.ChatType
 
@@ -27,7 +30,12 @@ internal object IQChannelsConfigRepository {
 
 		if (config.channels.isNotEmpty()) {
 			if (job == null || job?.isActive == false) {
-				job = CoroutineScope(SupervisorJob() + Dispatchers.IO).launch {
+				val excHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
+					Log.e("applyConfig", "Apply conf error", throwable)
+				}
+
+				val coroutineContext = SupervisorJob() + Dispatchers.IO + CoroutineName("applyConfig-worker") + excHandler
+				job = CoroutineScope(coroutineContext).launch {
 					val channels = mutableListOf<Channel>()
 					config.channels.forEach { channel ->
 						IQChannels.configureClient(IQChannelsConfig(config.address, channel))

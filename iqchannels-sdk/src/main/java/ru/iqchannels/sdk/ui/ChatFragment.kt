@@ -187,11 +187,7 @@ class ChatFragment : Fragment() {
 
 	private val requestAllPermissions =
 		registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-			if (permissions[Manifest.permission.CAMERA] == true) {
-				showAttachChooser(true)
-			} else {
-				showAttachChooser(false)
-			}
+			showAttachChooser(false)
 		}
 
 	private val requestPickImageFromFiles =
@@ -949,12 +945,11 @@ class ChatFragment : Fragment() {
 	private fun showAttachChooser() {
 		if (ContextCompat.checkSelfPermission(
 				requireContext(),
-				Manifest.permission.CAMERA
+				Manifest.permission.READ_EXTERNAL_STORAGE
 			) == PackageManager.PERMISSION_DENIED
 		) {
 			requestAllPermissions.launch(
 				arrayOf(
-					Manifest.permission.CAMERA,
 					Manifest.permission.READ_EXTERNAL_STORAGE,
 					Manifest.permission.WRITE_EXTERNAL_STORAGE
 				)
@@ -963,7 +958,7 @@ class ChatFragment : Fragment() {
 			return
 		}
 
-		showAttachChooser(true)
+		showAttachChooser(false)
 	}
 
 	private fun showAttachChooser(withCamera: Boolean) {

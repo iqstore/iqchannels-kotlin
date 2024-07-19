@@ -131,7 +131,6 @@ internal class MyMessageViewHolder(
 			val file = message.Upload ?: return@with
 			myImageFrame.visibility = View.GONE
 			clTextsMy.visibility = View.VISIBLE
-			myText.visibility = View.GONE
 			tvMyFileName.visibility = View.VISIBLE
 			tvMyFileName.text = file.name
 			val size = file.length()
@@ -147,6 +146,7 @@ internal class MyMessageViewHolder(
 			if (imageUrl != null) {
 				val size = Utils.computeImageSizeFromFile(file, rootViewDimens)
 
+				/*
 				if (message.Text != null && message.Text?.isNotEmpty() == true) {
 					clTextsMy.visibility = View.VISIBLE
 					myText.visibility = View.VISIBLE
@@ -154,6 +154,9 @@ internal class MyMessageViewHolder(
 				} else {
 					myText.visibility = View.GONE
 				}
+				 */
+
+				myText.visibility = View.GONE
 
 				myImgFlags.isVisible = true
 				myFlags.isVisible = false

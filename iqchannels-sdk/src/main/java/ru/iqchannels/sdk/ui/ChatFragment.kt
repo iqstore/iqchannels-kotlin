@@ -47,8 +47,10 @@ import androidx.annotation.RequiresApi
 import androidx.compose.ui.platform.ComposeView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -96,6 +98,9 @@ import ru.iqchannels.sdk.styling.IQStyles
 import ru.iqchannels.sdk.ui.backdrop.ErrorPageBackdropDialog
 import ru.iqchannels.sdk.ui.images.ImagePreviewFragment
 import ru.iqchannels.sdk.ui.nav_bar.NavBar
+import ru.iqchannels.sdk.ui.results.ClassParcelable
+import ru.iqchannels.sdk.ui.results.IQChatEvent
+import ru.iqchannels.sdk.ui.results.toParcelable
 import ru.iqchannels.sdk.ui.rv.SwipeController
 import ru.iqchannels.sdk.ui.theming.IQChannelsTheme
 import ru.iqchannels.sdk.ui.widgets.ReplyMessageView
@@ -104,11 +109,14 @@ import ru.iqchannels.sdk.ui.widgets.TopNotificationWidget
 class ChatFragment : Fragment() {
 
 	companion object {
+		const val REQUEST_KEY = "ChatFragment#requestKey"
+		const val RESULT_KEY_EVENT = "ChatFragment#resultKeyEvent"
 		private const val TAG = "iqchannels"
 		private const val SEND_FOCUS_SCROLL_THRESHOLD_PX = 300
 		private const val PARAM_LM_STATE = "ChatFragment#lmState"
 		private const val ARG_TITLE = "ChatFragment#title"
 		private const val ARG_STYLES = "ChatFragment#styles"
+		private const val ARG_HANDLED_EVENTS = "ChatFragment#handledEvents"
 
 		/**
 		 * Use this factory method to create a new instance of
@@ -116,11 +124,19 @@ class ChatFragment : Fragment() {
 		 *
 		 * @return A new instance of fragment ChatFragment.
 		 */
-		fun newInstance(title: String? = null, stylesJson: String? = null): ChatFragment {
+		fun newInstance(
+			title: String? = null,
+			stylesJson: String? = null,
+			handledEvents: List<Class<out IQChatEvent>>? = null
+		): ChatFragment {
 			val fragment = ChatFragment()
 			val args = Bundle().apply {
 				putString(ARG_TITLE, title)
 				putString(ARG_STYLES, stylesJson)
+				putParcelableArray(
+					ARG_HANDLED_EVENTS,
+					handledEvents?.map { it.toParcelable() }?.toTypedArray()
+				)
 			}
 			fragment.arguments = args
 			return fragment
@@ -227,6 +243,19 @@ class ChatFragment : Fragment() {
 	private val multipleFilesQueue: MutableList<Uri> = mutableListOf()
 
 	private var lmState: Parcelable? = null
+
+	private val handledEvents: List<Class<IQChatEvent>>?
+		get() {
+			return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+				arguments?.getParcelableArray(ARG_HANDLED_EVENTS, ClassParcelable::class.java)?.map {
+					it.clazz
+				} as? List<Class<IQChatEvent>>
+			} else {
+				(arguments?.getParcelableArray(ARG_HANDLED_EVENTS)?.toList() as? List<ClassParcelable<Class<IQChatEvent>>>)?.map {
+					it.clazz
+				} as? List<Class<IQChatEvent>>
+			}
+		}
 
 	override fun onCreateView(
 		inflater: LayoutInflater, container: ViewGroup?,
@@ -753,7 +782,12 @@ class ChatFragment : Fragment() {
 		progress?.visibility = View.GONE
 		refresh?.isRefreshing = false
 		refresh?.isEnabled = true
-		showMessagesErrorAlert(e)
+
+		if (checkEvent(IQChatEvent.MessagesLoadException::class.java)) {
+			sendChatEvent(IQChatEvent.MessagesLoadException(e))
+		} else {
+			showMessagesErrorAlert(e)
+		}
 	}
 
 	private fun messageReceived(message: ChatMessage) {
@@ -1290,6 +1324,21 @@ class ChatFragment : Fragment() {
 		)
 		IQChannels.chatType = ChatType.REGULAR
 		IQChannelsConfigRepository.credentials?.let { IQChannels.login(it) }
+	}
+
+	private fun sendChatEvent(event: IQChatEvent) {
+		setFragmentResult(
+			REQUEST_KEY,
+			bundleOf(
+				RESULT_KEY_EVENT to event
+			)
+		)
+	}
+
+	private fun checkEvent(event: Class<out IQChatEvent>): Boolean {
+		return handledEvents?.any {
+			it.isAssignableFrom(event)
+		} ?: false
 	}
 
 	private inner class ItemClickListener : ChatMessagesAdapter.ItemClickListener {

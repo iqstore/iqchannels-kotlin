@@ -229,6 +229,25 @@ SDK поддерживает пуш-уведомления о новых соо�
     IQChannels.setPushToken(token, isHuawei = true)
 ```
 
+# Обработка событий от чата
+ChatFragment передает события чата наружу через Fragment Result API.
+Достаточно подписаться на fragmentManager и отловить IQChatEvent объект следующим образом:
+
+```kotlin
+    supportFragmentManager.setFragmentResultListener(
+	    ChatFragment.REQUEST_KEY,
+	    this
+    ) { _, bundle ->
+
+        when(val res = bundle.getParcelable(ChatFragment.RESULT_KEY_EVENT, IQChatEvent::class.java)) {
+            is IQChatEvent.MessagesLoadException -> {
+                // handle event
+            }
+            else -> Unit
+        }
+    }
+```
+
 # Кроссегментация
 Для того, чтобы запустить режим с несколькими каналами, нужно вызвать инициализацию через IQChannelsFactory:
 ```kotlin

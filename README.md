@@ -248,6 +248,18 @@ ChatFragment передает события чата наружу через Fr
     }
 ```
 
+Чтобы включить кастомную обработку событий, необходимо при создании ChatFragment.newInstance(),
+передать на вход список событий, после чего события будут прилетать на выше описанный коллбэк setFragmentResultListener.
+Пример:
+
+```kotlin
+    ChatFragment.newInstance(
+        handledEvents = listOf(
+            IQChatEvent.MessagesLoadException::class.java
+        )
+    )
+```
+
 # Кроссегментация
 Для того, чтобы запустить режим с несколькими каналами, нужно вызвать инициализацию через IQChannelsFactory:
 ```kotlin

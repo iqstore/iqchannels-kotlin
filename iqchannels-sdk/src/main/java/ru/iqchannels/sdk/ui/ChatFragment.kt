@@ -795,6 +795,7 @@ class ChatFragment : Fragment() {
 			adapter?.received(
 				ChatMessage().apply {
 					newMsgHeader = true
+					Date = Date()
 				}
 			)
 		}

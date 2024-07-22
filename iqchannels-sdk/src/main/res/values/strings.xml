@@ -43,4 +43,5 @@
     <string name="go_back">Вернуться</string>
     <string name="file_not_uploaded">Файл не загрузился</string>
     <string name="online">На связи</string>
+    <string name="new_messages">Новые сообщения</string>
 </resources>

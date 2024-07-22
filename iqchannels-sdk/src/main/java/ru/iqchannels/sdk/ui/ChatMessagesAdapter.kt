@@ -18,6 +18,7 @@ import java.util.*
 import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.app.IQChannels
 import ru.iqchannels.sdk.databinding.ItemMyMessageBinding
+import ru.iqchannels.sdk.databinding.ItemNewMsgHeaderBinding
 import ru.iqchannels.sdk.databinding.ItemOtherMessageBinding
 import ru.iqchannels.sdk.http.HttpCallback
 import ru.iqchannels.sdk.schema.Action
@@ -28,6 +29,7 @@ import ru.iqchannels.sdk.schema.ChatPayloadType
 import ru.iqchannels.sdk.schema.SingleChoice
 import ru.iqchannels.sdk.schema.UploadedFile
 import ru.iqchannels.sdk.ui.rv.MyMessageViewHolder
+import ru.iqchannels.sdk.ui.rv.NewMessagesHeaderVH
 import ru.iqchannels.sdk.ui.rv.OtherMessageViewHolder
 
 internal class ChatMessagesAdapter(
@@ -161,6 +163,8 @@ internal class ChatMessagesAdapter(
 		} ?: -1
 	}
 
+	fun hasNewMsgHeader() = messages.reversed().any { it.newMsgHeader }
+
 	private fun getIndexByMessage(message: ChatMessage): Int {
 		if (message.My) {
 			for (i in messages.indices) {
@@ -194,6 +198,10 @@ internal class ChatMessagesAdapter(
 				val binding = ItemMyMessageBinding.inflate(inflater, parent, false)
 				MyMessageViewHolder(binding, itemClickListener)
 			}
+			R.layout.item_new_msg_header -> {
+				val binding = ItemNewMsgHeaderBinding.inflate(inflater, parent, false)
+				NewMessagesHeaderVH(binding)
+			}
 			else -> {
 				val binding = ItemOtherMessageBinding.inflate(inflater, parent, false)
 				OtherMessageViewHolder(binding, itemClickListener)
@@ -202,10 +210,12 @@ internal class ChatMessagesAdapter(
 	}
 
 	override fun getItemViewType(position: Int): Int {
-		return if (getItem(position).My) {
-			R.layout.item_my_message
-		} else {
-			R.layout.item_other_message
+		val msg = getItem(position)
+
+		return when {
+			msg.My -> R.layout.item_my_message
+			msg.newMsgHeader -> R.layout.item_new_msg_header
+			else -> R.layout.item_other_message
 		}
 	}
 

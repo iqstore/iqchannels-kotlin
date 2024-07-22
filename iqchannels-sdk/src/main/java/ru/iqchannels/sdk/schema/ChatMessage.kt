@@ -47,6 +47,7 @@ class ChatMessage {
 	var File: UploadedFile? = null
 	var Rating: Rating? = null
 	var Date: Date? = null
+	var newMsgHeader: Boolean = false
 
 	// Upload
 	@Transient

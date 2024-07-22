@@ -791,6 +791,14 @@ class ChatFragment : Fragment() {
 			return
 		}
 
+		if (showNewMsgHeader() && adapter?.hasNewMsgHeader() == false) {
+			adapter?.received(
+				ChatMessage().apply {
+					newMsgHeader = true
+				}
+			)
+		}
+
 		checkDisableFreeText(message)
 		adapter?.received(message)
 
@@ -1334,6 +1342,10 @@ class ChatFragment : Fragment() {
 		return handledEvents?.any {
 			it.isAssignableFrom(event)
 		} ?: false
+	}
+
+	private fun showNewMsgHeader(): Boolean {
+		return btnScrollToBottom?.isVisible == true
 	}
 
 	private inner class ItemClickListener : ChatMessagesAdapter.ItemClickListener {

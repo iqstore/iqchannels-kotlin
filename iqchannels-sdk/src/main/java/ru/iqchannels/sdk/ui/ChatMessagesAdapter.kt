@@ -110,6 +110,25 @@ internal class ChatMessagesAdapter(
 		}
 	}
 
+	fun deleteNewMsgHeader() {
+		var oldMessage: ChatMessage? = null
+		for (message: ChatMessage in messages.reversed()) {
+			if (message.newMsgHeader) {
+				oldMessage = message
+				break
+			}
+		}
+
+		if (oldMessage != null) {
+			val i = messages.indexOf(oldMessage)
+			if (i < 0) {
+				return
+			}
+			messages.removeAt(i)
+			notifyItemRemoved(i)
+		}
+	}
+
 	fun typing(event: ChatEvent) {
 		if (agentTyping) {
 			return

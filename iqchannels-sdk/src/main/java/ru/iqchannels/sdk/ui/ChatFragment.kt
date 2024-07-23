@@ -253,6 +253,8 @@ class ChatFragment : Fragment() {
 			}
 		}
 
+	private var lastUnreadMsgIndex = -1
+
 	override fun onCreateView(
 		inflater: LayoutInflater, container: ViewGroup?,
 		savedInstanceState: Bundle?
@@ -756,12 +758,18 @@ class ChatFragment : Fragment() {
 		}
 		enableSend()
 
-		adapter?.loaded(messages)
+		val messagesWithUnread: MutableList<ChatMessage>? = checkForUnreadMessages(messages)
+		adapter?.loaded(messagesWithUnread ?: messages)
 
 		lmState?.let {
 			(recycler?.layoutManager as? LinearLayoutManager)?.onRestoreInstanceState(it)
 		} ?: run {
-			recycler?.scrollToPosition(if (messages.isEmpty()) 0 else messages.size - 1)
+			val scrollPosition = when {
+				messagesWithUnread != null && lastUnreadMsgIndex > 0 -> lastUnreadMsgIndex
+				messages.isEmpty() -> 0
+				else -> messages.size - 1
+			}
+			recycler?.scrollToPosition(scrollPosition)
 		}
 
 		progress?.visibility = View.GONE
@@ -789,15 +797,6 @@ class ChatFragment : Fragment() {
 	private fun messageReceived(message: ChatMessage) {
 		if (messagesRequest == null) {
 			return
-		}
-
-		if (showNewMsgHeader() && adapter?.hasNewMsgHeader() == false) {
-			adapter?.received(
-				ChatMessage().apply {
-					newMsgHeader = true
-					Date = Date()
-				}
-			)
 		}
 
 		checkDisableFreeText(message)
@@ -1228,6 +1227,7 @@ class ChatFragment : Fragment() {
 
 		IQChannels.send(text, replyToMessageId)
 		hideReplying()
+		adapter?.deleteNewMsgHeader()
 	}
 
 	private fun sendMessage(text: String?) {
@@ -1345,8 +1345,25 @@ class ChatFragment : Fragment() {
 		} ?: false
 	}
 
-	private fun showNewMsgHeader(): Boolean {
-		return btnScrollToBottom?.isVisible == true
+	private fun checkForUnreadMessages(messages: List<ChatMessage>): MutableList<ChatMessage>? {
+		var messagesMutable: MutableList<ChatMessage>? = null
+
+		messages.find { !it.Read && it.Text?.isNotBlank() == true }?.let { firstUnreadMsg ->
+			val index = messages.indexOf(firstUnreadMsg)
+			if (index == lastUnreadMsgIndex) {
+				return@let
+			}
+
+			lastUnreadMsgIndex = index
+			messagesMutable = messages.toMutableList()
+			val newMsgHeader = ChatMessage().apply {
+				newMsgHeader = true
+				Date = Date()
+			}
+			messagesMutable?.add(index, newMsgHeader)
+		}
+
+		return messagesMutable
 	}
 
 	private inner class ItemClickListener : ChatMessagesAdapter.ItemClickListener {

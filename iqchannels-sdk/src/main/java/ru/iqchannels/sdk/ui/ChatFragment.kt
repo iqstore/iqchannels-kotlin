@@ -51,6 +51,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.setFragmentResult
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -84,6 +85,7 @@ import ru.iqchannels.sdk.app.IQChannelsListener
 import ru.iqchannels.sdk.app.MessagesListener
 import ru.iqchannels.sdk.applyIQStyles
 import ru.iqchannels.sdk.domain.models.ChatType
+import ru.iqchannels.sdk.download.FileConfigChecker
 import ru.iqchannels.sdk.http.HttpException
 import ru.iqchannels.sdk.lib.InternalIO.copy
 import ru.iqchannels.sdk.schema.Action
@@ -205,13 +207,17 @@ class ChatFragment : Fragment() {
 								uris.add(clipData.getItemAt(i).uri)
 							}
 
-							when (itemCount) {
+							val checkedFiles = context?.let { context ->
+								FileConfigChecker.checkFiles(context, uris)
+							} ?: uris
+
+							when (checkedFiles.size) {
 								1 -> {
-									onGalleryResult(uris.first())
+									onGalleryResult(checkedFiles.first())
 								}
 
 								else -> {
-									sendMultipleFiles(uris)
+									sendMultipleFiles(checkedFiles)
 								}
 							}
 						}
@@ -229,7 +235,17 @@ class ChatFragment : Fragment() {
 						if (isCamera) {
 							onCameraResult(it.resultCode)
 						} else {
-							onGalleryResult(uri)
+							val ctx = context
+
+							val checkedFile = if (ctx != null) {
+								FileConfigChecker.checkFiles(ctx, listOf(uri)).firstOrNull()
+							} else {
+								uri
+							}
+
+							checkedFile?.let {
+								onGalleryResult(checkedFile)
+							}
 						}
 					}
 				}
@@ -254,6 +270,13 @@ class ChatFragment : Fragment() {
 		}
 
 	private var lastUnreadMsgIndex = -1
+
+	private val viewModel: ChatViewModel by viewModels()
+
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		viewModel.getConfigs()
+	}
 
 	override fun onCreateView(
 		inflater: LayoutInflater, container: ViewGroup?,
@@ -1072,7 +1095,7 @@ class ChatFragment : Fragment() {
 		val mimeTypeMap = MimeTypeMap.getSingleton()
 		val mtype = resolver.getType(uri)
 		val ext = mimeTypeMap.getExtensionFromMimeType(mtype)
-		val file = createGalleryTempFile(uri, ext)
+		val file = FileUtils.createGalleryTempFile(context, uri, ext)
 		val `in` = resolver.openInputStream(uri)
 
 		if (`in` == null) {
@@ -1117,42 +1140,6 @@ class ChatFragment : Fragment() {
 	private fun hideReplying() {
 		clReply?.visibility = View.GONE
 		replyingMessage = null
-	}
-
-	@Throws(IOException::class)
-	private fun createGalleryTempFile(uri: Uri, ext: String?): File {
-		var ext = ext
-		var filename = getGalleryFilename(uri)
-		if (filename != null) {
-			val i = filename.lastIndexOf(".")
-			if (i > -1) {
-				ext = filename.substring(i + 1)
-				filename = filename.substring(0, i - 1)
-			}
-		} else {
-			filename = "file"
-			val mimeType = activity?.contentResolver?.getType(uri)
-			ext = MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType)
-		}
-
-		if (filename.length < 3) {
-			filename = "file-$filename"
-		}
-		val file = File.createTempFile(filename, ".$ext", activity?.cacheDir)
-		file.deleteOnExit()
-		return file
-	}
-
-	private fun getGalleryFilename(uri: Uri): String? {
-		var path = uri.path
-		val i = path?.lastIndexOf("/")
-		if (i != null) {
-			if (i > -1) {
-				path = path?.substring(i + 1)
-			}
-		}
-
-		return path
 	}
 
 	// Camera

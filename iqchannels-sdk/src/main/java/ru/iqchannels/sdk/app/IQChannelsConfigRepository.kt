@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import ru.iqchannels.sdk.Log
 import ru.iqchannels.sdk.domain.models.Channel
 import ru.iqchannels.sdk.domain.models.ChatType
+import ru.iqchannels.sdk.schema.ChatFilesConfig
 
 internal object IQChannelsConfigRepository {
 
@@ -23,6 +24,8 @@ internal object IQChannelsConfigRepository {
 	val channels = _channels.asStateFlow()
 
 	private var job: Job? = null
+
+	var chatFilesConfig: ChatFilesConfig? = null
 
 	internal fun applyConfig(config: IQChannelsConfig2, credentials: String) {
 		this.config = config

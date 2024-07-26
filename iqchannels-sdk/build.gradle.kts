@@ -63,6 +63,11 @@ dependencies {
     implementation("io.noties.markwon:core:4.6.2")
     implementation("io.noties.markwon:ext-strikethrough:4.6.2")
 
+    val version_retrofit = "2.9.0"
+    implementation("com.squareup.retrofit2:retrofit:$version_retrofit")
+    implementation("com.squareup.retrofit2:converter-scalars:$version_retrofit")
+    implementation("com.squareup.retrofit2:converter-gson:$version_retrofit")
+
     testImplementation("junit:junit:4.13.2")
     testImplementation("io.mockk:mockk:1.13.10")
 

@@ -205,6 +205,8 @@ object IQChannels {
 		}
 	}
 
+	internal fun getBaseUrl() = config?.address
+
 	private fun clear() {
 		clearAuth()
 		clearPushTokenState()

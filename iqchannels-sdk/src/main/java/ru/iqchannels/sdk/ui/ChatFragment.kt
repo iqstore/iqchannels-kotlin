@@ -113,7 +113,7 @@ class ChatFragment : Fragment() {
 	companion object {
 		const val REQUEST_KEY = "ChatFragment#requestKey"
 		const val RESULT_KEY_EVENT = "ChatFragment#resultKeyEvent"
-		private const val TAG = "iqchannels"
+		internal const val TAG = "iqchannels"
 		private const val SEND_FOCUS_SCROLL_THRESHOLD_PX = 300
 		private const val PARAM_LM_STATE = "ChatFragment#lmState"
 		private const val ARG_TITLE = "ChatFragment#title"
@@ -251,8 +251,6 @@ class ChatFragment : Fragment() {
 				}
 			}
 		}
-
-	private val multipleFilesQueue: MutableList<Uri> = mutableListOf()
 
 	private var lmState: Parcelable? = null
 
@@ -851,10 +849,7 @@ class ChatFragment : Fragment() {
 		adapter?.updated(message)
 		maybeScrollToBottomOnNewMessage()
 
-		runCatching { multipleFilesQueue.removeFirst() }
-			.getOrNull()
-			?.let { sendFile(it) }
-
+		viewModel.sendNextFile(requireActivity())
 	}
 
 	private fun messageCancelled(message: ChatMessage) {
@@ -1041,7 +1036,7 @@ class ChatFragment : Fragment() {
 	private fun onGalleryResult(uri: Uri) {
 
 		lifecycleScope.launch(Dispatchers.IO) {
-			val result = prepareFile(uri)
+			val result = viewModel.prepareFile(uri, requireActivity())
 
 			withContext(Dispatchers.Main) {
 				result?.let {
@@ -1057,7 +1052,7 @@ class ChatFragment : Fragment() {
 	private fun onGalleryMutipleFilesResult(uri: Uri, message: String) {
 
 		lifecycleScope.launch(Dispatchers.IO) {
-			val result = prepareFile(uri)
+			val result = viewModel.prepareFile(uri, requireActivity())
 
 			withContext(Dispatchers.Main) {
 				result?.let {
@@ -1069,8 +1064,8 @@ class ChatFragment : Fragment() {
 
 	private fun sendMultipleFiles(fileUris: List<Uri>) {
 		lifecycleScope.launch {
-			multipleFilesQueue.addAll(fileUris.take(10))
-			val uri = multipleFilesQueue.removeFirst()
+			viewModel.addMultipleFilesQueue(fileUris.take(10))
+			val uri = viewModel.getNextFileFromQueue()
 
 			val message = if (fileUris.size <= 10) {
 				getString(
@@ -1081,38 +1076,8 @@ class ChatFragment : Fragment() {
 				getString(R.string.chat_send_file_confirmation_description_multiple_cut)
 			}
 
-			onGalleryMutipleFilesResult(uri, message)
+			uri?.let { onGalleryMutipleFilesResult(it, message) }
 		}
-	}
-
-	private fun sendFile(uri: Uri) {
-		val file = prepareFile(uri)
-		IQChannels.sendFile(file, null)
-	}
-
-	private fun prepareFile(uri: Uri) = try {
-		val resolver = requireActivity().contentResolver
-		val mimeTypeMap = MimeTypeMap.getSingleton()
-		val mtype = resolver.getType(uri)
-		val ext = mimeTypeMap.getExtensionFromMimeType(mtype)
-		val file = FileUtils.createGalleryTempFile(context, uri, ext)
-		val `in` = resolver.openInputStream(uri)
-
-		if (`in` == null) {
-			Log.e(TAG, "onGalleryResult: Failed to pick a file, no input stream")
-			null
-		} else {
-			`in`.use { `in` ->
-				val out = FileOutputStream(file)
-				out.use { out ->
-					copy(`in`, out)
-				}
-			}
-			file
-		}
-	} catch (e: IOException) {
-		Log.e(TAG, String.format("onGalleryResult: Failed to pick a file, e=%s", e))
-		null
 	}
 
 	private fun showConfirmDialog(file: File, message: String) {
@@ -1128,10 +1093,10 @@ class ChatFragment : Fragment() {
 				hideReplying()
 			}
 			.setNegativeButton(R.string.cancel) { dialogInterface: DialogInterface?, i: Int ->
-				multipleFilesQueue.clear()
+				viewModel.clearFilesQueue()
 			}
 			.setOnCancelListener {
-				multipleFilesQueue.clear()
+				viewModel.clearFilesQueue()
 			}
 
 		builder.show()

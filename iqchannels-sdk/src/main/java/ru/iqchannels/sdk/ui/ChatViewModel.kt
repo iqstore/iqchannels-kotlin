@@ -13,6 +13,7 @@ import ru.iqchannels.sdk.Log
 import ru.iqchannels.sdk.app.IQChannels
 import ru.iqchannels.sdk.app.IQChannelsConfigRepository
 import ru.iqchannels.sdk.configs.GetConfigsInteractorImpl
+import ru.iqchannels.sdk.domain.models.PreFilledMessages
 import ru.iqchannels.sdk.http.retrofit.NetworkModule
 import ru.iqchannels.sdk.lib.InternalIO
 
@@ -64,7 +65,20 @@ class ChatViewModel : ViewModel() {
 		null
 	}
 
-	fun sendNextFile(activity: Activity) {
+	fun sendMsgFromQueue(activity: Activity) {
+		when {
+			multipleTextsQueue.isNotEmpty() -> sendNextText()
+			multipleFilesQueue.isNotEmpty() -> sendNextFile(activity)
+		}
+	}
+
+	private fun sendNextText() {
+		runCatching { multipleTextsQueue.removeFirst() }
+			.getOrNull()
+			?.let { IQChannels.send(it, null) }
+	}
+
+	private fun sendNextFile(activity: Activity) {
 		runCatching { multipleFilesQueue.removeFirst() }
 			.getOrNull()
 			?.let { sendFile(it, activity) }
@@ -79,4 +93,14 @@ class ChatViewModel : ViewModel() {
 	}.getOrNull()
 
 	fun clearFilesQueue() = multipleFilesQueue.clear()
+
+	fun applyPrefilledMessages(preFilledMessages: PreFilledMessages) {
+		preFilledMessages.textMsg?.let {
+			multipleTextsQueue.addAll(it)
+		}
+
+		preFilledMessages.fileMsg?.let {
+			multipleFilesQueue.addAll(it)
+		}
+	}
 }

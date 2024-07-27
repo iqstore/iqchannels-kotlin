@@ -26,12 +26,10 @@ import android.os.Parcelable
 import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.webkit.MimeTypeMap
 import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
@@ -64,7 +62,6 @@ import com.google.gson.reflect.TypeToken
 import io.noties.markwon.Markwon
 import io.noties.markwon.ext.strikethrough.StrikethroughPlugin
 import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -85,6 +82,7 @@ import ru.iqchannels.sdk.app.IQChannelsListener
 import ru.iqchannels.sdk.app.MessagesListener
 import ru.iqchannels.sdk.applyIQStyles
 import ru.iqchannels.sdk.domain.models.ChatType
+import ru.iqchannels.sdk.domain.models.PreFilledMessages
 import ru.iqchannels.sdk.download.FileConfigChecker
 import ru.iqchannels.sdk.http.HttpException
 import ru.iqchannels.sdk.lib.InternalIO.copy
@@ -119,6 +117,7 @@ class ChatFragment : Fragment() {
 		private const val ARG_TITLE = "ChatFragment#title"
 		private const val ARG_STYLES = "ChatFragment#styles"
 		private const val ARG_HANDLED_EVENTS = "ChatFragment#handledEvents"
+		private const val ARG_PREFILLED_MSG = "ChatFragment#preFilledMsg"
 
 		/**
 		 * Use this factory method to create a new instance of
@@ -129,7 +128,8 @@ class ChatFragment : Fragment() {
 		fun newInstance(
 			title: String? = null,
 			stylesJson: String? = null,
-			handledEvents: List<Class<out IQChatEvent>>? = null
+			handledEvents: List<Class<out IQChatEvent>>? = null,
+			preFilledMessages: PreFilledMessages? = null
 		): ChatFragment {
 			val fragment = ChatFragment()
 			val args = Bundle().apply {
@@ -139,6 +139,7 @@ class ChatFragment : Fragment() {
 					ARG_HANDLED_EVENTS,
 					handledEvents?.map { it.toParcelable() }?.toTypedArray()
 				)
+				putParcelable(ARG_PREFILLED_MSG, preFilledMessages)
 			}
 			fragment.arguments = args
 			return fragment
@@ -288,6 +289,16 @@ class ChatFragment : Fragment() {
 				}
 			} catch (e: Exception) {
 				Log.e("ChatFragment", "Error on parsing", e)
+			}
+		}
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			arguments?.getParcelable(ARG_PREFILLED_MSG, PreFilledMessages::class.java)?.let {
+				viewModel.applyPrefilledMessages(it)
+			}
+		} else {
+			(arguments?.getParcelable(ARG_PREFILLED_MSG) as? PreFilledMessages)?.let {
+				viewModel.applyPrefilledMessages(it)
 			}
 		}
 
@@ -796,6 +807,8 @@ class ChatFragment : Fragment() {
 		progress?.visibility = View.GONE
 		refresh?.isRefreshing = false
 		refresh?.isEnabled = true
+
+		viewModel.sendMsgFromQueue(requireActivity())
 	}
 
 	private fun messagesException(e: Exception) {
@@ -849,7 +862,7 @@ class ChatFragment : Fragment() {
 		adapter?.updated(message)
 		maybeScrollToBottomOnNewMessage()
 
-		viewModel.sendNextFile(requireActivity())
+		viewModel.sendMsgFromQueue(requireActivity())
 	}
 
 	private fun messageCancelled(message: ChatMessage) {

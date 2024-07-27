@@ -293,6 +293,7 @@ ChatFragment передает события чата наружу через Fr
 ```
 
 # Пример JSON для передачи в SDK
+Подробнее в файле ChatStyling.json
 
 ```json
 {

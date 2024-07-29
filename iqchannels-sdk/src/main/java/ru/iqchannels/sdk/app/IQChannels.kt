@@ -11,12 +11,14 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 import ru.iqchannels.sdk.Log
+import ru.iqchannels.sdk.configs.GetConfigsInteractorImpl
 import ru.iqchannels.sdk.domain.models.ChatType
 import ru.iqchannels.sdk.http.HttpCallback
 import ru.iqchannels.sdk.http.HttpClient
 import ru.iqchannels.sdk.http.HttpProgressCallback
 import ru.iqchannels.sdk.http.HttpRequest
 import ru.iqchannels.sdk.http.HttpSseListener
+import ru.iqchannels.sdk.http.retrofit.NetworkModule
 import ru.iqchannels.sdk.rels.Rels
 import ru.iqchannels.sdk.schema.ChatEvent
 import ru.iqchannels.sdk.schema.ChatEventQuery
@@ -1611,6 +1613,7 @@ object IQChannels {
 			ChatEventType.MESSAGE_READ -> messageRead(event)
 			ChatEventType.TYPING -> messageTyping(event)
 			ChatEventType.CHAT_CHANNEL_CHANGE -> changeChannel(event)
+			ChatEventType.FILE_UPDATED -> fileUpdated(event)
 			else -> Log.i(TAG, String.format("applyEvent: %s", event.Type))
 		}
 	}
@@ -1747,6 +1750,26 @@ object IQChannels {
 		event.NextChannelName?.let { channel ->
 			for (listener in messageListeners) {
 				execute { listener.eventChangeChannel(channel) }
+			}
+		}
+	}
+
+	private fun fileUpdated(event: ChatEvent) {
+		event.MessageId?.let { messageId ->
+			val message = getMessageById(messageId) ?: return
+			val fileId = message.FileId ?: return
+
+			try {
+				val interactor = GetConfigsInteractorImpl(NetworkModule.provideGetConfigApiService())
+				val file = interactor.getFile(fileId)
+				Log.d(TAG, "success got file: ${file?.Id}")
+				message.File = file
+
+				for (listener in messageListeners) {
+					execute { listener.messageUpdated(message) }
+				}
+			} catch (e: Exception) {
+				Log.e(TAG, e.message, e)
 			}
 		}
 	}

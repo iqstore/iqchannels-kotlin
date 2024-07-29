@@ -15,6 +15,7 @@ class UploadedFile {
 	var ImageHeight: Int? = null
 	var ContentType: String? = null
 	var CreatedAt: Long = 0
+	var State: FileValidState? = null
 
 	// Local
 	var Url: String? = null

@@ -26,7 +26,6 @@ import android.os.Parcelable
 import android.provider.MediaStore
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -427,7 +426,11 @@ class ChatFragment : Fragment() {
 				it.setContent {
 					IQChannelsTheme {
 						NavBar(title = title) {
-							parentFragmentManager.popBackStack()
+							if (checkEvent(IQChatEvent.NavBarBackButtonPressed::class.java)) {
+								sendChatEvent(IQChatEvent.NavBarBackButtonPressed)
+							} else {
+								parentFragmentManager.popBackStack()
+							}
 						}
 					}
 				}
@@ -494,7 +497,11 @@ class ChatFragment : Fragment() {
 		})
 
 		btnGoBack?.setOnClickListener {
-			parentFragmentManager.popBackStack()
+			if (checkEvent(IQChatEvent.ErrorGoBackButtonPressed::class.java)) {
+				sendChatEvent(IQChatEvent.ErrorGoBackButtonPressed)
+			} else {
+				parentFragmentManager.popBackStack()
+			}
 		}
 	}
 

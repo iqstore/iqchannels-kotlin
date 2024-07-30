@@ -88,6 +88,34 @@
         "dark": "#FFFFFF"
       },
       "text_size": 10
+    },
+    "text_file_state_rejected": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_file_state_on_checking": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_file_state_sent_for_checking": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_file_state_check_error": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
     }
   },
   "answer": {

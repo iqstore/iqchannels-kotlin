@@ -23,4 +23,8 @@ class ChatEvent {
 	var Client: Client? = null
 	var User: User? = null
 	var Message: ChatMessage? = null
+
+	override fun toString(): String {
+		return "ChatEvent: $Type"
+	}
 }

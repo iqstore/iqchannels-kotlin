@@ -1,10 +1,11 @@
 package ru.iqchannels.sdk.ui.rv
 
-import android.text.method.LinkMovementMethod
 import android.text.util.Linkify
 import android.view.Gravity
 import android.view.View
 import android.widget.LinearLayout
+import androidx.annotation.ColorRes
+import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -19,8 +20,10 @@ import ru.iqchannels.sdk.applyIQStyles
 import ru.iqchannels.sdk.databinding.ItemMyMessageBinding
 import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.schema.ChatPayloadType
+import ru.iqchannels.sdk.schema.FileValidState
 import ru.iqchannels.sdk.setBackgroundDrawable
 import ru.iqchannels.sdk.styling.IQStyles
+import ru.iqchannels.sdk.styling.Text
 import ru.iqchannels.sdk.ui.ChatMessagesAdapter
 import ru.iqchannels.sdk.ui.Colors
 import ru.iqchannels.sdk.ui.widgets.toPx
@@ -140,61 +143,28 @@ internal class MyMessageViewHolder(
 			myText.text = file.name
 			myText.setTextColor(Colors.linkColor())
 		} else if (message.File != null) {
-			myUpload.visibility = View.GONE
-			val file = message.File
-			val imageUrl = file?.ImagePreviewUrl
-			if (imageUrl != null) {
-				val size = Utils.computeImageSizeFromFile(file, rootViewDimens)
-
-				/*
-				if (message.Text != null && message.Text?.isNotEmpty() == true) {
-					clTextsMy.visibility = View.VISIBLE
-					myText.visibility = View.VISIBLE
-					myText.text = message.Text
-				} else {
-					myText.visibility = View.GONE
-				}
-				 */
-
-				myText.visibility = View.GONE
-
-				myImgFlags.isVisible = true
-				myFlags.isVisible = false
-
-				myImgDate.text = message.Date?.let { timeFormat.format(it) } ?: ""
-				myImgDate.visibility = if (message.Date != null) View.VISIBLE else View.GONE
-				myImgReceived.visibility = if (message.Received) View.VISIBLE else View.GONE
-				myImgRead.visibility = if (message.Read) View.VISIBLE else View.GONE
-				val isRead = message.Read
-				myImgRead.isVisible = isRead
-				myImgReceived.isVisible = !isRead && message.Received == true
-
-				myImageFrame.visibility = View.VISIBLE
-				myImageFrame.layoutParams.width = size[0]
-				myImageFrame.layoutParams.height = size[1]
-				myImageFrame.requestLayout()
-
-				myImageFrame.post {
-					Glide.with(root.context)
-						.load(imageUrl)
-						.transform(
-							CenterCrop(),
-							RoundedCorners(11.toPx.roundToInt())
-						)
-						.into(myImageSrc)
-				}
-			} else {
-				myImageFrame.visibility = View.GONE
-				clTextsMy.visibility = View.VISIBLE
-				myText.visibility = View.GONE
-				tvMyFileName.visibility = View.VISIBLE
-				tvMyFileName.text = file?.Name
-				ivFile.isVisible = true
-				val size = file?.Size
-
-				size?.let { showFileSize(it) }
-				myText.text = file?.Name
-				myText.setTextColor(Colors.linkColor())
+			when(message.File?.State) {
+				FileValidState.Rejected -> showFileStateMsg(
+					R.string.unsecure_file,
+					R.color.red,
+					IQStyles.iqChannelsStyles?.messages?.textFileStateRejected
+				)
+				FileValidState.OnChecking -> showFileStateMsg(
+					R.string.file_on_checking,
+					R.color.blue,
+					IQStyles.iqChannelsStyles?.messages?.textFileStateOnChecking
+				)
+				FileValidState.SentForChecking -> showFileStateMsg(
+					R.string.file_sent_to_check,
+					R.color.blue,
+					IQStyles.iqChannelsStyles?.messages?.textFileStateSentForChecking
+				)
+				FileValidState.CheckError -> showFileStateMsg(
+					R.string.error_on_checking,
+					R.color.red,
+					IQStyles.iqChannelsStyles?.messages?.textFileStateCheckError
+				)
+				else -> showApprovedFile(message, rootViewDimens)
 			}
 		} else {
 			myImageFrame.visibility = View.GONE
@@ -278,5 +248,85 @@ internal class MyMessageViewHolder(
 		} else {
 			tvMyFileSize.text = null
 		}
+	}
+
+	private fun showApprovedFile(
+		message: ChatMessage,
+		rootViewDimens: Pair<Int, Int>
+	) {
+		binding.apply {
+			myUpload.visibility = View.GONE
+			val file = message.File
+			val imageUrl = file?.ImagePreviewUrl
+			if (imageUrl != null) {
+				val size = Utils.computeImageSizeFromFile(file, rootViewDimens)
+
+				/*
+				if (message.Text != null && message.Text?.isNotEmpty() == true) {
+					clTextsMy.visibility = View.VISIBLE
+					myText.visibility = View.VISIBLE
+					myText.text = message.Text
+				} else {
+					myText.visibility = View.GONE
+				}
+				 */
+
+				myText.visibility = View.GONE
+
+				myImgFlags.isVisible = true
+				myFlags.isVisible = false
+
+				myImgDate.text = message.Date?.let { timeFormat.format(it) } ?: ""
+				myImgDate.visibility = if (message.Date != null) View.VISIBLE else View.GONE
+				myImgReceived.visibility = if (message.Received) View.VISIBLE else View.GONE
+				myImgRead.visibility = if (message.Read) View.VISIBLE else View.GONE
+				val isRead = message.Read
+				myImgRead.isVisible = isRead
+				myImgReceived.isVisible = !isRead && message.Received == true
+
+				myImageFrame.visibility = View.VISIBLE
+				myImageFrame.layoutParams.width = size[0]
+				myImageFrame.layoutParams.height = size[1]
+				myImageFrame.requestLayout()
+
+				myImageFrame.post {
+					Glide.with(root.context)
+						.load(imageUrl)
+						.transform(
+							CenterCrop(),
+							RoundedCorners(11.toPx.roundToInt())
+						)
+						.into(myImageSrc)
+				}
+			} else {
+				myImageFrame.visibility = View.GONE
+				clTextsMy.visibility = View.VISIBLE
+				myText.visibility = View.GONE
+				tvMyFileName.visibility = View.VISIBLE
+				tvMyFileName.text = file?.Name
+				ivFile.isVisible = true
+				val size = file?.Size
+
+				size?.let { showFileSize(it) }
+				myText.text = file?.Name
+				myText.setTextColor(Colors.linkColor())
+			}
+		}
+	}
+
+	private fun ItemMyMessageBinding.showFileStateMsg(
+		@StringRes strRes: Int,
+		@ColorRes colorRes: Int,
+		text: Text?
+	) {
+		myImageFrame.visibility = View.GONE
+		myUpload.visibility = View.GONE
+		clTextsMy.visibility = View.VISIBLE
+		myText.visibility = View.VISIBLE
+		myText.text = root.context.getString(strRes)
+		myText.setTextColor(
+			ContextCompat.getColor(root.context, colorRes)
+		)
+		myText.applyIQStyles(text)
 	}
 }

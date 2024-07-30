@@ -44,4 +44,8 @@
     <string name="file_not_uploaded">Файл не загрузился</string>
     <string name="online">На связи</string>
     <string name="new_messages">Новые сообщения</string>
+    <string name="unsecure_file">Небезопасный файл</string>
+    <string name="file_sent_to_check">Файл отправлен на проверку</string>
+    <string name="file_on_checking">Файл на проверке</string>
+    <string name="error_on_checking">Ошибка проверки файла</string>
 </resources>

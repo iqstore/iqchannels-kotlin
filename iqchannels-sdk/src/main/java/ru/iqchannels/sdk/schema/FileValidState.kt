@@ -4,13 +4,13 @@ import com.google.gson.annotations.SerializedName
 
 enum class FileValidState {
 	@SerializedName("approved")
-	FileStateApproved,
+	Approved,
 	@SerializedName("rejected")
-	FileStateRejected,
+	Rejected,
 	@SerializedName("on_checking")
-	FileStateOnChecking,
+	OnChecking,
 	@SerializedName("sent_for_checking")
-	FileStateSentForChecking,
+	SentForChecking,
 	@SerializedName("check_error")
-	FileStateCheckError
+	CheckError
 }

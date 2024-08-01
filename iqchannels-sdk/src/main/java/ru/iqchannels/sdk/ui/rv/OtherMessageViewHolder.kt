@@ -8,6 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.LinearLayout
+import androidx.annotation.ColorRes
+import androidx.annotation.StringRes
 import androidx.constraintlayout.helper.widget.Flow
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -19,15 +21,19 @@ import java.text.DateFormat
 import java.text.DecimalFormat
 import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.applyIQStyles
+import ru.iqchannels.sdk.databinding.ItemMyMessageBinding
 import ru.iqchannels.sdk.databinding.ItemOtherMessageBinding
 import ru.iqchannels.sdk.schema.Action
 import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.schema.ChatPayloadType
+import ru.iqchannels.sdk.schema.FileValidState
 import ru.iqchannels.sdk.schema.RatingState
 import ru.iqchannels.sdk.schema.SingleChoice
+import ru.iqchannels.sdk.schema.UploadedFile
 import ru.iqchannels.sdk.setBackgroundDrawable
 import ru.iqchannels.sdk.setBackgroundStyle
 import ru.iqchannels.sdk.styling.IQStyles
+import ru.iqchannels.sdk.styling.Text
 import ru.iqchannels.sdk.ui.ActionsAdapter
 import ru.iqchannels.sdk.ui.ButtonsAdapter
 import ru.iqchannels.sdk.ui.ChatMessagesAdapter
@@ -152,108 +158,32 @@ internal class OtherMessageViewHolder(
 			val file = message.File
 			val msgRating = message.Rating
 			if (file != null) {
-				val imageUrl = file.ImagePreviewUrl
-				if (imageUrl != null) {
-					val size = Utils.computeImageSizeFromFile(file, rootViewDimens)
-					val text = message.Text
-					if (!text.isNullOrEmpty()) {
-						clTexts.visibility = View.VISIBLE
-						clTexts.setBackgroundDrawable(
-							IQStyles.iqChannelsStyles?.messages?.backgroundOperator,
-							R.drawable.other_msg_reply_text_bg
-						)
-						otherText.visibility = View.VISIBLE
-						message.Text?.let {
-							markwon.setMarkdown(otherText, it)
-						}
-					} else {
-						otherText.visibility = View.GONE
-					}
-					otherImageFrame.visibility = View.VISIBLE
-
-					val withText = !text.isNullOrEmpty()
-					if (withText) {
-						otherImageFrame.setBackgroundDrawable(
-							IQStyles.iqChannelsStyles?.messages?.backgroundOperator,
-							R.drawable.other_msg_reply_bg
-						)
-					} else {
-						otherImageFrame.setBackgroundDrawable(
-							IQStyles.iqChannelsStyles?.messages?.backgroundOperator,
-							R.drawable.other_msg_bg
-						)
-					}
-
-					otherImageFrame.layoutParams.width = size[0]
-					otherImageFrame.layoutParams.height = size[1]
-					otherImageFrame.requestLayout()
-					val radius = UiUtils.toPx(12).toFloat()
-					Glide.with(otherImageFrame.context)
-						.load(imageUrl)
-						.transform(
-							CenterCrop(),
-							GranularRoundedCorners(
-								radius,
-								radius,
-								if (withText) 0f else radius,
-								if (withText) 0f else radius,
-							)
-						)
-						.into(otherImageSrc)
-					otherImageSrc.post {
-						val layoutParams: LinearLayout.LayoutParams = LinearLayout.LayoutParams(
-							otherImageFrame.width,
-							LinearLayout.LayoutParams.WRAP_CONTENT
-						)
-						layoutParams.setMargins(0, 0, UiUtils.toPx(40), 0)
-						clTexts.layoutParams = layoutParams
-					}
-				} else {
-					otherImageFrame.visibility = View.GONE
-					clTexts.visibility = View.VISIBLE
-
-					clTexts.setBackgroundDrawable(
-						IQStyles.iqChannelsStyles?.messages?.backgroundOperator,
-						R.drawable.other_msg_bg
+				when (message.File?.State) {
+					FileValidState.Rejected -> showFileStateMsg(
+						R.string.unsecure_file,
+						R.color.red,
+						IQStyles.iqChannelsStyles?.messages?.textFileStateRejectedOperator
 					)
 
-					tvOtherFileName.visibility = View.VISIBLE
-					ivFile.visibility = View.VISIBLE
-					tvOtherFileName.text = file.Name
-					if (file.Size > 0) {
-						tvOtherFileSize.visibility = View.VISIBLE
-						val sizeKb = (file.Size / 1024).toFloat()
-						var sizeMb = 0f
-						if (sizeKb > 1024) {
-							sizeMb = sizeKb / 1024
-						}
-						var strRes = 0
-						val fileSize: String
-						if (sizeMb > 0) {
-							strRes = R.string.file_size_mb_placeholder
-							val df = DecimalFormat("0.00")
-							fileSize = df.format(sizeMb.toDouble())
-						} else {
-							strRes = R.string.file_size_kb_placeholder
-							fileSize = sizeKb.toString()
-						}
-						tvOtherFileSize.text = root.resources.getString(
-							strRes,
-							fileSize
-						)
-					} else {
-						tvOtherFileSize.text = null
-					}
+					FileValidState.OnChecking -> showFileStateMsg(
+						R.string.file_on_checking,
+						R.color.blue,
+						IQStyles.iqChannelsStyles?.messages?.textFileStateOnCheckingOperator
+					)
 
-					val text = message.Text
-					if (!text.isNullOrEmpty()) {
-						otherText.visibility = View.VISIBLE
-						message.Text?.let {
-							markwon.setMarkdown(otherText, it)
-						}
-					}
+					FileValidState.SentForChecking -> showFileStateMsg(
+						R.string.file_sent_to_check,
+						R.color.blue,
+						IQStyles.iqChannelsStyles?.messages?.textFileStateSentForCheckingOperator
+					)
 
-//                holder.otherText.setText(makeFileLink(file));
+					FileValidState.CheckError -> showFileStateMsg(
+						R.string.error_on_checking,
+						R.color.red,
+						IQStyles.iqChannelsStyles?.messages?.textFileStateCheckErrorOperator
+					)
+
+					else -> showApprovedState(message, file, rootViewDimens, markwon)
 				}
 			} else if (msgRating != null) {
 				this.rating.root.visibility = View.VISIBLE
@@ -528,6 +458,134 @@ internal class OtherMessageViewHolder(
 		}
 
 		return value
+	}
+
+	private fun showApprovedState(
+		message: ChatMessage,
+		file: UploadedFile,
+		rootViewDimens: Pair<Int, Int>,
+		markwon: Markwon
+	) {
+		binding.apply {
+			val imageUrl = file.ImagePreviewUrl
+			if (imageUrl != null) {
+				val size = Utils.computeImageSizeFromFile(file, rootViewDimens)
+				val text = message.Text
+				if (!text.isNullOrEmpty()) {
+					clTexts.visibility = View.VISIBLE
+					clTexts.setBackgroundDrawable(
+						IQStyles.iqChannelsStyles?.messages?.backgroundOperator,
+						R.drawable.other_msg_reply_text_bg
+					)
+					otherText.visibility = View.VISIBLE
+					message.Text?.let {
+						markwon.setMarkdown(otherText, it)
+					}
+				} else {
+					otherText.visibility = View.GONE
+				}
+				otherImageFrame.visibility = View.VISIBLE
+
+				val withText = !text.isNullOrEmpty()
+				if (withText) {
+					otherImageFrame.setBackgroundDrawable(
+						IQStyles.iqChannelsStyles?.messages?.backgroundOperator,
+						R.drawable.other_msg_reply_bg
+					)
+				} else {
+					otherImageFrame.setBackgroundDrawable(
+						IQStyles.iqChannelsStyles?.messages?.backgroundOperator,
+						R.drawable.other_msg_bg
+					)
+				}
+
+				otherImageFrame.layoutParams.width = size[0]
+				otherImageFrame.layoutParams.height = size[1]
+				otherImageFrame.requestLayout()
+				val radius = UiUtils.toPx(12).toFloat()
+				Glide.with(otherImageFrame.context)
+					.load(imageUrl)
+					.transform(
+						CenterCrop(),
+						GranularRoundedCorners(
+							radius,
+							radius,
+							if (withText) 0f else radius,
+							if (withText) 0f else radius,
+						)
+					)
+					.into(otherImageSrc)
+				otherImageSrc.post {
+					val layoutParams: LinearLayout.LayoutParams = LinearLayout.LayoutParams(
+						otherImageFrame.width,
+						LinearLayout.LayoutParams.WRAP_CONTENT
+					)
+					layoutParams.setMargins(0, 0, UiUtils.toPx(40), 0)
+					clTexts.layoutParams = layoutParams
+				}
+			} else {
+				otherImageFrame.visibility = View.GONE
+				clTexts.visibility = View.VISIBLE
+
+				clTexts.setBackgroundDrawable(
+					IQStyles.iqChannelsStyles?.messages?.backgroundOperator,
+					R.drawable.other_msg_bg
+				)
+
+				tvOtherFileName.visibility = View.VISIBLE
+				ivFile.visibility = View.VISIBLE
+				tvOtherFileName.text = file.Name
+				if (file.Size > 0) {
+					tvOtherFileSize.visibility = View.VISIBLE
+					val sizeKb = (file.Size / 1024).toFloat()
+					var sizeMb = 0f
+					if (sizeKb > 1024) {
+						sizeMb = sizeKb / 1024
+					}
+					var strRes = 0
+					val fileSize: String
+					if (sizeMb > 0) {
+						strRes = R.string.file_size_mb_placeholder
+						val df = DecimalFormat("0.00")
+						fileSize = df.format(sizeMb.toDouble())
+					} else {
+						strRes = R.string.file_size_kb_placeholder
+						fileSize = sizeKb.toString()
+					}
+					tvOtherFileSize.text = root.resources.getString(
+						strRes,
+						fileSize
+					)
+				} else {
+					tvOtherFileSize.text = null
+				}
+
+				val text = message.Text
+				if (!text.isNullOrEmpty()) {
+					otherText.visibility = View.VISIBLE
+					message.Text?.let {
+						markwon.setMarkdown(otherText, it)
+					}
+				}
+
+//                holder.otherText.setText(makeFileLink(file));
+			}
+		}
+	}
+
+	private fun ItemOtherMessageBinding.showFileStateMsg(
+		@StringRes strRes: Int,
+		@ColorRes colorRes: Int,
+		text: Text?
+	) {
+		otherImageFrame.visibility = View.GONE
+		clTexts.visibility = View.VISIBLE
+		otherText.visibility = View.VISIBLE
+		otherText.text = root.context.getString(strRes)
+		otherText.setTextColor(
+			ContextCompat.getColor(root.context, colorRes)
+		)
+		otherText.applyIQStyles(text)
 	}
 
 }

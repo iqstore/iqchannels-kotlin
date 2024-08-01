@@ -32,5 +32,13 @@ class MessagesStyles(
 	@SerializedName("text_file_state_sent_for_checking")
 	val textFileStateSentForChecking: Text?,
 	@SerializedName("text_file_state_check_error")
-	val textFileStateCheckError: Text?
+	val textFileStateCheckError: Text?,
+	@SerializedName("text_file_state_rejected_operator")
+	val textFileStateRejectedOperator: Text?,
+	@SerializedName("text_file_state_on_checking_operator")
+	val textFileStateOnCheckingOperator: Text?,
+	@SerializedName("text_file_state_sent_for_checking_operator")
+	val textFileStateSentForCheckingOperator: Text?,
+	@SerializedName("text_file_state_check_error_operator")
+	val textFileStateCheckErrorOperator: Text?
 )

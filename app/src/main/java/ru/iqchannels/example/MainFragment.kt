@@ -36,6 +36,7 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import ru.iqchannels.example.prefill.PreFillMsgFragment
 import ru.iqchannels.example.shortcuts.ShortCutsFragment
 import ru.iqchannels.example.styles.StylesEditFragment
 import ru.iqchannels.sdk.ui.theming.IQChannelsCompose
@@ -78,6 +79,18 @@ class MainFragment : Fragment() {
 					modifier = Modifier
 						.fillMaxWidth()
 						.clickable { openShortCuts() }
+						.padding(16.dp)
+				)
+				Divider(Modifier.fillMaxWidth())
+
+				Text(
+					text = "Предзаполненные сообщения",
+					textDecoration = TextDecoration.Underline,
+					color = Color.Blue,
+					fontSize = 20.sp,
+					modifier = Modifier
+						.fillMaxWidth()
+						.clickable { openPreFillMsg() }
 						.padding(16.dp)
 				)
 				Divider(Modifier.fillMaxWidth())
@@ -175,6 +188,13 @@ class MainFragment : Fragment() {
 	private fun openStylesEdit() {
 		parentFragmentManager.beginTransaction()
 			.replace(R.id.content, StylesEditFragment())
+			.addToBackStack(null)
+			.commit()
+	}
+
+	private fun openPreFillMsg() {
+		parentFragmentManager.beginTransaction()
+			.replace(R.id.content, PreFillMsgFragment())
 			.addToBackStack(null)
 			.commit()
 	}

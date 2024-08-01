@@ -22,6 +22,9 @@ class ChatViewModel : ViewModel() {
 	private val multipleFilesQueue: MutableList<Uri> = mutableListOf()
 	private val multipleTextsQueue: MutableList<String> = mutableListOf()
 
+	private var preFilledSendingStarted = true
+	private var lastTextFromQueueSent = false
+
 	fun getConfigs() {
 		viewModelScope.launch(Dispatchers.IO) {
 			try {
@@ -68,17 +71,24 @@ class ChatViewModel : ViewModel() {
 	fun sendMsgFromQueue(activity: Activity) {
 		when {
 			multipleTextsQueue.isNotEmpty() -> sendNextText()
-			multipleFilesQueue.isNotEmpty() -> sendNextFile(activity)
+			lastTextFromQueueSent -> {
+				lastTextFromQueueSent = false
+				sendNextFile(activity)
+			}
 		}
 	}
 
 	private fun sendNextText() {
-		runCatching { multipleTextsQueue.removeFirst() }
-			.getOrNull()
+		runCatching {
+			if (multipleTextsQueue.size == 1) {
+				lastTextFromQueueSent = true
+			}
+			multipleTextsQueue.removeFirst()
+		}.getOrNull()
 			?.let { IQChannels.send(it, null) }
 	}
 
-	private fun sendNextFile(activity: Activity) {
+	fun sendNextFile(activity: Activity) {
 		runCatching { multipleFilesQueue.removeFirst() }
 			.getOrNull()
 			?.let { sendFile(it, activity) }
@@ -101,6 +111,18 @@ class ChatViewModel : ViewModel() {
 
 		preFilledMessages.fileMsg?.let {
 			multipleFilesQueue.addAll(it)
+		}
+
+		preFilledSendingStarted = false
+	}
+
+	fun startSendPrefilled(activity: Activity) {
+		if (!preFilledSendingStarted) {
+			if (multipleTextsQueue.isEmpty()) {
+				lastTextFromQueueSent = true
+			}
+			sendMsgFromQueue(activity)
+			preFilledSendingStarted = true
 		}
 	}
 }

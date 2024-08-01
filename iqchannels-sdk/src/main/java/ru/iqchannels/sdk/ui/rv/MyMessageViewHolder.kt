@@ -225,7 +225,7 @@ internal class MyMessageViewHolder(
 	private fun ItemMyMessageBinding.showFileSize(size: Long) {
 		if (size != null && size > 0) {
 			tvMyFileSize.visibility = View.VISIBLE
-			val sizeKb = (size / 1024).toFloat()
+			val sizeKb = size.toFloat() / 1024
 			var sizeMb = 0f
 			if (sizeKb > 1024) {
 				sizeMb = sizeKb / 1024
@@ -238,7 +238,7 @@ internal class MyMessageViewHolder(
 				fileSize = df.format(sizeMb.toDouble())
 			} else {
 				strRes = R.string.file_size_kb_placeholder
-				fileSize = sizeKb.toString()
+				fileSize = String.format("%.2f", sizeKb)
 			}
 
 			tvMyFileSize.text = root.resources.getString(

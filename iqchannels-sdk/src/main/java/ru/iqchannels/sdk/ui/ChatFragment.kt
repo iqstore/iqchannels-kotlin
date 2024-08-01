@@ -91,6 +91,7 @@ import ru.iqchannels.sdk.schema.ActionType
 import ru.iqchannels.sdk.schema.ChatEvent
 import ru.iqchannels.sdk.schema.ChatException
 import ru.iqchannels.sdk.schema.ChatMessage
+import ru.iqchannels.sdk.schema.ChatPayloadType
 import ru.iqchannels.sdk.schema.ClientAuth
 import ru.iqchannels.sdk.schema.SingleChoice
 import ru.iqchannels.sdk.styling.IQChannelsStyles
@@ -808,7 +809,7 @@ class ChatFragment : Fragment() {
 		refresh?.isRefreshing = false
 		refresh?.isEnabled = true
 
-		viewModel.sendMsgFromQueue(requireActivity())
+		viewModel.startSendPrefilled(requireActivity())
 	}
 
 	private fun messagesException(e: Exception) {
@@ -862,7 +863,8 @@ class ChatFragment : Fragment() {
 		adapter?.updated(message)
 		maybeScrollToBottomOnNewMessage()
 
-		viewModel.sendMsgFromQueue(requireActivity())
+		Log.d("abctag", "messageUploaded")
+		viewModel.sendNextFile(requireActivity())
 	}
 
 	private fun messageCancelled(message: ChatMessage) {
@@ -895,6 +897,11 @@ class ChatFragment : Fragment() {
 		adapter?.updated(message)
 
 		checkException(message)
+
+		if (message.Payload == ChatPayloadType.TEXT) {
+			Log.d("abctag", "messageUpdated: ${message.Payload}")
+			viewModel.sendMsgFromQueue(requireActivity())
+		}
 	}
 
 	private fun checkException(message: ChatMessage) {
@@ -1313,7 +1320,7 @@ class ChatFragment : Fragment() {
 	private fun checkForUnreadMessages(messages: List<ChatMessage>): MutableList<ChatMessage>? {
 		var messagesMutable: MutableList<ChatMessage>? = null
 
-		messages.find { !it.Read && it.Text?.isNotBlank() == true }?.let { firstUnreadMsg ->
+		messages.find { !it.My && !it.Read && it.Text?.isNotBlank() == true }?.let { firstUnreadMsg ->
 			val index = messages.indexOf(firstUnreadMsg)
 			if (index == lastUnreadMsgIndex) {
 				return@let

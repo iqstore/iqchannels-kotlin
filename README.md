@@ -385,6 +385,62 @@ ChatFragment передает события чата наружу через Fr
         "dark": "#FFFFFF"
       },
       "text_size": 10
+    },
+    "text_file_state_rejected_operator": { // Текст файла от оператора при статусе rejected
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_file_state_on_checking_operator": { // Текст файла от оператора при статусе on_checking
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_file_state_sent_for_checking_operator": { // Текст файла от оператора при статусе sent_for_checking
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_file_state_check_error_operator": { // Текст файла от оператора при статусе check_error
+      "color": {check_error
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_file_state_rejected_client": { // Текст файла от клиента при статусе rejected
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_file_state_on_checking_client": { // Текст файла от клиента при статусе on_checking
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_file_state_sent_for_checking_client": { // Текст файла от клиента при статусе sent_for_checking
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_file_state_check_error_client": { // Текст файла от клиента при статусе check_error
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
     }
   },
   "answer": {                 //Ответ на сообщения:

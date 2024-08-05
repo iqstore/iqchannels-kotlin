@@ -25,14 +25,14 @@ class MessagesStyles(
 	val textTime: Text?,
 	@SerializedName("text_up")
 	val textUp: Text?,
-	@SerializedName("text_file_state_rejected")
-	val textFileStateRejected: Text?,
-	@SerializedName("text_file_state_on_checking")
-	val textFileStateOnChecking: Text?,
-	@SerializedName("text_file_state_sent_for_checking")
-	val textFileStateSentForChecking: Text?,
-	@SerializedName("text_file_state_check_error")
-	val textFileStateCheckError: Text?,
+	@SerializedName("text_file_state_rejected_client")
+	val textFileStateRejectedClient: Text?,
+	@SerializedName("text_file_state_on_checking_client")
+	val textFileStateOnCheckingClient: Text?,
+	@SerializedName("text_file_state_sent_for_checking_client")
+	val textFileStateSentForCheckingClient: Text?,
+	@SerializedName("text_file_state_check_error_client")
+	val textFileStateCheckErrorClient: Text?,
 	@SerializedName("text_file_state_rejected_operator")
 	val textFileStateRejectedOperator: Text?,
 	@SerializedName("text_file_state_on_checking_operator")

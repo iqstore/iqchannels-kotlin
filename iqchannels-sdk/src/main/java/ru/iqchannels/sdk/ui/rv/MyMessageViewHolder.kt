@@ -147,22 +147,22 @@ internal class MyMessageViewHolder(
 				FileValidState.Rejected -> showFileStateMsg(
 					R.string.unsecure_file,
 					R.color.red,
-					IQStyles.iqChannelsStyles?.messages?.textFileStateRejected
+					IQStyles.iqChannelsStyles?.messages?.textFileStateRejectedClient
 				)
 				FileValidState.OnChecking -> showFileStateMsg(
 					R.string.file_on_checking,
 					R.color.blue,
-					IQStyles.iqChannelsStyles?.messages?.textFileStateOnChecking
+					IQStyles.iqChannelsStyles?.messages?.textFileStateOnCheckingClient
 				)
 				FileValidState.SentForChecking -> showFileStateMsg(
 					R.string.file_sent_to_check,
 					R.color.blue,
-					IQStyles.iqChannelsStyles?.messages?.textFileStateSentForChecking
+					IQStyles.iqChannelsStyles?.messages?.textFileStateSentForCheckingClient
 				)
 				FileValidState.CheckError -> showFileStateMsg(
 					R.string.error_on_checking,
 					R.color.red,
-					IQStyles.iqChannelsStyles?.messages?.textFileStateCheckError
+					IQStyles.iqChannelsStyles?.messages?.textFileStateCheckErrorClient
 				)
 				else -> showApprovedFile(message, rootViewDimens)
 			}

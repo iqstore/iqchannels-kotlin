@@ -462,7 +462,11 @@ class ChatFragment : Fragment() {
 				it.setContent {
 					IQChannelsTheme {
 						NavBar(title = title) {
-							parentFragmentManager.popBackStack()
+							if (checkEvent(IQChatEvent.NavBarBackButtonPressed::class.java)) {
+								sendChatEvent(IQChatEvent.NavBarBackButtonPressed)
+							} else {
+								parentFragmentManager.popBackStack()
+							}
 						}
 					}
 				}
@@ -529,7 +533,11 @@ class ChatFragment : Fragment() {
 		})
 
 		btnGoBack?.setOnClickListener {
-			parentFragmentManager.popBackStack()
+			if (checkEvent(IQChatEvent.ErrorGoBackButtonPressed::class.java)) {
+				sendChatEvent(IQChatEvent.ErrorGoBackButtonPressed)
+			} else {
+				parentFragmentManager.popBackStack()
+			}
 		}
 	}
 

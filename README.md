@@ -312,7 +312,6 @@ ChatFragment передает события чата наружу через Fr
       "light": "#008080",
       "dark": "#008080"
     },
-    "icon_operator": "https://gas-kvas.com/grafic/uploads/posts/2024-01/gas-kvas-com-p-logotip-cheloveka-na-prozrachnom-fone-4.png",    //Иконка оператора - файл
     "system_text": {          //Системные сообщения
       "color": {
         "light": "#000000",

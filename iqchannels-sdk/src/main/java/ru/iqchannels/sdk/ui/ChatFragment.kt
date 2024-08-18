@@ -982,7 +982,12 @@ class ChatFragment : Fragment() {
 
 		moreMessagesRequest = null
 		refresh?.isRefreshing = false
-		showMessagesErrorAlert(e)
+
+		if (checkEvent(IQChatEvent.MessagesLoadMoreException::class.java)) {
+			sendChatEvent(IQChatEvent.MessagesLoadMoreException(e))
+		} else {
+			showMessagesErrorAlert(e)
+		}
 	}
 
 	private fun moreMessagesLoaded(moreMessages: List<ChatMessage>) {

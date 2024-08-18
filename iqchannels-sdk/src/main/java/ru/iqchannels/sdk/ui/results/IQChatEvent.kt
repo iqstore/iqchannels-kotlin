@@ -12,6 +12,11 @@ sealed class IQChatEvent : Parcelable {
 	data class MessagesLoadException(val e: Exception) : IQChatEvent()
 
 	/**
+	 * Sent when an error occurs while loading messages
+	 */
+	data class MessagesLoadMoreException(val e: Exception) : IQChatEvent()
+
+	/**
 	 * Sent when clicked on top nav bar (toolbar) back button pressed
 	 */
 	data object NavBarBackButtonPressed : IQChatEvent()

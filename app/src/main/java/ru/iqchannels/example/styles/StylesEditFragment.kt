@@ -35,7 +35,11 @@ class StylesEditFragment : Fragment() {
 
 		val binding = FragmentStylesEditBinding.inflate(inflater, container, false).apply {
 
-			objBody.setText(JSONObject(configBody).toString(4))
+			val json = runCatching {
+				JSONObject(configBody).toString(4)
+			}.getOrNull()
+
+			objBody.setText(json)
 
 			applyChanges.setOnClickListener {
 				objBody.text?.toString()?.let { it1 -> apply(it1) }

@@ -248,6 +248,18 @@ ChatFragment передает события чата наружу через Fr
     }
 ```
 
+# Предзаполненные сообщения
+ChatFragment принимает предзаполненная сообщения с текстами и файлами:
+
+```kotlin
+    val fragment = ChatFragment.newInstance(
+        preFilledMessages = PreFilledMessages(
+            textMsg = listOf(text),
+            fileMsg = selectedFiles.value
+        )
+    )
+```
+
 Чтобы включить кастомную обработку событий, необходимо при создании ChatFragment.newInstance(),
 передать на вход список событий, после чего события будут прилетать на выше описанный коллбэк setFragmentResultListener.
 Пример:

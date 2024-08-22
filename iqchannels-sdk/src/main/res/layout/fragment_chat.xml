@@ -30,7 +30,7 @@
             android:hint="@string/chat_login_hint"
             android:imeOptions="actionSend"
             android:inputType="textShortMessage|textCapSentences|textAutoCorrect|textAutoComplete|textMultiLine"
-            android:maxLength="4096"
+            android:maxLength="100"
             android:maxLines="1"/>
 
         <Button

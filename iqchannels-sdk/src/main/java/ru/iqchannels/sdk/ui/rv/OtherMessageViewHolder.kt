@@ -65,7 +65,7 @@ internal class OtherMessageViewHolder(
 			}
 
 			val groupStart = adapter.isGroupStart(bindingAdapterPosition)
-			val groupEnd = adapter.isGroupEnd(bindingAdapterPosition)
+//			val groupEnd = adapter.isGroupEnd(bindingAdapterPosition)
 			other.visibility = View.VISIBLE
 
 			otherImageSrc.setOnClickListener { adapter.onImageClicked(bindingAdapterPosition) }
@@ -102,12 +102,12 @@ internal class OtherMessageViewHolder(
 			}
 
 			// Time
-			if (groupEnd && message.Date != null) {
+//			if (groupEnd && message.Date != null) {
 				otherDate.text = message.Date?.let { timeFormat.format(it) } ?: ""
-				otherDate.visibility = View.VISIBLE
-			} else {
-				otherDate.visibility = View.GONE
-			}
+//				otherDate.visibility = View.VISIBLE
+//			} else {
+//				otherDate.visibility = View.GONE
+//			}
 
 			run {
 				IQStyles.iqChannelsStyles?.messages?.backgroundOperator

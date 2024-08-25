@@ -278,8 +278,7 @@ internal class MyMessageViewHolder(
 				myText.visibility = View.GONE
 
 				myImgFlags.isVisible = true
-//				myFlags.isVisible = false
-
+				myFlags.isVisible = false
 				myImgDate.text = message.Date?.let { timeFormat.format(it) } ?: ""
 				myImgDate.visibility = if (message.Date != null) View.VISIBLE else View.GONE
 				myImgReceived.visibility = if (message.Received) View.VISIBLE else View.GONE
@@ -303,6 +302,7 @@ internal class MyMessageViewHolder(
 						.into(myImageSrc)
 				}
 			} else {
+				myFlags.isVisible = true
 				myImageFrame.visibility = View.GONE
 				clTextsMy.visibility = View.VISIBLE
 				myText.visibility = View.GONE

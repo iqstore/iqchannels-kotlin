@@ -1286,12 +1286,15 @@ object IQChannels {
 
 	internal fun sendFile(file: File?, replyToMessageId: Long?) {
 		if (file == null) {
+			Log.d("prefilledmsg", "sendFile: file == null")
 			return
 		}
 		if (!file.exists()) {
+			Log.d("prefilledmsg", "sendFile: file doesn't exist")
 			return
 		}
 		if (auth == null) {
+			Log.d("prefilledmsg", "sendFile: auth == null")
 			return
 		}
 
@@ -1302,6 +1305,7 @@ object IQChannels {
 			for (listener in messageListeners) {
 				execute { listener.messageSent(message) }
 			}
+			Log.d("prefilledmsg", "start sendFile $message")
 			sendFile(message)
 		}
 	}

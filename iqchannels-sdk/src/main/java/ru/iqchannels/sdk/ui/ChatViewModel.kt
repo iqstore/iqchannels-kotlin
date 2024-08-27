@@ -39,7 +39,9 @@ class ChatViewModel : ViewModel() {
 	}
 
 	fun sendFile(uri: Uri, activity: Activity) {
-		val file = prepareFile(uri, activity)
+		val file = prepareFile(uri, activity)?.also {
+			Log.d("prefilledmsg", "prepareFile: $it")
+		}
 		IQChannels.sendFile(file, null)
 	}
 
@@ -64,7 +66,11 @@ class ChatViewModel : ViewModel() {
 			file
 		}
 	} catch (e: IOException) {
+		Log.d("prefilledmsg", "prepareFile IOexception: ${e.message}")
 		Log.e(ChatFragment.TAG, String.format("onGalleryResult: Failed to pick a file, e=%s", e))
+		null
+	} catch (e: Exception) {
+		Log.d("prefilledmsg", "prepareFile exception: ${e.message}")
 		null
 	}
 
@@ -85,13 +91,19 @@ class ChatViewModel : ViewModel() {
 			}
 			multipleTextsQueue.removeFirst()
 		}.getOrNull()
-			?.let { IQChannels.send(it, null) }
+			?.let {
+				Log.d("prefilledmsg", "sendNextText: $it")
+				IQChannels.send(it, null)
+			}
 	}
 
 	fun sendNextFile(activity: Activity) {
 		runCatching { multipleFilesQueue.removeFirst() }
 			.getOrNull()
-			?.let { sendFile(it, activity) }
+			?.let {
+				Log.d("prefilledmsg", "sendNextFile: $it")
+				sendFile(it, activity)
+			}
 	}
 
 	fun addMultipleFilesQueue(files: List<Uri>) {
@@ -105,11 +117,14 @@ class ChatViewModel : ViewModel() {
 	fun clearFilesQueue() = multipleFilesQueue.clear()
 
 	fun applyPrefilledMessages(preFilledMessages: PreFilledMessages) {
+		Log.d("prefilledmsg", "applyPrefilledMessages: $preFilledMessages")
 		preFilledMessages.textMsg?.let {
+			Log.d("prefilledmsg", "add textMsg size: ${it.size}")
 			multipleTextsQueue.addAll(it)
 		}
 
 		preFilledMessages.fileMsg?.let {
+			Log.d("prefilledmsg", "add fileMsg size: ${it.size}")
 			multipleFilesQueue.addAll(it)
 		}
 
@@ -118,6 +133,7 @@ class ChatViewModel : ViewModel() {
 
 	fun startSendPrefilled(activity: Activity) {
 		if (!preFilledSendingStarted) {
+			Log.d("prefilledmsg", "startSendPrefilled")
 			if (multipleTextsQueue.isEmpty()) {
 				lastTextFromQueueSent = true
 			}

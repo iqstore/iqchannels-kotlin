@@ -62,30 +62,30 @@ internal class MyMessageViewHolder(
 		myUpload.setOnClickListener { adapter.onUploadCancelClicked(bindingAdapterPosition) }
 
 		// Time
-		if (adapter.isGroupEnd(bindingAdapterPosition)) {
-			if (message.Sending) {
-				mySending.visibility = View.VISIBLE
-				myDate.visibility = View.INVISIBLE
-				myReceived.visibility = View.GONE
-				myRead.visibility = View.GONE
-				myDate.text = message.Date?.let { timeFormat.format(it) } ?: ""
-				myDate.visibility = if (message.Date != null) View.VISIBLE else View.GONE
-			} else {
-				mySending.visibility = View.GONE
-				myFlags.visibility = View.VISIBLE
-				myDate.text = message.Date?.let { timeFormat.format(it) } ?: ""
-				myDate.visibility = if (message.Date != null) View.VISIBLE else View.GONE
-				myReceived.visibility = if (message.Received) View.VISIBLE else View.GONE
-				myRead.visibility = if (message.Read) View.VISIBLE else View.GONE
-
-				val isRead = message.Read
-				myRead.isVisible = isRead
-				myReceived.isVisible = !isRead && message.Received == true
-			}
+//		if (adapter.isGroupEnd(bindingAdapterPosition)) {
+		if (message.Sending) {
+			mySending.visibility = View.VISIBLE
+			myDate.visibility = View.INVISIBLE
+			myReceived.visibility = View.GONE
+			myRead.visibility = View.GONE
+			myDate.text = message.Date?.let { timeFormat.format(it) } ?: ""
+//			myDate.visibility = if (message.Date != null) View.VISIBLE else View.GONE
 		} else {
 			mySending.visibility = View.GONE
-			myFlags.visibility = View.GONE
+//				myFlags.visibility = View.VISIBLE
+			myDate.text = message.Date?.let { timeFormat.format(it) } ?: ""
+			myDate.visibility = if (message.Date != null) View.VISIBLE else View.GONE
+			myReceived.visibility = if (message.Received) View.VISIBLE else View.GONE
+			myRead.visibility = if (message.Read) View.VISIBLE else View.GONE
+
+			val isRead = message.Read
+			myRead.isVisible = isRead
+			myReceived.isVisible = !isRead && message.Received == true
 		}
+//		} else {
+//			mySending.visibility = View.GONE
+//			myFlags.visibility = View.GONE
+//		}
 
 		run {
 			IQStyles.iqChannelsStyles?.messages?.backgroundClient
@@ -143,27 +143,31 @@ internal class MyMessageViewHolder(
 			myText.text = file.name
 			myText.setTextColor(Colors.linkColor())
 		} else if (message.File != null) {
-			when(message.File?.State) {
+			when (message.File?.State) {
 				FileValidState.Rejected -> showFileStateMsg(
 					R.string.unsecure_file,
 					R.color.red,
 					IQStyles.iqChannelsStyles?.messages?.textFileStateRejectedClient
 				)
+
 				FileValidState.OnChecking -> showFileStateMsg(
 					R.string.file_on_checking,
 					R.color.blue,
 					IQStyles.iqChannelsStyles?.messages?.textFileStateOnCheckingClient
 				)
+
 				FileValidState.SentForChecking -> showFileStateMsg(
 					R.string.file_sent_to_check,
 					R.color.blue,
 					IQStyles.iqChannelsStyles?.messages?.textFileStateSentForCheckingClient
 				)
+
 				FileValidState.CheckError -> showFileStateMsg(
 					R.string.error_on_checking,
 					R.color.red,
 					IQStyles.iqChannelsStyles?.messages?.textFileStateCheckErrorClient
 				)
+
 				else -> showApprovedFile(message, rootViewDimens)
 			}
 		} else {
@@ -275,7 +279,6 @@ internal class MyMessageViewHolder(
 
 				myImgFlags.isVisible = true
 				myFlags.isVisible = false
-
 				myImgDate.text = message.Date?.let { timeFormat.format(it) } ?: ""
 				myImgDate.visibility = if (message.Date != null) View.VISIBLE else View.GONE
 				myImgReceived.visibility = if (message.Received) View.VISIBLE else View.GONE
@@ -299,6 +302,7 @@ internal class MyMessageViewHolder(
 						.into(myImageSrc)
 				}
 			} else {
+				myFlags.isVisible = true
 				myImageFrame.visibility = View.GONE
 				clTextsMy.visibility = View.VISIBLE
 				myText.visibility = View.GONE

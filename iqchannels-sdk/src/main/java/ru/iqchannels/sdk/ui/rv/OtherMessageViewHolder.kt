@@ -12,11 +12,13 @@ import androidx.annotation.ColorRes
 import androidx.annotation.StringRes
 import androidx.constraintlayout.helper.widget.Flow
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.GranularRoundedCorners
 import io.noties.markwon.Markwon
+import ru.iqchannels.sdk.Log
 import java.text.DateFormat
 import java.text.DecimalFormat
 import ru.iqchannels.sdk.R
@@ -65,7 +67,7 @@ internal class OtherMessageViewHolder(
 			}
 
 			val groupStart = adapter.isGroupStart(bindingAdapterPosition)
-			val groupEnd = adapter.isGroupEnd(bindingAdapterPosition)
+//			val groupEnd = adapter.isGroupEnd(bindingAdapterPosition)
 			other.visibility = View.VISIBLE
 
 			otherImageSrc.setOnClickListener { adapter.onImageClicked(bindingAdapterPosition) }
@@ -102,12 +104,12 @@ internal class OtherMessageViewHolder(
 			}
 
 			// Time
-			if (groupEnd && message.Date != null) {
-				otherDate.text = message.Date?.let { timeFormat.format(it) } ?: ""
-				otherDate.visibility = View.VISIBLE
-			} else {
-				otherDate.visibility = View.GONE
-			}
+//			if (groupEnd && message.Date != null) {
+			otherDate.text = message.Date?.let { timeFormat.format(it) } ?: ""
+//				otherDate.visibility = View.VISIBLE
+//			} else {
+//				otherDate.visibility = View.GONE
+//			}
 
 			run {
 				IQStyles.iqChannelsStyles?.messages?.backgroundOperator
@@ -523,6 +525,17 @@ internal class OtherMessageViewHolder(
 					layoutParams.setMargins(0, 0, UiUtils.toPx(40), 0)
 					clTexts.layoutParams = layoutParams
 				}
+				val showImgFlags = message.Text == null || message?.Text == ""
+				if (showImgFlags) {
+					otherImgDate.text = message.Date?.let { timeFormat.format(it) } ?: ""
+					otherImgDate.visibility = if (message.Date != null) View.VISIBLE else View.GONE
+					otherImgReceived.visibility = if (message.Received) View.VISIBLE else View.GONE
+					otherImgRead.visibility = if (message.Read) View.VISIBLE else View.GONE
+					val isRead = message.Read
+					otherImgRead.isVisible = isRead
+					otherImgReceived.isVisible = !isRead && message.Received == true
+				}
+				otherImgFlags.isVisible = showImgFlags
 			} else {
 				otherImageFrame.visibility = View.GONE
 				clTexts.visibility = View.VISIBLE

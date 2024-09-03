@@ -912,10 +912,7 @@ class ChatFragment : Fragment() {
 
 		checkException(message)
 
-		if (message.Payload == ChatPayloadType.TEXT) {
-			Log.d("abctag", "messageUpdated: ${message.Payload}")
-			viewModel.sendMsgFromQueue(requireActivity())
-		}
+		viewModel.onMessageUpdated(message, requireActivity())
 	}
 
 	private fun checkException(message: ChatMessage) {

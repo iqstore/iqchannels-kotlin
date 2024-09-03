@@ -16,6 +16,7 @@ import ru.iqchannels.sdk.configs.GetConfigsInteractorImpl
 import ru.iqchannels.sdk.domain.models.PreFilledMessages
 import ru.iqchannels.sdk.http.retrofit.NetworkModule
 import ru.iqchannels.sdk.lib.InternalIO
+import ru.iqchannels.sdk.schema.ChatMessage
 
 class ChatViewModel : ViewModel() {
 
@@ -24,6 +25,12 @@ class ChatViewModel : ViewModel() {
 
 	private var preFilledSendingStarted = true
 	private var lastTextFromQueueSent = false
+
+	private var lastSentMsgFromQueue: ChatMessage? = null
+		set(value) {
+			Log.d("prefilledmsg", "set lastSentMsgFromQueue: $value")
+			field = value
+		}
 
 	fun getConfigs() {
 		viewModelScope.launch(Dispatchers.IO) {
@@ -38,11 +45,11 @@ class ChatViewModel : ViewModel() {
 		}
 	}
 
-	fun sendFile(uri: Uri, activity: Activity) {
+	fun sendFile(uri: Uri, activity: Activity): ChatMessage? {
 		val file = prepareFile(uri, activity)?.also {
 			Log.d("prefilledmsg", "prepareFile: $it")
 		}
-		IQChannels.sendFile(file, null)
+		return IQChannels.sendFile(file, null)
 	}
 
 	fun prepareFile(uri: Uri, activity: Activity) = try {
@@ -74,10 +81,20 @@ class ChatViewModel : ViewModel() {
 		null
 	}
 
-	fun sendMsgFromQueue(activity: Activity) {
+	fun onMessageUpdated(chatMessage: ChatMessage, activity: Activity) {
+		if (chatMessage.LocalId == lastSentMsgFromQueue?.LocalId) {
+			Log.d("prefilledmsg", "onMessageUpdated")
+			sendMsgFromQueue(activity)
+		}
+	}
+
+	private fun sendMsgFromQueue(activity: Activity) {
+		Log.d("prefilledmsg", "sendMsgFromQueue")
+		lastSentMsgFromQueue = null
 		when {
 			multipleTextsQueue.isNotEmpty() -> sendNextText()
 			lastTextFromQueueSent -> {
+				Log.d("prefilledmsg", "sendMsgFromQueue lastTextFromQueueSent sendNextFile")
 				lastTextFromQueueSent = false
 				sendNextFile(activity)
 			}
@@ -93,7 +110,7 @@ class ChatViewModel : ViewModel() {
 		}.getOrNull()
 			?.let {
 				Log.d("prefilledmsg", "sendNextText: $it")
-				IQChannels.send(it, null)
+				lastSentMsgFromQueue = IQChannels.send(it, null)
 			}
 	}
 
@@ -102,7 +119,7 @@ class ChatViewModel : ViewModel() {
 			.getOrNull()
 			?.let {
 				Log.d("prefilledmsg", "sendNextFile: $it")
-				sendFile(it, activity)
+				lastSentMsgFromQueue = sendFile(it, activity)
 			}
 	}
 

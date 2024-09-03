@@ -1207,15 +1207,15 @@ object IQChannels {
 	}
 
 	// Send
-	internal fun send(text: String?, replyToMessageId: Long?) {
+	internal fun send(text: String?, replyToMessageId: Long?): ChatMessage? {
 		if (text == null) {
-			return
+			return null
 		}
 		if (text.isEmpty()) {
-			return
+			return null
 		}
 		if (auth == null) {
-			return
+			return null
 		}
 
 		auth?.Client?.let { client ->
@@ -1233,7 +1233,11 @@ object IQChannels {
 			form.ChatType = chatType.name.lowercase()
 			Log.i(TAG, String.format("Enqueued an outgoing message, localId=%d", localId))
 			send()
+
+			return message
 		}
+
+		return null
 	}
 
 	fun handleVersion() {
@@ -1284,18 +1288,18 @@ object IQChannels {
 		}
 	}
 
-	internal fun sendFile(file: File?, replyToMessageId: Long?) {
+	internal fun sendFile(file: File?, replyToMessageId: Long?): ChatMessage? {
 		if (file == null) {
 			Log.d("prefilledmsg", "sendFile: file == null")
-			return
+			return null
 		}
 		if (!file.exists()) {
 			Log.d("prefilledmsg", "sendFile: file doesn't exist")
-			return
+			return null
 		}
 		if (auth == null) {
 			Log.d("prefilledmsg", "sendFile: auth == null")
-			return
+			return null
 		}
 
 		auth?.Client?.let { client ->
@@ -1307,7 +1311,11 @@ object IQChannels {
 			}
 			Log.d("prefilledmsg", "start sendFile $message")
 			sendFile(message)
+
+			return message
 		}
+
+		return null
 	}
 
 	internal fun sendFile(message: ChatMessage) {

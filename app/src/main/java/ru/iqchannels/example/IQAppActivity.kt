@@ -61,7 +61,7 @@ class IQAppActivity :
 		val navigationView = findViewById<NavigationView>(R.id.nav_view)
 		navigationView.setNavigationItemSelectedListener(this)
 		setupIQChannels()
-		setStylesPrefs()
+		//setStylesPrefs()
 	}
 
 	private fun setupIQChannels() {

@@ -347,7 +347,13 @@ class ChatFragment : Fragment() {
 		btnGoBack = view.findViewById(R.id.btn_go_back)
 
 		// Messages.
-		progress = view.findViewById<View>(R.id.messagesProgress) as ProgressBar
+		progress = (view.findViewById<View>(R.id.messagesProgress) as ProgressBar)
+		IQStyles.iqChannelsStyles?.chat?.chatLoader?.getColorInt(requireContext())?.let {
+			progress?.indeterminateDrawable?.colorFilter = PorterDuffColorFilter(it, PorterDuff.Mode.SRC_ATOP)
+			(view.findViewById<View>(R.id.authProgress) as ProgressBar).indeterminateDrawable?.colorFilter =
+				PorterDuffColorFilter(it, PorterDuff.Mode.SRC_ATOP)
+		}
+
 		refresh = view.findViewById<View>(R.id.messagesRefresh) as SwipeRefreshLayout
 		refresh?.isEnabled = false
 		refresh?.setOnRefreshListener { refreshMessages() }

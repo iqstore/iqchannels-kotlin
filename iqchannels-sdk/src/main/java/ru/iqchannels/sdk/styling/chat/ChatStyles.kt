@@ -10,6 +10,8 @@ class ChatStyles(
 	val dateText: Text?,
 	@SerializedName("chat_history")
 	val chatHistory: Color?,
+	@SerializedName("chat_loader")
+	val chatLoader: Color?,
 	@SerializedName("icon_operator")
 	val iconOperator: String?,
 	@SerializedName("system_text")

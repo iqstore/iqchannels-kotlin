@@ -1,5 +1,6 @@
 package ru.iqchannels.sdk.ui.rv
 
+import android.animation.Animator
 import android.annotation.SuppressLint
 import android.content.res.Resources
 import android.graphics.Canvas
@@ -9,6 +10,7 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import ru.iqchannels.sdk.Log
 import ru.iqchannels.sdk.R
 
 class SwipeController(private val swipeListener: SwipeListener) : ItemTouchHelper.Callback() {
@@ -19,7 +21,7 @@ class SwipeController(private val swipeListener: SwipeListener) : ItemTouchHelpe
 		recyclerView: RecyclerView,
 		viewHolder: RecyclerView.ViewHolder
 	): Int {
-		return makeMovementFlags(ItemTouchHelper.ACTION_STATE_IDLE, ItemTouchHelper.RIGHT)
+		return makeMovementFlags(ItemTouchHelper.ACTION_STATE_IDLE, ItemTouchHelper.LEFT)
 	}
 
 	override fun onMove(
@@ -49,12 +51,21 @@ class SwipeController(private val swipeListener: SwipeListener) : ItemTouchHelpe
 		actionState: Int,
 		isCurrentlyActive: Boolean
 	) {
+		val itemView = viewHolder.itemView
+		val itemWidth = itemView.width
+		val maxDx = itemWidth * 0.3f
+		val limitedDx = when {
+			dX < -maxDx -> -maxDx  // влево, ограничиваем до -50% ширины
+			dX > 0 -> 0f  // вправо, не разрешаем движение
+			else -> dX  // если в пределах порога, оставляем dX как есть
+		}
+
 		if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
 			recyclerView.setOnTouchListener { v: View?, event: MotionEvent ->
 				swipeBack =
 					event.action == MotionEvent.ACTION_CANCEL || event.action == MotionEvent.ACTION_UP
 				if (swipeBack) {
-					if (Math.abs(viewHolder.itemView.translationX) >= toPx(100)) {
+					if (Math.abs(viewHolder.itemView.translationX) >= maxDx) {
 						swipeListener.onSwiped(viewHolder.bindingAdapterPosition)
 					}
 				}
@@ -62,26 +73,35 @@ class SwipeController(private val swipeListener: SwipeListener) : ItemTouchHelpe
 			}
 		}
 
-		if (dX > 0) {
-			val editIcon = ContextCompat.getDrawable(viewHolder.itemView.context, R.drawable.reply_32)
+		// Позиционирование иконки для свайпа влево
+		if (limitedDx < 0) {
+			val editIcon =
+				ContextCompat.getDrawable(viewHolder.itemView.context, R.drawable.reply_32)
 			val intrinsicWidth = editIcon?.intrinsicWidth ?: 0
-			val intrinsicHeigh = editIcon?.intrinsicHeight ?: 0
+			val intrinsicHeight = editIcon?.intrinsicHeight ?: 0
 
-			// Calculate position of delete icon
-			val itemView = viewHolder.itemView
 			val itemHeight = itemView.bottom - itemView.top
-			val deleteIconTop = viewHolder.itemView.top + (itemHeight - intrinsicHeigh) / 2
-			val deleteIconMargin = (itemHeight - intrinsicHeigh) / 2
-			val deleteIconLeft = itemView.left + deleteIconMargin
-			val deleteIconBottom = deleteIconTop + intrinsicHeigh
-			val deleteIconRight = deleteIconLeft + intrinsicWidth
+			val iconTop = viewHolder.itemView.top + (itemHeight - intrinsicHeight) / 2
+			val iconMargin = (itemHeight - intrinsicHeight) / 2
+			val iconRight = itemView.right - iconMargin
+			val iconLeft = iconRight - intrinsicWidth
+			val iconBottom = iconTop + intrinsicHeight
 
-			// Draw the delete icon
-			editIcon?.setBounds(deleteIconLeft, deleteIconTop, deleteIconRight, deleteIconBottom)
+			editIcon?.setBounds(iconLeft, iconTop, iconRight, iconBottom)
 			editIcon?.draw(c)
 		}
 
-		super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+
+		// Передаем ограниченное значение limitedDx в super.onChildDraw
+		super.onChildDraw(
+			c,
+			recyclerView,
+			viewHolder,
+			limitedDx,
+			dY,
+			actionState,
+			isCurrentlyActive
+		)
 	}
 
 	private fun toPx(dp: Int): Float {

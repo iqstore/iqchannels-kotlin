@@ -10,6 +10,12 @@ import java.util.concurrent.CancellationException
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import ru.iqchannels.sdk.Log
 import ru.iqchannels.sdk.configs.GetConfigsInteractorImpl
 import ru.iqchannels.sdk.domain.models.ChatType
@@ -29,7 +35,10 @@ import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.schema.ChatMessageForm
 import ru.iqchannels.sdk.schema.ClientAuth
 import ru.iqchannels.sdk.schema.ClientTypingForm
+import ru.iqchannels.sdk.schema.FileImageSize
+import ru.iqchannels.sdk.schema.FileType
 import ru.iqchannels.sdk.schema.MaxIdQuery
+import ru.iqchannels.sdk.schema.RelationMap
 import ru.iqchannels.sdk.schema.UploadedFile
 import ru.iqchannels.sdk.schema.User
 
@@ -47,6 +56,14 @@ object IQChannels {
 	private var token: String? = null
 	private var credentials: String? = null
 	private var signupName: String? = null
+
+	private val excHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
+		Log.e(TAG, "IQChannels", throwable)
+	}
+
+	private val coroutineScope = CoroutineScope(
+		SupervisorJob() + Dispatchers.IO + CoroutineName("IQChannels-coroutine-worker") + excHandler
+	)
 
 	// Auth
 	var auth: ClientAuth? = null
@@ -1771,18 +1788,37 @@ object IQChannels {
 			val message = getMessageById(messageId) ?: return
 			val fileId = message.FileId ?: return
 
-			try {
-				val interactor = GetConfigsInteractorImpl(NetworkModule.provideGetConfigApiService())
-				val file = interactor.getFile(fileId)
-				Log.d(TAG, "success got file: ${file?.Id}")
-				message.File = file
+			coroutineScope.launch(Dispatchers.IO) {
+				try {
+					val interactor = GetConfigsInteractorImpl(NetworkModule.provideGetConfigApiService())
+					val file = interactor.getFile(fileId)
+					file?.let { prepareFile(it) }
+					Log.d(TAG, "success got file: ${file?.Id}")
+					message.File = file
 
-				for (listener in messageListeners) {
-					execute { listener.messageUpdated(message) }
+					for (listener in messageListeners) {
+						execute { listener.messageUpdated(message) }
+					}
+				} catch (e: Exception) {
+					Log.e(TAG, e.message, e)
 				}
-			} catch (e: Exception) {
-				Log.e(TAG, e.message, e)
 			}
 		}
+	}
+
+	fun prepareFile(file: UploadedFile) {
+		file.Url = file.Id?.let { fileUrl(it) }
+		if (file.Type == FileType.IMAGE) {
+			file.ImagePreviewUrl = fileImageUrl(file.Id, FileImageSize.PREVIEW)
+			file.imageUrl = fileImageUrl(file.Id, FileImageSize.ORIGINAL)
+		}
+	}
+
+	private fun fileUrl(fileId: String): String {
+		return String.format("%s/public/api/v1/files/get/%s", getBaseUrl(), fileId)
+	}
+
+	private fun fileImageUrl(fileId: String?, size: FileImageSize): String {
+		return String.format("%s/public/api/v1/files/image/%s?size=%s", getBaseUrl(), fileId, size)
 	}
 }

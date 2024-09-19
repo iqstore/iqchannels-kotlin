@@ -7,5 +7,5 @@ interface GetConfigsInteractor {
 
 	suspend fun getFileConfigs(): ChatFilesConfig?
 
-	fun getFile(fileId: String): UploadedFile?
+	suspend fun getFile(fileId: String): UploadedFile?
 }

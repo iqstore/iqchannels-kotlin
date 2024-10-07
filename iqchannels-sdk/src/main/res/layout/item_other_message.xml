@@ -250,6 +250,12 @@
                 android:layout_width="wrap_content"
                 android:layout_marginRight="20dp" />
 
+            <include layout="@layout/chat_rating_poll"
+                android:id="@+id/ratingPoll"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_marginRight="20dp" />
+
         </LinearLayout>
     </LinearLayout>
 

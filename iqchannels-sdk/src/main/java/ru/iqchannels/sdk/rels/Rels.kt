@@ -11,6 +11,7 @@ import ru.iqchannels.sdk.schema.Client
 import ru.iqchannels.sdk.schema.ClientAuth
 import ru.iqchannels.sdk.schema.FileImageSize
 import ru.iqchannels.sdk.schema.FileType
+import ru.iqchannels.sdk.schema.RatingPoll
 import ru.iqchannels.sdk.schema.RelationMap
 import ru.iqchannels.sdk.schema.Relations
 import ru.iqchannels.sdk.schema.UploadedFile
@@ -63,6 +64,12 @@ class Rels(address: String) {
 			}
 		}
 
+		rels.RatingPolls?.let {
+			for (poll in it) {
+				map.RatingPolls[poll.Id] = poll
+			}
+		}
+
 		chatMessages(map.ChatMessages.values, map)
 		clients(map.Clients.values, map)
 		files(map.Files.values, map)
@@ -95,6 +102,10 @@ class Rels(address: String) {
 		}
 		if (message.RatingId != null) {
 			message.Rating = map.Ratings[message.RatingId]
+			var rating = message.Rating
+			if (rating?.RatingPollId != null) {
+				rating.RatingPoll = map.RatingPolls[rating.RatingPollId]
+			}
 		}
 		if (message.CreatedAt > 0) {
 			message.Date = Date(message.CreatedAt)

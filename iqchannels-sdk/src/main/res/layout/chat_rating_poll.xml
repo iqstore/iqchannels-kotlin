@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/other_msg_bg"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:paddingLeft="16dp"
+    android:paddingTop="8dp"
+    android:paddingRight="16dp"
+    android:paddingBottom="10dp">
+
+    <!-- Вопрос Да/Нет -->
+    <LinearLayout
+        android:id="@+id/pollOffer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/questionText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:gravity="center"
+            android:text="Желаете пройти опрос?"
+            android:textColor="#000"
+            android:textSize="18sp" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/buttonNo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="?android:attr/selectableItemBackground"
+                android:paddingHorizontal="20dp"
+                android:text="Нет"
+                android:textColor="#00a0e0"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/buttonYes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:background="?android:attr/selectableItemBackground"
+                android:paddingHorizontal="20dp"
+                android:text="Да"
+                android:textColor="#00a0e0"
+                android:textSize="16sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Вопрос с выбором из списка -->
+    <LinearLayout
+        android:id="@+id/pollQuestionOneOfList"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/singleChoiceQuestion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:gravity="center"
+            android:text="One of list"
+            android:textColor="#000"
+            android:textSize="18sp" />
+
+        <RadioGroup
+            android:id="@+id/radioGroup"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <RadioButton
+                android:id="@+id/option1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:buttonTint="#00a0e0"
+                android:text="Option 1"
+                android:textColor="#00a0e0" />
+
+            <RadioButton
+                android:id="@+id/option2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:buttonTint="#00a0e0"
+                android:text="Option 2"
+                android:textColor="#00a0e0" />
+
+            <RadioButton
+                android:id="@+id/option3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:buttonTint="#00a0e0"
+                android:text="Option 3"
+                android:textColor="#00a0e0" />
+        </RadioGroup>
+    </LinearLayout>
+
+    <!-- Вопрос Да/Нет (FCR) -->
+    <LinearLayout
+        android:id="@+id/pollQuestionFcr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/yesNoQuestion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:gravity="center"
+            android:text="FCR"
+            android:textColor="#000"
+            android:textSize="18sp" />
+
+        <LinearLayout
+            android:id="@+id/pollQuestionFcrContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Вопрос с вводом текста (Input) -->
+    <LinearLayout
+        android:id="@+id/pollQuestionInput"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/inputQuestion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:gravity="center"
+            android:text="Input"
+            android:textColor="#000"
+            android:textSize="18sp" />
+
+        <EditText
+            android:id="@+id/editTextAnswer"
+            android:layout_width="250dp"
+            android:layout_height="100dp"
+            android:background="#fff"
+            android:gravity="start"
+            android:hint="Ваш ответ"
+            android:padding="8dp"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <!-- Оценка звездами (Stars) -->
+    <LinearLayout
+        android:id="@+id/pollQuestionStars"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/starRatingQuestion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:gravity="center"
+            android:text="Stars"
+            android:textColor="#000"
+            android:textSize="18sp" />
+
+        <LinearLayout
+            android:id="@+id/pollRatingRates"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/pollRatingRate1"
+                android:layout_width="@dimen/rating_button_size"
+                android:layout_height="@dimen/rating_button_size"
+                android:layout_marginRight="10dp"
+                android:background="@null"
+                android:scaleType="centerCrop"
+                android:src="@drawable/star_empty"
+                tools:ignore="ContentDescription" />
+
+            <ImageButton
+                android:id="@+id/pollRatingRate2"
+                android:layout_width="@dimen/rating_button_size"
+                android:layout_height="@dimen/rating_button_size"
+                android:layout_marginRight="10dp"
+                android:background="@null"
+                android:scaleType="centerCrop"
+                android:src="@drawable/star_empty"
+                tools:ignore="ContentDescription" />
+
+            <ImageButton
+                android:id="@+id/pollRatingRate3"
+                android:layout_width="@dimen/rating_button_size"
+                android:layout_height="@dimen/rating_button_size"
+                android:layout_marginRight="10dp"
+                android:background="@null"
+                android:scaleType="centerCrop"
+                android:src="@drawable/star_empty"
+                tools:ignore="ContentDescription" />
+
+            <ImageButton
+                android:id="@+id/pollRatingRate4"
+                android:layout_width="@dimen/rating_button_size"
+                android:layout_height="@dimen/rating_button_size"
+                android:layout_marginRight="10dp"
+                android:background="@null"
+                android:scaleType="centerCrop"
+                android:src="@drawable/star_empty"
+                tools:ignore="ContentDescription" />
+
+            <ImageButton
+                android:id="@+id/pollRatingRate5"
+                android:layout_width="@dimen/rating_button_size"
+                android:layout_height="@dimen/rating_button_size"
+                android:layout_marginRight="5dp"
+                android:background="@null"
+                android:scaleType="centerCrop"
+                android:src="@drawable/star_empty"
+                tools:ignore="ContentDescription" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Шкала от 0 до 10 (Scale) -->
+    <LinearLayout
+        android:id="@+id/poll_question_scale_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/scaleQuestion"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:gravity="center"
+            android:text="Scale"
+            android:textColor="#000"
+            android:textSize="18sp" />
+
+        <LinearLayout
+            android:id="@+id/poll_question_scale"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:gravity="center"
+            android:orientation="horizontal" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/scaleMinLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Very bad"
+                android:textColor="#000"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/scaleMaxLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="200dp"
+                android:text="Excellent"
+                android:textColor="#000"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/submitButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:paddingVertical="10dp"
+        android:paddingHorizontal="15dp"
+        android:text="Отправить"
+        android:textColor="@color/light_text_color"
+        android:background="@drawable/bg_button_rate"
+        android:backgroundTint="@color/bg_btn_rate" />
+
+    <include
+        android:id="@+id/thanksFeedbackLayout"
+        layout="@layout/thank_you_feedback"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+</LinearLayout>

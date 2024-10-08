@@ -7,7 +7,6 @@ import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import ru.iqchannels.sdk.Log
 import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.schema.PollOptionType
 import ru.iqchannels.sdk.schema.Rating
@@ -31,6 +30,7 @@ internal class RatingPollViewHolder(
 	private var textWatcher: TextWatcher? = null
 
 	fun bindPoll(ratingPoll: RatingPoll, rating: Rating) {
+		binding.editTextAnswer.setBackgroundResource(R.drawable.bg_rating_poll_rounded_edit_text)
 		this.rating = rating
 		this.poll = ratingPoll
 		if (ratingPoll.ShowOffer) {
@@ -46,7 +46,6 @@ internal class RatingPollViewHolder(
 		hideAllQuestionLayouts()
 
 		binding.buttonYes.setOnClickListener {
-			binding.pollOffer.visibility = View.GONE
 			renderCurrentQuestion()
 		}
 
@@ -56,7 +55,9 @@ internal class RatingPollViewHolder(
 	}
 
 	private fun renderCurrentQuestion() {
+		binding.pollOffer.visibility = View.GONE
 		binding.submitButton.visibility = View.VISIBLE
+		binding.submitButton.isEnabled = false
 		poll.Questions?.let {
 			if (currentQuestionIndex < it.size) {
 				val question = it[currentQuestionIndex]
@@ -122,24 +123,24 @@ internal class RatingPollViewHolder(
 		question.Answers?.forEach { answer ->
 			val button = Button(binding.root.context).apply {
 				text = answer.Text
-				setBackgroundColor(Color.LTGRAY)
+				setBackgroundResource(R.drawable.bg_rating_poll_rounded_button)
 				setTextColor(Color.BLACK)
 
 				layoutParams = LinearLayout.LayoutParams(
 					LinearLayout.LayoutParams.MATCH_PARENT,
 					LinearLayout.LayoutParams.WRAP_CONTENT
 				).apply {
-					setMargins(0, 16, 0, 16)
+					setMargins(0, 10, 0, 10)
 				}
 
 				setOnClickListener {
 					savePollResult(question.Id, PollOptionType.ONE_OF_LIST, null, answer.Id)
 
-					setBackgroundColor(Color.RED)
+					setBackgroundResource(R.drawable.bg_rating_poll_rounded_button_active)
 					setTextColor(Color.WHITE)
 
 					selectedButton?.let { btn ->
-						btn.setBackgroundColor(Color.LTGRAY)
+						btn.setBackgroundResource(R.drawable.bg_rating_poll_rounded_button)
 						btn.setTextColor(Color.BLACK)
 					}
 
@@ -163,14 +164,14 @@ internal class RatingPollViewHolder(
 		question.Answers?.forEach { answer ->
 			val button = Button(binding.root.context).apply {
 				text = answer.Text
-				setBackgroundColor(Color.LTGRAY)
+				setBackgroundResource(R.drawable.bg_rating_poll_rounded_button)
 				setTextColor(Color.BLACK)
 
 				layoutParams = LinearLayout.LayoutParams(
 					LinearLayout.LayoutParams.MATCH_PARENT,
 					LinearLayout.LayoutParams.WRAP_CONTENT
 				).apply {
-					setMargins(0, 16, 0, 16)
+					setMargins(15, 0, 15, 0)
 				}
 
 				setOnClickListener {
@@ -184,11 +185,11 @@ internal class RatingPollViewHolder(
 						answer.FCR
 					)
 
-					setBackgroundColor(Color.RED)
+					setBackgroundResource(R.drawable.bg_rating_poll_rounded_button_active)
 					setTextColor(Color.WHITE)
 
 					selectedButton?.let { btn ->
-						btn.setBackgroundColor(Color.LTGRAY)
+						btn.setBackgroundResource(R.drawable.bg_rating_poll_rounded_button)
 						btn.setTextColor(Color.BLACK)
 					}
 
@@ -276,7 +277,7 @@ internal class RatingPollViewHolder(
 		for (i in fromValue..toValue) {
 			val button = Button(binding.root.context).apply {
 				text = i.toString()
-				setBackgroundColor(Color.LTGRAY)
+				setBackgroundResource(R.drawable.bg_rating_poll_scale_button)
 				setTextColor(Color.BLACK)
 				setOnClickListener {
 					savePollResult(
@@ -284,10 +285,10 @@ internal class RatingPollViewHolder(
 						PollOptionType.SCALE,
 						null, null, null, i,
 					)
-					setBackgroundColor(Color.RED)
+					setBackgroundResource(R.drawable.bg_rating_poll_scale_button_active)
 					setTextColor(Color.WHITE)
 					selectedButton?.let { btn ->
-						btn.setBackgroundColor(Color.LTGRAY)
+						btn.setBackgroundResource(R.drawable.bg_rating_poll_scale_button)
 						btn.setTextColor(Color.BLACK)
 					}
 					selectedButton = this
@@ -296,6 +297,7 @@ internal class RatingPollViewHolder(
 					0,
 					LinearLayout.LayoutParams.WRAP_CONTENT
 				).apply {
+					setMargins(8, 0, 8, 0)
 					weight = 1f
 				}
 			}
@@ -324,6 +326,7 @@ internal class RatingPollViewHolder(
 			scaleValue,
 			fcr,
 		)
+		binding.submitButton.isEnabled = true
 	}
 
 	private fun submitPoll() {
@@ -350,16 +353,20 @@ internal class RatingPollViewHolder(
 			binding.submitButton.visibility = View.GONE
 			showThanksFeedback()
 			binding.root.postDelayed({
-				binding.thanksFeedbackLayout.root.visibility = View.GONE
-				binding.root.visibility = View.GONE
-				rating.State = RatingState.FINISHED
+				hidePoll()
 			}, 2000)
 		} else {
 			binding.root.post {
-				binding.root.visibility = View.GONE
-				rating.State = RatingState.FINISHED
+				hidePoll()
 			}
 		}
+	}
+
+	private fun hidePoll() {
+		binding.thanksFeedbackLayout.root.visibility = View.GONE
+		binding.root.visibility = View.GONE
+		rating.State = RatingState.FINISHED
+		listener?.onRatingPollFinished()
 	}
 
 	private fun showThanksFeedback() {

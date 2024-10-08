@@ -2,19 +2,20 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
+    android:minWidth="300dp"
     android:layout_height="wrap_content"
     android:background="@drawable/other_msg_bg"
     android:gravity="center"
     android:orientation="vertical"
     android:paddingLeft="16dp"
-    android:paddingTop="8dp"
+    android:paddingTop="16dp"
     android:paddingRight="16dp"
     android:paddingBottom="10dp">
 
     <!-- Вопрос Да/Нет -->
     <LinearLayout
         android:id="@+id/pollOffer"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:orientation="vertical">
@@ -30,7 +31,7 @@
             android:textSize="18sp" />
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="horizontal">
@@ -61,7 +62,7 @@
     <!-- Вопрос с выбором из списка -->
     <LinearLayout
         android:id="@+id/pollQuestionOneOfList"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:gravity="center_horizontal"
@@ -79,7 +80,7 @@
 
         <RadioGroup
             android:id="@+id/radioGroup"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="vertical">
@@ -113,7 +114,7 @@
     <!-- Вопрос Да/Нет (FCR) -->
     <LinearLayout
         android:id="@+id/pollQuestionFcr"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:gravity="center_horizontal"
@@ -142,7 +143,7 @@
     <!-- Вопрос с вводом текста (Input) -->
     <LinearLayout
         android:id="@+id/pollQuestionInput"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:gravity="center_horizontal"
@@ -160,9 +161,10 @@
 
         <EditText
             android:id="@+id/editTextAnswer"
-            android:layout_width="250dp"
+            android:layout_width="match_parent"
             android:layout_height="100dp"
             android:background="#fff"
+            android:radius="16dp"
             android:gravity="start"
             android:hint="Ваш ответ"
             android:padding="8dp"
@@ -172,7 +174,7 @@
     <!-- Оценка звездами (Stars) -->
     <LinearLayout
         android:id="@+id/pollQuestionStars"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:gravity="center_horizontal"
@@ -251,7 +253,7 @@
     <!-- Шкала от 0 до 10 (Scale) -->
     <LinearLayout
         android:id="@+id/poll_question_scale_container"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:gravity="center_horizontal"
@@ -271,7 +273,7 @@
             android:id="@+id/poll_question_scale"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="4dp"
             android:gravity="center"
             android:orientation="horizontal" />
 
@@ -302,11 +304,11 @@
 
     <Button
         android:id="@+id/submitButton"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:paddingVertical="10dp"
-        android:paddingHorizontal="15dp"
+        android:paddingHorizontal="25dp"
         android:text="Отправить"
         android:textColor="@color/light_text_color"
         android:background="@drawable/bg_button_rate"

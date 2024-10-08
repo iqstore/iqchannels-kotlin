@@ -18,7 +18,6 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.GranularRoundedCorners
 import io.noties.markwon.Markwon
-import ru.iqchannels.sdk.Log
 import java.text.DateFormat
 import java.text.DecimalFormat
 import ru.iqchannels.sdk.R
@@ -52,6 +51,7 @@ interface RatingPollListener {
 		pollId: Long,
 		callback: HttpCallback<Void>
 	)
+	fun onRatingPollFinished()
 }
 
 internal class OtherMessageViewHolder(
@@ -200,6 +200,7 @@ internal class OtherMessageViewHolder(
 					else -> showApprovedState(message, file, rootViewDimens, markwon)
 				}
 			} else if (msgRating != null) {
+				if (msgRating.State == RatingState.FINISHED) binding.root.visibility = View.GONE
 				if (msgRating.State == RatingState.POLL && msgRating.RatingPoll != null) {
 					showRatingPoll(msgRating, ratingPoll)
 				} else {
@@ -373,6 +374,10 @@ internal class OtherMessageViewHolder(
 			pollId,
 			callback
 		)
+	}
+
+	override fun onRatingPollFinished() {
+		binding.root.visibility = View.GONE
 	}
 
 	private fun getRateButtonValue(view: View): Int {

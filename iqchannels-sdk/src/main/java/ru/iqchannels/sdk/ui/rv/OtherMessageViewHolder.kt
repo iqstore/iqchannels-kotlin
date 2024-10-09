@@ -200,7 +200,6 @@ internal class OtherMessageViewHolder(
 					else -> showApprovedState(message, file, rootViewDimens, markwon)
 				}
 			} else if (msgRating != null) {
-				if (msgRating.State == RatingState.FINISHED) binding.root.visibility = View.GONE
 				if (msgRating.State == RatingState.POLL && msgRating.RatingPoll != null) {
 					showRatingPoll(msgRating, ratingPoll)
 				} else {
@@ -411,9 +410,14 @@ internal class OtherMessageViewHolder(
 		msgRating: Rating,
 		ratingPollBinding: ru.iqchannels.sdk.databinding.ChatRatingPollBinding,
 	) = with(binding) {
+		IQStyles.iqChannelsStyles?.messages?.backgroundOperator
+			?.let {
+				rating.root.setBackgroundDrawable(it, R.drawable.other_msg_rating_poll_bg)
+			}
 		val poll = msgRating.RatingPoll
 		val pollViewHolder = RatingPollViewHolder(ratingPollBinding)
-
+		binding.otherAvatar.visibility = View.GONE
+		binding.date.visibility = View.GONE
 		pollViewHolder.bindPoll(poll!!, msgRating)
 		pollViewHolder.setRatingPollListener(this@OtherMessageViewHolder)
 		ratingPoll.root.visibility = View.VISIBLE

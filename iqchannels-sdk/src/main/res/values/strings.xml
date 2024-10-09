@@ -48,4 +48,7 @@
     <string name="file_sent_to_check">Файл отправлен на проверку</string>
     <string name="file_on_checking">Файл на проверке</string>
     <string name="error_on_checking">Ошибка проверки файла</string>
+    <string name="rating_poll_edit_text_placeholder">Ваш ответ</string>
+    <string name="rating_poll_show_offer_text">Желаете пройти опрос?</string>
+    <string name="rating_poll_submit">Отправить</string>
 </resources>

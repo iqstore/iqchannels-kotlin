@@ -6,6 +6,7 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
+import androidx.compose.ui.unit.dp
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.schema.PollOptionType
@@ -30,7 +31,6 @@ internal class RatingPollViewHolder(
 	private var textWatcher: TextWatcher? = null
 
 	fun bindPoll(ratingPoll: RatingPoll, rating: Rating) {
-		binding.editTextAnswer.setBackgroundResource(R.drawable.bg_rating_poll_rounded_edit_text)
 		this.rating = rating
 		this.poll = ratingPoll
 		if (ratingPoll.ShowOffer) {
@@ -278,6 +278,7 @@ internal class RatingPollViewHolder(
 			val button = Button(binding.root.context).apply {
 				text = i.toString()
 				setBackgroundResource(R.drawable.bg_rating_poll_scale_button)
+				includeFontPadding = false
 				setTextColor(Color.BLACK)
 				setOnClickListener {
 					savePollResult(
@@ -295,7 +296,7 @@ internal class RatingPollViewHolder(
 				}
 				layoutParams = LinearLayout.LayoutParams(
 					0,
-					LinearLayout.LayoutParams.WRAP_CONTENT
+					100
 				).apply {
 					setMargins(8, 0, 8, 0)
 					weight = 1f

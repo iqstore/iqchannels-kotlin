@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
-    android:minWidth="300dp"
+    android:minWidth="400dp"
     android:layout_height="wrap_content"
     android:background="@drawable/other_msg_bg"
     android:gravity="center"
@@ -26,8 +26,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:gravity="center"
-            android:text="Желаете пройти опрос?"
-            android:textColor="#000"
+            android:text="@string/rating_poll_show_offer_text"
+            android:textColor="@color/dark_text_color"
             android:textSize="18sp" />
 
         <LinearLayout
@@ -40,10 +40,10 @@
                 android:id="@+id/buttonNo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="?android:attr/selectableItemBackground"
+                android:background="@drawable/bg_rating_poll_rounded_button"
                 android:paddingHorizontal="20dp"
                 android:text="Нет"
-                android:textColor="#00a0e0"
+                android:textColor="@color/dark_text_color"
                 android:textSize="16sp" />
 
             <Button
@@ -51,10 +51,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
-                android:background="?android:attr/selectableItemBackground"
+                android:background="@drawable/bg_button_rate"
                 android:paddingHorizontal="20dp"
                 android:text="Да"
-                android:textColor="#00a0e0"
+                android:textColor="@color/light_text_color"
                 android:textSize="16sp" />
         </LinearLayout>
     </LinearLayout>
@@ -64,7 +64,6 @@
         android:id="@+id/pollQuestionOneOfList"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
@@ -75,40 +74,16 @@
             android:layout_marginBottom="16dp"
             android:gravity="center"
             android:text="One of list"
-            android:textColor="#000"
+            android:textColor="@color/dark_text_color"
             android:textSize="18sp" />
 
-        <RadioGroup
+        <LinearLayout
             android:id="@+id/radioGroup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="vertical">
-
-            <RadioButton
-                android:id="@+id/option1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:buttonTint="#00a0e0"
-                android:text="Option 1"
-                android:textColor="#00a0e0" />
-
-            <RadioButton
-                android:id="@+id/option2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:buttonTint="#00a0e0"
-                android:text="Option 2"
-                android:textColor="#00a0e0" />
-
-            <RadioButton
-                android:id="@+id/option3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:buttonTint="#00a0e0"
-                android:text="Option 3"
-                android:textColor="#00a0e0" />
-        </RadioGroup>
+        </LinearLayout>
     </LinearLayout>
 
     <!-- Вопрос Да/Нет (FCR) -->
@@ -116,7 +91,6 @@
         android:id="@+id/pollQuestionFcr"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
@@ -127,7 +101,7 @@
             android:layout_marginBottom="16dp"
             android:gravity="center"
             android:text="FCR"
-            android:textColor="#000"
+            android:textColor="@color/dark_text_color"
             android:textSize="18sp" />
 
         <LinearLayout
@@ -145,7 +119,6 @@
         android:id="@+id/pollQuestionInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
@@ -156,17 +129,17 @@
             android:layout_marginBottom="16dp"
             android:gravity="center"
             android:text="Input"
-            android:textColor="#000"
+            android:textColor="@color/dark_text_color"
             android:textSize="18sp" />
 
         <EditText
             android:id="@+id/editTextAnswer"
             android:layout_width="match_parent"
             android:layout_height="100dp"
-            android:background="#fff"
+            android:background="@drawable/bg_rating_poll_rounded_edit_text"
             android:radius="16dp"
             android:gravity="start"
-            android:hint="Ваш ответ"
+            android:hint="@string/rating_poll_edit_text_placeholder"
             android:padding="8dp"
             android:textSize="16sp" />
     </LinearLayout>
@@ -176,7 +149,6 @@
         android:id="@+id/pollQuestionStars"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
@@ -187,7 +159,7 @@
             android:layout_marginBottom="16dp"
             android:gravity="center"
             android:text="Stars"
-            android:textColor="#000"
+            android:textColor="@color/dark_text_color"
             android:textSize="18sp" />
 
         <LinearLayout
@@ -255,7 +227,6 @@
         android:id="@+id/poll_question_scale_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
@@ -266,7 +237,7 @@
             android:layout_marginBottom="16dp"
             android:gravity="center"
             android:text="Scale"
-            android:textColor="#000"
+            android:textColor="@color/dark_text_color"
             android:textSize="18sp" />
 
         <LinearLayout
@@ -278,26 +249,28 @@
             android:orientation="horizontal" />
 
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/scaleMinLabel"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="Very bad"
-                android:textColor="#000"
+                android:textColor="@color/dark_text_color"
                 android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/scaleMaxLabel"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="200dp"
+                android:layout_weight="1"
+                android:gravity="end"
                 android:text="Excellent"
-                android:textColor="#000"
+                android:textColor="@color/dark_text_color"
                 android:textSize="14sp" />
         </LinearLayout>
     </LinearLayout>
@@ -309,7 +282,8 @@
         android:layout_marginTop="20dp"
         android:paddingVertical="10dp"
         android:paddingHorizontal="25dp"
-        android:text="Отправить"
+        android:text="@string/rating_poll_submit"
+        android:includeFontPadding="false"
         android:textColor="@color/light_text_color"
         android:background="@drawable/bg_button_rate"
         android:backgroundTint="@color/bg_btn_rate" />

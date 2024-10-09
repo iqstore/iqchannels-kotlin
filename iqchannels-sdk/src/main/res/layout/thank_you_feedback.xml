@@ -12,8 +12,7 @@
         android:id="@+id/thankYouIcon"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:src="@drawable/ic_thank_you_icon"
-        app:tint="#2D98F4" />
+        android:src="@drawable/ic_thank_you_icon" />
 
     <!-- Text of thanks feedback -->
     <TextView
@@ -21,7 +20,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Спасибо за обратную связь!"
-        android:textColor="#2D98F4"
+        android:textColor="@color/dark_text_color"
         android:textSize="18sp"
         android:layout_marginTop="5dp" />
 </LinearLayout>

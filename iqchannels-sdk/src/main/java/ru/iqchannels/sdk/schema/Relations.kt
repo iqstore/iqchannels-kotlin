@@ -6,4 +6,5 @@ class Relations {
 	var Files: List<UploadedFile>? = null
 	var Ratings: List<Rating>? = null
 	var Users: List<User>? = null
+	var RatingPolls: List<RatingPoll>? = null
 }

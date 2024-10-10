@@ -5,4 +5,6 @@ object RatingState {
 	const val PENDING = "pending"
 	const val IGNORED = "ignored"
 	const val RATED = "rated"
+	const val POLL = "poll"
+	const val FINISHED = "finished"
 }

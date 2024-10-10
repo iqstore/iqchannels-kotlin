@@ -24,6 +24,7 @@ class ChatViewModel : ViewModel() {
 	private val multipleTextsQueue: MutableList<String> = mutableListOf()
 
 	private var preFilledSendingStarted = true
+	private var preFilledSent = false
 	private var lastTextFromQueueSent = false
 
 	private var lastSentMsgFromQueue: ChatMessage? = null
@@ -99,6 +100,7 @@ class ChatViewModel : ViewModel() {
 				sendNextFile(activity)
 			}
 		}
+		preFilledSent = true
 	}
 
 	private fun sendNextText() {
@@ -135,6 +137,9 @@ class ChatViewModel : ViewModel() {
 
 	fun applyPrefilledMessages(preFilledMessages: PreFilledMessages) {
 		Log.d("prefilledmsg", "applyPrefilledMessages: $preFilledMessages")
+		if (preFilledSent) {
+			return
+		}
 		preFilledMessages.textMsg?.let {
 			Log.d("prefilledmsg", "add textMsg size: ${it.size}")
 			multipleTextsQueue.addAll(it)

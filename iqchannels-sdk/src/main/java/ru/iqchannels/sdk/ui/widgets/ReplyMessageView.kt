@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.schema.ChatMessage
+import ru.iqchannels.sdk.ui.UiUtils.getRatingScaleMaxValue
 
 class ReplyMessageView @JvmOverloads constructor(
 	context: Context,
@@ -58,7 +59,7 @@ class ReplyMessageView @JvmOverloads constructor(
 			tvText.text = message.Text
 		} else if (message.Rating != null) {
 			val value = message.Rating?.Value ?: 0
-			val text = resources.getString(R.string.chat_ratings_rated, value)
+			val text = resources.getString(R.string.chat_ratings_rated_custom, value, getRatingScaleMaxValue(message.Rating!!))
 			tvText.visibility = VISIBLE
 			tvText.text = text
 		} else {

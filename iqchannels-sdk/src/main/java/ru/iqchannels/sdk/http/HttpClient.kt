@@ -25,9 +25,12 @@ import ru.iqchannels.sdk.schema.ClientIntegrationAuthRequest
 import ru.iqchannels.sdk.schema.ClientSignupRequest
 import ru.iqchannels.sdk.schema.ClientTypingForm
 import ru.iqchannels.sdk.schema.FileToken
+import ru.iqchannels.sdk.schema.FinishPollRequest
 import ru.iqchannels.sdk.schema.MaxIdQuery
+import ru.iqchannels.sdk.schema.PollRequest
 import ru.iqchannels.sdk.schema.PushTokenInput
 import ru.iqchannels.sdk.schema.RateRequest
+import ru.iqchannels.sdk.schema.RatingPollClientAnswerInput
 import ru.iqchannels.sdk.schema.UploadedFile
 
 class HttpClient(
@@ -555,6 +558,52 @@ class HttpClient(
 	): HttpRequest {
 		val path = "/ratings/rate"
 		val req = RateRequest(ratingId, value)
+		return post(
+			path,
+			req,
+			null,
+			object : HttpCallback<ru.iqchannels.sdk.schema.Response<Any>> {
+				override fun onResult(result: ru.iqchannels.sdk.schema.Response<Any>?) {
+					callback.onResult(null)
+				}
+
+				override fun onException(exception: Exception) {
+					callback.onException(exception)
+				}
+			}
+		)
+	}
+
+	fun sendPoll(
+		answers: List<RatingPollClientAnswerInput>,
+		callback: HttpCallback<Void>,
+	): HttpRequest {
+		val path = "/ratings/send_poll"
+		val req = PollRequest(answers)
+		return post(
+			path,
+			req,
+			null,
+			object : HttpCallback<ru.iqchannels.sdk.schema.Response<Any>> {
+				override fun onResult(result: ru.iqchannels.sdk.schema.Response<Any>?) {
+					callback.onResult(null)
+				}
+
+				override fun onException(exception: Exception) {
+					callback.onException(exception)
+				}
+			}
+		)
+	}
+
+	fun finishPoll(
+		ratingId: Long,
+		pollId: Long,
+		rated: Boolean,
+		callback: HttpCallback<Void>,
+	): HttpRequest {
+		val path = "/ratings/finish_poll"
+		val req = FinishPollRequest(rated, pollId, ratingId)
 		return post(
 			path,
 			req,

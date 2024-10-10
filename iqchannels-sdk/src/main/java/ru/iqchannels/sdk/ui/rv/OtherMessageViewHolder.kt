@@ -28,6 +28,7 @@ import ru.iqchannels.sdk.schema.Action
 import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.schema.ChatPayloadType
 import ru.iqchannels.sdk.schema.FileValidState
+import ru.iqchannels.sdk.schema.PollOptionType
 import ru.iqchannels.sdk.schema.Rating
 import ru.iqchannels.sdk.schema.RatingPollClientAnswerInput
 import ru.iqchannels.sdk.schema.RatingState
@@ -42,7 +43,9 @@ import ru.iqchannels.sdk.ui.ButtonsAdapter
 import ru.iqchannels.sdk.ui.ChatMessagesAdapter
 import ru.iqchannels.sdk.ui.Colors
 import ru.iqchannels.sdk.ui.UiUtils
+import ru.iqchannels.sdk.ui.UiUtils.getRatingScaleMaxValue
 import ru.iqchannels.sdk.ui.widgets.DropDownButton
+import kotlin.math.max
 
 interface RatingPollListener {
 	fun onRatingPollAnswersSend(
@@ -433,9 +436,10 @@ internal class OtherMessageViewHolder(
 		rating.ratingRate.visibility = View.GONE
 		rating.ratingRated.visibility = View.GONE
 		rating.ratingRateText.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textOperator)
-		if ((msgRating.State == RatingState.PENDING && msgRating.Sent) || msgRating.State == RatingState.RATED) {
+		if ((msgRating.State == RatingState.PENDING && msgRating.Sent) || (msgRating.State == RatingState.RATED
+					|| (msgRating.State == RatingState.FINISHED && msgRating.Value != null))) {
 			val value = msgRating.Value ?: 0
-			val text = root.resources.getString(R.string.chat_ratings_rated, value)
+			val text = root.resources.getString(R.string.chat_ratings_rated_custom, value, getRatingScaleMaxValue(msgRating))
 			rating.ratingRated.visibility = View.VISIBLE
 			rating.ratingRated.text = text
 			rating.ratingRated.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textOperator)

@@ -125,6 +125,9 @@ internal class RatingPollViewHolder(
 				text = answer.Text
 				setBackgroundResource(R.drawable.bg_rating_poll_rounded_button)
 				setTextColor(Color.BLACK)
+				elevation = 0f
+				stateListAnimator = null
+				isAllCaps = false
 
 				layoutParams = LinearLayout.LayoutParams(
 					LinearLayout.LayoutParams.MATCH_PARENT,
@@ -166,6 +169,8 @@ internal class RatingPollViewHolder(
 				text = answer.Text
 				setBackgroundResource(R.drawable.bg_rating_poll_rounded_button)
 				setTextColor(Color.BLACK)
+				elevation = 0f
+				stateListAnimator = null
 
 				layoutParams = LinearLayout.LayoutParams(
 					LinearLayout.LayoutParams.MATCH_PARENT,
@@ -280,6 +285,8 @@ internal class RatingPollViewHolder(
 				setBackgroundResource(R.drawable.bg_rating_poll_scale_button)
 				includeFontPadding = false
 				setTextColor(Color.BLACK)
+				elevation = 0f
+				stateListAnimator = null
 				setOnClickListener {
 					savePollResult(
 						question.Id,

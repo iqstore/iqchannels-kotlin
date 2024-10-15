@@ -253,6 +253,13 @@
         </LinearLayout>
     </LinearLayout>
 
+    <include layout="@layout/chat_rating_poll"
+        android:id="@+id/ratingPoll"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_marginTop="10dp"
+        android:layout_gravity="center" />
+
     <!-- DropDown buttons -->
 
     <androidx.constraintlayout.widget.ConstraintLayout

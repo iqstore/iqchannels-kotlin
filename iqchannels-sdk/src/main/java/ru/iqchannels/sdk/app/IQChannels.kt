@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Handler
 import android.webkit.MimeTypeMap
+import com.google.gson.Gson
 import java.io.File
 import java.util.*
 import java.util.concurrent.CancellationException
@@ -38,6 +39,7 @@ import ru.iqchannels.sdk.schema.ClientTypingForm
 import ru.iqchannels.sdk.schema.FileImageSize
 import ru.iqchannels.sdk.schema.FileType
 import ru.iqchannels.sdk.schema.MaxIdQuery
+import ru.iqchannels.sdk.schema.RatingPollClientAnswerInput
 import ru.iqchannels.sdk.schema.RelationMap
 import ru.iqchannels.sdk.schema.UploadedFile
 import ru.iqchannels.sdk.schema.User
@@ -278,7 +280,7 @@ object IQChannels {
 		client?.let { client ->
 			authAttempt++
 			authRequest = if (credentials != null) {
-				config?.channel?.let {  channel ->
+				config?.channel?.let { channel ->
 					credentials?.let { credentials ->
 						client.clientsIntegrationAuth(credentials, channel, callback)
 					}
@@ -313,7 +315,7 @@ object IQChannels {
 		client?.let { client ->
 			authAttempt++
 			authRequest = if (credentials != null) {
-				config?.channel?.let {  channel ->
+				config?.channel?.let { channel ->
 					credentials?.let { credentials ->
 						client.clientsIntegrationAuth(credentials, channel, callback)
 					}
@@ -477,17 +479,18 @@ object IQChannels {
 		config?.let { config ->
 			val name = signupName
 			config.channel?.let { channel ->
-				authRequest = client?.clientsSignup(name, channel, object : HttpCallback<ClientAuth> {
-					override fun onResult(result: ClientAuth?) {
-						result?.let {
-							execute { signupComplete(result) }
+				authRequest =
+					client?.clientsSignup(name, channel, object : HttpCallback<ClientAuth> {
+						override fun onResult(result: ClientAuth?) {
+							result?.let {
+								execute { signupComplete(result) }
+							}
 						}
-					}
 
-					override fun onException(exception: Exception) {
-						execute { signupException(exception) }
-					}
-				})
+						override fun onException(exception: Exception) {
+							execute { signupException(exception) }
+						}
+					})
 			}
 
 
@@ -575,7 +578,7 @@ object IQChannels {
 		if (pushTokenRequest != null) {
 			return
 		}
-		
+
 		client?.let { client ->
 			config?.channel?.let { channel ->
 				pushToken?.let { pushToken ->
@@ -696,7 +699,10 @@ object IQChannels {
 							execute { unreadDisconnected(Exception("disconnected")) }
 						}
 					})
-				Log.i(TAG, String.format("Listening to unread notifications, attempt=%d", unreadAttempt))
+				Log.i(
+					TAG,
+					String.format("Listening to unread notifications, attempt=%d", unreadAttempt)
+				)
 			}
 		}
 	}
@@ -1379,7 +1385,10 @@ object IQChannels {
 							ChatMessageForm.file(localId, result?.Id, message.ReplyToMessageId)
 						form.ChatType = chatType.name.lowercase()
 						sendQueue.add(form)
-						Log.i(TAG, String.format("Enqueued an outgoing message, localId=%d", localId))
+						Log.i(
+							TAG,
+							String.format("Enqueued an outgoing message, localId=%d", localId)
+						)
 						send()
 						for (listener in messageListeners) {
 							execute { listener.messageUploaded(message) }
@@ -1543,6 +1552,32 @@ object IQChannels {
 		})
 
 		Log.i(TAG, String.format("Sent rating, ratingId=%d, value=%d", ratingId, value))
+	}
+
+	internal fun ratingsSendPoll(
+		answers: List<RatingPollClientAnswerInput>,
+		ratingId: Long,
+		pollId: Long,
+		callback: HttpCallback<Void>,
+	) {
+		if (auth == null) {
+			return
+		}
+
+		client?.sendPoll(answers, object : HttpCallback<Void> {
+			override fun onResult(result: Void?) {
+				client?.finishPoll(ratingId, pollId, true, callback)
+			}
+
+			override fun onException(exception: Exception) {
+				callback.onException(exception)
+			}
+		})
+
+		Log.i(
+			TAG,
+			String.format("Sent rating poll answers, ratingId=%d, pollId=%d", ratingId, pollId)
+		)
 	}
 
 	// Typing
@@ -1790,7 +1825,8 @@ object IQChannels {
 
 			coroutineScope.launch(Dispatchers.IO) {
 				try {
-					val interactor = GetConfigsInteractorImpl(NetworkModule.provideGetConfigApiService())
+					val interactor =
+						GetConfigsInteractorImpl(NetworkModule.provideGetConfigApiService())
 					val file = interactor.getFile(fileId)
 					file?.let { prepareFile(it) }
 					Log.d(TAG, "success got file: ${file?.Id}")

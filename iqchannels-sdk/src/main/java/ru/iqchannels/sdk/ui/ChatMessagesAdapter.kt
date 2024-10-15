@@ -26,6 +26,7 @@ import ru.iqchannels.sdk.schema.ActorType
 import ru.iqchannels.sdk.schema.ChatEvent
 import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.schema.ChatPayloadType
+import ru.iqchannels.sdk.schema.RatingPollClientAnswerInput
 import ru.iqchannels.sdk.schema.SingleChoice
 import ru.iqchannels.sdk.schema.UploadedFile
 import ru.iqchannels.sdk.ui.rv.MyMessageViewHolder
@@ -212,15 +213,17 @@ internal class ChatMessagesAdapter(
 		val context = parent.context
 		val inflater = LayoutInflater.from(context)
 
-		return when(viewType) {
+		return when (viewType) {
 			R.layout.item_my_message -> {
 				val binding = ItemMyMessageBinding.inflate(inflater, parent, false)
 				MyMessageViewHolder(binding, itemClickListener)
 			}
+
 			R.layout.item_new_msg_header -> {
 				val binding = ItemNewMsgHeaderBinding.inflate(inflater, parent, false)
 				NewMessagesHeaderVH(binding)
 			}
+
 			else -> {
 				val binding = ItemOtherMessageBinding.inflate(inflater, parent, false)
 				OtherMessageViewHolder(binding, itemClickListener)
@@ -241,7 +244,7 @@ internal class ChatMessagesAdapter(
 	override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 		val message = messages[position]
 
-		when(holder) {
+		when (holder) {
 			is MyMessageViewHolder -> holder.bind(message, rootViewDimens())
 			is OtherMessageViewHolder -> holder.bind(message, rootViewDimens(), markwon)
 			else -> Unit
@@ -370,6 +373,15 @@ internal class ChatMessagesAdapter(
 		rating.Value = value
 		iqchannels.ratingsRate(rating.Id, value)
 		notifyItemChanged(position)
+	}
+
+	fun onRatingPollAnswersSend(
+		answers: List<RatingPollClientAnswerInput>,
+		ratingId: Long,
+		pollId: Long,
+		callback: HttpCallback<Void>,
+	) {
+		iqchannels.ratingsSendPoll(answers, ratingId, pollId, callback)
 	}
 
 	fun onTextMessageClicked(position: Int) {

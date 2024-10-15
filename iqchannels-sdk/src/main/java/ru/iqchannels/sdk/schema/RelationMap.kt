@@ -6,6 +6,7 @@ class RelationMap {
 	val Files: MutableMap<String, UploadedFile>
 	val Ratings: MutableMap<Long, Rating>
 	val Users: MutableMap<Long, User>
+	val RatingPolls: MutableMap<Long, RatingPoll>
 
 	init {
 		Clients = HashMap()
@@ -13,5 +14,6 @@ class RelationMap {
 		Files = HashMap()
 		Ratings = HashMap()
 		Users = HashMap()
+		RatingPolls = HashMap()
 	}
 }

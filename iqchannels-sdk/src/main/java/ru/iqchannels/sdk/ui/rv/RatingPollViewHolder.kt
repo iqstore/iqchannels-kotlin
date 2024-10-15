@@ -17,6 +17,7 @@ import ru.iqchannels.sdk.schema.RatingPollQuestion
 import ru.iqchannels.sdk.databinding.ChatRatingPollBinding
 import ru.iqchannels.sdk.http.HttpCallback
 import ru.iqchannels.sdk.schema.RatingState
+import ru.iqchannels.sdk.ui.UiUtils.toPx
 
 internal class RatingPollViewHolder(
 	private val binding: ChatRatingPollBinding
@@ -303,7 +304,7 @@ internal class RatingPollViewHolder(
 				}
 				layoutParams = LinearLayout.LayoutParams(
 					0,
-					100
+					toPx(32)
 				).apply {
 					setMargins(8, 0, 8, 0)
 					weight = 1f

@@ -432,6 +432,10 @@ internal class OtherMessageViewHolder(
 		rating: ru.iqchannels.sdk.databinding.ChatRatingBinding,
 		message: ChatMessage,
 	) = with(binding) {
+		if (msgRating.State == RatingState.FINISHED && (msgRating.Value == null || msgRating.Value == 0)) {
+			binding.root.visibility = View.GONE
+			return
+		}
 		rating.root.visibility = View.VISIBLE
 		rating.ratingRate.visibility = View.GONE
 		rating.ratingRated.visibility = View.GONE

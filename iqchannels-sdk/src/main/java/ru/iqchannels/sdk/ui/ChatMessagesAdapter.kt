@@ -375,6 +375,18 @@ internal class ChatMessagesAdapter(
 		notifyItemChanged(position)
 	}
 
+	fun onRatePollClicked(position: Int, value: Int) {
+		val message = messages[position]
+		val rating = message.Rating ?: return
+		if (rating.Sent) {
+			return
+		}
+
+		rating.Sent = true
+		rating.Value = value
+		notifyItemChanged(position)
+	}
+
 	fun onRatingPollAnswersSend(
 		answers: List<RatingPollClientAnswerInput>,
 		ratingId: Long,

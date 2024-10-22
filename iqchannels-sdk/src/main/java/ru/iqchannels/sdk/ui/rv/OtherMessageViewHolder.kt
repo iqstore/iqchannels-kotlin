@@ -54,7 +54,7 @@ interface RatingPollListener {
 		pollId: Long,
 		callback: HttpCallback<Void>
 	)
-	fun onRatingPollFinished()
+	fun onRatingPollFinished(value: Int?)
 }
 
 internal class OtherMessageViewHolder(
@@ -378,8 +378,10 @@ internal class OtherMessageViewHolder(
 		)
 	}
 
-	override fun onRatingPollFinished() {
-		binding.root.visibility = View.GONE
+	override fun onRatingPollFinished(value: Int?) {
+		if (value != null) {
+			(bindingAdapter as? ChatMessagesAdapter)?.onRatePollClicked(adapterPosition, value)
+		}
 	}
 
 	private fun getRateButtonValue(view: View): Int {
@@ -432,16 +434,11 @@ internal class OtherMessageViewHolder(
 		rating: ru.iqchannels.sdk.databinding.ChatRatingBinding,
 		message: ChatMessage,
 	) = with(binding) {
-		if (msgRating.State == RatingState.FINISHED && (msgRating.Value == null || msgRating.Value == 0)) {
-			binding.root.visibility = View.GONE
-			return
-		}
 		rating.root.visibility = View.VISIBLE
 		rating.ratingRate.visibility = View.GONE
 		rating.ratingRated.visibility = View.GONE
 		rating.ratingRateText.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textOperator)
-		if ((msgRating.State == RatingState.PENDING && msgRating.Sent) || (msgRating.State == RatingState.RATED
-					|| (msgRating.State == RatingState.FINISHED && msgRating.Value != null))) {
+		if (msgRating.Value != null && msgRating.Value != 0) {
 			val value = msgRating.Value ?: 0
 			val text = root.resources.getString(R.string.chat_ratings_rated_custom, value, getRatingScaleMaxValue(msgRating))
 			rating.ratingRated.visibility = View.VISIBLE

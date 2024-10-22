@@ -1,6 +1,8 @@
 package ru.iqchannels.sdk.ui.rv
 
 import android.graphics.Color
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -105,6 +107,14 @@ internal class RatingPollViewHolder(
 		binding.submitButton.visibility = View.VISIBLE
 		binding.submitButton.setOnClickListener {
 			if (currentAnswer != null) {
+				if (currentAnswer!!.AsTicketRating == true) {
+					if (currentAnswer!!.Type == PollOptionType.STARS) {
+						rating.Value = currentAnswer!!.AnswerStars as Int?
+					}
+					if (currentAnswer!!.Type == PollOptionType.SCALE) {
+						rating.Value = currentAnswer!!.AnswerScale
+					}
+				}
 				currentQuestionIndex++
 				renderCurrentQuestion()
 				pollResult.add(currentAnswer!!)
@@ -138,7 +148,11 @@ internal class RatingPollViewHolder(
 				}
 
 				setOnClickListener {
-					savePollResult(question.Id, PollOptionType.ONE_OF_LIST, null, answer.Id)
+					savePollResult(
+						question.Id,
+						PollOptionType.ONE_OF_LIST, null, answer.Id,
+						null, null, null, question.AsTicketRating,
+					)
 
 					setBackgroundResource(R.drawable.bg_rating_poll_rounded_button_active)
 					setTextColor(Color.WHITE)
@@ -188,7 +202,8 @@ internal class RatingPollViewHolder(
 						answer.Id,
 						null,
 						null,
-						answer.FCR
+						answer.FCR,
+						question.AsTicketRating,
 					)
 
 					setBackgroundResource(R.drawable.bg_rating_poll_rounded_button_active)
@@ -222,7 +237,9 @@ internal class RatingPollViewHolder(
 				savePollResult(
 					question.Id,
 					PollOptionType.INPUT,
-					binding.editTextAnswer.text.toString()
+					binding.editTextAnswer.text.toString(),
+					null, null, null, null,
+					question.AsTicketRating,
 				)
 			}
 
@@ -246,7 +263,10 @@ internal class RatingPollViewHolder(
 
 		starButtons.forEachIndexed { index, button ->
 			button.setOnClickListener {
-				savePollResult(question.Id, PollOptionType.STARS, null, null, (index + 1).toLong())
+				savePollResult(
+					question.Id, PollOptionType.STARS, null, null, (index + 1).toLong(),
+					null, null, question.AsTicketRating,
+				)
 				updateStarSelection(index)
 			}
 		}
@@ -292,7 +312,7 @@ internal class RatingPollViewHolder(
 					savePollResult(
 						question.Id,
 						PollOptionType.SCALE,
-						null, null, null, i,
+						null, null, null, i, null, question.AsTicketRating,
 					)
 					setBackgroundResource(R.drawable.bg_rating_poll_scale_button_active)
 					setTextColor(Color.WHITE)
@@ -322,6 +342,7 @@ internal class RatingPollViewHolder(
 		stars: Long? = null,
 		scaleValue: Int? = null,
 		fcr: Boolean? = null,
+		asTicketRating: Boolean? = null,
 	) {
 		currentAnswer = RatingPollClientAnswerInput(
 			rating.ProjectId,
@@ -334,6 +355,7 @@ internal class RatingPollViewHolder(
 			stars,
 			scaleValue,
 			fcr,
+			asTicketRating,
 		)
 		binding.submitButton.isEnabled = true
 	}
@@ -375,7 +397,7 @@ internal class RatingPollViewHolder(
 		binding.thanksFeedbackLayout.root.visibility = View.GONE
 		binding.root.visibility = View.GONE
 		rating.State = RatingState.FINISHED
-		listener?.onRatingPollFinished()
+		listener?.onRatingPollFinished(rating.Value)
 	}
 
 	private fun showThanksFeedback() {

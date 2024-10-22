@@ -11,6 +11,7 @@ class RatingPollClientAnswerInput {
 	var AnswerInput: String? = null
 	var AnswerStars: Long? = null
 	var AnswerScale: Int? = null
+	var AsTicketRating: Boolean? = null
 
 	constructor(
 		projectId: Long,
@@ -23,6 +24,7 @@ class RatingPollClientAnswerInput {
 		stars: Long? = null,
 		scaleValue: Int? = null,
 		fcr: Boolean? = null,
+		asTicketRating: Boolean? = null,
 	) {
 		ProjectId = projectId
 		ClientId = clientId
@@ -34,5 +36,6 @@ class RatingPollClientAnswerInput {
 		AnswerStars = stars
 		AnswerScale = scaleValue
 		FCR = fcr
+		AsTicketRating = asTicketRating
 	}
 }

@@ -5,7 +5,7 @@ class RatingPollQuestion {
 	val Text: String = ""
 	val Type: PollOptionType = PollOptionType.FCR
 	val Scale: PollQuestionScale? = null
-	val AsTicketRating: Boolean = false
+	val AsTicketRating: Boolean? = null
 	val Answers: List<RatingPollAnswer>? = null
 }
 

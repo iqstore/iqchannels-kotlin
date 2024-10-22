@@ -5,7 +5,8 @@ import ru.iqchannels.sdk.Log
 class IQChannelsConfig @JvmOverloads constructor(
 	val address: String?,
 	val channel: String?,
-	logging: Boolean = true
+	logging: Boolean = true,
+	val uiOptions: UIOptions = UIOptions(),
 ) {
 
 	init {

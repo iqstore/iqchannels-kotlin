@@ -50,7 +50,7 @@ object IQChannels {
 	private const val ANONYMOUS_TOKEN = "anonymous_token"
 
 	// Config and login
-	private var config: IQChannelsConfig? = null
+	internal var config: IQChannelsConfig? = null
 	private var client: HttpClient? = null
 	private var handler: Handler? = null // Always nonnull where used.
 	private var preferences: SharedPreferences? = null

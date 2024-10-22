@@ -1073,13 +1073,16 @@ class ChatFragment : Fragment() {
 
 		lifecycleScope.launch(Dispatchers.IO) {
 			val result = viewModel.prepareFile(uri, requireActivity())
-
-			withContext(Dispatchers.Main) {
-				result?.let {
-					showConfirmDialog(
-						it,
-						getString(R.string.chat_send_file_confirmation_description, it.name)
-					)
+			if (IQChannels.config?.uiOptions?.disableIMGConfirmationModal == true) {
+				IQChannels.sendFile(result, replyingMessage?.Id)
+			} else {
+				withContext(Dispatchers.Main) {
+					result?.let {
+						showConfirmDialog(
+							it,
+							getString(R.string.chat_send_file_confirmation_description, it.name)
+						)
+					}
 				}
 			}
 		}
@@ -1089,10 +1092,13 @@ class ChatFragment : Fragment() {
 
 		lifecycleScope.launch(Dispatchers.IO) {
 			val result = viewModel.prepareFile(uri, requireActivity())
-
-			withContext(Dispatchers.Main) {
-				result?.let {
-					showConfirmDialog(it, message)
+			if (IQChannels.config?.uiOptions?.disableIMGConfirmationModal == true) {
+				IQChannels.sendFile(result, replyingMessage?.Id)
+			} else {
+				withContext(Dispatchers.Main) {
+					result?.let {
+						showConfirmDialog(it, message)
+					}
 				}
 			}
 		}
@@ -1176,7 +1182,11 @@ class ChatFragment : Fragment() {
 		}
 
 		addCameraPhotoToGallery(file)
-		showConfirmDialog(file, file.name)
+		if (IQChannels.config?.uiOptions?.disableIMGConfirmationModal == true) {
+			IQChannels.sendFile(file, replyingMessage?.Id)
+		} else {
+			showConfirmDialog(file, file.name)
+		}
 	}
 
 	private fun addCameraPhotoToGallery(file: File) {

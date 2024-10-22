@@ -304,6 +304,28 @@ ChatFragment принимает предзаполненная сообщени�
     ChatFragment.newInstance(stylesJson = stylesJson)
 ```
 
+# Настройки UI
+Для настройки, достаточно указать параметр uiOptions при создании экземпляра класса:
+```kotlin
+    // Spec
+    class UIOptions {
+        var disableIMGConfirmationModal: Boolean = false
+    }
+
+    class IQChannelsConfig @JvmOverloads constructor(
+        val address: String?,
+        val channel: String?,
+        logging: Boolean = true,
+        val uiOptions: UIOptions = UIOptions(),
+    )
+
+    // Example
+    IQChannels.configure(
+        this, 
+        IQChannelsConfig(address, channels.first(), true, UIOptions(true)),
+    )
+```
+
 # Пример JSON для передачи в SDK
 
 ```json

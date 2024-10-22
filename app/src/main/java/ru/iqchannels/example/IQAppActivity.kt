@@ -25,6 +25,7 @@ import ru.iqchannels.sdk.app.IQChannels
 import ru.iqchannels.sdk.app.IQChannelsConfig
 import ru.iqchannels.sdk.app.IQChannelsConfig2
 import ru.iqchannels.sdk.app.IQChannelsFactory
+import ru.iqchannels.sdk.app.UIOptions
 import ru.iqchannels.sdk.app.UnreadListener
 import ru.iqchannels.sdk.ui.ChatFragment
 import ru.iqchannels.sdk.ui.channels.ChannelsFragment
@@ -90,7 +91,7 @@ class IQAppActivity :
 			TestingType.SingleChat -> {
 				IQChannels.configure(
 					this,
-					IQChannelsConfig(address, channels.first())
+					IQChannelsConfig(address, channels.first(), true, UIOptions(true))
 				)
 				IQChannels.loginAnonymous()
 			}

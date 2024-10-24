@@ -9,7 +9,7 @@ import ru.iqchannels.sdk.schema.UploadedFile
 
 interface GetFileConfigsApi {
 
-	@GET("public/api/v1/files/config/")
+	@GET("public/api/v1/files/config")
 	suspend fun getFileConfigs(): Response<ChatFilesConfig>
 
 	@GET("public/api/v1/files/get_file/{fileId}")

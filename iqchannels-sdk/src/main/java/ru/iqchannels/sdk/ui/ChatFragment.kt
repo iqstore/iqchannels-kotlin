@@ -560,10 +560,11 @@ class ChatFragment : Fragment() {
 	}
 
 	private fun updateViews() {
+		val token = IQChannels.getCurrentToken()
 		authLayout?.visibility =
-			if (IQChannels.auth == null && IQChannels.authRequest != null) View.VISIBLE else View.GONE
+			if (IQChannels.auth == null && IQChannels.authRequest != null && token != null) View.VISIBLE else View.GONE
 		signupLayout?.visibility =
-			if (IQChannels.auth == null && IQChannels.authRequest == null) View.VISIBLE else View.GONE
+			if (IQChannels.auth == null && IQChannels.authRequest == null && token == null) View.VISIBLE else View.GONE
 		signupButton?.isEnabled = IQChannels.authRequest == null
 		signupText?.isEnabled = IQChannels.authRequest == null
 		chatLayout?.visibility = if (IQChannels.auth != null) View.VISIBLE else View.GONE

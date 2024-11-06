@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.os.Build
 import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.View
@@ -131,14 +132,17 @@ class ImagePreviewFragment : Fragment() {
 		}
 
 		ibSave.setOnClickListener {
-			if (ContextCompat.checkSelfPermission(
-					requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE
-				)
-				== PackageManager.PERMISSION_GRANTED
-			) {
-				startDownload(image, fileName)
+			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+				// Android 10 and below — request WRITE_EXTERNAL_STORAGE
+				if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
+					== PackageManager.PERMISSION_GRANTED) {
+					startDownload(image, fileName)
+				} else {
+					requestStoragePermission.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+				}
 			} else {
-				requestStoragePermission.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+				// Android 11 and above — WRITE_EXTERNAL_STORAGE permission is not required
+				startDownload(image, fileName)
 			}
 		}
 	}

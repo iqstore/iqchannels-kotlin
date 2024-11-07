@@ -1,118 +1,125 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:background="@drawable/other_msg_bg"
-    android:orientation="vertical"
-    android:paddingBottom="10dp"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
-    android:paddingTop="8dp">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center">
 
     <LinearLayout
-        android:id="@+id/rating_rate"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-
-        <TextView
-            android:id="@+id/rating_rate_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="40dp"
-            android:autoLink="all"
-            android:textColor="#ff4c4c4c"
-            android:textSize="17sp"
-            android:text="@string/chat_ratings_rate_msg"/>
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingLeft="16dp"
+        android:paddingTop="8dp"
+        android:paddingRight="16dp"
+        android:paddingBottom="10dp">
 
         <LinearLayout
-            android:id="@+id/rating_rates"
+            android:id="@+id/rating_rate"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="10dp"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
-            <ImageButton
-                android:id="@+id/rating_rate_1"
-                android:layout_width="@dimen/rating_button_size"
-                android:layout_height="@dimen/rating_button_size"
-                android:layout_marginRight="10dp"
-                android:background="@null"
-                android:scaleType="centerCrop"
-                android:src="@drawable/star_empty"
-                tools:ignore="ContentDescription" />
+            <TextView
+                android:id="@+id/rating_rate_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="40dp"
+                android:autoLink="all"
+                android:text="@string/chat_ratings_rate_msg"
+                android:textColor="#ff4c4c4c"
+                android:textSize="17sp" />
 
-            <ImageButton
-                android:id="@+id/rating_rate_2"
-                android:layout_width="@dimen/rating_button_size"
-                android:layout_height="@dimen/rating_button_size"
-                android:layout_marginRight="10dp"
-                android:background="@null"
-                android:scaleType="centerCrop"
-                android:src="@drawable/star_empty"
-                tools:ignore="ContentDescription" />
+            <LinearLayout
+                android:id="@+id/rating_rates"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal">
 
-            <ImageButton
-                android:id="@+id/rating_rate_3"
-                android:layout_width="@dimen/rating_button_size"
-                android:layout_height="@dimen/rating_button_size"
-                android:layout_marginRight="10dp"
-                android:background="@null"
-                android:scaleType="centerCrop"
-                android:src="@drawable/star_empty"
-                tools:ignore="ContentDescription" />
+                <ImageButton
+                    android:id="@+id/rating_rate_1"
+                    android:layout_width="@dimen/rating_button_size"
+                    android:layout_height="@dimen/rating_button_size"
+                    android:layout_marginRight="10dp"
+                    android:background="@null"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/star_empty"
+                    tools:ignore="ContentDescription" />
 
-            <ImageButton
-                android:id="@+id/rating_rate_4"
-                android:layout_width="@dimen/rating_button_size"
-                android:layout_height="@dimen/rating_button_size"
-                android:layout_marginRight="10dp"
-                android:background="@null"
-                android:scaleType="centerCrop"
-                android:src="@drawable/star_empty"
-                tools:ignore="ContentDescription" />
+                <ImageButton
+                    android:id="@+id/rating_rate_2"
+                    android:layout_width="@dimen/rating_button_size"
+                    android:layout_height="@dimen/rating_button_size"
+                    android:layout_marginRight="10dp"
+                    android:background="@null"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/star_empty"
+                    tools:ignore="ContentDescription" />
 
-            <ImageButton
-                android:id="@+id/rating_rate_5"
-                android:layout_width="@dimen/rating_button_size"
-                android:layout_height="@dimen/rating_button_size"
-                android:layout_marginRight="5dp"
-                android:background="@null"
-                android:scaleType="centerCrop"
-                android:src="@drawable/star_empty"
-                tools:ignore="ContentDescription" />
+                <ImageButton
+                    android:id="@+id/rating_rate_3"
+                    android:layout_width="@dimen/rating_button_size"
+                    android:layout_height="@dimen/rating_button_size"
+                    android:layout_marginRight="10dp"
+                    android:background="@null"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/star_empty"
+                    tools:ignore="ContentDescription" />
+
+                <ImageButton
+                    android:id="@+id/rating_rate_4"
+                    android:layout_width="@dimen/rating_button_size"
+                    android:layout_height="@dimen/rating_button_size"
+                    android:layout_marginRight="10dp"
+                    android:background="@null"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/star_empty"
+                    tools:ignore="ContentDescription" />
+
+                <ImageButton
+                    android:id="@+id/rating_rate_5"
+                    android:layout_width="@dimen/rating_button_size"
+                    android:layout_height="@dimen/rating_button_size"
+                    android:layout_marginRight="5dp"
+                    android:background="@null"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/star_empty"
+                    tools:ignore="ContentDescription" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_send_rating"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/bg_button_rate"
+                android:backgroundTint="@color/bg_btn_rate"
+                android:enabled="false"
+                android:minHeight="0dp"
+                android:paddingVertical="10dp"
+                android:text="@string/send"
+                android:textAllCaps="false"
+                android:textColor="@color/light_text_color"
+                android:textSize="15sp" />
+
         </LinearLayout>
 
-        <Button
-            android:id="@+id/btn_send_rating"
+        <TextView
+            android:id="@+id/rating_rated"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:paddingVertical="10dp"
-            android:minHeight="0dp"
-            android:enabled="false"
-            android:text="@string/send"
-            android:textAllCaps="false"
-            android:textSize="15sp"
-            android:background="@drawable/bg_button_rate"
-            android:backgroundTint="@color/bg_btn_rate"
-            android:textColor="@color/light_text_color"
-            />
+            android:autoLink="all"
+            android:textAlignment="center"
+            android:textColor="#ff4c4c4c"
+            android:textSize="16sp"
+            android:textStyle="italic"
+            android:layout_marginRight="10dp"
+            android:visibility="gone"></TextView>
 
     </LinearLayout>
-
-    <TextView
-        android:id="@+id/rating_rated"
-        android:visibility="gone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="40dp"
-        android:autoLink="all"
-        android:textColor="#ff4c4c4c"
-        android:textSize="16sp"
-        android:textStyle="italic">
-    </TextView>
-
-</LinearLayout>
+</RelativeLayout>

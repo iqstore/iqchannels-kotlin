@@ -1274,7 +1274,7 @@ object IQChannels {
 		user.Online = true
 		user.Id = 1
 		val message = ChatMessage(user, localId)
-		message.Text = "2.0.6"
+		message.Text = "2.0.7"
 		messages?.add(message)
 		for (listener in messageListeners) {
 			execute {
@@ -1460,7 +1460,7 @@ object IQChannels {
 
 	private fun nextLocalId(): Long {
 		var localId = Date().time
-		if (localId < this.localId) {
+		if (localId <= this.localId) {
 			localId = this.localId + 1
 		}
 		this.localId = localId

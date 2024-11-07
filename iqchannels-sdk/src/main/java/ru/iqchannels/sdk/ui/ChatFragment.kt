@@ -1415,13 +1415,15 @@ class ChatFragment : Fragment() {
 		}
 
 		override fun onMessageLongClick(message: ChatMessage) {
-			message.Text?.let { text ->
-				val clipboard =
-					requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-				val clip = ClipData.newPlainText(text, text)
-				clipboard.setPrimaryClip(clip)
+			if (!message.System) {
+				message.Text?.let { text ->
+					val clipboard =
+						requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+					val clip = ClipData.newPlainText(text, text)
+					clipboard.setPrimaryClip(clip)
 
-				tnwMsgCopied?.show()
+					tnwMsgCopied?.show()
+				}
 			}
 		}
 

@@ -145,6 +145,7 @@ internal class ChatMessagesAdapter(
 		val name = if (event.User != null) event.User?.DisplayName else null
 		msg.Text = "$name печатает..."
 		msg.Payload = ChatPayloadType.TYPING
+		msg.System = true
 		msg.Date = Date()
 		messages.add(msg)
 

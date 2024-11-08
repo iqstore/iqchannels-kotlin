@@ -89,7 +89,7 @@ internal class OtherMessageViewHolder(
 
 			// Name and avatar
 			val user = message.User
-			if (groupStart && user != null) {
+			if (groupStart && user != null && message.Rating == null) {
 				val name = user.DisplayName
 				val letter = if (name?.isEmpty() == true) "" else name?.substring(0, 1)
 				otherName.text = name
@@ -203,6 +203,7 @@ internal class OtherMessageViewHolder(
 					else -> showApprovedState(message, file, rootViewDimens, markwon)
 				}
 			} else if (msgRating != null) {
+				message.System = true
 				if (msgRating.State == RatingState.POLL && msgRating.RatingPoll != null) {
 					showRatingPoll(msgRating, ratingPoll)
 				} else {
@@ -438,12 +439,12 @@ internal class OtherMessageViewHolder(
 		rating.ratingRate.visibility = View.GONE
 		rating.ratingRated.visibility = View.GONE
 		rating.ratingRateText.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textOperator)
-		if (msgRating.Value != null && msgRating.Value != 0) {
+		if (message.Rating != null && msgRating.Value != 0) {
 			val value = msgRating.Value ?: 0
 			val text = root.resources.getString(R.string.chat_ratings_rated_custom, value, getRatingScaleMaxValue(msgRating))
 			rating.ratingRated.visibility = View.VISIBLE
 			rating.ratingRated.text = text
-			rating.ratingRated.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textOperator)
+			rating.ratingRated.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.systemText)
 		} else if (msgRating.State == RatingState.PENDING) {
 			IQStyles.iqChannelsStyles?.ratingStyles?.sentRating?.let {
 				val states = arrayOf(

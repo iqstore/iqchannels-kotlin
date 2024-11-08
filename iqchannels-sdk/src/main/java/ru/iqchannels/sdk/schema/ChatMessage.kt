@@ -1,5 +1,6 @@
 package ru.iqchannels.sdk.schema
 
+import com.google.gson.Gson
 import java.io.File
 import java.util.*
 import ru.iqchannels.sdk.http.HttpRequest
@@ -42,12 +43,17 @@ class ChatMessage {
 
 	// Local
 	var Sending = false
+	var System = false
 	var Client: Client? = null
 	var User: User? = null
 	var File: UploadedFile? = null
 	var Rating: Rating? = null
 	var Date: Date? = null
 	var newMsgHeader: Boolean = false
+
+	override fun toString(): String {
+		return Gson().toJson(this)
+	}
 
 	// Upload
 	@Transient

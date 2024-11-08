@@ -9,6 +9,8 @@ class MessagesStyles(
 	val backgroundOperator: Color?,
 	@SerializedName("background_client")
 	val backgroundClient: Color?,
+	@SerializedName("system_text")
+	val systemText: Text?,
 	@SerializedName("text_operator")
 	val textOperator: Text?,
 	@SerializedName("text_client")

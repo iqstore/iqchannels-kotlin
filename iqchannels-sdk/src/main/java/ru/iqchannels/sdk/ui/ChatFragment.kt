@@ -91,7 +91,6 @@ import ru.iqchannels.sdk.schema.ActionType
 import ru.iqchannels.sdk.schema.ChatEvent
 import ru.iqchannels.sdk.schema.ChatException
 import ru.iqchannels.sdk.schema.ChatMessage
-import ru.iqchannels.sdk.schema.ChatPayloadType
 import ru.iqchannels.sdk.schema.ClientAuth
 import ru.iqchannels.sdk.schema.SingleChoice
 import ru.iqchannels.sdk.styling.IQChannelsStyles
@@ -444,7 +443,10 @@ class ChatFragment : Fragment() {
 					.into(this)
 			}
 		}
-		attachButton?.setOnClickListener { showAttachChooser() }
+		attachButton?.setOnClickListener {
+			IQChannels.fileСhooser = true
+			showAttachChooser()
+		}
 		sendButton = view.findViewById<ImageButton?>(R.id.sendButton)?.apply {
 			IQStyles.iqChannelsStyles?.toolsToMessage?.iconSent?.let {
 				Glide.with(context)
@@ -1415,13 +1417,15 @@ class ChatFragment : Fragment() {
 		}
 
 		override fun onMessageLongClick(message: ChatMessage) {
-			message.Text?.let { text ->
-				val clipboard =
-					requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-				val clip = ClipData.newPlainText(text, text)
-				clipboard.setPrimaryClip(clip)
+			if (!message.System) {
+				message.Text?.let { text ->
+					val clipboard =
+						requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+					val clip = ClipData.newPlainText(text, text)
+					clipboard.setPrimaryClip(clip)
 
-				tnwMsgCopied?.show()
+					tnwMsgCopied?.show()
+				}
 			}
 		}
 

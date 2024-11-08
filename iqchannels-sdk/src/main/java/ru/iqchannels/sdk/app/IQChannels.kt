@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.os.Handler
 import android.webkit.MimeTypeMap
-import com.google.gson.Gson
 import java.io.File
 import java.util.*
 import java.util.concurrent.CancellationException
@@ -40,7 +39,6 @@ import ru.iqchannels.sdk.schema.FileImageSize
 import ru.iqchannels.sdk.schema.FileType
 import ru.iqchannels.sdk.schema.MaxIdQuery
 import ru.iqchannels.sdk.schema.RatingPollClientAnswerInput
-import ru.iqchannels.sdk.schema.RelationMap
 import ru.iqchannels.sdk.schema.UploadedFile
 import ru.iqchannels.sdk.schema.User
 
@@ -72,6 +70,7 @@ object IQChannels {
 		private set
 	var authRequest: HttpRequest? = null
 		private set
+	var fileСhooser: Boolean = false
 
 	private var authAttempt = 0
 	private val listeners: MutableSet<IQChannelsListener>
@@ -761,13 +760,18 @@ object IQChannels {
 		Preconditions.checkNotNull(listener, "null listener")
 		messageListeners.add(listener)
 		Log.d(TAG, String.format("Added a messages listener %s", listener))
+
+		if(!fileСhooser) {
+			loadMessages()
+		}
+		fileСhooser = false
+
 		if (messages != null) {
 			listenToEvents()
 			val copy: List<ChatMessage> = ArrayList(messages)
 			execute { listener.messagesLoaded(copy) }
-		} else {
-			loadMessages()
 		}
+
 		return object : Cancellable {
 			override fun cancel() {
 				messageListeners.remove(listener)
@@ -796,9 +800,6 @@ object IQChannels {
 	}
 
 	private fun loadMessages() {
-		if (messages != null) {
-			return
-		}
 		if (messageRequest != null) {
 			return
 		}
@@ -1460,7 +1461,7 @@ object IQChannels {
 
 	private fun nextLocalId(): Long {
 		var localId = Date().time
-		if (localId < this.localId) {
+		if (localId <= this.localId) {
 			localId = this.localId + 1
 		}
 		this.localId = localId

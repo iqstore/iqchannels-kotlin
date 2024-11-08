@@ -25,7 +25,12 @@
         "light": "#000000",
         "dark": "#FFFFFF"
       },
-      "text_size": 10
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": true
+      }
     }
   },
   "messages": {

@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import ru.iqchannels.sdk.Log
 import ru.iqchannels.sdk.R
+import ru.iqchannels.sdk.ui.ChatMessagesAdapter
 
 class SwipeController(private val swipeListener: SwipeListener) : ItemTouchHelper.Callback() {
 
@@ -21,7 +22,14 @@ class SwipeController(private val swipeListener: SwipeListener) : ItemTouchHelpe
 		recyclerView: RecyclerView,
 		viewHolder: RecyclerView.ViewHolder
 	): Int {
-		return makeMovementFlags(ItemTouchHelper.ACTION_STATE_IDLE, ItemTouchHelper.LEFT)
+		val position = viewHolder.getBindingAdapterPosition()
+		val chatMessage = (recyclerView.adapter as ChatMessagesAdapter).getItem(position)
+
+		return if (!chatMessage.System) {
+			makeMovementFlags(ItemTouchHelper.ACTION_STATE_IDLE, ItemTouchHelper.LEFT)
+		} else {
+			makeMovementFlags(0, 0) // Отключение свайпа влево
+		}
 	}
 
 	override fun onMove(

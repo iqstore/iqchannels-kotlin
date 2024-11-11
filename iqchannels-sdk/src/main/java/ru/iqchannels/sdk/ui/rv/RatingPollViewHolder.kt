@@ -109,7 +109,7 @@ internal class RatingPollViewHolder(
 			if (currentAnswer != null) {
 				if (currentAnswer!!.AsTicketRating == true) {
 					if (currentAnswer!!.Type == PollOptionType.STARS) {
-						rating.Value = currentAnswer!!.AnswerStars as Int?
+						rating.Value = currentAnswer!!.AnswerStars?.toInt()
 					}
 					if (currentAnswer!!.Type == PollOptionType.SCALE) {
 						rating.Value = currentAnswer!!.AnswerScale

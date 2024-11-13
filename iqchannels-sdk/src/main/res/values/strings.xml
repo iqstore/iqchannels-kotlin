@@ -17,6 +17,7 @@
     <string name="chat_ratings_rate_msg">Удалось решить вопрос? Оцените работу оператора</string>
     <string name="chat_ratings_rated">Оценка оператора %1$d из 5</string>
     <string name="chat_ratings_rated_custom">Оценка оператора %1$d из %2$d</string>
+    <string name="chat_ratings_ignored">Оценка оператору не поставлена</string>
     <string name="chat_send_file_confirmation">Подтвердите отправку файла:</string>
     <string name="chat_send_multiple_file_confirmation">За раз можно отправить до 10 файлов</string>
     <string name="chat_send_file_confirmation_description">Вы действительно желаете отправить %1$s ?</string>

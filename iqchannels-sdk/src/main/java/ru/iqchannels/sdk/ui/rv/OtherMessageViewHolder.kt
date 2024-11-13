@@ -45,6 +45,7 @@ import ru.iqchannels.sdk.ui.Colors
 import ru.iqchannels.sdk.ui.UiUtils
 import ru.iqchannels.sdk.ui.UiUtils.getRatingScaleMaxValue
 import ru.iqchannels.sdk.ui.widgets.DropDownButton
+import android.util.Log
 import kotlin.math.max
 
 interface RatingPollListener {
@@ -439,10 +440,16 @@ internal class OtherMessageViewHolder(
 		rating.ratingRate.visibility = View.GONE
 		rating.ratingRated.visibility = View.GONE
 		rating.ratingRateText.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textOperator)
-		if (message.Rating != null && msgRating.Value != 0) {
+
+		if (message.Rating != null && msgRating.State == RatingState.FINISHED || msgRating.State == RatingState.RATED) {
 			val value = msgRating.Value ?: 0
 			val text = root.resources.getString(R.string.chat_ratings_rated_custom, value, getRatingScaleMaxValue(msgRating))
 			rating.ratingRated.visibility = View.VISIBLE
+			rating.ratingRated.text = text
+			rating.ratingRated.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.systemText)
+		} else if (msgRating.State == RatingState.IGNORED) {
+			rating.ratingRated.visibility = View.VISIBLE
+			val text = root.resources.getString(R.string.chat_ratings_ignored)
 			rating.ratingRated.text = text
 			rating.ratingRated.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.systemText)
 		} else if (msgRating.State == RatingState.PENDING) {

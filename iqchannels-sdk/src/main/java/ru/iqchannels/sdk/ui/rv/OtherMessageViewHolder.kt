@@ -208,7 +208,7 @@ internal class OtherMessageViewHolder(
 				if (msgRating.State == RatingState.POLL && msgRating.RatingPoll != null) {
 					showRatingPoll(msgRating, ratingPoll)
 				} else {
-					showRating(msgRating, rating, message)
+					showRating(msgRating, rating)
 				}
 			} else {
 				clTexts.visibility = View.VISIBLE
@@ -434,104 +434,108 @@ internal class OtherMessageViewHolder(
 	private fun showRating(
 		msgRating: Rating,
 		rating: ru.iqchannels.sdk.databinding.ChatRatingBinding,
-		message: ChatMessage,
 	) = with(binding) {
 		rating.root.visibility = View.VISIBLE
 		rating.ratingRate.visibility = View.GONE
 		rating.ratingRated.visibility = View.GONE
 		rating.ratingRateText.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textOperator)
 
-		if (message.Rating != null && msgRating.State == RatingState.FINISHED || msgRating.State == RatingState.RATED) {
-			val value = msgRating.Value ?: 0
-			val text = root.resources.getString(R.string.chat_ratings_rated_custom, value, getRatingScaleMaxValue(msgRating))
-			rating.ratingRated.visibility = View.VISIBLE
-			rating.ratingRated.text = text
-			rating.ratingRated.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.systemText)
-		} else if (msgRating.State == RatingState.IGNORED) {
-			rating.ratingRated.visibility = View.VISIBLE
-			val text = root.resources.getString(R.string.chat_ratings_ignored)
-			rating.ratingRated.text = text
-			rating.ratingRated.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.systemText)
-		} else if (msgRating.State == RatingState.PENDING) {
-			IQStyles.iqChannelsStyles?.ratingStyles?.sentRating?.let {
-				val states = arrayOf(
-					intArrayOf(android.R.attr.state_enabled),
-					intArrayOf(-android.R.attr.state_enabled),
+		when (msgRating.State) {
+			RatingState.FINISHED, RatingState.RATED -> {
+				val value = msgRating.Value ?: 0
+				val text = root.resources.getString(R.string.chat_ratings_rated_custom, value, getRatingScaleMaxValue(msgRating))
+				rating.ratingRated.visibility = View.VISIBLE
+				rating.ratingRated.text = text
+				rating.ratingRated.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.systemText)
+			}
+			RatingState.IGNORED -> {
+				rating.ratingRated.visibility = View.VISIBLE
+				val text = root.resources.getString(R.string.chat_ratings_ignored)
+				rating.ratingRated.text = text
+				rating.ratingRated.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.systemText)
+			}
+			RatingState.PENDING -> {
+				IQStyles.iqChannelsStyles?.ratingStyles?.sentRating?.let {
+					val states = arrayOf(
+						intArrayOf(android.R.attr.state_enabled),
+						intArrayOf(-android.R.attr.state_enabled),
+					)
+
+					val btnColors = intArrayOf(
+						it.colorEnabled?.getColorInt(root.context) ?: ContextCompat.getColor(
+							root.context,
+							R.color.red
+						),
+						it.colorDisabled?.getColorInt(root.context) ?: ContextCompat.getColor(
+							root.context,
+							R.color.disabled_grey
+						)
+					)
+
+					rating.btnSendRating.backgroundTintList = ColorStateList(states, btnColors)
+				}
+
+				this.rating.ratingRate.visibility = View.VISIBLE
+				val value = msgRating.Value ?: 0
+				val ratingButtons = arrayOf(
+					this.rating.ratingRate1,
+					this.rating.ratingRate2,
+					this.rating.ratingRate3,
+					this.rating.ratingRate4,
+					this.rating.ratingRate5
 				)
-
-				val btnColors = intArrayOf(
-					it.colorEnabled?.getColorInt(root.context) ?: ContextCompat.getColor(
-						root.context,
-						R.color.red
-					),
-					it.colorDisabled?.getColorInt(root.context) ?: ContextCompat.getColor(
-						root.context,
-						R.color.disabled_grey
-					)
-				)
-
-				rating.btnSendRating.backgroundTintList = ColorStateList(states, btnColors)
-			}
-
-			this.rating.ratingRate.visibility = View.VISIBLE
-			val value = msgRating.Value ?: 0
-			val ratingButtons = arrayOf(
-				this.rating.ratingRate1,
-				this.rating.ratingRate2,
-				this.rating.ratingRate3,
-				this.rating.ratingRate4,
-				this.rating.ratingRate5
-			)
-			for (i in ratingButtons.indices) {
-				val button = ratingButtons[i]
-				if (value >= i + 1) {
-					IQStyles.iqChannelsStyles?.ratingStyles?.fullStar?.let {
-						Glide.with(root.context)
-							.load(it)
-							.into(button)
-					} ?: run {
-						button.setImageResource(R.drawable.star_filled)
-					}
-				} else {
-					IQStyles.iqChannelsStyles?.ratingStyles?.emptyStar?.let {
-						Glide.with(root.context)
-							.load(it)
-							.into(button)
-					} ?: run {
-						button.setImageResource(R.drawable.star_empty)
+				for (i in ratingButtons.indices) {
+					val button = ratingButtons[i]
+					if (value >= i + 1) {
+						IQStyles.iqChannelsStyles?.ratingStyles?.fullStar?.let {
+							Glide.with(root.context)
+								.load(it)
+								.into(button)
+						} ?: run {
+							button.setImageResource(R.drawable.star_filled)
+						}
+					} else {
+						IQStyles.iqChannelsStyles?.ratingStyles?.emptyStar?.let {
+							Glide.with(root.context)
+								.load(it)
+								.into(button)
+						} ?: run {
+							button.setImageResource(R.drawable.star_empty)
+						}
 					}
 				}
-			}
 
-			for (button: ImageButton in ratingButtons) {
-				button.setOnTouchListener { view, motionEvent ->
-					onRateButtonTouch(
-						view,
-						motionEvent
-					)
+				for (button: ImageButton in ratingButtons) {
+					button.setOnTouchListener { view, motionEvent ->
+						onRateButtonTouch(
+							view,
+							motionEvent
+						)
+					}
+				}
+
+				msgRating.Value?.takeIf { it > 0 }?.let { rate ->
+					this.rating.btnSendRating.isEnabled = msgRating.Sent != true
+					this.rating.btnSendRating.setOnClickListener {
+						onRateButtonClick(rate)
+					}
+				}
+
+				run {
+					if (rating.btnSendRating.isEnabled) {
+						rating.btnSendRating.applyIQStyles(
+							IQStyles.iqChannelsStyles?.ratingStyles?.sentRating?.textEnabled
+						)
+					} else {
+						rating.btnSendRating.applyIQStyles(
+							IQStyles.iqChannelsStyles?.ratingStyles?.sentRating?.textDisabled
+						)
+					}
 				}
 			}
-
-			message.Rating?.Value?.takeIf { it > 0 }?.let { rate ->
-				this.rating.btnSendRating.isEnabled = message.Rating?.Sent != true
-				this.rating.btnSendRating.setOnClickListener {
-					onRateButtonClick(rate)
-				}
+			else -> {
+				rating.root.visibility = View.GONE
 			}
-
-			run {
-				if (rating.btnSendRating.isEnabled) {
-					rating.btnSendRating.applyIQStyles(
-						IQStyles.iqChannelsStyles?.ratingStyles?.sentRating?.textEnabled
-					)
-				} else {
-					rating.btnSendRating.applyIQStyles(
-						IQStyles.iqChannelsStyles?.ratingStyles?.sentRating?.textDisabled
-					)
-				}
-			}
-		} else {
-			rating.root.visibility = View.GONE
 		}
 	}
 

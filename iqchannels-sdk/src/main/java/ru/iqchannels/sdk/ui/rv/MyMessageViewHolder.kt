@@ -27,6 +27,8 @@ import ru.iqchannels.sdk.styling.Text
 import ru.iqchannels.sdk.ui.ChatMessagesAdapter
 import ru.iqchannels.sdk.ui.Colors
 import ru.iqchannels.sdk.ui.widgets.toPx
+import ru.iqchannels.sdk.Log
+
 
 internal class MyMessageViewHolder(
 	private val binding: ItemMyMessageBinding,
@@ -75,12 +77,12 @@ internal class MyMessageViewHolder(
 //				myFlags.visibility = View.VISIBLE
 			myDate.text = message.Date?.let { timeFormat.format(it) } ?: ""
 			myDate.visibility = if (message.Date != null) View.VISIBLE else View.GONE
-			myReceived.visibility = if (message.Received) View.VISIBLE else View.GONE
+			myReceived.visibility = if (message.Id > 0 && !message.Read) View.VISIBLE else View.GONE
 			myRead.visibility = if (message.Read) View.VISIBLE else View.GONE
 
-			val isRead = message.Read
-			myRead.isVisible = isRead
-			myReceived.isVisible = !isRead && message.Received == true
+//			val isRead = message.Read
+//			myRead.isVisible = isRead
+//			myReceived.isVisible = !isRead && message.Received == true
 		}
 //		} else {
 //			mySending.visibility = View.GONE

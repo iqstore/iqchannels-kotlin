@@ -3,6 +3,7 @@ package ru.iqchannels.sdk.ui
 import android.content.Context
 import android.net.Uri
 import android.webkit.MimeTypeMap
+import ru.iqchannels.sdk.Log
 import java.io.File
 
 object FileUtils {
@@ -26,7 +27,18 @@ object FileUtils {
 			filename = "file-$filename"
 		}
 		val file = File.createTempFile(filename, ".$ext", dir ?: context?.cacheDir)
-		file.deleteOnExit()
+
+		try {
+			context?.contentResolver?.openInputStream(uri)?.use { inputStream ->
+				file.outputStream().use { outputStream ->
+					inputStream.copyTo(outputStream)
+				}
+			}
+		} catch (e: Exception) {
+			e.printStackTrace()
+			Log.e("createGalleryTempFile", "Failed to copy content from URI to temp file $e")
+		}
+
 		return file
 	}
 

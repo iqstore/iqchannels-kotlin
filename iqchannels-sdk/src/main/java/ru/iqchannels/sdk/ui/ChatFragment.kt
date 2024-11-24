@@ -209,7 +209,7 @@ class ChatFragment : Fragment() {
 							}
 
 							val checkedFiles = context?.let { context ->
-								FileConfigChecker.checkFiles(context, uris)
+								FileConfigChecker.checkFiles(context, uris, childFragmentManager)
 							} ?: uris
 
 							when (checkedFiles.size) {
@@ -239,7 +239,7 @@ class ChatFragment : Fragment() {
 							val ctx = context
 
 							val checkedFile = if (ctx != null) {
-								FileConfigChecker.checkFiles(ctx, listOf(uri)).firstOrNull()
+								FileConfigChecker.checkFiles(ctx, listOf(uri), childFragmentManager).firstOrNull()
 							} else {
 								uri
 							}

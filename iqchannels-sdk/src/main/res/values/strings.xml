@@ -28,6 +28,9 @@
     <string name="open_file">Открыть файл</string>
     <string name="download_file">Сохранить в \"Загрузки\"</string>
     <string name="file_size_too_large">Превышен максимально допустимый размер файла</string>
+    <string name="image_size_too_large">Слишком большая ширина или высота изображения</string>
+    <string name="file_extension_not_allowed">Неподдерживаемый тип файла</string>
+    <string name="file_extension_forbidden">Запрещенный тип файла</string>
     <string name="check_connection">Проверьте соединение с Интернетом</string>
     <string name="error_occured">Произошла ошибка</string>
     <string name="timeout_message">Превышено время ожидания, повторите попытку позже</string>

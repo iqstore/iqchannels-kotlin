@@ -6,7 +6,7 @@ package ru.iqchannels.example
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
+import ru.iqchannels.sdk.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View

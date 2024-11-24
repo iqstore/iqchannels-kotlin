@@ -4,13 +4,12 @@ import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
-import ru.iqchannels.sdk.schema.ChatFilesConfig
-import ru.iqchannels.sdk.schema.UploadedFile
+import ru.iqchannels.sdk.schema.ChatFilesConfigResponse
 
 interface GetFileConfigsApi {
 
 	@GET("public/api/v1/files/config")
-	suspend fun getFileConfigs(): Response<ChatFilesConfig>
+	suspend fun getFileConfigs(): Response<ChatFilesConfigResponse>
 
 	@GET("public/api/v1/files/get_file/{fileId}")
 	suspend fun getFile(

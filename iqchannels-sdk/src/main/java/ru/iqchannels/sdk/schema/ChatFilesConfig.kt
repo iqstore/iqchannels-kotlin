@@ -2,6 +2,16 @@ package ru.iqchannels.sdk.schema
 
 import com.google.gson.annotations.SerializedName
 
+
+data class ChatFilesConfigResponse(
+	@SerializedName("OK")
+	val ok: Boolean?,
+	@SerializedName("Error")
+	val error: String?,
+	@SerializedName("Result")
+	val result: ChatFilesConfig?
+)
+
 data class ChatFilesConfig(
 	@SerializedName("MaxFileSizeMb")
 	val maxFileSizeMb: Int?,

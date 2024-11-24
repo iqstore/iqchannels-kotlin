@@ -5,6 +5,8 @@ import org.json.JSONObject
 import ru.iqchannels.sdk.http.HttpException
 import ru.iqchannels.sdk.schema.ChatFilesConfig
 import ru.iqchannels.sdk.schema.UploadedFile
+import ru.iqchannels.sdk.Log
+import ru.iqchannels.sdk.schema.ChatFilesConfigResponse
 
 class GetConfigsInteractorImpl(
 	private val apiServices: GetFileConfigsApi
@@ -12,9 +14,8 @@ class GetConfigsInteractorImpl(
 
 	override suspend fun getFileConfigs(): ChatFilesConfig? {
 		val response = apiServices.getFileConfigs()
-
 		return if (response.isSuccessful) {
-			response.body()
+			response.body()?.result
 		} else {
 			throw HttpException(response.errorBody()?.string())
 		}

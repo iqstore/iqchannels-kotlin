@@ -25,7 +25,7 @@ internal object FileConfigChecker {
 			val resolver = context.contentResolver
 			val mimeTypeMap = MimeTypeMap.getSingleton()
 			val mtype = resolver.getType(uri)
-			val ext = mimeTypeMap.getExtensionFromMimeType(mtype)
+			val ext = if (mtype == "image/jpeg") "jpeg" else mimeTypeMap.getExtensionFromMimeType(mtype)
 			val file = FileUtils.createGalleryTempFile(context, uri, ext, tempDir)
 			checkFile(context, file, ext, childFragmentManager)?.let {
 				res.add(uri)

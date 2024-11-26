@@ -22,10 +22,8 @@ internal object FileConfigChecker {
 		val res = mutableListOf<Uri>()
 
 		files.forEach { uri ->
-			val resolver = context.contentResolver
-			val mimeTypeMap = MimeTypeMap.getSingleton()
-			val mtype = resolver.getType(uri)
-			val ext = if (mtype == "image/jpeg") "jpeg" else mimeTypeMap.getExtensionFromMimeType(mtype)
+			val path = uri.toString()
+			val ext = path.substring(path.lastIndexOf(".") + 1).lowercase()
 			val file = FileUtils.createGalleryTempFile(context, uri, ext, tempDir)
 			checkFile(context, file, ext, childFragmentManager)?.let {
 				res.add(uri)

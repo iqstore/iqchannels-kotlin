@@ -98,28 +98,56 @@
       },
       "text_size": 10
     },
-    "text_file_state_rejected": {
+    "text_file_state_rejected_operator": {
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
       "text_size": 10
     },
-    "text_file_state_on_checking": {
+    "text_file_state_on_checking_operator": {
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
       "text_size": 10
     },
-    "text_file_state_sent_for_checking": {
+    "text_file_state_sent_for_checking_operator": {
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
       },
       "text_size": 10
     },
-    "text_file_state_check_error": {
+    "text_file_state_check_error_operator": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_file_state_rejected_client": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_file_state_on_checking_client": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_file_state_sent_for_checking_client": {
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10
+    },
+    "text_file_state_check_error_client": {
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"

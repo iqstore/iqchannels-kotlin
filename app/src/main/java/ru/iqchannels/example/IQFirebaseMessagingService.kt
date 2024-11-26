@@ -1,6 +1,6 @@
 package ru.iqchannels.example
 
-import android.util.Log
+import ru.iqchannels.sdk.Log
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import ru.iqchannels.sdk.app.IQChannels

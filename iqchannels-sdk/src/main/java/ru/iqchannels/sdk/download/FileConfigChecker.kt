@@ -4,26 +4,28 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.webkit.MimeTypeMap
+import androidx.fragment.app.FragmentManager
 import java.io.File
 import ru.iqchannels.sdk.Log
+import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.app.IQChannelsConfigRepository
 import ru.iqchannels.sdk.ui.FileUtils
+import ru.iqchannels.sdk.ui.backdrop.ErrorPageBackdropDialog
+
 
 internal object FileConfigChecker {
 
-	fun checkFiles(context: Context, files: List<Uri>): List<Uri> {
+	fun checkFiles(context: Context, files: List<Uri>, childFragmentManager: FragmentManager): List<Uri> {
 		if (IQChannelsConfigRepository.chatFilesConfig == null) return files
 
 		val tempDir = context.tempDir() ?: return files
 		val res = mutableListOf<Uri>()
 
 		files.forEach { uri ->
-			val resolver = context.contentResolver
-			val mimeTypeMap = MimeTypeMap.getSingleton()
-			val mtype = resolver.getType(uri)
-			val ext = mimeTypeMap.getExtensionFromMimeType(mtype)
+			val path = uri.toString()
+			val ext = path.substring(path.lastIndexOf(".") + 1).lowercase()
 			val file = FileUtils.createGalleryTempFile(context, uri, ext, tempDir)
-			checkFile(file, ext)?.let {
+			checkFile(context, file, ext, childFragmentManager)?.let {
 				res.add(uri)
 			}
 		}
@@ -31,20 +33,39 @@ internal object FileConfigChecker {
 		return res
 	}
 
-	fun checkFile(file: File, ext: String?): File? {
+	fun checkFile(context: Context, file: File, ext: String?, childFragmentManager: FragmentManager): File? {
 		val configs = IQChannelsConfigRepository.chatFilesConfig ?: return file
 
 		// check file size
 		val fileSizeMb = file.length() / 1024 / 1024
-		if (configs.maxFileSizeMb != null && configs.maxFileSizeMb.toLong() < fileSizeMb) return null
+
+		if (configs.maxFileSizeMb != null && configs.maxFileSizeMb < fileSizeMb) {
+			Log.d("FileConfigChecker", "notAllowedFileSize: $fileSizeMb")
+
+			val backdrop = ErrorPageBackdropDialog.newInstance(context.getString(R.string.file_size_too_large))
+			backdrop.show(childFragmentManager, ErrorPageBackdropDialog.TRANSACTION_TAG)
+			return null
+		}
 
 		// check image
 		if (configs.maxImageHeight != null || configs.maxImageWidth != null) {
 			try {
-				val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+				val options = BitmapFactory.Options()
+				options.inJustDecodeBounds = true
+				BitmapFactory.decodeFile(file.path, options)
 
-				if (configs.maxImageWidth != null && configs.maxImageWidth < bitmap.width) return null
-				if (configs.maxImageHeight != null && configs.maxImageHeight < bitmap.height) return null
+				val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+				val allowedWidth = configs.maxImageWidth != null && configs.maxImageWidth > bitmap.width
+				val allowedHeight = configs.maxImageHeight != null && configs.maxImageHeight > bitmap.height
+
+
+				if (!allowedWidth || !allowedHeight) {
+					Log.d("FileConfigChecker", "notAllowedImageSize: ${bitmap.width}  ${bitmap.height}")
+
+					val backdrop = ErrorPageBackdropDialog.newInstance(context.getString(R.string.image_size_too_large))
+					backdrop.show(childFragmentManager, ErrorPageBackdropDialog.TRANSACTION_TAG)
+					return null
+				}
 			} catch (e: Exception) {
 				Log.d("FileConfigChecker", "error on reading bitmap: ${e.message}")
 			}
@@ -55,6 +76,10 @@ internal object FileConfigChecker {
 			val allowedExtensions = configs.allowedExtensions
 			if (!allowedExtensions.isNullOrEmpty()) {
 				if (!allowedExtensions.contains(ext)) {
+					Log.d("FileConfigChecker", "notAllowedExtension: $ext")
+
+					val backdrop = ErrorPageBackdropDialog.newInstance(context.getString(R.string.file_extension_not_allowed))
+					backdrop.show(childFragmentManager, ErrorPageBackdropDialog.TRANSACTION_TAG)
 					return null
 				}
 			}
@@ -62,6 +87,10 @@ internal object FileConfigChecker {
 			val forbiddenExtensions = configs.forbiddenExtensions
 			if (!forbiddenExtensions.isNullOrEmpty()) {
 				if (forbiddenExtensions.contains(ext)) {
+					Log.d("FileConfigChecker", "forbiddenExtension: $ext")
+
+					val backdrop = ErrorPageBackdropDialog.newInstance(context.getString(R.string.file_extension_forbidden))
+					backdrop.show(childFragmentManager, ErrorPageBackdropDialog.TRANSACTION_TAG)
 					return null
 				}
 			}

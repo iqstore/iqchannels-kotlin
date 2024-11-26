@@ -45,7 +45,7 @@ import ru.iqchannels.sdk.ui.Colors
 import ru.iqchannels.sdk.ui.UiUtils
 import ru.iqchannels.sdk.ui.UiUtils.getRatingScaleMaxValue
 import ru.iqchannels.sdk.ui.widgets.DropDownButton
-import android.util.Log
+import ru.iqchannels.sdk.Log
 import kotlin.math.max
 
 interface RatingPollListener {

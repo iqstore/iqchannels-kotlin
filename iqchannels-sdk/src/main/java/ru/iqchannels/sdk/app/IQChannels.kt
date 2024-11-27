@@ -402,6 +402,7 @@ object IQChannels {
 		token = preferences?.getString(ANONYMOUS_TOKEN, null)
 
 		if (token == null || token?.isEmpty() == true) {
+			logout()
 			signupAnonymous()
 			return
 		}
@@ -450,6 +451,7 @@ object IQChannels {
 				editor?.remove(ANONYMOUS_TOKEN)
 				editor?.apply()
 				token = null
+				logout()
 				signupAnonymous()
 				return
 			}
@@ -472,8 +474,6 @@ object IQChannels {
 		if (client == null) {
 			return
 		}
-
-		logout()
 
 		config?.let { config ->
 			val name = signupName
@@ -530,7 +530,9 @@ object IQChannels {
 
 		handler?.let { handler ->
 			val delaySec = Retry.delaySeconds(authAttempt)
-			handler.postDelayed({ signupAnonymous() }, (delaySec * 1000).toLong())
+			handler.postDelayed({
+				logout()
+				signupAnonymous()}, (delaySec * 1000).toLong())
 			Log.e(
 				TAG, String.format(
 					"Failed to signup, will retry in %d seconds, exc=%s",
@@ -1275,7 +1277,7 @@ object IQChannels {
 		user.Online = true
 		user.Id = 1
 		val message = ChatMessage(user, localId)
-		message.Text = "2.0.8-1"
+		message.Text = "2.0.9"
 		messages?.add(message)
 		for (listener in messageListeners) {
 			execute {

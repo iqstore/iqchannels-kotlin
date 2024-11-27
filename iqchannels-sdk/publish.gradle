@@ -1,6 +1,6 @@
 apply plugin: 'maven-publish'
 
-version '2.0.8-1'
+version '2.0.9'
 group 'ru.iqstore'
 
 Properties properties = new Properties()

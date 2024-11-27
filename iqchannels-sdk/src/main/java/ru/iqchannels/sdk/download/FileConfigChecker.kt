@@ -3,6 +3,7 @@ package ru.iqchannels.sdk.download
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.provider.OpenableColumns
 import android.webkit.MimeTypeMap
 import androidx.fragment.app.FragmentManager
 import java.io.File
@@ -22,8 +23,8 @@ internal object FileConfigChecker {
 		val res = mutableListOf<Uri>()
 
 		files.forEach { uri ->
-			val path = uri.toString()
-			val ext = path.substring(path.lastIndexOf(".") + 1).lowercase()
+			val filenameFromUri = getFilenameFromUri(context, uri)
+			val ext = filenameFromUri.substring(filenameFromUri.lastIndexOf(".") + 1).lowercase()
 			val file = FileUtils.createGalleryTempFile(context, uri, ext, tempDir)
 			checkFile(context, file, ext, childFragmentManager)?.let {
 				res.add(uri)
@@ -97,6 +98,24 @@ internal object FileConfigChecker {
 		}
 
 		return file
+	}
+
+	fun getFilenameFromUri(context: Context, uri: Uri): String {
+		var filename = ""
+		if (uri.scheme == "content") {
+			val cursor = context.contentResolver.query(uri, null, null, null, null)
+			cursor?.use {
+				if (it.moveToFirst()) {
+					val nameIndex = it.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+					if (nameIndex != -1) {
+						filename = it.getString(nameIndex)
+					}
+				}
+			}
+		} else if (uri.scheme == "file") {
+			filename = File(uri.path!!).name
+		}
+		return filename
 	}
 
 	fun Context.tempDir(): File? {

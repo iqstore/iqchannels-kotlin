@@ -130,41 +130,6 @@ internal class ChatMessagesAdapter(
 		}
 	}
 
-	fun typing(event: ChatEvent) {
-		if (agentTyping) {
-			return
-		}
-
-		if (event.Actor == ActorType.CLIENT) {
-			return
-		}
-
-		agentTyping = true
-		val msg = ChatMessage()
-		msg.Author = ActorType.USER
-		val name = if (event.User != null) event.User?.DisplayName else null
-		msg.Text = "$name печатает..."
-		msg.Payload = ChatPayloadType.TYPING
-		msg.System = true
-		msg.Date = Date()
-		messages.add(msg)
-
-		if (messages.size > 1) {
-			notifyItemChanged(messages.size - 2)
-		}
-
-		notifyItemInserted(messages.size - 1)
-		Handler(Looper.getMainLooper()).postDelayed(
-			{
-				agentTyping = false
-				val i: Int = messages.indexOf(msg)
-				messages.remove(msg)
-				notifyItemRemoved(i)
-			},
-			3000
-		)
-	}
-
 	fun updated(message: ChatMessage) {
 		val i = getIndexByMessage(message)
 		if (i < 0) {

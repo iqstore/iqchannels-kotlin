@@ -22,6 +22,8 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import android.os.Parcelable
 import android.provider.MediaStore
 import android.text.Editable
@@ -88,6 +90,7 @@ import ru.iqchannels.sdk.http.HttpException
 import ru.iqchannels.sdk.lib.InternalIO.copy
 import ru.iqchannels.sdk.schema.Action
 import ru.iqchannels.sdk.schema.ActionType
+import ru.iqchannels.sdk.schema.ActorType
 import ru.iqchannels.sdk.schema.ChatEvent
 import ru.iqchannels.sdk.schema.ChatException
 import ru.iqchannels.sdk.schema.ChatMessage
@@ -901,8 +904,24 @@ class ChatFragment : Fragment() {
 	}
 
 	private fun eventTyping(event: ChatEvent) {
-		adapter?.typing(event)
-		maybeScrollToBottomOnNewMessage()
+		if (event.Actor == ActorType.CLIENT) {
+			return
+		}
+
+		val name = if (event.User != null) event.User?.DisplayName else "Оператор"
+
+		val typingText = view?.findViewById<TextView?>(R.id.typing)
+		typingText?.text = "$name печатает..."
+		typingText?.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.systemText)
+
+		typingText?.visibility = View.VISIBLE
+
+		Handler(Looper.getMainLooper()).postDelayed(
+			{
+				typingText?.visibility = View.GONE
+			},
+			3000
+		)
 	}
 
 	private fun messageUpdated(message: ChatMessage) {

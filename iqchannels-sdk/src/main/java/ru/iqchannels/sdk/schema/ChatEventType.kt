@@ -15,6 +15,8 @@ enum class ChatEventType {
 	TYPING,
 	@SerializedName("message_created")
 	MESSAGE_CREATED,
+	@SerializedName("rating_ignored")
+	RATING_IGNORED,
 	@SerializedName("system_message_created")
 	SYSTEM_MESSAGE_CREATED,
 	@SerializedName("message_received")

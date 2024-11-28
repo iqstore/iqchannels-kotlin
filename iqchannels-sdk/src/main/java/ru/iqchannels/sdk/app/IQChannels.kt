@@ -1649,10 +1649,10 @@ object IQChannels {
 		return null
 	}
 
-	private fun getMyMessageByLocalId(localId: Long): ChatMessage? {
+	private fun getMessageByLocalId(localId: Long): ChatMessage? {
 		messages?.let { messages ->
 			for (message in messages) {
-				if (message.My && message.LocalId == localId) {
+				if (message.LocalId == localId) {
 					return message
 				}
 			}
@@ -1678,6 +1678,7 @@ object IQChannels {
 			ChatEventType.MESSAGE_DELETED -> messageDeleted(event)
 			ChatEventType.MESSAGE_RECEIVED -> messageReceived(event)
 			ChatEventType.MESSAGE_READ -> messageRead(event)
+			ChatEventType.RATING_IGNORED -> ratingIgnored(event)
 			ChatEventType.TYPING -> messageTyping(event)
 			ChatEventType.CHAT_CHANNEL_CHANGE -> changeChannel(event)
 			ChatEventType.FILE_UPDATED -> fileUpdated(event)
@@ -1688,7 +1689,7 @@ object IQChannels {
 	private fun messageCreated(event: ChatEvent) {
 		val message = event.Message ?: return
 		if (message.My) {
-			val existing = getMyMessageByLocalId(message.LocalId)
+			val existing = getMessageByLocalId(message.LocalId)
 			if (existing != null) {
 				existing.Id = message.Id
 				existing.EventId = message.EventId
@@ -1804,6 +1805,26 @@ object IQChannels {
 			for (listener in messageListeners) {
 				execute { listener.messageUpdated(message) }
 			}
+		}
+	}
+
+	private fun ratingIgnored(event: ChatEvent) {
+		val message = event.Message ?: return
+
+		val existing = getMessageByLocalId(message.LocalId)
+
+		if (existing != null) {
+			existing.Rating = message.Rating
+			Log.i(
+				TAG, String.format(
+					"Received a rating confirmation, localId=%d",
+					message.LocalId
+				)
+			)
+			for (listener in messageListeners) {
+				execute { listener.messageUpdated(existing) }
+			}
+			return
 		}
 	}
 

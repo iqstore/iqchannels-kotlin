@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import ru.iqchannels.sdk.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import okhttp3.ResponseBody
 import java.io.File
 import java.io.InterruptedIOException
 import java.net.MalformedURLException
@@ -19,6 +20,8 @@ import ru.iqchannels.sdk.schema.ChatEvent
 import ru.iqchannels.sdk.schema.ChatEventQuery
 import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.schema.ChatMessageForm
+import ru.iqchannels.sdk.schema.ChatSettings
+import ru.iqchannels.sdk.schema.ChatSettingsQuery
 import ru.iqchannels.sdk.schema.Client
 import ru.iqchannels.sdk.schema.ClientAuth
 import ru.iqchannels.sdk.schema.ClientAuthRequest
@@ -287,9 +290,9 @@ class HttpClient(
 			query,
 			type,
 			object : HttpCallback<ru.iqchannels.sdk.schema.Response<List<ChatMessage>>> {
-				override fun onResult(response: ru.iqchannels.sdk.schema.Response<List<ChatMessage>>?) {
-					val map = response?.Rels?.let { rels.map(it) }
-					val messages = response?.Result
+				override fun onResult(result: ru.iqchannels.sdk.schema.Response<List<ChatMessage>>?) {
+					val map = result?.Rels?.let { rels.map(it) }
+					val messages = result?.Result
 					map?.let {
 						messages?.let {
 							rels.chatMessages(messages, map)
@@ -300,6 +303,53 @@ class HttpClient(
 
 				override fun onException(exception: Exception) {
 					callback.onException(exception)
+				}
+			}
+		)
+	}
+
+	fun getChatSettings(
+		channel: String,
+		query: ChatSettingsQuery,
+		callback: HttpCallback<ChatSettings>
+	): HttpRequest {
+		val path = "/chats/channel/chat/get_settings/$channel"
+		val type: TypeToken<ru.iqchannels.sdk.schema.Response<ChatSettings>> =
+			object : TypeToken<ru.iqchannels.sdk.schema.Response<ChatSettings>>() {}
+
+		return post(
+			path,
+			query,
+			type,
+			object : HttpCallback<ru.iqchannels.sdk.schema.Response<ChatSettings>> {
+				override fun onResult(result: ru.iqchannels.sdk.schema.Response<ChatSettings>?) {
+					val chatSettings = result?.Data
+					callback.onResult(chatSettings)
+				}
+
+				override fun onException(exception: Exception) {
+					callback.onException(exception)
+				}
+			}
+		)
+	}
+
+	fun openSystemChat(
+		channel: String
+	): HttpRequest {
+		val path = "/chats/channel/system_chats/send/$channel"
+
+		return post(
+			path,
+			null,
+			null,
+			object : HttpCallback<ru.iqchannels.sdk.schema.Response<ResponseBody>> {
+				override fun onResult(result: ru.iqchannels.sdk.schema.Response<ResponseBody>?) {
+					Log.d("openSystemChat", result.toString())
+				}
+
+				override fun onException(exception: Exception) {
+					Log.e("openSystemChat", "${exception.message}")
 				}
 			}
 		)

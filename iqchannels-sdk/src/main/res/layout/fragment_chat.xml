@@ -147,6 +147,20 @@
 
         </FrameLayout>
 
+
+        <!-- Typing -->
+        <TextView
+            android:id="@+id/typing"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/send"
+            android:background="@color/white"
+            android:paddingHorizontal="70dp"
+            android:paddingVertical="5dp"
+            android:text="Печатает..."
+            android:visibility="gone" />
+
+
         <!-- Send textbox and button -->
         <RelativeLayout
             android:id="@+id/send"
@@ -156,7 +170,6 @@
             android:paddingBottom="@dimen/activity_vertical_margin">
 
             <!-- Reply -->
-
             <ru.iqchannels.sdk.ui.widgets.ReplyMessageView
                 android:id="@+id/reply"
                 android:layout_width="match_parent"

@@ -26,6 +26,7 @@ import ru.iqchannels.sdk.http.HttpRequest
 import ru.iqchannels.sdk.http.HttpSseListener
 import ru.iqchannels.sdk.http.retrofit.NetworkModule
 import ru.iqchannels.sdk.rels.Rels
+import ru.iqchannels.sdk.schema.ActorType
 import ru.iqchannels.sdk.schema.ChatEvent
 import ru.iqchannels.sdk.schema.ChatEventQuery
 import ru.iqchannels.sdk.schema.ChatEventType
@@ -33,6 +34,9 @@ import ru.iqchannels.sdk.schema.ChatException
 import ru.iqchannels.sdk.schema.ChatExceptionCode
 import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.schema.ChatMessageForm
+import ru.iqchannels.sdk.schema.ChatPayloadType
+import ru.iqchannels.sdk.schema.ChatSettings
+import ru.iqchannels.sdk.schema.ChatSettingsQuery
 import ru.iqchannels.sdk.schema.ClientAuth
 import ru.iqchannels.sdk.schema.ClientTypingForm
 import ru.iqchannels.sdk.schema.FileImageSize
@@ -118,8 +122,12 @@ object IQChannels {
 	private var sendRequest: HttpRequest? = null
 	private var sendTypingRequest: HttpRequest? = null
 
+	// chat
 	@Volatile
 	internal var chatType: ChatType = ChatType.REGULAR
+	internal var systemChat: Boolean = false
+	private var chatSettingsRequest: HttpRequest? = null
+
 
 	init {
 		listeners = HashSet()
@@ -383,7 +391,7 @@ object IQChannels {
 				execute { listener.authComplete(auth) }
 			}
 			sendPushToken()
-			loadMessages()
+			getChatSettings()
 			listenToUnread()
 		}
 	}
@@ -402,6 +410,7 @@ object IQChannels {
 		token = preferences?.getString(ANONYMOUS_TOKEN, null)
 
 		if (token == null || token?.isEmpty() == true) {
+			logout()
 			signupAnonymous()
 			return
 		}
@@ -450,6 +459,7 @@ object IQChannels {
 				editor?.remove(ANONYMOUS_TOKEN)
 				editor?.apply()
 				token = null
+				logout()
 				signupAnonymous()
 				return
 			}
@@ -472,8 +482,6 @@ object IQChannels {
 		if (client == null) {
 			return
 		}
-
-		logout()
 
 		config?.let { config ->
 			val name = signupName
@@ -530,7 +538,9 @@ object IQChannels {
 
 		handler?.let { handler ->
 			val delaySec = Retry.delaySeconds(authAttempt)
-			handler.postDelayed({ signupAnonymous() }, (delaySec * 1000).toLong())
+			handler.postDelayed({
+				logout()
+				signupAnonymous()}, (delaySec * 1000).toLong())
 			Log.e(
 				TAG, String.format(
 					"Failed to signup, will retry in %d seconds, exc=%s",
@@ -762,7 +772,7 @@ object IQChannels {
 		Log.d(TAG, String.format("Added a messages listener %s", listener))
 
 		if(!fileСhooser) {
-			loadMessages()
+			getChatSettings()
 		}
 		fileСhooser = false
 
@@ -799,7 +809,7 @@ object IQChannels {
 		Log.d(TAG, "Cleared messages")
 	}
 
-	private fun loadMessages() {
+	private fun loadMessages(autoGreeting: ChatMessage?) {
 		if (messageRequest != null) {
 			return
 		}
@@ -820,16 +830,83 @@ object IQChannels {
 					query,
 					object : HttpCallback<List<ChatMessage>> {
 						override fun onResult(messages: List<ChatMessage>?) {
+							val copy: MutableList<ChatMessage> = ArrayList(messages)
+							autoGreeting?.let {
+								copy.add(autoGreeting)
+							}
 							messages?.let {
-								execute { messagesLoaded(messages) }
+								execute { messagesLoaded(copy) }
 							}
 						}
 
 						override fun onException(exception: Exception) {
 							execute { messagesException(exception) }
 						}
-					})
+					}
+				)
 				Log.i(TAG, "Loading messages")
+			}
+		}
+	}
+
+	private fun showAutoGreeting(settings: ChatSettings?) {
+		Log.d("chatSettings", settings.toString())
+		systemChat = settings?.Enabled == true
+
+		if(systemChat){
+			openSystemChat()
+		}
+		val now = Date()
+		val message = when {
+			settings == null -> null
+			systemChat && settings.TotalOpenedTickets == 0 -> ChatMessage().apply {
+				Id = now.time
+				Author = ActorType.USER
+				CreatedAt = now.time
+				Date = now
+				Text = settings.Message
+				Payload = ChatPayloadType.TEXT
+				Read = true
+				Received = true
+				UserId = now.time
+				User = User().apply { DisplayName = settings.OperatorName }
+			}
+			else -> null
+		}
+		loadMessages(message)
+	}
+
+	private fun getChatSettings() {
+		val clientId = auth?.Client?.Id ?: return
+
+		val query = ChatSettingsQuery().apply {
+			ClientId = clientId
+		}
+
+		client?.let { client ->
+			config?.channel?.let { channel ->
+				chatSettingsRequest = client.getChatSettings(
+					channel,
+					query,
+					object : HttpCallback<ChatSettings> {
+						override fun onResult(result: ChatSettings?) {
+							showAutoGreeting(result)
+						}
+
+						override fun onException(exception: Exception) {
+							Log.e(TAG, "Failed to get chat settings, exc=${exception.message}")
+						}
+					}
+				)
+				Log.i(TAG, "get chat settings")
+			}
+		}
+	}
+
+	private fun openSystemChat() {
+		client?.let { client ->
+			config?.channel?.let { channel ->
+				 client.openSystemChat(channel)
 			}
 		}
 	}
@@ -1275,7 +1352,7 @@ object IQChannels {
 		user.Online = true
 		user.Id = 1
 		val message = ChatMessage(user, localId)
-		message.Text = "2.0.8-1"
+		message.Text = "2.0.9"
 		messages?.add(message)
 		for (listener in messageListeners) {
 			execute {
@@ -1647,10 +1724,10 @@ object IQChannels {
 		return null
 	}
 
-	private fun getMyMessageByLocalId(localId: Long): ChatMessage? {
+	private fun getMessageByLocalId(localId: Long): ChatMessage? {
 		messages?.let { messages ->
 			for (message in messages) {
-				if (message.My && message.LocalId == localId) {
+				if (message.LocalId == localId) {
 					return message
 				}
 			}
@@ -1676,7 +1753,10 @@ object IQChannels {
 			ChatEventType.MESSAGE_DELETED -> messageDeleted(event)
 			ChatEventType.MESSAGE_RECEIVED -> messageReceived(event)
 			ChatEventType.MESSAGE_READ -> messageRead(event)
+			ChatEventType.RATING_IGNORED -> ratingIgnored(event)
 			ChatEventType.TYPING -> messageTyping(event)
+			ChatEventType.CHAT_CLOSED -> systemChat = false
+			ChatEventType.CLOSE_SYSTEM_CHAT -> systemChat = false
 			ChatEventType.CHAT_CHANNEL_CHANGE -> changeChannel(event)
 			ChatEventType.FILE_UPDATED -> fileUpdated(event)
 			else -> Log.i(TAG, String.format("applyEvent: %s", event.Type))
@@ -1686,7 +1766,7 @@ object IQChannels {
 	private fun messageCreated(event: ChatEvent) {
 		val message = event.Message ?: return
 		if (message.My) {
-			val existing = getMyMessageByLocalId(message.LocalId)
+			val existing = getMessageByLocalId(message.LocalId)
 			if (existing != null) {
 				existing.Id = message.Id
 				existing.EventId = message.EventId
@@ -1802,6 +1882,26 @@ object IQChannels {
 			for (listener in messageListeners) {
 				execute { listener.messageUpdated(message) }
 			}
+		}
+	}
+
+	private fun ratingIgnored(event: ChatEvent) {
+		val message = event.Message ?: return
+
+		val existing = getMessageByLocalId(message.LocalId)
+
+		if (existing != null) {
+			existing.Rating = message.Rating
+			Log.i(
+				TAG, String.format(
+					"Received a rating confirmation, localId=%d",
+					message.LocalId
+				)
+			)
+			for (listener in messageListeners) {
+				execute { listener.messageUpdated(existing) }
+			}
+			return
 		}
 	}
 

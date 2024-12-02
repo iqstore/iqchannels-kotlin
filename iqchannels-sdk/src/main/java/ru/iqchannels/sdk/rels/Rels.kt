@@ -4,6 +4,7 @@
  */
 package ru.iqchannels.sdk.rels
 
+import ru.iqchannels.sdk.Log
 import java.util.*
 import ru.iqchannels.sdk.schema.ChatEvent
 import ru.iqchannels.sdk.schema.ChatMessage

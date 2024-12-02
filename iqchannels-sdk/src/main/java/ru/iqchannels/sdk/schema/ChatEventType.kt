@@ -11,6 +11,8 @@ enum class ChatEventType {
 	CHAT_OPENED,
 	@SerializedName("chat_closed")
 	CHAT_CLOSED,
+	@SerializedName("close-system-chat")
+	CLOSE_SYSTEM_CHAT,
 	@SerializedName("typing")
 	TYPING,
 	@SerializedName("message_created")

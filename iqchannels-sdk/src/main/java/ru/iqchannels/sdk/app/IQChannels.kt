@@ -26,6 +26,7 @@ import ru.iqchannels.sdk.http.HttpRequest
 import ru.iqchannels.sdk.http.HttpSseListener
 import ru.iqchannels.sdk.http.retrofit.NetworkModule
 import ru.iqchannels.sdk.rels.Rels
+import ru.iqchannels.sdk.schema.ActorType
 import ru.iqchannels.sdk.schema.ChatEvent
 import ru.iqchannels.sdk.schema.ChatEventQuery
 import ru.iqchannels.sdk.schema.ChatEventType
@@ -33,6 +34,9 @@ import ru.iqchannels.sdk.schema.ChatException
 import ru.iqchannels.sdk.schema.ChatExceptionCode
 import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.schema.ChatMessageForm
+import ru.iqchannels.sdk.schema.ChatPayloadType
+import ru.iqchannels.sdk.schema.ChatSettings
+import ru.iqchannels.sdk.schema.ChatSettingsQuery
 import ru.iqchannels.sdk.schema.ClientAuth
 import ru.iqchannels.sdk.schema.ClientTypingForm
 import ru.iqchannels.sdk.schema.FileImageSize
@@ -118,8 +122,12 @@ object IQChannels {
 	private var sendRequest: HttpRequest? = null
 	private var sendTypingRequest: HttpRequest? = null
 
+	// chat
 	@Volatile
 	internal var chatType: ChatType = ChatType.REGULAR
+	internal var systemChat: Boolean = false
+	private var chatSettingsRequest: HttpRequest? = null
+
 
 	init {
 		listeners = HashSet()
@@ -383,7 +391,7 @@ object IQChannels {
 				execute { listener.authComplete(auth) }
 			}
 			sendPushToken()
-			loadMessages()
+			getChatSettings()
 			listenToUnread()
 		}
 	}
@@ -764,7 +772,7 @@ object IQChannels {
 		Log.d(TAG, String.format("Added a messages listener %s", listener))
 
 		if(!fileСhooser) {
-			loadMessages()
+			getChatSettings()
 		}
 		fileСhooser = false
 
@@ -801,7 +809,7 @@ object IQChannels {
 		Log.d(TAG, "Cleared messages")
 	}
 
-	private fun loadMessages() {
+	private fun loadMessages(autoGreeting: ChatMessage?) {
 		if (messageRequest != null) {
 			return
 		}
@@ -822,16 +830,83 @@ object IQChannels {
 					query,
 					object : HttpCallback<List<ChatMessage>> {
 						override fun onResult(messages: List<ChatMessage>?) {
+							val copy: MutableList<ChatMessage> = ArrayList(messages)
+							autoGreeting?.let {
+								copy.add(autoGreeting)
+							}
 							messages?.let {
-								execute { messagesLoaded(messages) }
+								execute { messagesLoaded(copy) }
 							}
 						}
 
 						override fun onException(exception: Exception) {
 							execute { messagesException(exception) }
 						}
-					})
+					}
+				)
 				Log.i(TAG, "Loading messages")
+			}
+		}
+	}
+
+	private fun showAutoGreeting(settings: ChatSettings?) {
+		Log.d("chatSettings", settings.toString())
+		systemChat = settings?.Enabled == true
+
+		if(systemChat){
+			openSystemChat()
+		}
+		val now = Date()
+		val message = when {
+			settings == null -> null
+			systemChat && settings.TotalOpenedTickets == 0 -> ChatMessage().apply {
+				Id = now.time
+				Author = ActorType.USER
+				CreatedAt = now.time
+				Date = now
+				Text = settings.Message
+				Payload = ChatPayloadType.TEXT
+				Read = true
+				Received = true
+				UserId = now.time
+				User = User().apply { DisplayName = settings.OperatorName }
+			}
+			else -> null
+		}
+		loadMessages(message)
+	}
+
+	private fun getChatSettings() {
+		val clientId = auth?.Client?.Id ?: return
+
+		val query = ChatSettingsQuery().apply {
+			ClientId = clientId
+		}
+
+		client?.let { client ->
+			config?.channel?.let { channel ->
+				chatSettingsRequest = client.getChatSettings(
+					channel,
+					query,
+					object : HttpCallback<ChatSettings> {
+						override fun onResult(result: ChatSettings?) {
+							showAutoGreeting(result)
+						}
+
+						override fun onException(exception: Exception) {
+							Log.e(TAG, "Failed to get chat settings, exc=${exception.message}")
+						}
+					}
+				)
+				Log.i(TAG, "get chat settings")
+			}
+		}
+	}
+
+	private fun openSystemChat() {
+		client?.let { client ->
+			config?.channel?.let { channel ->
+				 client.openSystemChat(channel)
 			}
 		}
 	}
@@ -1680,6 +1755,8 @@ object IQChannels {
 			ChatEventType.MESSAGE_READ -> messageRead(event)
 			ChatEventType.RATING_IGNORED -> ratingIgnored(event)
 			ChatEventType.TYPING -> messageTyping(event)
+			ChatEventType.CHAT_CLOSED -> systemChat = false
+			ChatEventType.CLOSE_SYSTEM_CHAT -> systemChat = false
 			ChatEventType.CHAT_CHANNEL_CHANGE -> changeChannel(event)
 			ChatEventType.FILE_UPDATED -> fileUpdated(event)
 			else -> Log.i(TAG, String.format("applyEvent: %s", event.Type))

@@ -1,5 +1,6 @@
 package ru.iqchannels.sdk.http.retrofit
 
+import okhttp3.Interceptor
 import java.util.concurrent.TimeUnit
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -9,14 +10,20 @@ import ru.iqchannels.sdk.configs.GetFileConfigsApi
 
 object NetworkModule {
 
-	fun provideOkHttpClient(
-	): OkHttpClient {
+	fun provideOkHttpClient(): OkHttpClient {
 		val timeout = 300L
 
-		return OkHttpClient
-			.Builder()
+		val interceptor = Interceptor { chain ->
+			val request = chain.request().newBuilder()
+				.addHeader("Cookie", "client-session=${IQChannels.getCurrentToken()}")
+				.build()
+			chain.proceed(request)
+		}
+
+		return OkHttpClient.Builder()
 			.connectTimeout(timeout, TimeUnit.SECONDS)
 			.readTimeout(timeout, TimeUnit.SECONDS)
+			.addInterceptor(interceptor)
 			.build()
 	}
 

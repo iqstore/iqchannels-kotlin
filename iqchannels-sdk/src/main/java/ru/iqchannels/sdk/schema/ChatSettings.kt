@@ -6,6 +6,8 @@ class ChatSettings {
     var Id: Long = 0
     var Message: String = "Здравствуйте!"
     var Enabled: Boolean = true
+    var GreetFrom: String = "user"
+    var Lifetime: Int = 300
     var OperatorName: String = "Оператор"
     var TotalOpenedTickets: Int = 0
 

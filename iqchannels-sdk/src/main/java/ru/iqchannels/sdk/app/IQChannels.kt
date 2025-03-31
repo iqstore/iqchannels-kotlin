@@ -853,25 +853,30 @@ object IQChannels {
 		Log.d("chatSettings", settings.toString())
 		systemChat = settings?.Enabled == true
 
-		if(systemChat){
+		var message: ChatMessage? = null
+
+		if (settings?.GreetFrom == "bot") {
 			openSystemChat()
-		}
-		val now = Date()
-		val message = when {
-			settings == null -> null
-			systemChat && settings.TotalOpenedTickets == 0 -> ChatMessage().apply {
-				Id = now.time
-				Author = ActorType.USER
-				CreatedAt = now.time
-				Date = now
-				Text = settings.Message
-				Payload = ChatPayloadType.TEXT
-				Read = true
-				Received = true
-				UserId = now.time
-				User = User().apply { DisplayName = settings.OperatorName }
+		} else {
+			if(settings?.TotalOpenedTickets == 0){
+				val now = Date()
+				message = when {
+					systemChat && settings.TotalOpenedTickets == 0 -> ChatMessage().apply {
+						Id = now.time
+						Author = ActorType.USER
+						CreatedAt = now.time
+						Date = now
+						Text = settings.Message
+						Payload = ChatPayloadType.TEXT
+						Read = true
+						Received = true
+						UserId = now.time
+						User = User().apply { DisplayName = settings.OperatorName }
+					}
+					else -> null
+				}
+//				lifeTime = settings.lifetime
 			}
-			else -> null
 		}
 		loadMessages(message)
 	}
@@ -1352,7 +1357,7 @@ object IQChannels {
 		user.Online = true
 		user.Id = 1
 		val message = ChatMessage(user, localId)
-		message.Text = "2.0.9"
+		message.Text = "2.1.0"
 		messages?.add(message)
 		for (listener in messageListeners) {
 			execute {

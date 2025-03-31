@@ -932,6 +932,8 @@ class ChatFragment : Fragment() {
 		checkDisableFreeText(message)
 		adapter?.updated(message)
 
+		maybeScrollToBottomOnNewMessage()
+
 		checkException(message)
 
 		viewModel.onMessageUpdated(message, requireActivity())

@@ -26,8 +26,8 @@ class GetConfigsInteractorImpl(
 
 		return if (response.isSuccessful) {
 			val responseBody = response.body()
-			val json = JSONObject(responseBody?.string())
-			val result = json.getJSONObject("Result")
+			val json = responseBody?.string()?.let { JSONObject(it) }
+			val result = json?.getJSONObject("Result")
 			Gson().getAdapter(UploadedFile::class.java).fromJson(result.toString())
 		} else {
 			throw HttpException(response.errorBody()?.string())

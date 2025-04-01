@@ -74,12 +74,12 @@ class ChatMessage {
 		Text = text
 	}
 
-	constructor(client: Client, localId: Long, file: File, replyToMessageId: Long?) : this(
+	constructor(client: Client, localId: Long, text: String, file: File, replyToMessageId: Long?) : this(
 		client,
 		localId
 	) {
 		Payload = ChatPayloadType.FILE
-		Text = file.name
+		Text = text
 		Upload = file
 		ReplyToMessageId = replyToMessageId
 	}

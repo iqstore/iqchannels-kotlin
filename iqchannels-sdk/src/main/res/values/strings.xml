@@ -34,8 +34,8 @@
     <string name="check_connection">Проверьте соединение с Интернетом</string>
     <string name="error_occured">Произошла ошибка</string>
     <string name="timeout_message">Превышено время ожидания, повторите попытку позже</string>
-    <string name="file_saved_success_msg">Файл \"%1$s\" успешно сохранен в папку \"Загрузки\"</string>
-    <string name="file_saved_fail_msg">Не удалось сохранить файл \"%1$s\" в папку \"Загрузки\"</string>
+    <string name="file_saved_success_msg">Файл успешно сохранен в папку \"Загрузки\"</string>
+    <string name="file_saved_fail_msg">Не удалось сохранить файл в папку \"Загрузки\"</string>
     <string name="file_size_kb_placeholder">%1$s кб</string>
     <string name="file_size_mb_placeholder">%1$s Мб</string>
     <string name="msg_date_time">%1$s, %2$s</string>

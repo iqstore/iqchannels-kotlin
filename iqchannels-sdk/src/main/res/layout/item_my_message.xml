@@ -210,10 +210,9 @@
                         android:layout_height="wrap_content"
                         android:textColor="#ff979fa7"
                         android:textSize="15sp"
-                        app:layout_constraintTop_toBottomOf="@id/tvMyFileName"
                         app:layout_constraintStart_toEndOf="@id/barrier_icon_file"
-                        tools:text="15.0 кб"
-                        />
+                        app:layout_constraintTop_toBottomOf="@id/tvMyFileName"
+                        tools:text="15.0 кб" />
 
                     <TextView
                         android:id="@+id/myText"
@@ -222,13 +221,12 @@
                         android:autoLink="all"
                         android:textColor="@color/my_text_color"
                         android:textSize="16sp"
-                        app:layout_constraintTop_toBottomOf="@+id/tvMyFileName"
-                        app:layout_constraintStart_toEndOf="@id/barrier_icon_file"
-                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constrainedWidth="true"
+                        app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintHorizontal_bias="0"
-                        tools:text="Message Text adsadasdasdasdads adsads ds"
-                        />
+                        app:layout_constraintStart_toEndOf="@id/barrier_icon_file"
+                        app:layout_constraintTop_toBottomOf="@+id/tvMyFileSize"
+                        tools:text="Message Text" />
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </LinearLayout>

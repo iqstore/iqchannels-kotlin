@@ -154,7 +154,7 @@ class ImagePreviewFragment : Fragment() {
 				val result = saveImage(bitmapDrawable.bitmap, fileName)
 				if (result) {
 					withContext(Dispatchers.Main) {
-						showSuccessMessage()
+						Toast.makeText(context, getString(R.string.image_saved), Toast.LENGTH_LONG).show()
 					}
 				}
 			}
@@ -210,11 +210,6 @@ class ImagePreviewFragment : Fragment() {
 		}
 
 		return false
-	}
-
-	private fun showSuccessMessage() {
-		Toast.makeText(context, getString(R.string.image_saved), Toast.LENGTH_LONG)
-			.show()
 	}
 
 	private fun galleryAddPic(imagePath: String?) {

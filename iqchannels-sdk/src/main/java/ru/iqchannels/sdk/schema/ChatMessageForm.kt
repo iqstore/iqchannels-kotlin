@@ -19,11 +19,12 @@ class ChatMessageForm {
 			return form
 		}
 
-		fun file(localId: Long, fileId: String?, replyToMessageId: Long?): ChatMessageForm {
+		fun file(localId: Long, text: String?, fileId: String?, replyToMessageId: Long?): ChatMessageForm {
 			val form = ChatMessageForm()
 			form.LocalId = localId
 			form.Payload = ChatPayloadType.FILE
 			form.FileId = fileId
+			form.Text = text
 			form.ReplyToMessageId = replyToMessageId
 			return form
 		}

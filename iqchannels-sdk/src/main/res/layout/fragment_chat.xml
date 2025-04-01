@@ -174,10 +174,20 @@
                 android:id="@+id/reply"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/divider"
                 android:background="@color/white"
                 android:paddingHorizontal="16dp"
                 android:paddingVertical="15dp"
-                android:layout_below="@id/divider"
+                android:visibility="gone" />
+
+            <ru.iqchannels.sdk.ui.widgets.FileMessageView
+                android:id="@+id/file"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/reply"
+                android:background="@color/white"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="15dp"
                 android:visibility="gone" />
 
             <ImageView
@@ -206,21 +216,21 @@
                 android:id="@+id/sendText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/file"
                 android:layout_marginTop="12dp"
                 android:layout_marginEnd="12dp"
-                android:minHeight="40dp"
-                android:layout_below="@id/reply"
                 android:layout_toLeftOf="@+id/sendButton"
                 android:layout_toRightOf="@+id/attachButton"
                 android:background="@drawable/bg_text_field"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="8dp"
                 android:gravity="center_vertical"
                 android:hint="@string/chat_send_hint"
                 android:imeOptions="actionSend"
                 android:inputType="textShortMessage|textCapSentences|textAutoCorrect|textAutoComplete|textMultiLine"
                 android:maxLength="4096"
-                android:maxLines="4"/>
+                android:maxLines="4"
+                android:minHeight="40dp"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="8dp" />
 
             <ImageButton
                 android:id="@+id/sendButton"

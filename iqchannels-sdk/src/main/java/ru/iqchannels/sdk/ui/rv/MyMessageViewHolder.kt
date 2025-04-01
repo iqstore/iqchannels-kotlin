@@ -123,7 +123,7 @@ internal class MyMessageViewHolder(
 
 		// Message
 		if (message.Upload != null) {
-			myText.visibility = View.GONE
+			myText.visibility = View.VISIBLE
 			myImageFrame.visibility = View.GONE
 			clTextsMy.visibility = View.VISIBLE
 			myUpload.visibility = View.VISIBLE
@@ -142,8 +142,7 @@ internal class MyMessageViewHolder(
 
 			showFileSize(size)
 
-			myText.text = file.name
-			myText.setTextColor(Colors.linkColor())
+			myText.text = message.Text
 		} else if (message.File != null) {
 			when (message.File?.State) {
 				FileValidState.Rejected -> showFileStateMsg(
@@ -267,27 +266,34 @@ internal class MyMessageViewHolder(
 			if (imageUrl != null) {
 				val size = Utils.computeImageSizeFromFile(file, rootViewDimens)
 
-				/*
-				if (message.Text != null && message.Text?.isNotEmpty() == true) {
+				if (!message.Text.isNullOrEmpty()) {
 					clTextsMy.visibility = View.VISIBLE
 					myText.visibility = View.VISIBLE
 					myText.text = message.Text
+					myFlags.isVisible = true
+
+					myImgFlags.isVisible = false
+					myDate.text = message.Date?.let { timeFormat.format(it) } ?: ""
+					myDate.visibility = if (message.Date != null) View.VISIBLE else View.GONE
+					myReceived.visibility = if (message.Received) View.VISIBLE else View.GONE
+					myRead.visibility = if (message.Read) View.VISIBLE else View.GONE
+					val isRead = message.Read
+					myRead.isVisible = isRead
+					myReceived.isVisible = !isRead && message.Received == true
 				} else {
+					clTextsMy.visibility = View.GONE
 					myText.visibility = View.GONE
+					myFlags.isVisible = false
+
+					myImgFlags.isVisible = true
+					myImgDate.text = message.Date?.let { timeFormat.format(it) } ?: ""
+					myImgDate.visibility = if (message.Date != null) View.VISIBLE else View.GONE
+					myImgReceived.visibility = if (message.Received) View.VISIBLE else View.GONE
+					myImgRead.visibility = if (message.Read) View.VISIBLE else View.GONE
+					val isRead = message.Read
+					myImgRead.isVisible = isRead
+					myImgReceived.isVisible = !isRead && message.Received == true
 				}
-				 */
-
-				myText.visibility = View.GONE
-
-				myImgFlags.isVisible = true
-				myFlags.isVisible = false
-				myImgDate.text = message.Date?.let { timeFormat.format(it) } ?: ""
-				myImgDate.visibility = if (message.Date != null) View.VISIBLE else View.GONE
-				myImgReceived.visibility = if (message.Received) View.VISIBLE else View.GONE
-				myImgRead.visibility = if (message.Read) View.VISIBLE else View.GONE
-				val isRead = message.Read
-				myImgRead.isVisible = isRead
-				myImgReceived.isVisible = !isRead && message.Received == true
 
 				myImageFrame.visibility = View.VISIBLE
 				myImageFrame.layoutParams.width = size[0]
@@ -304,18 +310,21 @@ internal class MyMessageViewHolder(
 						.into(myImageSrc)
 				}
 			} else {
+				if (!message.Text.isNullOrEmpty()) {
+					myText.visibility = View.VISIBLE
+					myText.text = message.Text
+				} else {
+					myText.visibility = View.GONE
+				}
 				myFlags.isVisible = true
 				myImageFrame.visibility = View.GONE
 				clTextsMy.visibility = View.VISIBLE
-				myText.visibility = View.GONE
 				tvMyFileName.visibility = View.VISIBLE
 				tvMyFileName.text = file?.Name
 				ivFile.isVisible = true
 				val size = file?.Size
 
 				size?.let { showFileSize(it) }
-				myText.text = file?.Name
-				myText.setTextColor(Colors.linkColor())
 			}
 		}
 	}

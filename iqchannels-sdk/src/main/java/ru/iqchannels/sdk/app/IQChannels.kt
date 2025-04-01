@@ -1394,7 +1394,7 @@ object IQChannels {
 		}
 	}
 
-	internal fun sendFile(file: File?, replyToMessageId: Long?): ChatMessage? {
+	internal fun sendFile(file: File?, text: String, replyToMessageId: Long?): ChatMessage? {
 		if (file == null) {
 			Log.d("prefilledmsg", "sendFile: file == null")
 			return null
@@ -1410,7 +1410,7 @@ object IQChannels {
 
 		auth?.Client?.let { client ->
 			val localId = nextLocalId()
-			val message = ChatMessage(client, localId, file, replyToMessageId)
+			val message = ChatMessage(client, localId, text, file, replyToMessageId)
 			messages?.add(message)
 			for (listener in messageListeners) {
 				execute { listener.messageSent(message) }
@@ -1465,7 +1465,7 @@ object IQChannels {
 							String.format("sendFile: Uploaded a file, fileId=%s", result?.Id)
 						)
 						val form =
-							ChatMessageForm.file(localId, result?.Id, message.ReplyToMessageId)
+							ChatMessageForm.file(localId, message.Text, result?.Id, message.ReplyToMessageId)
 						form.ChatType = chatType.name.lowercase()
 						sendQueue.add(form)
 						Log.i(

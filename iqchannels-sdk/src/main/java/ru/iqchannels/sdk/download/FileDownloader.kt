@@ -1,23 +1,30 @@
 package ru.iqchannels.sdk.download
 
-import android.app.DownloadManager
+import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
+import android.provider.MediaStore
+import androidx.annotation.RequiresApi
+import ru.iqchannels.sdk.Log
 import ru.iqchannels.sdk.R
 
 object FileDownloader {
 
-	fun downloadFile(context: Context, fileUrl: String?, fileName: String?): Long {
-		val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-		val uri = Uri.parse(fileUrl)
-		val request = DownloadManager.Request(uri)
-		request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
-			.setAllowedOverRoaming(false)
-			.setTitle(fileName)
-			.setDescription(context.getString(R.string.downloading))
-			.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
+	@RequiresApi(Build.VERSION_CODES.Q)
+	fun saveFileToDownloads(context: Context?, fileName: String, fileContent: ByteArray) {
+		val contentResolver = context?.contentResolver
+		val contentValues = ContentValues().apply {
+			put(MediaStore.Downloads.DISPLAY_NAME, fileName)
+			put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+		}
 
-		return downloadManager.enqueue(request)
+		val uri = contentResolver?.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+		uri?.let {
+			contentResolver.openOutputStream(it)?.use { outputStream ->
+				outputStream.write(fileContent)
+			}
+		}
 	}
 }

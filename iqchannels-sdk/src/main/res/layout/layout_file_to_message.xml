@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@color/reply_typing_bg"
+    android:paddingVertical="15dp"
+    android:paddingHorizontal="16dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <ImageView
+        android:id="@+id/iv_file_image"
+        android:layout_width="39dp"
+        android:layout_height="39dp"
+        android:layout_marginVertical="5dp"
+        android:layout_marginStart="5dp"
+        android:src="@drawable/doc_32"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+
+    <ImageButton
+        android:id="@+id/ib_file_close"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:background="?selectableItemBackgroundBorderless"
+        android:src="@drawable/close_24"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+
+    <TextView
+        android:id="@+id/tv_file_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="3dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="16dp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:textSize="13sp"
+        android:textColor="@color/text_color"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@id/iv_file_image"
+        app:layout_constraintEnd_toStartOf="@id/ib_file_close"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintHorizontal_bias="0"
+        tools:text="File.pdf"
+        />
+
+    <TextView
+        android:id="@+id/tv_file_size"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:autoLink="all"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textColor="#ff979fa7"
+        android:textSize="15sp"
+        android:lineHeight="18.75dp"
+        android:textFontWeight="400"
+        app:layout_constraintTop_toBottomOf="@id/tv_file_name"
+        app:layout_constraintStart_toStartOf="@id/tv_file_name"
+        app:layout_constraintEnd_toStartOf="@id/ib_file_close"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintHorizontal_bias="0"
+        tools:text="20Кб"
+        />
+
+</merge>

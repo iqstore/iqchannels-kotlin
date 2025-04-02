@@ -94,6 +94,7 @@ class IQAppActivity :
 					IQChannelsConfig(address, channels.first(), true, UIOptions(true))
 				)
 				IQChannels.loginAnonymous()
+				IQChannels.getSignupGreetingSettings()
 			}
 
 			else -> Unit

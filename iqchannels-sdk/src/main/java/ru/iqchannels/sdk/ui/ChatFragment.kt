@@ -7,12 +7,12 @@ package ru.iqchannels.sdk.ui
 import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
+import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.PorterDuff
@@ -31,6 +31,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.widget.CheckBox
 import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
@@ -40,7 +41,6 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.ui.platform.ComposeView
@@ -71,7 +71,6 @@ import java.util.*
 import java.util.concurrent.TimeoutException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import ru.iqchannels.sdk.Log
 import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.app.Callback
@@ -161,9 +160,12 @@ class ChatFragment : Fragment() {
 
 	// Signup layout
 	private var signupLayout: LinearLayout? = null
-	private var signupText: EditText? = null
+	private var signupTextName: EditText? = null
 	private var signupButton: Button? = null
 	private var signupError: TextView? = null
+	private var signupTitle: TextView? = null
+	private var signupSubtitle: TextView? = null
+	private var signupCheckBox: CheckBox? = null
 
 	// Chat layout
 	private var chatLayout: RelativeLayout? = null
@@ -318,8 +320,13 @@ class ChatFragment : Fragment() {
 
 		// Login views.
 		signupLayout = view.findViewById<View>(R.id.signupLayout) as LinearLayout
-		signupText = view.findViewById<View>(R.id.signupName) as EditText
+		signupTitle = view.findViewById<View>(R.id.signupTitle) as TextView
+		signupSubtitle = view.findViewById<View>(R.id.signupSubtitle) as TextView
+		signupCheckBox = view.findViewById<View>(R.id.signupCheckBox) as CheckBox
+		signupTextName = view.findViewById<View>(R.id.signupName) as EditText
 		signupButton = view.findViewById<View>(R.id.signupButton) as Button
+		signupButton?.setOnClickListener { signup() }
+		signupError = view.findViewById<View>(R.id.signupError) as TextView
 
 		clReply = view.findViewById<ReplyMessageView?>(R.id.reply).apply {
 			applyReplyStyles()
@@ -327,9 +334,6 @@ class ChatFragment : Fragment() {
 		clFile = view.findViewById<FileMessageView?>(R.id.file).apply {
 			applyFileStyles()
 		}
-
-		signupButton?.setOnClickListener { signup() }
-		signupError = view.findViewById<View>(R.id.signupError) as TextView
 
 		// Chat.
 		chatLayout = view.findViewById<View>(R.id.chatLayout) as RelativeLayout
@@ -580,10 +584,30 @@ class ChatFragment : Fragment() {
 		val token = IQChannels.getCurrentToken()
 		authLayout?.visibility =
 			if (IQChannels.auth == null && IQChannels.authRequest != null && token != null) View.VISIBLE else View.GONE
-		signupLayout?.visibility =
-			if (IQChannels.auth == null && IQChannels.authRequest == null && token == null) View.VISIBLE else View.GONE
-		signupButton?.isEnabled = IQChannels.authRequest == null
-		signupText?.isEnabled = IQChannels.authRequest == null
+
+		if(IQChannels.auth == null && IQChannels.authRequest == null && token == null){
+			signupTextName?.addTextChangedListener(object : TextWatcher {
+				override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+				override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+				override fun afterTextChanged(name: Editable) {
+					signupButton?.isEnabled = name.isNotEmpty() && signupCheckBox?.isChecked ?: false
+				}
+			})
+
+			signupCheckBox?.setOnCheckedChangeListener { _, isChecked ->
+				signupButton?.isEnabled = signupTextName?.text?.isNotEmpty() ?: false && isChecked
+			}
+
+			val greetingBold = IQChannels.signupGreetingSettings?.GreetingBold
+			val greeting = IQChannels.signupGreetingSettings?.Greeting
+			if (!greetingBold.isNullOrBlank()) {signupTitle?.text = greetingBold}
+			if (!greeting.isNullOrBlank()) {signupSubtitle?.text = greeting}
+
+			signupLayout?.visibility = View.VISIBLE
+		}else{
+			signupLayout?.visibility = View.GONE
+		}
+		signupTextName?.isEnabled = IQChannels.authRequest == null
 		chatLayout?.visibility = if (IQChannels.auth != null) View.VISIBLE else View.GONE
 		chatUnavailableLayout?.isVisible = false
 	}
@@ -706,12 +730,11 @@ class ChatFragment : Fragment() {
 
 	// Signup
 	private fun signup() {
-		val name = signupText?.text?.toString() ?: return
+		val name = signupTextName?.text?.toString() ?: return
 		if (name.length < 3) {
 			signupError!!.text = "Ошибка: длина имени должна быть не менее 3-х символов."
 			return
 		}
-
 		signupError?.text = ""
 		IQChannels.signup(name)
 	}

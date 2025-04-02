@@ -33,6 +33,7 @@ import ru.iqchannels.sdk.schema.FinishPollRequest
 import ru.iqchannels.sdk.schema.MaxIdQuery
 import ru.iqchannels.sdk.schema.PollRequest
 import ru.iqchannels.sdk.schema.PushTokenInput
+import ru.iqchannels.sdk.schema.GreetingSettings
 import ru.iqchannels.sdk.schema.RateRequest
 import ru.iqchannels.sdk.schema.RatingPollClientAnswerInput
 import ru.iqchannels.sdk.schema.UploadedFile
@@ -299,6 +300,31 @@ class HttpClient(
 							callback.onResult(messages)
 						}
 					}
+				}
+
+				override fun onException(exception: Exception) {
+					callback.onException(exception)
+				}
+			}
+		)
+	}
+
+	fun getSignupGreetingSettings(
+		channel: String,
+		callback: HttpCallback<GreetingSettings>
+	): HttpRequest {
+		val path = "/widget/greetings/$channel"
+		val type: TypeToken<ru.iqchannels.sdk.schema.Response<GreetingSettings>> =
+			object : TypeToken<ru.iqchannels.sdk.schema.Response<GreetingSettings>>() {}
+
+		return post(
+			path,
+			null,
+			type,
+			object : HttpCallback<ru.iqchannels.sdk.schema.Response<GreetingSettings>> {
+				override fun onResult(result: ru.iqchannels.sdk.schema.Response<GreetingSettings>?) {
+					val greetingSettings = result?.Data
+					callback.onResult(greetingSettings)
 				}
 
 				override fun onException(exception: Exception) {

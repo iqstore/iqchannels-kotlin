@@ -13,31 +13,65 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:gravity="center"
+        android:background="#F0F0F0"
+        android:paddingLeft="@dimen/signup_horizontal_margin"
+        android:paddingRight="@dimen/signup_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin">
 
         <TextView
+            android:id="@+id/signupTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Представьтесь, пожалуйста:"/>
+            android:gravity="center"
+            android:text="Представьтесь, пожалуйста,"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/signupSubtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="желательно указать фамилию и имя:"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:textColor="#777777" />
 
         <EditText
             android:id="@+id/signupName"
             android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:hint="Ваше имя"
+            android:textSize="16sp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:background="@drawable/edit_text_border"
+            android:layout_margin="10dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:importantForAccessibility="yes"/>
+
+        <CheckBox
+            android:id="@+id/signupCheckBox"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="top"
-            android:hint="@string/chat_login_hint"
-            android:imeOptions="actionSend"
-            android:inputType="textShortMessage|textCapSentences|textAutoCorrect|textAutoComplete|textMultiLine"
-            android:maxLength="100"
-            android:maxLines="1"/>
+            android:buttonTint="@color/bg_checkbox"
+            android:text="Согласие на обработку персональных данных"
+            android:textSize="14sp" />
 
         <Button
             android:id="@+id/signupButton"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Начать чат"/>
+            android:layout_height="52dp"
+            android:text="Начать чат"
+            android:textSize="16sp"
+            android:textStyle="normal"
+            android:textAllCaps="false"
+            android:background="@color/bg_btn_signup"
+            android:layout_marginTop="30dp"
+            android:layout_marginHorizontal="10dp"
+            android:textColor="#FFF"
+            android:enabled="false"/>
 
         <TextView
             android:id="@+id/signupError"
@@ -45,6 +79,7 @@
             android:layout_height="wrap_content"
             android:paddingTop="@dimen/activity_vertical_margin"
             android:text=""
+            android:gravity="center"
             android:textColor="#ff0000"/>
     </LinearLayout>
 

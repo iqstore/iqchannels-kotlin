@@ -41,6 +41,7 @@ import ru.iqchannels.sdk.schema.ClientAuth
 import ru.iqchannels.sdk.schema.ClientTypingForm
 import ru.iqchannels.sdk.schema.FileImageSize
 import ru.iqchannels.sdk.schema.FileType
+import ru.iqchannels.sdk.schema.GreetingSettings
 import ru.iqchannels.sdk.schema.MaxIdQuery
 import ru.iqchannels.sdk.schema.RatingPollClientAnswerInput
 import ru.iqchannels.sdk.schema.UploadedFile
@@ -68,13 +69,13 @@ object IQChannels {
 	private val coroutineScope = CoroutineScope(
 		SupervisorJob() + Dispatchers.IO + CoroutineName("IQChannels-coroutine-worker") + excHandler
 	)
+	var fileСhooser: Boolean = false
 
 	// Auth
 	var auth: ClientAuth? = null
 		private set
 	var authRequest: HttpRequest? = null
 		private set
-	var fileСhooser: Boolean = false
 
 	private var authAttempt = 0
 	private val listeners: MutableSet<IQChannelsListener>
@@ -128,6 +129,8 @@ object IQChannels {
 	internal var systemChat: Boolean = false
 	private var chatSettingsRequest: HttpRequest? = null
 
+	// Signup greeting
+	var signupGreetingSettings: GreetingSettings? = null
 
 	init {
 		listeners = HashSet()
@@ -904,6 +907,26 @@ object IQChannels {
 					}
 				)
 				Log.i(TAG, "get chat settings")
+			}
+		}
+	}
+
+	fun getSignupGreetingSettings() {
+		client?.let { client ->
+			config?.channel?.let { channel ->
+				client.getSignupGreetingSettings(
+					channel,
+					object : HttpCallback<GreetingSettings> {
+						override fun onResult(result: GreetingSettings?) {
+							signupGreetingSettings = result
+						}
+
+						override fun onException(exception: Exception) {
+							Log.e(TAG, "Failed to get signup greeting settings, exc=${exception.message}")
+						}
+					}
+				)
+				Log.i(TAG, "get signup greeting settings")
 			}
 		}
 	}

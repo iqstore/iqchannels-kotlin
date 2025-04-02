@@ -34,4 +34,8 @@
     <color name="text_color_h1">#494949</color>
     <color name="text_color_description">#969696</color>
     <color name="other_file_icon">#ff4c4c4c</color>
+    <color name="button_enabled_color">#ee5c13</color>
+    <color name="button_disabled_color">#777777</color>
+    <color name="checkbox_enabled_color">#0275ff</color>
+    <color name="checkbox_disabled_color">#777777</color>
 </resources>

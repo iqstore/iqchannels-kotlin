@@ -26,6 +26,12 @@ import ru.iqchannels.sdk.http.HttpRequest
 import ru.iqchannels.sdk.http.HttpSseListener
 import ru.iqchannels.sdk.http.retrofit.NetworkModule
 import ru.iqchannels.sdk.rels.Rels
+import ru.iqchannels.sdk.room.AppDatabase
+import ru.iqchannels.sdk.room.DatabaseInstance
+import ru.iqchannels.sdk.room.DatabaseMessage
+import ru.iqchannels.sdk.room.MessageDao
+import ru.iqchannels.sdk.room.toChatMessage
+import ru.iqchannels.sdk.room.toDatabaseMessage
 import ru.iqchannels.sdk.schema.ActorType
 import ru.iqchannels.sdk.schema.ChatEvent
 import ru.iqchannels.sdk.schema.ChatEventQuery
@@ -46,6 +52,7 @@ import ru.iqchannels.sdk.schema.MaxIdQuery
 import ru.iqchannels.sdk.schema.RatingPollClientAnswerInput
 import ru.iqchannels.sdk.schema.UploadedFile
 import ru.iqchannels.sdk.schema.User
+import kotlin.collections.ArrayList
 
 object IQChannels {
 
@@ -118,7 +125,6 @@ object IQChannels {
 
 	// Send queue
 	private var localId: Long = 0
-	private var sendAttempt = 0
 	private val sendQueue: MutableList<ChatMessageForm>
 	private var sendRequest: HttpRequest? = null
 	private var sendTypingRequest: HttpRequest? = null
@@ -131,6 +137,10 @@ object IQChannels {
 
 	// Signup greeting
 	var signupGreetingSettings: GreetingSettings? = null
+
+	// Database
+	private var database: AppDatabase? = null
+	var messageDao: MessageDao? = null
 
 	init {
 		listeners = HashSet()
@@ -170,6 +180,8 @@ object IQChannels {
 				"IQChannels", Context.MODE_PRIVATE
 			)
 		}
+		database = DatabaseInstance.getDatabase(context)
+		messageDao = database?.messageDao()
 	}
 
 	fun configureSystem(context: Context) {
@@ -833,7 +845,16 @@ object IQChannels {
 					query,
 					object : HttpCallback<List<ChatMessage>> {
 						override fun onResult(messages: List<ChatMessage>?) {
-							val copy: MutableList<ChatMessage> = ArrayList(messages)
+							if (!messages.isNullOrEmpty()){
+								for(message in messages) {
+									messageDao?.insertMessage(message.toDatabaseMessage())
+								}
+							}
+
+							val databaseMessages = messageDao?.getAllMessages()
+							var copy: MutableList<ChatMessage> = ArrayList(messages)
+							checkUnsendMessages(databaseMessages).let {copy += it}
+
 							autoGreeting?.let {
 								copy.add(autoGreeting)
 							}
@@ -1353,6 +1374,8 @@ object IQChannels {
 			message.Sending = true
 			messages?.add(message)
 
+			insertMessageToDatabase(message)
+
 			for (listener in messageListeners) {
 				execute { listener.messageSent(message) }
 			}
@@ -1434,7 +1457,9 @@ object IQChannels {
 		auth?.Client?.let { client ->
 			val localId = nextLocalId()
 			val message = ChatMessage(client, localId, text, file, replyToMessageId)
+			message.Sending = true
 			messages?.add(message)
+			insertMessageToDatabase(message)
 			for (listener in messageListeners) {
 				execute { listener.messageSent(message) }
 			}
@@ -1487,8 +1512,9 @@ object IQChannels {
 							TAG,
 							String.format("sendFile: Uploaded a file, fileId=%s", result?.Id)
 						)
-						val form =
-							ChatMessageForm.file(localId, message.Text, result?.Id, message.ReplyToMessageId)
+
+						val localId = if (localId > 0) localId else message.LocalId
+						val form = ChatMessageForm.file(localId, message.Text, result?.Id, message.ReplyToMessageId)
 						form.ChatType = chatType.name.lowercase()
 						sendQueue.add(form)
 						Log.i(
@@ -1547,7 +1573,9 @@ object IQChannels {
 		if (message.Upload == null) {
 			return
 		}
-
+		CoroutineScope(Dispatchers.IO).launch {
+			messageDao?.deleteMessageByLocalId(message.LocalId)
+		}
 		messages?.remove(message)
 		message.UploadRequest?.cancel()
 
@@ -1558,7 +1586,6 @@ object IQChannels {
 
 	private fun clearSend() {
 		sendRequest?.cancel()
-		sendAttempt = 0
 		sendQueue.clear()
 		sendRequest = null
 		Log.d(TAG, "Cleared send queue")
@@ -1585,7 +1612,8 @@ object IQChannels {
 		}
 
 		val form = sendQueue.removeAt(0)
-		sendAttempt++
+		val sendAttempt: Int = 1
+
 		config?.channel?.let { channel ->
 			sendRequest =
 				client?.chatsChannelSend(channel, form, object : HttpCallback<Void> {
@@ -1594,7 +1622,8 @@ object IQChannels {
 					}
 
 					override fun onException(exception: Exception) {
-						execute { sendException(exception, form) }
+						sendRequest = null
+						execute { sendException(exception, form, sendAttempt) }
 					}
 				})
 
@@ -1602,24 +1631,81 @@ object IQChannels {
 		}
 	}
 
-	private fun sendException(exception: Exception, form: ChatMessageForm) {
-		if (sendRequest == null) {
+	fun resend(form: ChatMessageForm, sendAttempt: Int, changeErrorStatus: Boolean) {
+		if (auth == null) {
 			return
 		}
-		sendRequest = null
+		if(changeErrorStatus) {
+			val existing = getMessageByLocalId(form.LocalId)
+			if (existing != null) {
+				existing.Error = false
+				existing.Sending = true
 
+				insertMessageToDatabase(existing)
+				for (listener in messageListeners) {
+					execute { listener.messageUpdated(existing) }
+				}
+			}
+		}
+
+		val nextAttempt = sendAttempt + 1
+
+		config?.channel?.let { channel ->
+			client?.chatsChannelSend(channel, form, object : HttpCallback<Void> {
+				override fun onResult(result: Void?) {
+					execute { sent(form) }
+				}
+
+				override fun onException(exception: Exception) {
+					execute { sendException(exception, form, nextAttempt) }
+				}
+			})
+
+			Log.i(TAG, String.format("Resending a message, localId=%d", form.LocalId))
+		}
+	}
+
+	fun messageDelete(messagesToDelete: ChatMessage) {
+		messages?.remove(messagesToDelete)
+
+		CoroutineScope(Dispatchers.IO).launch {
+			messageDao?.deleteMessageByLocalId(messagesToDelete.LocalId)
+		}
+
+		for (listener in messageListeners) {
+			execute { listener.messageDeleted(messagesToDelete) }
+		}
+	}
+
+	private fun sendException(exception: Exception, form: ChatMessageForm, sendAttempt: Int) {
 		if (auth == null) {
 			Log.i(TAG, String.format("Failed to send a message, exc=%s", exception))
 			return
 		}
 
-		sendQueue.add(0, form)
-		val delaySec = Retry.delaySeconds(sendAttempt)
-		handler?.postDelayed({ send() }, (delaySec * 1000).toLong())
+		// Resend after 3 seconds if there are less than 3 attempts
+		if(sendAttempt <= 3) {
+			handler?.postDelayed({ resend(form, sendAttempt, false) }, 3000)
+		}
+		//Set message to error and do not resend
+		else{
+			val existing = getMessageByLocalId(form.LocalId)
+			if (existing != null) {
+				existing.Error = true
+				existing.Sending = false
+
+				insertMessageToDatabase(existing)
+				for (listener in messageListeners) {
+					execute { listener.messageUpdated(existing) }
+				}
+				return
+			}
+		}
+
 		Log.e(
 			TAG, String.format(
 				"Failed to send a message, will retry in %d seconds, exc=%s",
-				delaySec, exception
+				3, exception
 			)
 		)
 	}
@@ -1629,7 +1715,6 @@ object IQChannels {
 			return
 		}
 		sendRequest = null
-		sendAttempt = 0
 		Log.i(TAG, String.format("Sent a message, localId=%d", form.LocalId))
 		send()
 	}
@@ -1798,6 +1883,7 @@ object IQChannels {
 			if (existing != null) {
 				existing.Id = message.Id
 				existing.EventId = message.EventId
+				existing.LocalId = message.LocalId
 				existing.Payload = message.Payload
 				existing.Text = message.Text
 				existing.FileId = message.FileId
@@ -1812,6 +1898,7 @@ object IQChannels {
 						message.LocalId
 					)
 				)
+				insertMessageToDatabase(existing)
 				for (listener in messageListeners) {
 					execute { listener.messageUpdated(existing) }
 				}
@@ -1829,6 +1916,7 @@ object IQChannels {
 		}
 
 		messages?.add(message)
+		insertMessageToDatabase(message)
 		Log.i(TAG, String.format("Received a new message, messageId=%d", message.Id))
 		for (listener in messageListeners) {
 			execute { listener.messageReceived(message) }
@@ -1858,6 +1946,10 @@ object IQChannels {
 			oldMessage?.let { oldMessage ->
 				messages?.remove(oldMessage)
 				Log.i(TAG, String.format("Deleted message, messageId=%d", oldMessage.Id))
+			}
+
+			CoroutineScope(Dispatchers.IO).launch {
+				messageDao?.deleteMessageByLocalId(chatMessageToDelete.LocalId)
 			}
 
 			for (listener in messageListeners) {
@@ -1985,5 +2077,44 @@ object IQChannels {
 
 	private fun fileImageUrl(fileId: String?, size: FileImageSize): String {
 		return String.format("%s/public/api/v1/files/image/%s?size=%s", getBaseUrl(), fileId, size)
+	}
+
+	private fun insertMessageToDatabase(message: ChatMessage) {
+		Log.i(TAG, "insertMessageToDatabase: $message}")
+		CoroutineScope(Dispatchers.IO).launch {
+			messageDao?.insertMessage(message.toDatabaseMessage())
+		}
+	}
+
+	private fun checkUnsendMessages(databaseMessages: List<DatabaseMessage>?): List<ChatMessage> {
+		val messagesToAdd: MutableList<ChatMessage> = mutableListOf()
+		val messagesToSend = databaseMessages?.filter { it.id == 0L }
+
+		messagesToSend?.forEach {
+			if(it.sending && !it.error) {
+				if (it.upload != null) {
+					it.toChatMessage()?.let { chatMessage ->
+						sendFile(chatMessage)
+					}
+				} else {
+					if (!it.text.isNullOrEmpty()) {
+						val form = ChatMessageForm.text(it.localId, it.text, it.replyToMessageId)
+						sendQueue.add(form)
+					} else {
+						CoroutineScope(Dispatchers.IO).launch {
+							messageDao?.deleteMessageByLocalId(it.localId)
+						}
+						return@forEach
+					}
+				}
+			}
+
+			it.toChatMessage()?.let {
+					chatMessage -> messagesToAdd.add(chatMessage)
+			}
+		}
+
+		handler?.postDelayed({ send() }, 1000)
+		return messagesToAdd
 	}
 }

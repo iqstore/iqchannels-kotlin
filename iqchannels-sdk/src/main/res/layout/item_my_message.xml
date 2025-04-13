@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    android:id="@+id/myContainer"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/myContainer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="4dp"
+    android:gravity="end"
     android:orientation="vertical">
 
     <!-- Day -->
@@ -15,277 +15,281 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
-        android:textColor="@color/date"
         android:paddingVertical="12dp"
+        android:textColor="@color/date"
         android:textSize="13sp"
-        tools:text="12 April"/>
+        tools:text="12 April" />
 
     <LinearLayout
-        android:id="@+id/my"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:layout_marginLeft="40dp"
-        android:orientation="vertical">
+        android:gravity="bottom"
+        android:orientation="horizontal">
 
         <LinearLayout
-            android:id="@+id/myMsgContainer"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:background="@drawable/my_msg_bg">
+            android:id="@+id/my"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginLeft="40dp"
+            android:orientation="vertical">
 
             <LinearLayout
-                android:id="@+id/replyContainer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
-
-                <ru.iqchannels.sdk.ui.widgets.ReplyMessageView
-                    android:id="@+id/myReply"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:paddingHorizontal="15dp"
-                    android:paddingTop="15dp"
-                    android:background="@drawable/my_msg_reply_bg"
-                    />
-
-            </LinearLayout>
-
-            <!-- Payload -->
-            <LinearLayout
-                android:id="@+id/myPayload"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:id="@+id/myMsgContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/my_msg_bg"
                 android:orientation="vertical">
 
-                <!-- Image -->
-                <FrameLayout
-                    android:id="@+id/myImageFrame"
-                    android:layout_width="200dp"
-                    android:layout_height="150dp"
-                    android:layout_alignParentRight="true"
-                    android:background="@drawable/my_msg_bg">
+                <LinearLayout
+                    android:id="@+id/replyContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
 
-                    <ProgressBar
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:layout_gravity="center"
-                        android:indeterminate="true"/>
-
-                    <ImageView
-                        android:id="@+id/myImageSrc"
+                    <ru.iqchannels.sdk.ui.widgets.ReplyMessageView
+                        android:id="@+id/myReply"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        tools:ignore="ContentDescription"/>
-
-                    <!-- Flags -->
-                    <LinearLayout
-                        android:id="@+id/myImgFlags"
-                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="end|bottom"
-                        android:layout_margin="8dp"
-                        android:paddingHorizontal="12dp"
-                        android:paddingVertical="2dp"
-                        android:gravity="end|center_vertical"
-                        android:orientation="horizontal"
-                        android:background="@drawable/bg_img_status"
-                        >
+                        android:paddingHorizontal="15dp"
+                        android:paddingTop="15dp" />
 
-                        <!-- Date -->
-                        <TextView
-                            android:id="@+id/myImgDate"
-                            android:layout_height="wrap_content"
-                            android:layout_width="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:layout_marginEnd="4dp"
-                            android:textColor="@color/white_transparent_54"
-                            android:textSize="12sp"
-                            />
+                </LinearLayout>
 
-                        <!-- Read -->
-                        <ImageView
-                            android:id="@+id/myImgRead"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:src="@drawable/ic_read_16"
-                            app:tint="@color/white_transparent_54"
-                            tools:ignore="HardcodedText,SmallSp"/>
-
-                        <!-- Received -->
-                        <ImageView
-                            android:id="@+id/myImgReceived"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_gravity="center_vertical"
-                            android:src="@drawable/ic_delivered_12x16"
-                            app:tint="@color/white_transparent_54"
-                            tools:ignore="HardcodedText,SmallSp"/>
-
-                    </LinearLayout>
-
-                </FrameLayout>
-
-                <!-- Text -->
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:id="@+id/cl_texts_my"
+                <!-- Payload -->
+                <LinearLayout
+                    android:id="@+id/myPayload"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:autoLink="all"
-                    android:background="@drawable/my_msg_bg"
-                    android:gravity="end|center_vertical"
-                    android:paddingBottom="10dp"
-                    android:paddingHorizontal="16dp"
-                    android:paddingTop="8dp">
+                    android:orientation="vertical">
 
+                    <!-- Image -->
                     <FrameLayout
-                        android:id="@+id/myUpload"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:visibility="gone"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        >
+                        android:id="@+id/myImageFrame"
+                        android:layout_width="200dp"
+                        android:layout_height="150dp"
+                        android:layout_alignParentRight="true">
 
-                        <com.google.android.material.progressindicator.CircularProgressIndicator
-                            android:id="@+id/myUploadProgress"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:progress="50"
-                            android:indeterminate="true"
-                            app:indicatorSize="32dp"
-                            app:indicatorColor="@color/my_text_color"
-                            app:trackThickness="2dp"
-                            />
-
-
-                        <ImageView
+                        <ProgressBar
                             android:layout_width="16dp"
                             android:layout_height="16dp"
                             android:layout_gravity="center"
-                            android:src="@drawable/close_16"
-                            />
+                            android:indeterminate="true" />
+
+                        <ImageView
+                            android:id="@+id/myImageSrc"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            tools:ignore="ContentDescription" />
+
+                        <!-- Flags -->
+                        <LinearLayout
+                            android:id="@+id/myImgFlags"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="end|bottom"
+                            android:layout_margin="8dp"
+                            android:background="@drawable/bg_img_status"
+                            android:gravity="end|center_vertical"
+                            android:orientation="horizontal"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="2dp">
+
+                            <!-- Date -->
+                            <TextView
+                                android:id="@+id/myImgDate"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginEnd="4dp"
+                                android:textColor="@color/white_transparent_54"
+                                android:textSize="12sp" />
+
+                            <!-- Read -->
+                            <ImageView
+                                android:id="@+id/myImgRead"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:src="@drawable/ic_read_16"
+                                app:tint="@color/white_transparent_54"
+                                tools:ignore="HardcodedText,SmallSp" />
+
+                            <!-- Received -->
+                            <ImageView
+                                android:id="@+id/myImgReceived"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:src="@drawable/ic_delivered_12x16"
+                                app:tint="@color/white_transparent_54"
+                                tools:ignore="HardcodedText,SmallSp" />
+
+                        </LinearLayout>
 
                     </FrameLayout>
 
-                    <ImageView
-                        android:id="@+id/iv_file"
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:layout_marginTop="3dp"
-                        android:src="@drawable/doc_32"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        />
-
-                    <androidx.constraintlayout.widget.Barrier
-                        android:id="@+id/barrier_icon_file"
+                    <!-- Text -->
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/cl_texts_my"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:barrierMargin="8dp"
-                        app:barrierDirection="end"
-                        app:constraint_referenced_ids="iv_file, myUpload"
-                        />
-
-                    <TextView
-                        android:id="@+id/tvMyFileName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="16dp"
+                        android:layout_alignParentRight="true"
                         android:autoLink="all"
-                        android:textColor="@color/my_text_color"
-                        android:textSize="16sp"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:layout_constraintStart_toEndOf="@id/barrier_icon_file"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constrainedWidth="true"
-                        tools:text="CJM.pdf"
-                        />
+                        android:gravity="end|center_vertical"
+                        android:paddingHorizontal="16dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="10dp">
 
+                        <FrameLayout
+                            android:id="@+id/myUpload"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:visibility="gone"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent">
+
+                            <com.google.android.material.progressindicator.CircularProgressIndicator
+                                android:id="@+id/myUploadProgress"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:indeterminate="true"
+                                android:progress="50"
+                                app:indicatorColor="@color/my_text_color"
+                                app:indicatorSize="32dp"
+                                app:trackThickness="2dp" />
+
+
+                            <ImageView
+                                android:layout_width="16dp"
+                                android:layout_height="16dp"
+                                android:layout_gravity="center"
+                                android:src="@drawable/close_16" />
+
+                        </FrameLayout>
+
+                        <ImageView
+                            android:id="@+id/iv_file"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:layout_marginTop="3dp"
+                            android:src="@drawable/doc_32"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <androidx.constraintlayout.widget.Barrier
+                            android:id="@+id/barrier_icon_file"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:barrierDirection="end"
+                            app:barrierMargin="8dp"
+                            app:constraint_referenced_ids="iv_file, myUpload" />
+
+                        <TextView
+                            android:id="@+id/tvMyFileName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginEnd="16dp"
+                            android:autoLink="all"
+                            android:textColor="@color/my_text_color"
+                            android:textSize="16sp"
+                            app:layout_constrainedWidth="true"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toEndOf="@id/barrier_icon_file"
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:text="CJM.pdf" />
+
+                        <TextView
+                            android:id="@+id/tvMyFileSize"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="#ff979fa7"
+                            android:textSize="15sp"
+                            app:layout_constraintStart_toEndOf="@id/barrier_icon_file"
+                            app:layout_constraintTop_toBottomOf="@id/tvMyFileName"
+                            tools:text="15.0 кб" />
+
+                        <TextView
+                            android:id="@+id/myText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:autoLink="all"
+                            android:textColor="@color/my_text_color"
+                            android:textSize="16sp"
+                            app:layout_constrainedWidth="true"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintHorizontal_bias="0"
+                            app:layout_constraintStart_toEndOf="@id/barrier_icon_file"
+                            app:layout_constraintTop_toBottomOf="@+id/tvMyFileSize"
+                            tools:text="Message Text" />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+                </LinearLayout>
+
+                <!-- Flags -->
+                <LinearLayout
+                    android:id="@+id/myFlags"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end"
+                    android:layout_marginHorizontal="12dp"
+                    android:gravity="end|center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingBottom="8dp">
+
+                    <!-- Date -->
                     <TextView
-                        android:id="@+id/tvMyFileSize"
+                        android:id="@+id/myDate"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginEnd="4dp"
+                        android:gravity="center"
+                        android:textAlignment="center"
                         android:textColor="#ff979fa7"
-                        android:textSize="15sp"
-                        app:layout_constraintStart_toEndOf="@id/barrier_icon_file"
-                        app:layout_constraintTop_toBottomOf="@id/tvMyFileName"
-                        tools:text="15.0 кб" />
+                        android:textSize="12sp" />
 
-                    <TextView
-                        android:id="@+id/myText"
+                    <!-- Read -->
+                    <ImageView
+                        android:id="@+id/myRead"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:autoLink="all"
-                        android:textColor="@color/my_text_color"
-                        android:textSize="16sp"
-                        app:layout_constrainedWidth="true"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintHorizontal_bias="0"
-                        app:layout_constraintStart_toEndOf="@id/barrier_icon_file"
-                        app:layout_constraintTop_toBottomOf="@+id/tvMyFileSize"
-                        tools:text="Message Text" />
+                        android:src="@drawable/ic_read_16"
+                        tools:ignore="HardcodedText,SmallSp" />
 
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </LinearLayout>
+                    <!-- Received -->
+                    <ImageView
+                        android:id="@+id/myReceived"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_delivered_12x16"
+                        tools:ignore="HardcodedText,SmallSp" />
 
-            <!-- Flags -->
-            <LinearLayout
-                android:id="@+id/myFlags"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="end"
-                android:layout_marginHorizontal="12dp"
-                android:paddingBottom="8dp"
-                android:gravity="end|center_vertical"
-                android:orientation="horizontal">
+                    <!-- Sending -->
 
-                <!-- Date -->
-                <TextView
-                    android:id="@+id/myDate"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:gravity="center"
-                    android:textAlignment="center"
-                    android:layout_marginEnd="4dp"
-                    android:textColor="#ff979fa7"
-                    android:textSize="12sp"
-                    />
+                    <com.google.android.material.progressindicator.CircularProgressIndicator
+                        android:id="@+id/mySending"
+                        android:layout_width="12dp"
+                        android:layout_height="12dp"
+                        android:indeterminate="true"
+                        android:progress="50"
+                        app:indicatorColor="@color/light_text_color"
+                        app:indicatorSize="12dp"
+                        app:trackThickness="1dp" />
 
-                <!-- Read -->
-                <ImageView
-                    android:id="@+id/myRead"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_read_16"
-                    tools:ignore="HardcodedText,SmallSp"/>
-
-                <!-- Received -->
-                <ImageView
-                    android:id="@+id/myReceived"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/ic_delivered_12x16"
-                    tools:ignore="HardcodedText,SmallSp"/>
-
-                <!-- Sending -->
-
-                <com.google.android.material.progressindicator.CircularProgressIndicator
-                    android:id="@+id/mySending"
-                    android:layout_width="12dp"
-                    android:layout_height="12dp"
-                    android:progress="50"
-                    android:indeterminate="true"
-                    app:indicatorSize="12dp"
-                    app:indicatorColor="@color/light_text_color"
-                    app:trackThickness="1dp"
-                    />
+                </LinearLayout>
 
             </LinearLayout>
 
         </LinearLayout>
+
+        <Button
+            android:id="@+id/errorIcon"
+            android:layout_marginLeft="5dp"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:background="@drawable/round_error_btn"
+            android:text="!"
+            android:textColor="@android:color/white"
+            android:textSize="24sp"/>
 
     </LinearLayout>
 

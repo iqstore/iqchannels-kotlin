@@ -1,9 +1,18 @@
 package ru.iqchannels.sdk.ui.rv
 
+import android.content.res.Resources
 import android.text.util.Linkify
 import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
+import android.view.animation.AnimationUtils
+import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.PopupMenu
+import android.widget.PopupWindow
 import androidx.annotation.ColorRes
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
@@ -12,6 +21,9 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.text.DecimalFormat
 import kotlin.math.roundToInt
@@ -28,6 +40,10 @@ import ru.iqchannels.sdk.ui.ChatMessagesAdapter
 import ru.iqchannels.sdk.ui.Colors
 import ru.iqchannels.sdk.ui.widgets.toPx
 import ru.iqchannels.sdk.Log
+import ru.iqchannels.sdk.app.IQChannels
+import ru.iqchannels.sdk.http.HttpCallback
+import ru.iqchannels.sdk.room.toDatabaseMessage
+import ru.iqchannels.sdk.schema.ChatMessageForm
 
 
 internal class MyMessageViewHolder(
@@ -64,30 +80,26 @@ internal class MyMessageViewHolder(
 		myUpload.setOnClickListener { adapter.onUploadCancelClicked(bindingAdapterPosition) }
 
 		// Time
-//		if (adapter.isGroupEnd(bindingAdapterPosition)) {
 		if (message.Sending) {
 			mySending.visibility = View.VISIBLE
 			myDate.visibility = View.INVISIBLE
 			myReceived.visibility = View.GONE
 			myRead.visibility = View.GONE
 			myDate.text = message.Date?.let { timeFormat.format(it) } ?: ""
-//			myDate.visibility = if (message.Date != null) View.VISIBLE else View.GONE
 		} else {
 			mySending.visibility = View.GONE
-//				myFlags.visibility = View.VISIBLE
 			myDate.text = message.Date?.let { timeFormat.format(it) } ?: ""
 			myDate.visibility = if (message.Date != null) View.VISIBLE else View.GONE
 			myReceived.visibility = if (message.Id > 0 && !message.Read) View.VISIBLE else View.GONE
 			myRead.visibility = if (message.Read) View.VISIBLE else View.GONE
-
-//			val isRead = message.Read
-//			myRead.isVisible = isRead
-//			myReceived.isVisible = !isRead && message.Received == true
 		}
-//		} else {
-//			mySending.visibility = View.GONE
-//			myFlags.visibility = View.GONE
-//		}
+
+		// Error icon
+		if (message.Error) {
+			errorIcon.visibility = View.VISIBLE
+		} else {
+			errorIcon.visibility = View.GONE
+		}
 
 		run {
 			IQStyles.iqChannelsStyles?.messages?.backgroundClient
@@ -108,6 +120,10 @@ internal class MyMessageViewHolder(
 				Glide.with(root.context)
 					.load(it)
 					.into(ivFile)
+			}
+
+			errorIcon.setOnClickListener { view ->
+				showPopupMenu(view, message)
 			}
 		}
 
@@ -222,6 +238,60 @@ internal class MyMessageViewHolder(
 		binding.root.setOnLongClickListener {
 			itemClickListener.onMessageLongClick(message)
 			true
+		}
+	}
+
+	private fun showPopupMenu(view: View, message: ChatMessage) {
+		val inflater = LayoutInflater.from(view.context)
+		val popupView = inflater.inflate(R.layout.popup_menu, null)
+
+		val popupWindow = PopupWindow(
+			popupView,
+			ViewGroup.LayoutParams.WRAP_CONTENT,
+			ViewGroup.LayoutParams.WRAP_CONTENT,
+			true
+		)
+		popupWindow.inputMethodMode = PopupWindow.INPUT_METHOD_NOT_NEEDED
+		popupWindow.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING
+
+		val retryButton: Button = popupView.findViewById(R.id.retryButton)
+		val deleteButton: Button = popupView.findViewById(R.id.deleteButton)
+
+		retryButton.setOnClickListener {
+			val form = ChatMessageForm.text(message.LocalId, message.Text, message.ReplyToMessageId)
+			IQChannels.resend( form, 0, true)
+
+			popupWindow.dismiss()
+		}
+
+		deleteButton.setOnClickListener {
+			IQChannels.messageDelete(message)
+			popupWindow.dismiss()
+		}
+
+		popupView.startAnimation(AnimationUtils.loadAnimation(view.context, R.anim.popup_enter))
+
+		val location = IntArray(2)
+		view.getLocationOnScreen(location)
+
+		val screenWidth = Resources.getSystem().displayMetrics.widthPixels
+
+		popupView.measure(
+			View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+			View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+		)
+		val menuWidth = popupView.measuredWidth
+		val menuHeight = popupView.measuredHeight
+
+		val buttonY = location[1]
+		val spaceAbove = buttonY - 40
+
+		val offsetX = screenWidth - menuWidth - 10
+
+		if (spaceAbove >= menuHeight) {
+			popupWindow.showAtLocation(view, Gravity.NO_GRAVITY, offsetX, buttonY - menuHeight)
+		} else {
+			popupWindow.showAtLocation(view, Gravity.NO_GRAVITY, offsetX, buttonY + view.height)
 		}
 	}
 

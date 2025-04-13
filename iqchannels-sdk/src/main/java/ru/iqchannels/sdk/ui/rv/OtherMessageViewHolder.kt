@@ -132,11 +132,11 @@ internal class OtherMessageViewHolder(
 						otherReply.setBackgroundDrawable(it, R.drawable.other_msg_reply_bg)
 						rating.root.setBackgroundDrawable(it, R.drawable.other_msg_bg)
 					}
-				IQStyles.iqChannelsStyles?.ratingStyles?.backgroundContainer
+				IQStyles.iqChannelsStyles?.rating?.backgroundContainer
 					?.let { rating.root.setBackgroundDrawable(it, R.drawable.other_msg_bg) }
 
 				otherText.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textOperator)
-				otherDate.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textTime)
+				otherDate.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textTimeOperator)
 				otherName.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textUp)
 
 				otherReply.tvSenderName.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.replySenderTextOperator)
@@ -438,7 +438,7 @@ internal class OtherMessageViewHolder(
 		rating.root.visibility = View.VISIBLE
 		rating.ratingRate.visibility = View.GONE
 		rating.ratingRated.visibility = View.GONE
-		rating.ratingRateText.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textOperator)
+		rating.ratingRateText.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.ratingTitle)
 
 		when (msgRating.State) {
 			RatingState.FINISHED, RatingState.RATED -> {
@@ -446,27 +446,27 @@ internal class OtherMessageViewHolder(
 				val text = root.resources.getString(R.string.chat_ratings_rated_custom, value, getRatingScaleMaxValue(msgRating))
 				rating.ratingRated.visibility = View.VISIBLE
 				rating.ratingRated.text = text
-				rating.ratingRated.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.systemText)
+				rating.ratingRated.applyIQStyles(IQStyles.iqChannelsStyles?.chat?.systemText)
 			}
 			RatingState.IGNORED -> {
 				rating.ratingRated.visibility = View.VISIBLE
 				val text = root.resources.getString(R.string.chat_ratings_ignored)
 				rating.ratingRated.text = text
-				rating.ratingRated.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.systemText)
+				rating.ratingRated.applyIQStyles(IQStyles.iqChannelsStyles?.chat?.systemText)
 			}
 			RatingState.PENDING -> {
-				IQStyles.iqChannelsStyles?.ratingStyles?.sentRating?.let {
+				IQStyles.iqChannelsStyles?.rating?.sentRating?.let {
 					val states = arrayOf(
 						intArrayOf(android.R.attr.state_enabled),
 						intArrayOf(-android.R.attr.state_enabled),
 					)
 
 					val btnColors = intArrayOf(
-						it.colorEnabled?.getColorInt(root.context) ?: ContextCompat.getColor(
+						it.backgroundEnabled?.color?.getColorInt(root.context) ?: ContextCompat.getColor(
 							root.context,
 							R.color.red
 						),
-						it.colorDisabled?.getColorInt(root.context) ?: ContextCompat.getColor(
+						it.backgroundDisabled?.color?.getColorInt(root.context) ?: ContextCompat.getColor(
 							root.context,
 							R.color.disabled_grey
 						)
@@ -487,7 +487,7 @@ internal class OtherMessageViewHolder(
 				for (i in ratingButtons.indices) {
 					val button = ratingButtons[i]
 					if (value >= i + 1) {
-						IQStyles.iqChannelsStyles?.ratingStyles?.fullStar?.let {
+						IQStyles.iqChannelsStyles?.rating?.fullStar?.let {
 							Glide.with(root.context)
 								.load(it)
 								.into(button)
@@ -495,7 +495,7 @@ internal class OtherMessageViewHolder(
 							button.setImageResource(R.drawable.star_filled)
 						}
 					} else {
-						IQStyles.iqChannelsStyles?.ratingStyles?.emptyStar?.let {
+						IQStyles.iqChannelsStyles?.rating?.emptyStar?.let {
 							Glide.with(root.context)
 								.load(it)
 								.into(button)
@@ -524,11 +524,11 @@ internal class OtherMessageViewHolder(
 				run {
 					if (rating.btnSendRating.isEnabled) {
 						rating.btnSendRating.applyIQStyles(
-							IQStyles.iqChannelsStyles?.ratingStyles?.sentRating?.textEnabled
+							IQStyles.iqChannelsStyles?.rating?.sentRating?.textEnabled
 						)
 					} else {
 						rating.btnSendRating.applyIQStyles(
-							IQStyles.iqChannelsStyles?.ratingStyles?.sentRating?.textDisabled
+							IQStyles.iqChannelsStyles?.rating?.sentRating?.textDisabled
 						)
 					}
 				}

@@ -7,7 +7,6 @@ package ru.iqchannels.sdk.ui
 import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
-import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -17,6 +16,7 @@ import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
+import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -94,6 +94,7 @@ import ru.iqchannels.sdk.schema.ChatException
 import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.schema.ClientAuth
 import ru.iqchannels.sdk.schema.SingleChoice
+import ru.iqchannels.sdk.setBackgroundDrawable
 import ru.iqchannels.sdk.styling.IQChannelsStyles
 import ru.iqchannels.sdk.styling.IQStyles
 import ru.iqchannels.sdk.ui.backdrop.ErrorPageBackdropDialog
@@ -107,6 +108,8 @@ import ru.iqchannels.sdk.ui.theming.IQChannelsTheme
 import ru.iqchannels.sdk.ui.widgets.ReplyMessageView
 import ru.iqchannels.sdk.ui.widgets.FileMessageView
 import ru.iqchannels.sdk.ui.widgets.TopNotificationWidget
+import ru.iqchannels.sdk.ui.widgets.toPx
+import kotlin.math.roundToInt
 
 class ChatFragment : Fragment() {
 
@@ -420,13 +423,18 @@ class ChatFragment : Fragment() {
 		// Send.
 		sendText = view.findViewById<EditText?>(R.id.sendText)?.apply {
 			applyIQStyles(IQStyles.iqChannelsStyles?.toolsToMessage?.textChat)
-			IQStyles.iqChannelsStyles?.toolsToMessage?.backgroundChat?.getColorInt(context)?.let {
-				background = ContextCompat.getDrawable(context, R.drawable.bg_text_field)
-					?.apply {
-						colorFilter =
-							PorterDuffColorFilter(it, PorterDuff.Mode.SRC_ATOP)
+
+			IQStyles.iqChannelsStyles?.toolsToMessage?.backgroundChat
+				?.let {
+					background = GradientDrawable().apply {
+						setColor(it.color?.getColorInt(context) ?: ContextCompat.getColor(context, 0))
+						setStroke(
+							it.border?.size?.toPx?.roundToInt() ?: 0,
+							it.border?.color?.getColorInt(context) ?: ContextCompat.getColor(context, 0)
+						)
+						cornerRadius = it.border?.borderRadius?.toPx ?: 12.toPx
 					}
-			}
+				}
 		}
 		sendText?.setOnEditorActionListener { v, actionId, event ->
 			var handled = false
@@ -586,24 +594,49 @@ class ChatFragment : Fragment() {
 			if (IQChannels.auth == null && IQChannels.authRequest != null && token != null) View.VISIBLE else View.GONE
 
 		if(IQChannels.auth == null && IQChannels.authRequest == null && token == null){
+			changeStyleButton(signupButton?.isEnabled)
+
+			IQStyles.iqChannelsStyles?.signup?.button?.backgroundDisabled
+				?.let {
+					signupButton?.setBackgroundDrawable(it, null)
+				}
+			signupButton?.applyIQStyles(IQStyles.iqChannelsStyles?.signup?.button?.textDisabled)
+
 			signupTextName?.addTextChangedListener(object : TextWatcher {
 				override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
 				override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
 				override fun afterTextChanged(name: Editable) {
 					signupButton?.isEnabled = name.isNotEmpty() && signupCheckBox?.isChecked ?: false
+					changeStyleButton(signupButton?.isEnabled)
 				}
 			})
 
+			IQStyles.iqChannelsStyles?.signup?.inputBackground
+				?.let {
+					signupTextName?.setBackgroundDrawable(it, null)
+				}
+			signupTextName?.applyIQStyles(IQStyles.iqChannelsStyles?.signup?.inputText)
+
 			signupCheckBox?.setOnCheckedChangeListener { _, isChecked ->
 				signupButton?.isEnabled = signupTextName?.text?.isNotEmpty() ?: false && isChecked
+				changeStyleButton(signupButton?.isEnabled)
 			}
+			signupCheckBox?.applyIQStyles(IQStyles.iqChannelsStyles?.signup?.checkBoxText)
 
 			val greetingBold = IQChannels.signupGreetingSettings?.GreetingBold
 			val greeting = IQChannels.signupGreetingSettings?.Greeting
 			if (!greetingBold.isNullOrBlank()) {signupTitle?.text = greetingBold}
+			signupTitle?.applyIQStyles(IQStyles.iqChannelsStyles?.signup?.title)
 			if (!greeting.isNullOrBlank()) {signupSubtitle?.text = greeting}
+			signupSubtitle?.applyIQStyles(IQStyles.iqChannelsStyles?.signup?.subtitle)
 
 			signupLayout?.visibility = View.VISIBLE
+			signupLayout?.setBackgroundColor(
+				IQStyles.iqChannelsStyles?.signup?.background?.getColorInt(requireContext())
+					?: ContextCompat.getColor(requireContext(), R.color.white)
+			)
+
+			signupError?.applyIQStyles(IQStyles.iqChannelsStyles?.signup?.errorText)
 		}else{
 			signupLayout?.visibility = View.GONE
 		}
@@ -947,7 +980,7 @@ class ChatFragment : Fragment() {
 
 		val typingText = view?.findViewById<TextView?>(R.id.typing)
 		typingText?.text = "$name печатает..."
-		typingText?.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.systemText)
+		typingText?.applyIQStyles(IQStyles.iqChannelsStyles?.chat?.systemText)
 
 		typingText?.visibility = View.VISIBLE
 
@@ -1433,6 +1466,22 @@ class ChatFragment : Fragment() {
 					recycler?.smoothScrollToPosition(it)
 				}
 			}
+		}
+	}
+
+	private fun changeStyleButton(enabled: Boolean?) {
+		if(enabled == true) {
+			IQStyles.iqChannelsStyles?.signup?.button?.backgroundEnabled
+				?.let {
+					signupButton?.setBackgroundDrawable(it, null)
+				}
+			signupButton?.applyIQStyles(IQStyles.iqChannelsStyles?.signup?.button?.textEnabled)
+		}else{
+			IQStyles.iqChannelsStyles?.signup?.button?.backgroundDisabled
+				?.let {
+					signupButton?.setBackgroundDrawable(it, null)
+				}
+			signupButton?.applyIQStyles(IQStyles.iqChannelsStyles?.signup?.button?.textDisabled)
 		}
 	}
 }

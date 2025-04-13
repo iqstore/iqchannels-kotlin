@@ -1,16 +1,14 @@
 package ru.iqchannels.sdk.ui.rv
 
 import android.graphics.Color
-import android.os.Handler
-import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
-import androidx.compose.ui.unit.dp
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import ru.iqchannels.sdk.R
+import ru.iqchannels.sdk.applyIQStyles
 import ru.iqchannels.sdk.schema.PollOptionType
 import ru.iqchannels.sdk.schema.Rating
 import ru.iqchannels.sdk.schema.RatingPoll
@@ -19,6 +17,8 @@ import ru.iqchannels.sdk.schema.RatingPollQuestion
 import ru.iqchannels.sdk.databinding.ChatRatingPollBinding
 import ru.iqchannels.sdk.http.HttpCallback
 import ru.iqchannels.sdk.schema.RatingState
+import ru.iqchannels.sdk.setBackgroundDrawable
+import ru.iqchannels.sdk.styling.IQStyles
 import ru.iqchannels.sdk.ui.UiUtils.toPx
 
 internal class RatingPollViewHolder(
@@ -55,6 +55,26 @@ internal class RatingPollViewHolder(
 		binding.buttonNo.setOnClickListener {
 			finishPoll()
 		}
+
+
+		binding.questionText.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.ratingTitle)
+
+		IQStyles.iqChannelsStyles?.rating?.backgroundContainer
+			?.let {
+				binding.pollBackground.setBackgroundDrawable(it, R.drawable.other_msg_bg)
+			}
+
+		IQStyles.iqChannelsStyles?.rating?.sentRating?.backgroundEnabled
+			?.let {
+				binding.buttonYes.setBackgroundDrawable(it, R.drawable.bg_button_rate)
+			}
+		binding.buttonYes.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.sentRating?.textEnabled)
+
+		IQStyles.iqChannelsStyles?.rating?.sentRating?.backgroundDisabled
+			?.let {
+				binding.buttonNo.setBackgroundDrawable(it, R.drawable.bg_rating_poll_rounded_button)
+			}
+		binding.buttonNo.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.sentRating?.textDisabled)
 	}
 
 	private fun renderCurrentQuestion() {
@@ -69,6 +89,12 @@ internal class RatingPollViewHolder(
 				submitPoll()
 			}
 		}
+
+		IQStyles.iqChannelsStyles?.rating?.sentRating?.backgroundDisabled
+			?.let {
+				binding.submitButton.setBackgroundDrawable(it, R.drawable.bg_rating_poll_rounded_button)
+			}
+		binding.submitButton.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.sentRating?.textDisabled)
 	}
 
 	private fun hideAllQuestionLayouts() {
@@ -126,16 +152,35 @@ internal class RatingPollViewHolder(
 	private fun renderOneOfListQuestion(question: RatingPollQuestion) {
 		binding.pollQuestionOneOfList.visibility = View.VISIBLE
 		binding.singleChoiceQuestion.text = question.Text
+		binding.singleChoiceQuestion.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.ratingTitle)
 
 		binding.radioGroup.removeAllViews()
 
 		var selectedButton: Button? = null
 
 		question.Answers?.forEach { answer ->
+			IQStyles.iqChannelsStyles?.rating?.sentRating?.backgroundEnabled
+				?.let {
+					binding.buttonYes.setBackgroundDrawable(it, R.drawable.bg_button_rate)
+				}
+			binding.buttonYes.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.sentRating?.textEnabled)
+
+			IQStyles.iqChannelsStyles?.rating?.sentRating?.backgroundDisabled
+				?.let {
+					binding.buttonNo.setBackgroundDrawable(it, R.drawable.bg_rating_poll_rounded_button)
+				}
+			binding.buttonNo.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.sentRating?.textDisabled)
+
+
 			val button = Button(binding.root.context).apply {
 				text = answer.Text
-				setBackgroundResource(R.drawable.bg_rating_poll_rounded_button)
-				setTextColor(Color.BLACK)
+
+				IQStyles.iqChannelsStyles?.rating?.answerButton?.backgroundDisabled
+					?.let {
+						setBackgroundDrawable(it, R.drawable.bg_rating_poll_rounded_button)
+					}
+				applyIQStyles(IQStyles.iqChannelsStyles?.rating?.answerButton?.textDisabled)
+
 				elevation = 0f
 				stateListAnimator = null
 				isAllCaps = false
@@ -154,12 +199,18 @@ internal class RatingPollViewHolder(
 						null, null, null, question.AsTicketRating,
 					)
 
-					setBackgroundResource(R.drawable.bg_rating_poll_rounded_button_active)
-					setTextColor(Color.WHITE)
+					IQStyles.iqChannelsStyles?.rating?.answerButton?.backgroundEnabled
+						?.let {
+							setBackgroundDrawable(it, R.drawable.bg_rating_poll_rounded_button_active)
+						}
+					applyIQStyles(IQStyles.iqChannelsStyles?.rating?.answerButton?.textEnabled)
 
 					selectedButton?.let { btn ->
-						btn.setBackgroundResource(R.drawable.bg_rating_poll_rounded_button)
-						btn.setTextColor(Color.BLACK)
+						IQStyles.iqChannelsStyles?.rating?.answerButton?.backgroundDisabled
+							?.let {
+								btn.setBackgroundDrawable(it, R.drawable.bg_rating_poll_rounded_button)
+							}
+						btn.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.answerButton?.textDisabled)
 					}
 
 					selectedButton = this
@@ -174,6 +225,7 @@ internal class RatingPollViewHolder(
 	private fun renderFCRQuestion(question: RatingPollQuestion) {
 		binding.pollQuestionFcr.visibility = View.VISIBLE
 		binding.yesNoQuestion.text = question.Text
+		binding.yesNoQuestion.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.ratingTitle)
 
 		binding.pollQuestionFcrContainer.removeAllViews()
 
@@ -182,8 +234,13 @@ internal class RatingPollViewHolder(
 		question.Answers?.forEach { answer ->
 			val button = Button(binding.root.context).apply {
 				text = answer.Text
-				setBackgroundResource(R.drawable.bg_rating_poll_rounded_button)
-				setTextColor(Color.BLACK)
+
+				IQStyles.iqChannelsStyles?.rating?.answerButton?.backgroundDisabled
+					?.let {
+						setBackgroundDrawable(it, R.drawable.bg_rating_poll_rounded_button)
+					}
+				applyIQStyles(IQStyles.iqChannelsStyles?.rating?.answerButton?.textDisabled)
+
 				elevation = 0f
 				stateListAnimator = null
 
@@ -206,12 +263,18 @@ internal class RatingPollViewHolder(
 						question.AsTicketRating,
 					)
 
-					setBackgroundResource(R.drawable.bg_rating_poll_rounded_button_active)
-					setTextColor(Color.WHITE)
+					IQStyles.iqChannelsStyles?.rating?.answerButton?.backgroundEnabled
+						?.let {
+							setBackgroundDrawable(it, R.drawable.bg_rating_poll_rounded_button_active)
+						}
+					applyIQStyles(IQStyles.iqChannelsStyles?.rating?.answerButton?.textEnabled)
 
 					selectedButton?.let { btn ->
-						btn.setBackgroundResource(R.drawable.bg_rating_poll_rounded_button)
-						btn.setTextColor(Color.BLACK)
+						IQStyles.iqChannelsStyles?.rating?.answerButton?.backgroundDisabled
+							?.let {
+								btn.setBackgroundDrawable(it, R.drawable.bg_rating_poll_rounded_button)
+							}
+						btn.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.answerButton?.textDisabled)
 					}
 
 					selectedButton = this
@@ -226,6 +289,7 @@ internal class RatingPollViewHolder(
 	private fun renderInputQuestion(question: RatingPollQuestion) {
 		binding.pollQuestionInput.visibility = View.VISIBLE
 		binding.inputQuestion.text = question.Text
+		binding.inputQuestion.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.ratingTitle)
 
 		textWatcher?.let {
 			binding.editTextAnswer.removeTextChangedListener(it)
@@ -247,11 +311,21 @@ internal class RatingPollViewHolder(
 		}
 
 		binding.editTextAnswer.addTextChangedListener(textWatcher)
+
+
+		IQStyles.iqChannelsStyles?.rating?.inputBackground
+			?.let {
+				binding.editTextAnswer.setBackgroundDrawable(it, R.drawable.bg_rating_poll_rounded_edit_text)
+			}
+		binding.editTextAnswer.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.inputText)
+
+
 	}
 
 	private fun renderStarsQuestion(question: RatingPollQuestion) {
 		binding.pollQuestionStars.visibility = View.VISIBLE
 		binding.starRatingQuestion.text = question.Text
+		binding.starRatingQuestion.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.ratingTitle)
 
 		val starButtons = listOf(
 			binding.pollRatingRate1,
@@ -269,6 +343,14 @@ internal class RatingPollViewHolder(
 				)
 				updateStarSelection(index)
 			}
+
+			IQStyles.iqChannelsStyles?.rating?.emptyStar?.let {
+				Glide.with(binding.root.context)
+					.load(it)
+					.into(button)
+			} ?: run {
+				button.setImageResource(R.drawable.star_empty)
+			}
 		}
 	}
 
@@ -283,29 +365,52 @@ internal class RatingPollViewHolder(
 
 		starButtons.forEachIndexed { index, button ->
 			if (index <= selectedIndex) {
-				button.setImageResource(R.drawable.star_filled)
+				IQStyles.iqChannelsStyles?.rating?.fullStar?.let {
+					Glide.with(binding.root.context)
+						.load(it)
+						.into(button)
+				} ?: run {
+					button.setImageResource(R.drawable.star_filled)
+				}
+
+//				button.setImageResource(R.drawable.star_filled)
 			} else {
-				button.setImageResource(R.drawable.star_empty)
+				IQStyles.iqChannelsStyles?.rating?.emptyStar?.let {
+					Glide.with(binding.root.context)
+						.load(it)
+						.into(button)
+				} ?: run {
+					button.setImageResource(R.drawable.star_empty)
+				}
+//				button.setImageResource(R.drawable.star_empty)
 			}
 		}
 	}
 
 	private fun renderScaleQuestion(question: RatingPollQuestion) {
 		binding.scaleQuestion.text = question.Text
+		binding.scaleQuestion.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.ratingTitle)
 		binding.pollQuestionScaleContainer.visibility = View.VISIBLE
 		binding.pollQuestionScale.removeAllViews()
 
 		val fromValue = question.Scale?.FromValue ?: 0
 		val toValue = question.Scale?.ToValue ?: 10
 		binding.scaleMinLabel.text = question.Scale?.Items?.get(question.Scale.FromValue)
+		binding.scaleMinLabel.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.scaleMinText)
 		binding.scaleMaxLabel.text = question.Scale?.Items?.get(question.Scale.ToValue)
+		binding.scaleMaxLabel.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.scaleMaxText)
 		var selectedButton: Button? = null
 		for (i in fromValue..toValue) {
 			val button = Button(binding.root.context).apply {
 				text = i.toString()
-				setBackgroundResource(R.drawable.bg_rating_poll_scale_button)
+
+				IQStyles.iqChannelsStyles?.rating?.scaleButton?.backgroundDisabled
+					?.let {
+						setBackgroundDrawable(it, R.drawable.bg_rating_poll_rounded_button)
+					}
+				applyIQStyles(IQStyles.iqChannelsStyles?.rating?.scaleButton?.textDisabled)
+
 				includeFontPadding = false
-				setTextColor(Color.BLACK)
 				elevation = 0f
 				stateListAnimator = null
 				setOnClickListener {
@@ -314,12 +419,21 @@ internal class RatingPollViewHolder(
 						PollOptionType.SCALE,
 						null, null, null, i, null, question.AsTicketRating,
 					)
-					setBackgroundResource(R.drawable.bg_rating_poll_scale_button_active)
-					setTextColor(Color.WHITE)
+
+					IQStyles.iqChannelsStyles?.rating?.scaleButton?.backgroundEnabled
+						?.let {
+							setBackgroundDrawable(it, R.drawable.bg_rating_poll_rounded_button_active)
+						}
+					applyIQStyles(IQStyles.iqChannelsStyles?.rating?.scaleButton?.textEnabled)
+
 					selectedButton?.let { btn ->
-						btn.setBackgroundResource(R.drawable.bg_rating_poll_scale_button)
-						btn.setTextColor(Color.BLACK)
+						IQStyles.iqChannelsStyles?.rating?.scaleButton?.backgroundDisabled
+							?.let {
+								btn.setBackgroundDrawable(it, R.drawable.bg_rating_poll_rounded_button)
+							}
+						btn.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.scaleButton?.textDisabled)
 					}
+
 					selectedButton = this
 				}
 				layoutParams = LinearLayout.LayoutParams(
@@ -358,6 +472,12 @@ internal class RatingPollViewHolder(
 			asTicketRating,
 		)
 		binding.submitButton.isEnabled = true
+
+		IQStyles.iqChannelsStyles?.rating?.sentRating?.backgroundEnabled
+			?.let {
+				binding.submitButton.setBackgroundDrawable(it, R.drawable.bg_button_rate)
+			}
+		binding.submitButton.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.sentRating?.textEnabled)
 	}
 
 	private fun submitPoll() {
@@ -403,6 +523,7 @@ internal class RatingPollViewHolder(
 	private fun showThanksFeedback() {
 		binding.thanksFeedbackLayout.thanksFeedbackText.text = poll.FeedbackThanksText
 		binding.thanksFeedbackLayout.root.visibility = View.VISIBLE
+		binding.thanksFeedbackLayout.thanksFeedbackText.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.feedbackThanksText)
 	}
 
 	fun setRatingPollListener(listener: RatingPollListener) {

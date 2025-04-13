@@ -93,11 +93,9 @@ internal class MyMessageViewHolder(
 			IQStyles.iqChannelsStyles?.messages?.backgroundClient
 				?.let {
 					myMsgContainer.setBackgroundDrawable(it, R.drawable.my_msg_bg)
-					clTextsMy.setBackgroundDrawable(it, R.drawable.my_msg_bg)
-					myReply.setBackgroundDrawable(it, R.drawable.my_msg_reply_bg)
 				}
 
-			myDate.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textTime)
+			myDate.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textTimeClient)
 
 			myReply.tvSenderName.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.replySenderTextClient)
 			myReply.tvText.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.replyTextClient)

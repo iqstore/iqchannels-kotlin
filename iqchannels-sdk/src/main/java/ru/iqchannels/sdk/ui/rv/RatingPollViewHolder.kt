@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.bumptech.glide.Glide
 import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.applyIQStyles
 import ru.iqchannels.sdk.schema.PollOptionType

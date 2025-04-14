@@ -5,6 +5,7 @@
 package ru.iqchannels.example
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import ru.iqchannels.sdk.Log
 import android.view.Menu
@@ -48,6 +49,9 @@ class IQAppActivity :
 
 	private var customNavBarEnabled = false
 
+	private var preferences: SharedPreferences? = null
+	private var token: String? = null
+
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		setContentView(R.layout.activity_app)
@@ -57,10 +61,16 @@ class IQAppActivity :
 		val toggle = ActionBarDrawerToggle(
 			this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close
 		)
+
+		preferences = this.applicationContext.getSharedPreferences(
+			"IQChannels", Context.MODE_PRIVATE
+		)
+
 		drawer.addDrawerListener(toggle)
 		toggle.syncState()
 		val navigationView = findViewById<NavigationView>(R.id.nav_view)
 		navigationView.setNavigationItemSelectedListener(this)
+
 		if(IQChannels.auth == null) {
 			setupIQChannels()
 		}
@@ -95,7 +105,10 @@ class IQAppActivity :
 					this,
 					IQChannelsConfig(address, channels.first(), true, UIOptions(true))
 				)
-//				IQChannels.loginAnonymous()
+				token = preferences?.getString("anonymous_token", null)
+				if (token != null && token?.isEmpty() == false) {
+					IQChannels.loginAnonymous()
+				}
 				IQChannels.getSignupGreetingSettings()
 			}
 

@@ -61,7 +61,9 @@ class IQAppActivity :
 		toggle.syncState()
 		val navigationView = findViewById<NavigationView>(R.id.nav_view)
 		navigationView.setNavigationItemSelectedListener(this)
-		setupIQChannels()
+		if(IQChannels.auth == null) {
+			setupIQChannels()
+		}
 		//setStylesPrefs()
 	}
 
@@ -93,7 +95,7 @@ class IQAppActivity :
 					this,
 					IQChannelsConfig(address, channels.first(), true, UIOptions(true))
 				)
-				IQChannels.loginAnonymous()
+//				IQChannels.loginAnonymous()
 				IQChannels.getSignupGreetingSettings()
 			}
 

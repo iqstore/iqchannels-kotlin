@@ -131,7 +131,12 @@ internal class RatingPollViewHolder(
 			}
 		}
 
-		binding.submitButton.visibility = View.VISIBLE
+		if(question.Type == PollOptionType.FCR || question.Type == PollOptionType.ONE_OF_LIST) {
+			binding.submitButton.visibility = View.GONE
+		}else{
+			binding.submitButton.visibility = View.VISIBLE
+		}
+
 		binding.submitButton.setOnClickListener {
 			if (currentAnswer != null) {
 				if (currentAnswer!!.AsTicketRating == true) {
@@ -156,8 +161,6 @@ internal class RatingPollViewHolder(
 		binding.singleChoiceQuestion.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.ratingTitle)
 
 		binding.radioGroup.removeAllViews()
-
-		var selectedButton: Button? = null
 
 		question.Answers?.forEach { answer ->
 			IQStyles.iqChannelsStyles?.rating?.sentRating?.backgroundEnabled
@@ -199,22 +202,10 @@ internal class RatingPollViewHolder(
 						PollOptionType.ONE_OF_LIST, null, answer.Id,
 						null, null, null, question.AsTicketRating,
 					)
-
-					IQStyles.iqChannelsStyles?.rating?.answerButton?.backgroundEnabled
-						?.let {
-							setBackgroundDrawable(it, R.drawable.bg_rating_poll_rounded_button_active)
-						}
-					applyIQStyles(IQStyles.iqChannelsStyles?.rating?.answerButton?.textEnabled)
-
-					selectedButton?.let { btn ->
-						IQStyles.iqChannelsStyles?.rating?.answerButton?.backgroundDisabled
-							?.let {
-								btn.setBackgroundDrawable(it, R.drawable.bg_rating_poll_rounded_button)
-							}
-						btn.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.answerButton?.textDisabled)
-					}
-
-					selectedButton = this
+					currentQuestionIndex++
+					renderCurrentQuestion()
+					pollResult.add(currentAnswer!!)
+					currentAnswer = null
 				}
 			}
 
@@ -229,8 +220,6 @@ internal class RatingPollViewHolder(
 		binding.yesNoQuestion.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.ratingTitle)
 
 		binding.pollQuestionFcrContainer.removeAllViews()
-
-		var selectedButton: Button? = null
 
 		question.Answers?.forEach { answer ->
 			val button = Button(binding.root.context).apply {
@@ -263,22 +252,10 @@ internal class RatingPollViewHolder(
 						answer.FCR,
 						question.AsTicketRating,
 					)
-
-					IQStyles.iqChannelsStyles?.rating?.answerButton?.backgroundEnabled
-						?.let {
-							setBackgroundDrawable(it, R.drawable.bg_rating_poll_rounded_button_active)
-						}
-					applyIQStyles(IQStyles.iqChannelsStyles?.rating?.answerButton?.textEnabled)
-
-					selectedButton?.let { btn ->
-						IQStyles.iqChannelsStyles?.rating?.answerButton?.backgroundDisabled
-							?.let {
-								btn.setBackgroundDrawable(it, R.drawable.bg_rating_poll_rounded_button)
-							}
-						btn.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.answerButton?.textDisabled)
-					}
-
-					selectedButton = this
+					currentQuestionIndex++
+					renderCurrentQuestion()
+					pollResult.add(currentAnswer!!)
+					currentAnswer = null
 				}
 			}
 

@@ -165,11 +165,31 @@ internal class MyMessageViewHolder(
 					IQStyles.iqChannelsStyles?.messages?.textFileStateRejectedClient
 				)
 
-				FileValidState.OnChecking -> showFileStateMsg(
-					R.string.file_on_checking,
-					R.color.blue,
-					IQStyles.iqChannelsStyles?.messages?.textFileStateOnCheckingClient
-				)
+				FileValidState.OnChecking -> {
+					myText.visibility = View.VISIBLE
+					myImageFrame . visibility = View . GONE
+					clTextsMy.visibility = View.VISIBLE
+					myUpload . visibility = View . VISIBLE
+					mySending.isVisible = false
+
+					if (message.UploadExc != null) {
+						myUpload.visibility = View.GONE
+					}
+
+					val file = message.File ?: return@with
+
+					myImageFrame.visibility = View.GONE
+					clTextsMy . visibility = View . VISIBLE
+					tvMyFileName.visibility = View.VISIBLE
+					tvMyFileName . text = file . Name
+					val size = file.Size
+
+					showFileSize (size)
+
+					myText . text = message . Text
+				}
+
+
 
 				FileValidState.SentForChecking -> showFileStateMsg(
 					R.string.file_sent_to_check,

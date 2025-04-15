@@ -1571,13 +1571,10 @@ object IQChannels {
 		if (auth == null) {
 			return
 		}
-		if (message.Upload == null) {
-			return
-		}
 		CoroutineScope(Dispatchers.IO).launch {
 			messageDao?.deleteMessageByLocalId(message.LocalId)
 		}
-		messages?.remove(message)
+		messageDelete(message)
 		message.UploadRequest?.cancel()
 
 		for (listener in messageListeners) {

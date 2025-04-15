@@ -208,6 +208,27 @@ class ChatFragment : Fragment() {
 				val intent = it.data
 				val uri = intent?.data
 
+				clFile?.imageView?.setImageResource(R.drawable.doc_32)
+
+				clFile?.imageView?.imageTintList =
+					context?.let { it1 -> ContextCompat.getColor(it1, R.color.other_file_icon) }
+						?.let { it2 ->
+							ColorStateList.valueOf(
+								it2
+							)
+						}
+
+				val clipData = intent?.clipData
+				if (clipData != null) {
+					clFile?.imageView?.imageTintList = null
+
+					clFile?.imageView?.scaleType = ImageView.ScaleType.CENTER_CROP
+					for (i in 0 until clipData.itemCount) {
+						val itemUri = clipData.getItemAt(i).uri
+						clFile?.imageView?.setImageURI(itemUri)
+					}
+				}
+
 				when (uri == null) {
 					true -> { // multiple choice
 						it.data?.clipData?.let { clipData ->
@@ -538,9 +559,6 @@ class ChatFragment : Fragment() {
 				.load(it)
 				.into(ibClose)
 		}
-		imageView.imageTintList = ColorStateList.valueOf(
-			ContextCompat.getColor(context, R.color.other_file_icon)
-		)
 	}
 
 	@RequiresApi(Build.VERSION_CODES.TIRAMISU)

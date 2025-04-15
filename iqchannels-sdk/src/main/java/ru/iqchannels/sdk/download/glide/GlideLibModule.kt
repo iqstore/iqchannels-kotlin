@@ -13,8 +13,8 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 
 @GlideModule
-class GlideLibModule : AppGlideModule() {
-	override fun registerComponents(context: Context, glide: Glide, registry: com.bumptech.glide.Registry) {
+class GlideLibModule : LibraryGlideModule() {
+	override fun registerComponents(context: Context, glide: Glide, registry: Registry) {
 		val factory = OkHttpUrlLoader.Factory(GlideHttpClient.instance)
 		registry.replace(GlideUrl::class.java, InputStream::class.java, factory)
 	}

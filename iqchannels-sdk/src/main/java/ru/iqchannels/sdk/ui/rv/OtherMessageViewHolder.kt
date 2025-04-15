@@ -220,9 +220,7 @@ internal class OtherMessageViewHolder(
 				otherText.visibility = View.VISIBLE
 				otherText.autoLinkMask = Linkify.ALL
 				otherText.setTextColor(Colors.textColor())
-				message.Text?.let {
-					markwon.setMarkdown(otherText, it)
-				}
+				otherText.text = message.Text
 			}
 			val lp = LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT,

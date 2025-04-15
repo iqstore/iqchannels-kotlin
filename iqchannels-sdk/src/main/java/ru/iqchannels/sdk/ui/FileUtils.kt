@@ -2,6 +2,7 @@ package ru.iqchannels.sdk.ui
 
 import android.content.Context
 import android.net.Uri
+import android.provider.OpenableColumns
 import android.webkit.MimeTypeMap
 import ru.iqchannels.sdk.Log
 import java.io.File
@@ -10,7 +11,8 @@ object FileUtils {
 
 	fun createGalleryTempFile(context: Context?, uri: Uri, ext: String?, dir: File? = null): File {
 		var ext = ext
-		var filename = getGalleryFilename(uri)
+		var filename = getFileNameFromUri(context, uri)
+
 		if (filename != null) {
 			val i = filename.lastIndexOf(".")
 			if (i > -1) {
@@ -42,15 +44,14 @@ object FileUtils {
 		return file
 	}
 
-	fun getGalleryFilename(uri: Uri): String? {
-		var path = uri.path
-		val i = path?.lastIndexOf("/")
-		if (i != null) {
-			if (i > -1) {
-				path = path?.substring(i + 1)
+	fun getFileNameFromUri(context: Context?, uri: Uri): String? {
+		val returnCursor = context?.contentResolver?.query(uri, null, null, null, null)
+		returnCursor?.use { cursor ->
+			val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+			if (cursor.moveToFirst()) {
+				return cursor.getString(nameIndex)
 			}
 		}
-
-		return path
+		return null
 	}
 }

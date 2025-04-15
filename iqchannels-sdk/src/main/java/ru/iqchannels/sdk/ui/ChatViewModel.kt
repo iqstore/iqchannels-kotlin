@@ -50,7 +50,7 @@ class ChatViewModel : ViewModel() {
 		val file = prepareFile(uri, activity)?.also {
 			Log.d("prefilledmsg", "prepareFile: $it")
 		}
-		return IQChannels.sendFile(file, null)
+		return IQChannels.sendFile(file, "", null)
 	}
 
 	fun prepareFile(uri: Uri, activity: Activity) = try {

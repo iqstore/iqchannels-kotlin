@@ -25,7 +25,7 @@ class SwipeController(private val swipeListener: SwipeListener) : ItemTouchHelpe
 		val position = viewHolder.getBindingAdapterPosition()
 		val chatMessage = (recyclerView.adapter as ChatMessagesAdapter).getItem(position)
 
-		return if (!chatMessage.System) {
+		return if (!chatMessage.System && !chatMessage.AutoGreeting) {
 			makeMovementFlags(ItemTouchHelper.ACTION_STATE_IDLE, ItemTouchHelper.LEFT)
 		} else {
 			makeMovementFlags(0, 0) // Отключение свайпа влево

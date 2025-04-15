@@ -41,6 +41,12 @@ android {
 }
 
 dependencies {
+    val room_version = "2.6.1"
+    implementation("androidx.room:room-runtime:$room_version")
+    kapt ("androidx.room:room-compiler:$room_version")
+    implementation("androidx.room:room-ktx:$room_version")
+//    annotationProcessor("androidx.room:room-compiler:$room_version")
+
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
@@ -84,7 +90,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview:1.4.0")
     debugImplementation("androidx.compose.ui:ui-tooling:1.4.0")
     implementation("com.google.android.material:compose-theme-adapter:1.2.1")
-    implementation("io.coil-kt:coil-compose:2.1.0")
+    implementation("io.coil-kt:coil-compose:2.2.0")
     implementation("io.coil-kt:coil:2.2.2")
 
 }

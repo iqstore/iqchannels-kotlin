@@ -1,5 +1,7 @@
 package ru.iqchannels.sdk.schema
 
+import com.google.gson.Gson
+
 class ChatMessageForm {
 	var LocalId: Long = 0
 	var Payload: String? = null // ChatPayloadType
@@ -8,6 +10,10 @@ class ChatMessageForm {
 	var ReplyToMessageId: Long? = null
 	var BotpressPayload: String? = null
 	var ChatType: String = ru.iqchannels.sdk.domain.models.ChatType.REGULAR.name.lowercase()
+
+	override fun toString(): String {
+		return Gson().toJson(this)
+	}
 
 	companion object {
 		fun text(localId: Long, text: String?, replyToMessageId: Long?): ChatMessageForm {
@@ -19,11 +25,12 @@ class ChatMessageForm {
 			return form
 		}
 
-		fun file(localId: Long, fileId: String?, replyToMessageId: Long?): ChatMessageForm {
+		fun file(localId: Long, text: String?, fileId: String?, replyToMessageId: Long?): ChatMessageForm {
 			val form = ChatMessageForm()
 			form.LocalId = localId
 			form.Payload = ChatPayloadType.FILE
 			form.FileId = fileId
+			form.Text = text
 			form.ReplyToMessageId = replyToMessageId
 			return form
 		}

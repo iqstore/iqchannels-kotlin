@@ -37,6 +37,8 @@ class ChatMessage {
 	var CreatedAt: Long = 0
 	var ReceivedAt: Long? = null
 	var ReadAt: Long? = null
+	var Error: Boolean = false
+	var AutoGreeting: Boolean = false
 
 	// Transient
 	var My = false
@@ -74,12 +76,12 @@ class ChatMessage {
 		Text = text
 	}
 
-	constructor(client: Client, localId: Long, file: File, replyToMessageId: Long?) : this(
+	constructor(client: Client, localId: Long, text: String, file: File, replyToMessageId: Long?) : this(
 		client,
 		localId
 	) {
 		Payload = ChatPayloadType.FILE
-		Text = file.name
+		Text = text
 		Upload = file
 		ReplyToMessageId = replyToMessageId
 	}

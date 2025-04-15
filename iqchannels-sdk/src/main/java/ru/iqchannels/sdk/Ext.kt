@@ -2,19 +2,18 @@ package ru.iqchannels.sdk
 
 import android.content.Context
 import android.content.res.Configuration
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
+import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import kotlin.math.roundToInt
 import ru.iqchannels.sdk.styling.Border
 import ru.iqchannels.sdk.styling.Color
+import ru.iqchannels.sdk.styling.ContainerStyles
 import ru.iqchannels.sdk.styling.Text
 import ru.iqchannels.sdk.ui.widgets.toPx
 
@@ -33,17 +32,43 @@ fun TextView.applyIQStyles(text: Text?) {
 	text?.textSize?.let {
 		setTextSize(TypedValue.COMPLEX_UNIT_SP, it)
 	}
+
+	text?.textStyle?.let { style ->
+		val isBold = style.bold ?: false
+		val isItalic = style.italic ?: false
+		when {
+			isBold && isItalic -> setTypeface(typeface, Typeface.BOLD_ITALIC)
+			isBold -> setTypeface(typeface, Typeface.BOLD)
+			isItalic -> setTypeface(typeface, Typeface.ITALIC)
+			else -> setTypeface(typeface, Typeface.NORMAL)
+		}
+	}
+
+	text?.textAlignment?.let { alignment ->
+		textAlignment = when (alignment) {
+			"center" -> View.TEXT_ALIGNMENT_CENTER
+			"left" -> View.TEXT_ALIGNMENT_TEXT_START
+			"right" -> View.TEXT_ALIGNMENT_TEXT_END
+			else -> View.TEXT_ALIGNMENT_INHERIT
+		}
+	}
 }
 
-fun ViewGroup.setBackgroundDrawable(color: Color?, @DrawableRes drawableRes: Int) {
-	color?.let {
-		background = ContextCompat.getDrawable(context, drawableRes)
-			?.apply {
-				colorFilter =
-					PorterDuffColorFilter(color.getColorInt(context), PorterDuff.Mode.SRC_ATOP)
-			}
+fun View.setBackgroundDrawable(
+	style: ContainerStyles?,
+	@DrawableRes drawableRes: Int?
+) {
+	style?.let {
+		background = GradientDrawable().apply {
+			setColor(style.color?.getColorInt(context) ?: ContextCompat.getColor(context, 0))
+			setStroke(
+				style.border?.size?.toPx?.roundToInt() ?: 0,
+				style.border?.color?.getColorInt(context) ?: ContextCompat.getColor(context, 0)
+			)
+			cornerRadius = style.border?.borderRadius?.toPx ?: 12.toPx
+		}
 	} ?: run {
-		setBackgroundResource(drawableRes)
+		if (drawableRes != null) setBackgroundResource(drawableRes)
 	}
 }
 

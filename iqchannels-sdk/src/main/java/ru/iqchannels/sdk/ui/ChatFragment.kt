@@ -7,17 +7,16 @@ package ru.iqchannels.sdk.ui
 import android.Manifest
 import android.app.Activity
 import android.app.AlertDialog
-import android.app.DownloadManager
-import android.content.BroadcastReceiver
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.DialogInterface
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
+import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -32,6 +31,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.widget.CheckBox
 import android.widget.Button
 import android.widget.EditText
 import android.widget.FrameLayout
@@ -41,7 +41,6 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.ui.platform.ComposeView
@@ -72,7 +71,6 @@ import java.util.*
 import java.util.concurrent.TimeoutException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import ru.iqchannels.sdk.Log
 import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.app.Callback
@@ -96,6 +94,7 @@ import ru.iqchannels.sdk.schema.ChatException
 import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.schema.ClientAuth
 import ru.iqchannels.sdk.schema.SingleChoice
+import ru.iqchannels.sdk.setBackgroundDrawable
 import ru.iqchannels.sdk.styling.IQChannelsStyles
 import ru.iqchannels.sdk.styling.IQStyles
 import ru.iqchannels.sdk.ui.backdrop.ErrorPageBackdropDialog
@@ -107,7 +106,10 @@ import ru.iqchannels.sdk.ui.results.toParcelable
 import ru.iqchannels.sdk.ui.rv.SwipeController
 import ru.iqchannels.sdk.ui.theming.IQChannelsTheme
 import ru.iqchannels.sdk.ui.widgets.ReplyMessageView
+import ru.iqchannels.sdk.ui.widgets.FileMessageView
 import ru.iqchannels.sdk.ui.widgets.TopNotificationWidget
+import ru.iqchannels.sdk.ui.widgets.toPx
+import kotlin.math.roundToInt
 
 class ChatFragment : Fragment() {
 
@@ -161,9 +163,12 @@ class ChatFragment : Fragment() {
 
 	// Signup layout
 	private var signupLayout: LinearLayout? = null
-	private var signupText: EditText? = null
+	private var signupTextName: EditText? = null
 	private var signupButton: Button? = null
 	private var signupError: TextView? = null
+	private var signupTitle: TextView? = null
+	private var signupSubtitle: TextView? = null
+	private var signupCheckBox: CheckBox? = null
 
 	// Chat layout
 	private var chatLayout: RelativeLayout? = null
@@ -185,10 +190,11 @@ class ChatFragment : Fragment() {
 	private var attachButton: ImageButton? = null
 	private var sendButton: ImageButton? = null
 	private var clReply: ReplyMessageView? = null
+	private var clFile: FileMessageView? = null
 
 	// Camera and gallery
 	private var cameraTempFile: File? = null
-	private var onDownloadComplete: BroadcastReceiver? = null
+	private var selectedFile: File? = null
 	private var replyingMessage: ChatMessage? = null
 
 	private val requestAllPermissions =
@@ -202,13 +208,26 @@ class ChatFragment : Fragment() {
 				val intent = it.data
 				val uri = intent?.data
 
+				clFile?.imageView?.setImageResource(R.drawable.doc_32)
+				clFile?.imageView?.imageTintList =
+					context?.let { it1 -> ContextCompat.getColor(it1, R.color.other_file_icon) }
+						?.let { it2 ->
+							ColorStateList.valueOf(
+								it2
+							)
+						}
+
 				when (uri == null) {
 					true -> { // multiple choice
 						it.data?.clipData?.let { clipData ->
 							val uris = ArrayList<Uri>()
+							clFile?.imageView?.imageTintList = null
+							clFile?.imageView?.scaleType = ImageView.ScaleType.CENTER_CROP
 							val itemCount = clipData.itemCount
 							for (i in 0 until itemCount) {
-								uris.add(clipData.getItemAt(i).uri)
+								val itemUri = clipData.getItemAt(i).uri
+								clFile?.imageView?.setImageURI(itemUri)
+								uris.add(itemUri)
 							}
 
 							val checkedFiles = context?.let { context ->
@@ -317,15 +336,20 @@ class ChatFragment : Fragment() {
 
 		// Login views.
 		signupLayout = view.findViewById<View>(R.id.signupLayout) as LinearLayout
-		signupText = view.findViewById<View>(R.id.signupName) as EditText
+		signupTitle = view.findViewById<View>(R.id.signupTitle) as TextView
+		signupSubtitle = view.findViewById<View>(R.id.signupSubtitle) as TextView
+		signupCheckBox = view.findViewById<View>(R.id.signupCheckBox) as CheckBox
+		signupTextName = view.findViewById<View>(R.id.signupName) as EditText
 		signupButton = view.findViewById<View>(R.id.signupButton) as Button
+		signupButton?.setOnClickListener { signup() }
+		signupError = view.findViewById<View>(R.id.signupError) as TextView
 
 		clReply = view.findViewById<ReplyMessageView?>(R.id.reply).apply {
 			applyReplyStyles()
 		}
-
-		signupButton?.setOnClickListener { signup() }
-		signupError = view.findViewById<View>(R.id.signupError) as TextView
+		clFile = view.findViewById<FileMessageView?>(R.id.file).apply {
+			applyFileStyles()
+		}
 
 		// Chat.
 		chatLayout = view.findViewById<View>(R.id.chatLayout) as RelativeLayout
@@ -407,17 +431,23 @@ class ChatFragment : Fragment() {
 		val itemTouchHelper = ItemTouchHelper(swipeController)
 		itemTouchHelper.attachToRecyclerView(recycler)
 		clReply?.setCloseBtnClickListener { hideReplying() }
+		clFile?.setCloseBtnClickListener { hideSelectedFile() }
 
 		// Send.
 		sendText = view.findViewById<EditText?>(R.id.sendText)?.apply {
 			applyIQStyles(IQStyles.iqChannelsStyles?.toolsToMessage?.textChat)
-			IQStyles.iqChannelsStyles?.toolsToMessage?.backgroundChat?.getColorInt(context)?.let {
-				background = ContextCompat.getDrawable(context, R.drawable.bg_text_field)
-					?.apply {
-						colorFilter =
-							PorterDuffColorFilter(it, PorterDuff.Mode.SRC_ATOP)
+
+			IQStyles.iqChannelsStyles?.toolsToMessage?.backgroundChat
+				?.let {
+					background = GradientDrawable().apply {
+						setColor(it.color?.getColorInt(context) ?: ContextCompat.getColor(context, 0))
+						setStroke(
+							it.border?.size?.toPx?.roundToInt() ?: 0,
+							it.border?.color?.getColorInt(context) ?: ContextCompat.getColor(context, 0)
+						)
+						cornerRadius = it.border?.borderRadius?.toPx ?: 12.toPx
 					}
-			}
+				}
 		}
 		sendText?.setOnEditorActionListener { v, actionId, event ->
 			var handled = false
@@ -507,6 +537,22 @@ class ChatFragment : Fragment() {
 		}
 	}
 
+	private fun FileMessageView.applyFileStyles() {
+		tvFileName.applyIQStyles(IQStyles.iqChannelsStyles?.answer?.textMessage)
+		tvFileSize.applyIQStyles(IQStyles.iqChannelsStyles?.answer?.textMessage)
+
+		setBackgroundColor(
+			IQStyles.iqChannelsStyles?.answer?.backgroundTextUpMessage?.getColorInt(context)
+				?: ContextCompat.getColor(requireContext(), R.color.white)
+		)
+
+		IQStyles.iqChannelsStyles?.answer?.iconCancel?.let {
+			Glide.with(context)
+				.load(it)
+				.into(ibClose)
+		}
+	}
+
 	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
@@ -517,15 +563,6 @@ class ChatFragment : Fragment() {
 			} else {
 				it.getParcelable(PARAM_LM_STATE)
 			}
-		}
-
-		childFragmentManager.setFragmentResultListener(
-			FileActionsChooseFragment.REQUEST_KEY,
-			this
-		) { _: String?, bundle: Bundle ->
-			val downloadID = bundle.getLong(FileActionsChooseFragment.KEY_DOWNLOAD_ID)
-			val fileName = bundle.getString(FileActionsChooseFragment.KEY_FILE_NAME)
-			handleDownload(downloadID, fileName)
 		}
 
 		recycler?.addOnScrollListener(object : OnScrollListener() {
@@ -558,9 +595,6 @@ class ChatFragment : Fragment() {
 	}
 
 	override fun onDestroy() {
-		if (onDownloadComplete != null) {
-			context?.unregisterReceiver(onDownloadComplete)
-		}
 		super.onDestroy()
 	}
 
@@ -568,10 +602,55 @@ class ChatFragment : Fragment() {
 		val token = IQChannels.getCurrentToken()
 		authLayout?.visibility =
 			if (IQChannels.auth == null && IQChannels.authRequest != null && token != null) View.VISIBLE else View.GONE
-		signupLayout?.visibility =
-			if (IQChannels.auth == null && IQChannels.authRequest == null && token == null) View.VISIBLE else View.GONE
-		signupButton?.isEnabled = IQChannels.authRequest == null
-		signupText?.isEnabled = IQChannels.authRequest == null
+
+		if(IQChannels.auth == null && IQChannels.authRequest == null && token == null){
+			changeStyleButton(signupButton?.isEnabled)
+
+			IQStyles.iqChannelsStyles?.signup?.button?.backgroundDisabled
+				?.let {
+					signupButton?.setBackgroundDrawable(it, null)
+				}
+			signupButton?.applyIQStyles(IQStyles.iqChannelsStyles?.signup?.button?.textDisabled)
+
+			signupTextName?.addTextChangedListener(object : TextWatcher {
+				override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {}
+				override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {}
+				override fun afterTextChanged(name: Editable) {
+					signupButton?.isEnabled = name.isNotEmpty() && signupCheckBox?.isChecked ?: false
+					changeStyleButton(signupButton?.isEnabled)
+				}
+			})
+
+			IQStyles.iqChannelsStyles?.signup?.inputBackground
+				?.let {
+					signupTextName?.setBackgroundDrawable(it, null)
+				}
+			signupTextName?.applyIQStyles(IQStyles.iqChannelsStyles?.signup?.inputText)
+
+			signupCheckBox?.setOnCheckedChangeListener { _, isChecked ->
+				signupButton?.isEnabled = signupTextName?.text?.isNotEmpty() ?: false && isChecked
+				changeStyleButton(signupButton?.isEnabled)
+			}
+			signupCheckBox?.applyIQStyles(IQStyles.iqChannelsStyles?.signup?.checkBoxText)
+
+			val greetingBold = IQChannels.signupGreetingSettings?.GreetingBold
+			val greeting = IQChannels.signupGreetingSettings?.Greeting
+			if (!greetingBold.isNullOrBlank()) {signupTitle?.text = greetingBold}
+			signupTitle?.applyIQStyles(IQStyles.iqChannelsStyles?.signup?.title)
+			if (!greeting.isNullOrBlank()) {signupSubtitle?.text = greeting}
+			signupSubtitle?.applyIQStyles(IQStyles.iqChannelsStyles?.signup?.subtitle)
+
+			signupLayout?.visibility = View.VISIBLE
+			signupLayout?.setBackgroundColor(
+				IQStyles.iqChannelsStyles?.signup?.background?.getColorInt(requireContext())
+					?: ContextCompat.getColor(requireContext(), R.color.white)
+			)
+
+			signupError?.applyIQStyles(IQStyles.iqChannelsStyles?.signup?.errorText)
+		}else{
+			signupLayout?.visibility = View.GONE
+		}
+		signupTextName?.isEnabled = IQChannels.authRequest == null
 		chatLayout?.visibility = if (IQChannels.auth != null) View.VISIBLE else View.GONE
 		chatUnavailableLayout?.isVisible = false
 	}
@@ -694,12 +773,11 @@ class ChatFragment : Fragment() {
 
 	// Signup
 	private fun signup() {
-		val name = signupText?.text?.toString() ?: return
+		val name = signupTextName?.text?.toString() ?: return
 		if (name.length < 3) {
 			signupError!!.text = "Ошибка: длина имени должна быть не менее 3-х символов."
 			return
 		}
-
 		signupError?.text = ""
 		IQChannels.signup(name)
 	}
@@ -912,7 +990,7 @@ class ChatFragment : Fragment() {
 
 		val typingText = view?.findViewById<TextView?>(R.id.typing)
 		typingText?.text = "$name печатает..."
-		typingText?.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.systemText)
+		typingText?.applyIQStyles(IQStyles.iqChannelsStyles?.chat?.systemText)
 
 		typingText?.visibility = View.VISIBLE
 
@@ -931,8 +1009,6 @@ class ChatFragment : Fragment() {
 
 		checkDisableFreeText(message)
 		adapter?.updated(message)
-
-		maybeScrollToBottomOnNewMessage()
 
 		checkException(message)
 
@@ -1094,37 +1170,20 @@ class ChatFragment : Fragment() {
 
 	// Gallery
 	private fun onGalleryResult(uri: Uri) {
+		selectedFile = viewModel.prepareFile(uri, requireActivity())
 
-		lifecycleScope.launch(Dispatchers.IO) {
-			val result = viewModel.prepareFile(uri, requireActivity())
-			if (IQChannels.config?.uiOptions?.disableIMGConfirmationModal == true) {
-				IQChannels.sendFile(result, replyingMessage?.Id)
-			} else {
-				withContext(Dispatchers.Main) {
-					result?.let {
-						showConfirmDialog(
-							it,
-							getString(R.string.chat_send_file_confirmation_description, it.name)
-						)
-					}
-				}
-			}
+		lifecycleScope.launch(Dispatchers.Main) {
+			clFile?.showSelectedFile(selectedFile)
+			sendButton?.isVisible = true
 		}
 	}
 
 	private fun onGalleryMutipleFilesResult(uri: Uri, message: String) {
+		selectedFile = viewModel.prepareFile(uri, requireActivity())
 
-		lifecycleScope.launch(Dispatchers.IO) {
-			val result = viewModel.prepareFile(uri, requireActivity())
-			if (IQChannels.config?.uiOptions?.disableIMGConfirmationModal == true) {
-				IQChannels.sendFile(result, replyingMessage?.Id)
-			} else {
-				withContext(Dispatchers.Main) {
-					result?.let {
-						showConfirmDialog(it, message)
-					}
-				}
-			}
+		lifecycleScope.launch(Dispatchers.Main) {
+			clFile?.showSelectedFile(selectedFile)
+			sendButton?.isVisible = true
 		}
 	}
 
@@ -1155,7 +1214,9 @@ class ChatFragment : Fragment() {
 				if (replyingMessage != null) {
 					replyToMessageId = replyingMessage?.Id
 				}
-				IQChannels.sendFile(file, replyToMessageId)
+				val text = sendText?.text.toString()
+				sendText?.setText("")
+				IQChannels.sendFile(file, text, replyToMessageId)
 				hideReplying()
 			}
 			.setNegativeButton(R.string.cancel) { dialogInterface: DialogInterface?, i: Int ->
@@ -1164,13 +1225,18 @@ class ChatFragment : Fragment() {
 			.setOnCancelListener {
 				viewModel.clearFilesQueue()
 			}
-
 		builder.show()
 	}
 
 	private fun hideReplying() {
 		clReply?.visibility = View.GONE
 		replyingMessage = null
+	}
+
+	private fun hideSelectedFile() {
+		clFile?.visibility = View.GONE
+		sendButton?.isVisible = !sendText?.text.isNullOrEmpty()
+		selectedFile = null
 	}
 
 	// Camera
@@ -1207,7 +1273,11 @@ class ChatFragment : Fragment() {
 
 		addCameraPhotoToGallery(file)
 		if (IQChannels.config?.uiOptions?.disableIMGConfirmationModal == true) {
-			IQChannels.sendFile(file, replyingMessage?.Id)
+			val text = sendText?.text.toString()
+			sendText?.setText("")
+
+			IQChannels.sendFile(file, text, replyingMessage?.Id)
+			hideReplying()
 		} else {
 			showConfirmDialog(file, file.name)
 		}
@@ -1247,7 +1317,12 @@ class ChatFragment : Fragment() {
 			replyToMessageId = replyingMessage?.Id
 		}
 
-		IQChannels.send(text, replyToMessageId)
+		if(selectedFile != null) {
+			IQChannels.sendFile(selectedFile, text, replyToMessageId)
+		} else {
+			IQChannels.send(text, replyToMessageId)
+		}
+		hideSelectedFile()
 		hideReplying()
 		adapter?.deleteNewMsgHeader()
 	}
@@ -1280,66 +1355,6 @@ class ChatFragment : Fragment() {
 		builder.show()
 	}
 
-	@RequiresApi(Build.VERSION_CODES.TIRAMISU)
-	private fun handleDownload(downloadID: Long, fileName: String?) {
-		if (downloadID > 0) {
-			onDownloadComplete = object : BroadcastReceiver() {
-				override fun onReceive(context: Context, intent: Intent) {
-					val action = intent.action
-					if (DownloadManager.ACTION_DOWNLOAD_COMPLETE == action) {
-						val downloadId = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
-						Log.d(TAG, "received: $downloadId")
-						if (downloadID != downloadId) return
-						val downloadManager =
-							context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-						val query = DownloadManager.Query()
-						query.setFilterById(downloadId)
-						val cursor = downloadManager.query(query)
-						if (cursor.moveToFirst()) {
-							val columnIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS)
-							val status = cursor.getInt(columnIndex)
-							if (status == DownloadManager.STATUS_SUCCESSFUL) {
-								// Загрузка завершена успешно
-								Log.d(TAG, "SUCCESS")
-								Toast.makeText(
-									context,
-									getString(R.string.file_saved_success_msg, fileName),
-									Toast.LENGTH_LONG
-								).show()
-							} else if (status == DownloadManager.STATUS_FAILED) {
-								val columnReason =
-									cursor.getColumnIndex(DownloadManager.COLUMN_REASON)
-								val reason = cursor.getInt(columnReason)
-								// Обработка ошибки загрузки
-								Log.d(TAG, "FAILED")
-								Toast.makeText(
-									context,
-									getString(R.string.file_saved_fail_msg, fileName),
-									Toast.LENGTH_LONG
-								).show()
-							}
-						}
-						cursor.close()
-						context.unregisterReceiver(this)
-					}
-				}
-			}
-
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-				context?.registerReceiver(
-					onDownloadComplete,
-					IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
-					Context.RECEIVER_NOT_EXPORTED
-				)
-			} else {
-				context?.registerReceiver(
-					onDownloadComplete,
-					IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE),
-					Context.RECEIVER_NOT_EXPORTED,
-				)
-			}
-		}
-	}
 
 	private fun onChannelChange(channel: String) {
 		IQChannels.configureClient(
@@ -1461,6 +1476,22 @@ class ChatFragment : Fragment() {
 					recycler?.smoothScrollToPosition(it)
 				}
 			}
+		}
+	}
+
+	private fun changeStyleButton(enabled: Boolean?) {
+		if(enabled == true) {
+			IQStyles.iqChannelsStyles?.signup?.button?.backgroundEnabled
+				?.let {
+					signupButton?.setBackgroundDrawable(it, null)
+				}
+			signupButton?.applyIQStyles(IQStyles.iqChannelsStyles?.signup?.button?.textEnabled)
+		}else{
+			IQStyles.iqChannelsStyles?.signup?.button?.backgroundDisabled
+				?.let {
+					signupButton?.setBackgroundDrawable(it, null)
+				}
+			signupButton?.applyIQStyles(IQStyles.iqChannelsStyles?.signup?.button?.textDisabled)
 		}
 	}
 }

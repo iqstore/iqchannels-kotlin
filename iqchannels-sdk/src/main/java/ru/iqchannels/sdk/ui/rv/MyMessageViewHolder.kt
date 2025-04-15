@@ -1,9 +1,18 @@
 package ru.iqchannels.sdk.ui.rv
 
+import android.content.res.Resources
 import android.text.util.Linkify
 import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
+import android.view.animation.AnimationUtils
+import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.PopupMenu
+import android.widget.PopupWindow
 import androidx.annotation.ColorRes
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
@@ -12,6 +21,9 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.text.DecimalFormat
 import kotlin.math.roundToInt
@@ -28,6 +40,10 @@ import ru.iqchannels.sdk.ui.ChatMessagesAdapter
 import ru.iqchannels.sdk.ui.Colors
 import ru.iqchannels.sdk.ui.widgets.toPx
 import ru.iqchannels.sdk.Log
+import ru.iqchannels.sdk.app.IQChannels
+import ru.iqchannels.sdk.http.HttpCallback
+import ru.iqchannels.sdk.room.toDatabaseMessage
+import ru.iqchannels.sdk.schema.ChatMessageForm
 
 
 internal class MyMessageViewHolder(
@@ -64,40 +80,34 @@ internal class MyMessageViewHolder(
 		myUpload.setOnClickListener { adapter.onUploadCancelClicked(bindingAdapterPosition) }
 
 		// Time
-//		if (adapter.isGroupEnd(bindingAdapterPosition)) {
 		if (message.Sending) {
 			mySending.visibility = View.VISIBLE
 			myDate.visibility = View.INVISIBLE
 			myReceived.visibility = View.GONE
 			myRead.visibility = View.GONE
 			myDate.text = message.Date?.let { timeFormat.format(it) } ?: ""
-//			myDate.visibility = if (message.Date != null) View.VISIBLE else View.GONE
 		} else {
 			mySending.visibility = View.GONE
-//				myFlags.visibility = View.VISIBLE
 			myDate.text = message.Date?.let { timeFormat.format(it) } ?: ""
 			myDate.visibility = if (message.Date != null) View.VISIBLE else View.GONE
 			myReceived.visibility = if (message.Id > 0 && !message.Read) View.VISIBLE else View.GONE
 			myRead.visibility = if (message.Read) View.VISIBLE else View.GONE
-
-//			val isRead = message.Read
-//			myRead.isVisible = isRead
-//			myReceived.isVisible = !isRead && message.Received == true
 		}
-//		} else {
-//			mySending.visibility = View.GONE
-//			myFlags.visibility = View.GONE
-//		}
+
+		// Error icon
+		if (message.Error) {
+			errorIcon.visibility = View.VISIBLE
+		} else {
+			errorIcon.visibility = View.GONE
+		}
 
 		run {
 			IQStyles.iqChannelsStyles?.messages?.backgroundClient
 				?.let {
 					myMsgContainer.setBackgroundDrawable(it, R.drawable.my_msg_bg)
-					clTextsMy.setBackgroundDrawable(it, R.drawable.my_msg_bg)
-					myReply.setBackgroundDrawable(it, R.drawable.my_msg_reply_bg)
 				}
 
-			myDate.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textTime)
+			myDate.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textTimeClient)
 
 			myReply.tvSenderName.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.replySenderTextClient)
 			myReply.tvText.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.replyTextClient)
@@ -111,6 +121,10 @@ internal class MyMessageViewHolder(
 					.load(it)
 					.into(ivFile)
 			}
+
+			errorIcon.setOnClickListener { view ->
+				showPopupMenu(view, message)
+			}
 		}
 
 		// Reset the visibility.
@@ -123,7 +137,7 @@ internal class MyMessageViewHolder(
 
 		// Message
 		if (message.Upload != null) {
-			myText.visibility = View.GONE
+			myText.visibility = View.VISIBLE
 			myImageFrame.visibility = View.GONE
 			clTextsMy.visibility = View.VISIBLE
 			myUpload.visibility = View.VISIBLE
@@ -142,8 +156,7 @@ internal class MyMessageViewHolder(
 
 			showFileSize(size)
 
-			myText.text = file.name
-			myText.setTextColor(Colors.linkColor())
+			myText.text = message.Text
 		} else if (message.File != null) {
 			when (message.File?.State) {
 				FileValidState.Rejected -> showFileStateMsg(
@@ -152,11 +165,31 @@ internal class MyMessageViewHolder(
 					IQStyles.iqChannelsStyles?.messages?.textFileStateRejectedClient
 				)
 
-				FileValidState.OnChecking -> showFileStateMsg(
-					R.string.file_on_checking,
-					R.color.blue,
-					IQStyles.iqChannelsStyles?.messages?.textFileStateOnCheckingClient
-				)
+				FileValidState.OnChecking -> {
+					myText.visibility = View.VISIBLE
+					myImageFrame . visibility = View . GONE
+					clTextsMy.visibility = View.VISIBLE
+					myUpload . visibility = View . VISIBLE
+					mySending.isVisible = false
+
+					if (message.UploadExc != null) {
+						myUpload.visibility = View.GONE
+					}
+
+					val file = message.File ?: return@with
+
+					myImageFrame.visibility = View.GONE
+					clTextsMy . visibility = View . VISIBLE
+					tvMyFileName.visibility = View.VISIBLE
+					tvMyFileName . text = file . Name
+					val size = file.Size
+
+					showFileSize (size)
+
+					myText . text = message . Text
+				}
+
+
 
 				FileValidState.SentForChecking -> showFileStateMsg(
 					R.string.file_sent_to_check,
@@ -228,6 +261,60 @@ internal class MyMessageViewHolder(
 		}
 	}
 
+	private fun showPopupMenu(view: View, message: ChatMessage) {
+		val inflater = LayoutInflater.from(view.context)
+		val popupView = inflater.inflate(R.layout.popup_menu, null)
+
+		val popupWindow = PopupWindow(
+			popupView,
+			ViewGroup.LayoutParams.WRAP_CONTENT,
+			ViewGroup.LayoutParams.WRAP_CONTENT,
+			true
+		)
+		popupWindow.inputMethodMode = PopupWindow.INPUT_METHOD_NOT_NEEDED
+		popupWindow.softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING
+
+		val retryButton: Button = popupView.findViewById(R.id.retryButton)
+		val deleteButton: Button = popupView.findViewById(R.id.deleteButton)
+
+		retryButton.setOnClickListener {
+			val form = ChatMessageForm.text(message.LocalId, message.Text, message.ReplyToMessageId)
+			IQChannels.resend( form, 0, true)
+
+			popupWindow.dismiss()
+		}
+
+		deleteButton.setOnClickListener {
+			IQChannels.messageDelete(message)
+			popupWindow.dismiss()
+		}
+
+		popupView.startAnimation(AnimationUtils.loadAnimation(view.context, R.anim.popup_enter))
+
+		val location = IntArray(2)
+		view.getLocationOnScreen(location)
+
+		val screenWidth = Resources.getSystem().displayMetrics.widthPixels
+
+		popupView.measure(
+			View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+			View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+		)
+		val menuWidth = popupView.measuredWidth
+		val menuHeight = popupView.measuredHeight
+
+		val buttonY = location[1]
+		val spaceAbove = buttonY - 40
+
+		val offsetX = screenWidth - menuWidth - 10
+
+		if (spaceAbove >= menuHeight) {
+			popupWindow.showAtLocation(view, Gravity.NO_GRAVITY, offsetX, buttonY - menuHeight)
+		} else {
+			popupWindow.showAtLocation(view, Gravity.NO_GRAVITY, offsetX, buttonY + view.height)
+		}
+	}
+
 	private fun ItemMyMessageBinding.showFileSize(size: Long) {
 		if (size != null && size > 0) {
 			tvMyFileSize.visibility = View.VISIBLE
@@ -267,27 +354,34 @@ internal class MyMessageViewHolder(
 			if (imageUrl != null) {
 				val size = Utils.computeImageSizeFromFile(file, rootViewDimens)
 
-				/*
-				if (message.Text != null && message.Text?.isNotEmpty() == true) {
+				if (!message.Text.isNullOrEmpty()) {
 					clTextsMy.visibility = View.VISIBLE
 					myText.visibility = View.VISIBLE
 					myText.text = message.Text
+					myFlags.isVisible = true
+
+					myImgFlags.isVisible = false
+					myDate.text = message.Date?.let { timeFormat.format(it) } ?: ""
+					myDate.visibility = if (message.Date != null) View.VISIBLE else View.GONE
+					myReceived.visibility = if (message.Received) View.VISIBLE else View.GONE
+					myRead.visibility = if (message.Read) View.VISIBLE else View.GONE
+					val isRead = message.Read
+					myRead.isVisible = isRead
+					myReceived.isVisible = !isRead && message.Received == true
 				} else {
+					clTextsMy.visibility = View.GONE
 					myText.visibility = View.GONE
+					myFlags.isVisible = false
+
+					myImgFlags.isVisible = true
+					myImgDate.text = message.Date?.let { timeFormat.format(it) } ?: ""
+					myImgDate.visibility = if (message.Date != null) View.VISIBLE else View.GONE
+					myImgReceived.visibility = if (message.Received) View.VISIBLE else View.GONE
+					myImgRead.visibility = if (message.Read) View.VISIBLE else View.GONE
+					val isRead = message.Read
+					myImgRead.isVisible = isRead
+					myImgReceived.isVisible = !isRead && message.Received == true
 				}
-				 */
-
-				myText.visibility = View.GONE
-
-				myImgFlags.isVisible = true
-				myFlags.isVisible = false
-				myImgDate.text = message.Date?.let { timeFormat.format(it) } ?: ""
-				myImgDate.visibility = if (message.Date != null) View.VISIBLE else View.GONE
-				myImgReceived.visibility = if (message.Received) View.VISIBLE else View.GONE
-				myImgRead.visibility = if (message.Read) View.VISIBLE else View.GONE
-				val isRead = message.Read
-				myImgRead.isVisible = isRead
-				myImgReceived.isVisible = !isRead && message.Received == true
 
 				myImageFrame.visibility = View.VISIBLE
 				myImageFrame.layoutParams.width = size[0]
@@ -304,18 +398,21 @@ internal class MyMessageViewHolder(
 						.into(myImageSrc)
 				}
 			} else {
+				if (!message.Text.isNullOrEmpty()) {
+					myText.visibility = View.VISIBLE
+					myText.text = message.Text
+				} else {
+					myText.visibility = View.GONE
+				}
 				myFlags.isVisible = true
 				myImageFrame.visibility = View.GONE
 				clTextsMy.visibility = View.VISIBLE
-				myText.visibility = View.GONE
 				tvMyFileName.visibility = View.VISIBLE
 				tvMyFileName.text = file?.Name
 				ivFile.isVisible = true
 				val size = file?.Size
 
 				size?.let { showFileSize(it) }
-				myText.text = file?.Name
-				myText.setTextColor(Colors.linkColor())
 			}
 		}
 	}

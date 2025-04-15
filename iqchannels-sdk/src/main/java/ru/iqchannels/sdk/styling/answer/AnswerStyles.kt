@@ -11,8 +11,6 @@ class AnswerStyles(
 	val textMessage: Text?,
 	@SerializedName("background_text_up_message")
 	val backgroundTextUpMessage: Color?,
-	@SerializedName("text_answer")
-	val textAnswer: Text?,
 	@SerializedName("icon_cancel")
 	val iconCancel: String?,
 	@SerializedName("left_line")

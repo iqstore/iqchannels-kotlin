@@ -2,15 +2,14 @@ package ru.iqchannels.sdk.styling.messages
 
 import com.google.gson.annotations.SerializedName
 import ru.iqchannels.sdk.styling.Color
+import ru.iqchannels.sdk.styling.ContainerStyles
 import ru.iqchannels.sdk.styling.Text
 
 class MessagesStyles(
 	@SerializedName("background_operator")
-	val backgroundOperator: Color?,
+	val backgroundOperator: ContainerStyles?,
 	@SerializedName("background_client")
-	val backgroundClient: Color?,
-	@SerializedName("system_text")
-	val systemText: Text?,
+	val backgroundClient: ContainerStyles?,
 	@SerializedName("text_operator")
 	val textOperator: Text?,
 	@SerializedName("text_client")
@@ -23,8 +22,10 @@ class MessagesStyles(
 	val replyTextOperator: Text?,
 	@SerializedName("reply_sender_text_operator")
 	val replySenderTextOperator: Text?,
-	@SerializedName("text_time")
-	val textTime: Text?,
+	@SerializedName("text_time_operator")
+	val textTimeOperator: Text?,
+	@SerializedName("text_time_client")
+	val textTimeClient: Text?,
 	@SerializedName("text_up")
 	val textUp: Text?,
 	@SerializedName("text_file_state_rejected_client")

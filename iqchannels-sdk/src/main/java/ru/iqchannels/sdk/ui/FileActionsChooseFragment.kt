@@ -1,6 +1,7 @@
 package ru.iqchannels.sdk.ui
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -10,11 +11,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import ru.iqchannels.sdk.Log
 import ru.iqchannels.sdk.R
-import ru.iqchannels.sdk.download.FileDownloader.downloadFile
+import ru.iqchannels.sdk.download.FileDownloader.saveFileToDownloads
 import ru.iqchannels.sdk.ui.Colors.textColor
 
 class FileActionsChooseFragment : BottomSheetDialogFragment() {
@@ -51,6 +61,7 @@ class FileActionsChooseFragment : BottomSheetDialogFragment() {
 		return inflater.inflate(R.layout.fragment_file_actions_choose, container, false)
 	}
 
+	@RequiresApi(Build.VERSION_CODES.Q)
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
 		val tvOpenFile = view.findViewById<TextView>(R.id.tv_open_file)
@@ -75,7 +86,7 @@ class FileActionsChooseFragment : BottomSheetDialogFragment() {
 					)
 					== PackageManager.PERMISSION_GRANTED
 				) {
-					downloadAndFinish(url, fileName)
+					downloadAndFinish(context, url, fileName)
 				} else {
 					ActivityCompat.requestPermissions(
 						requireActivity(), arrayOf(
@@ -84,11 +95,12 @@ class FileActionsChooseFragment : BottomSheetDialogFragment() {
 					)
 				}
 			} else {
-				downloadAndFinish(url, fileName)
+				downloadAndFinish(context, url, fileName)
 			}
 		}
 	}
 
+	@RequiresApi(Build.VERSION_CODES.Q)
 	override fun onRequestPermissionsResult(
 		requestCode: Int,
 		permissions: Array<String>,
@@ -99,17 +111,42 @@ class FileActionsChooseFragment : BottomSheetDialogFragment() {
 			if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 				val url = requireArguments().getString(ARG_URL)
 				val fileName = requireArguments().getString(ARG_FILE_NAME)
-				downloadAndFinish(url, fileName)
+				downloadAndFinish(requireActivity(), url, fileName)
 			}
 		}
 	}
 
-	private fun downloadAndFinish(url: String?, fileName: String?) {
-		val id = downloadFile(requireContext(), url, fileName)
-		val bundle = Bundle()
-		bundle.putLong(KEY_DOWNLOAD_ID, id)
-		bundle.putString(KEY_FILE_NAME, fileName)
-		parentFragmentManager.setFragmentResult(REQUEST_KEY, bundle)
+	@RequiresApi(Build.VERSION_CODES.Q)
+	fun downloadAndFinish(context: Context?, url: String?, fileName: String?) {
+		val successMessage = getString(R.string.file_saved_success_msg)
+		val errorMessage = getString(R.string.file_saved_fail_msg)
+
+		CoroutineScope(Dispatchers.IO).launch {
+			try {
+				val client = OkHttpClient()
+				val request = Request.Builder().url(url!!).build()
+				val response = client.newCall(request).execute()
+
+				if (response.isSuccessful) {
+					val fileContent = response.body?.bytes()
+					if (fileContent != null) {
+						saveFileToDownloads(context, fileName!!, fileContent)
+						withContext(Dispatchers.Main) {
+							Toast.makeText(context, successMessage, Toast.LENGTH_LONG).show()
+						}
+					}
+				} else {
+					withContext(Dispatchers.Main) {
+						Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
+					}
+				}
+			} catch (e: Exception) {
+				e.printStackTrace()
+				withContext(Dispatchers.Main) {
+					Toast.makeText(context, errorMessage, Toast.LENGTH_LONG).show()
+				}
+			}
+		}
 		dismiss()
 	}
 }

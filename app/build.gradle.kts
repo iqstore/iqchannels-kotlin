@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("com.google.gms.google-services")
     id("org.jetbrains.kotlin.android")
+    kotlin("kapt")
 }
 
 android {
@@ -13,7 +14,7 @@ android {
         minSdk = 26
         targetSdk = 34
         versionCode = 2
-        versionName = "2.1.0"
+        versionName = "2.2.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
     }
@@ -79,6 +80,6 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview:1.4.0")
     debugImplementation("androidx.compose.ui:ui-tooling:1.4.0")
     implementation("com.google.android.material:compose-theme-adapter:1.2.1")
-    implementation("io.coil-kt:coil-compose:2.1.0")
+    implementation("io.coil-kt:coil-compose:2.2.0")
     implementation("io.coil-kt:coil:2.2.2")
 }

@@ -38,6 +38,7 @@ class ChatMessage {
 	var ReceivedAt: Long? = null
 	var ReadAt: Long? = null
 	var Error: Boolean = false
+	var AutoGreeting: Boolean = false
 
 	// Transient
 	var My = false

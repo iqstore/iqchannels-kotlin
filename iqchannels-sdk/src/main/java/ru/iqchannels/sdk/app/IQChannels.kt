@@ -895,6 +895,7 @@ object IQChannels {
 						Read = true
 						Received = true
 						UserId = now.time
+						AutoGreeting = true
 						User = User().apply { DisplayName = settings.OperatorName }
 					}
 					else -> null

@@ -209,7 +209,6 @@ class ChatFragment : Fragment() {
 				val uri = intent?.data
 
 				clFile?.imageView?.setImageResource(R.drawable.doc_32)
-
 				clFile?.imageView?.imageTintList =
 					context?.let { it1 -> ContextCompat.getColor(it1, R.color.other_file_icon) }
 						?.let { it2 ->
@@ -218,24 +217,17 @@ class ChatFragment : Fragment() {
 							)
 						}
 
-				val clipData = intent?.clipData
-				if (clipData != null) {
-					clFile?.imageView?.imageTintList = null
-
-					clFile?.imageView?.scaleType = ImageView.ScaleType.CENTER_CROP
-					for (i in 0 until clipData.itemCount) {
-						val itemUri = clipData.getItemAt(i).uri
-						clFile?.imageView?.setImageURI(itemUri)
-					}
-				}
-
 				when (uri == null) {
 					true -> { // multiple choice
 						it.data?.clipData?.let { clipData ->
 							val uris = ArrayList<Uri>()
+							clFile?.imageView?.imageTintList = null
+							clFile?.imageView?.scaleType = ImageView.ScaleType.CENTER_CROP
 							val itemCount = clipData.itemCount
 							for (i in 0 until itemCount) {
-								uris.add(clipData.getItemAt(i).uri)
+								val itemUri = clipData.getItemAt(i).uri
+								clFile?.imageView?.setImageURI(itemUri)
+								uris.add(itemUri)
 							}
 
 							val checkedFiles = context?.let { context ->

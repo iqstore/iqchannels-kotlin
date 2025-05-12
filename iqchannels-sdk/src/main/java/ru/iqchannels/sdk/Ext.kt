@@ -60,10 +60,10 @@ fun View.setBackgroundDrawable(
 ) {
 	style?.let {
 		background = GradientDrawable().apply {
-			setColor(style.color?.getColorInt(context) ?: ContextCompat.getColor(context, 0))
+			setColor(style.color?.getColorInt(context) ?: ContextCompat.getColor(context, R.color.default_color))
 			setStroke(
 				style.border?.size?.toPx?.roundToInt() ?: 0,
-				style.border?.color?.getColorInt(context) ?: ContextCompat.getColor(context, 0)
+				style.border?.color?.getColorInt(context) ?: ContextCompat.getColor(context, R.color.default_color)
 			)
 			cornerRadius = style.border?.borderRadius?.toPx ?: 12.toPx
 		}

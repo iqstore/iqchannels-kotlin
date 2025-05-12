@@ -447,10 +447,10 @@ class ChatFragment : Fragment() {
 			IQStyles.iqChannelsStyles?.toolsToMessage?.backgroundChat
 				?.let {
 					background = GradientDrawable().apply {
-						setColor(it.color?.getColorInt(context) ?: ContextCompat.getColor(context, 0))
+						setColor(it.color?.getColorInt(context) ?: ContextCompat.getColor(context, R.color.default_color))
 						setStroke(
 							it.border?.size?.toPx?.roundToInt() ?: 0,
-							it.border?.color?.getColorInt(context) ?: ContextCompat.getColor(context, 0)
+							it.border?.color?.getColorInt(context) ?: ContextCompat.getColor(context, R.color.default_color)
 						)
 						cornerRadius = it.border?.borderRadius?.toPx ?: 12.toPx
 					}

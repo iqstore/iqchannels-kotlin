@@ -318,6 +318,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:layout_marginHorizontal="50dp"
             android:text="@string/chat_unavailable_description"
             android:textAlignment="center"
             android:gravity="center"

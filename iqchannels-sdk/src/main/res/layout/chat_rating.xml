@@ -114,7 +114,7 @@
             android:id="@+id/rating_rated"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginRight="10dp"
+            android:layout_marginLeft="7dp"
             android:autoLink="all"
             android:textAlignment="center"
             android:textColor="#ff4c4c4c"

@@ -31,7 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
-            android:layout_marginLeft="40dp"
+            android:layout_marginLeft="80dp"
             android:orientation="vertical">
 
             <LinearLayout
@@ -136,9 +136,10 @@
                         android:layout_alignParentRight="true"
                         android:autoLink="all"
                         android:gravity="end|center_vertical"
-                        android:paddingHorizontal="16dp"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="16dp"
                         android:paddingTop="8dp"
-                        android:paddingBottom="10dp">
+                        android:paddingBottom="3dp">
 
                         <FrameLayout
                             android:id="@+id/myUpload"

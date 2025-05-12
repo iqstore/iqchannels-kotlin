@@ -209,13 +209,13 @@
                     app:layout_constrainedWidth="true"
                     app:layout_constraintHorizontal_bias="0"
                     tools:text="Message Text"
+                    android:paddingBottom="3dp"
                     />
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_card_buttons"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
                     app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                     app:layout_constraintTop_toBottomOf="@id/otherText"
                     app:layout_constraintStart_toStartOf="parent"
@@ -247,8 +247,7 @@
             <include layout="@layout/chat_rating"
                 android:id="@+id/rating"
                 android:layout_height="wrap_content"
-                android:layout_width="wrap_content"
-                android:layout_marginRight="20dp" />
+                android:layout_width="wrap_content"/>
 
         </LinearLayout>
     </LinearLayout>

@@ -19,4 +19,5 @@ interface MessagesListener {
 	fun messageCancelled(message: ChatMessage)
 	fun messageDeleted(message: ChatMessage)
 	fun eventChangeChannel(channel: String)
+	fun ratingRenderQuestion()
 }

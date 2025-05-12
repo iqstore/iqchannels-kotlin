@@ -46,7 +46,7 @@ import ru.iqchannels.sdk.ui.UiUtils
 import ru.iqchannels.sdk.ui.UiUtils.getRatingScaleMaxValue
 import ru.iqchannels.sdk.ui.widgets.DropDownButton
 import ru.iqchannels.sdk.Log
-import kotlin.math.max
+import ru.iqchannels.sdk.app.IQChannels
 
 interface RatingPollListener {
 	fun onRatingPollAnswersSend(
@@ -56,6 +56,7 @@ interface RatingPollListener {
 		callback: HttpCallback<Void>
 	)
 	fun onRatingPollFinished(value: Int?)
+	fun onRatingRenderQuestion()
 }
 
 internal class OtherMessageViewHolder(
@@ -361,7 +362,7 @@ internal class OtherMessageViewHolder(
 			return
 		}
 
-		(bindingAdapter as? ChatMessagesAdapter)?.onRateClicked(adapterPosition, value)
+		(bindingAdapter as? ChatMessagesAdapter)?.onRateClicked(bindingAdapterPosition, value)
 	}
 
 	override fun onRatingPollAnswersSend(
@@ -380,8 +381,12 @@ internal class OtherMessageViewHolder(
 
 	override fun onRatingPollFinished(value: Int?) {
 		if (value != null) {
-			(bindingAdapter as? ChatMessagesAdapter)?.onRatePollClicked(adapterPosition, value)
+			(bindingAdapter as? ChatMessagesAdapter)?.onRatePollClicked(bindingAdapterPosition, value)
 		}
+	}
+
+	override fun onRatingRenderQuestion() {
+		IQChannels.ratingRenderQuestion()
 	}
 
 	private fun getRateButtonValue(view: View): Int {
@@ -433,6 +438,8 @@ internal class OtherMessageViewHolder(
 		msgRating: Rating,
 		rating: ru.iqchannels.sdk.databinding.ChatRatingBinding,
 	) = with(binding) {
+		binding.otherAvatar.visibility = View.GONE
+		binding.date.visibility = View.GONE
 		rating.root.visibility = View.VISIBLE
 		rating.ratingRate.visibility = View.GONE
 		rating.ratingRated.visibility = View.GONE

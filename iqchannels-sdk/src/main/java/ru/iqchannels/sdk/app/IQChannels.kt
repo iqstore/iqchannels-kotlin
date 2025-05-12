@@ -884,6 +884,7 @@ object IQChannels {
 		} else {
 			if(settings?.TotalOpenedTickets == 0){
 				val now = Date()
+				val avatarUrl = String.format("%s/public/api/v1/files/image/%s?size=%s", getBaseUrl(), settings.AvatarId, FileImageSize.AVATAR)
 				message = when {
 					systemChat && settings.TotalOpenedTickets == 0 -> ChatMessage().apply {
 						Id = now.time
@@ -896,7 +897,10 @@ object IQChannels {
 						Received = true
 						UserId = now.time
 						AutoGreeting = true
-						User = User().apply { DisplayName = settings.OperatorName }
+						User = User().apply {
+							DisplayName = settings.Pseudonym
+							AvatarUrl = avatarUrl
+						}
 					}
 					else -> null
 				}
@@ -1733,6 +1737,12 @@ object IQChannels {
 	}
 
 	// Ratings
+	internal fun ratingRenderQuestion() {
+		for (listener in messageListeners) {
+			listener.ratingRenderQuestion()
+		}
+	}
+
 	internal fun ratingsRate(ratingId: Long, value: Int) {
 		if (auth == null) {
 			return

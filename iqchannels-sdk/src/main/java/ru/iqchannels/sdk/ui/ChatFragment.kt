@@ -1471,7 +1471,9 @@ class ChatFragment : Fragment() {
 					val clip = ClipData.newPlainText(text, text)
 					clipboard.setPrimaryClip(clip)
 
-					tnwMsgCopied?.show()
+					if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+						tnwMsgCopied?.show()
+					}
 				}
 			}
 		}

@@ -69,7 +69,7 @@ internal class OtherMessageViewHolder(
 	private val timeFormat: DateFormat =
 		android.text.format.DateFormat.getTimeFormat(binding.root.context)
 
-	fun bind(message: ChatMessage, rootViewDimens: Pair<Int, Int>, markwon: Markwon) =
+	fun bind(message: ChatMessage, isPreviousFromOtherUser: Boolean, rootViewDimens: Pair<Int, Int>, markwon: Markwon) =
 		with(binding) {
 			val adapter = bindingAdapter as? ChatMessagesAdapter ?: return@with
 
@@ -80,6 +80,12 @@ internal class OtherMessageViewHolder(
 				date.applyIQStyles(IQStyles.iqChannelsStyles?.chat?.dateText)
 			} else {
 				date.visibility = View.GONE
+			}
+
+			if (isPreviousFromOtherUser){
+				other.setPadding(0, 0, 0, 30)
+			} else {
+				other.setPadding(0, 0, 0, 0)
 			}
 
 			val groupStart = adapter.isGroupStart(bindingAdapterPosition)

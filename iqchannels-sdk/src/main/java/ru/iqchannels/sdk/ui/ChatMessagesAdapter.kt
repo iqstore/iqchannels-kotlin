@@ -27,6 +27,7 @@ import ru.iqchannels.sdk.schema.ChatEvent
 import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.schema.ChatPayloadType
 import ru.iqchannels.sdk.schema.RatingPollClientAnswerInput
+import ru.iqchannels.sdk.schema.RatingState
 import ru.iqchannels.sdk.schema.SingleChoice
 import ru.iqchannels.sdk.schema.UploadedFile
 import ru.iqchannels.sdk.ui.rv.MyMessageViewHolder
@@ -212,7 +213,11 @@ internal class ChatMessagesAdapter(
 
 		when (holder) {
 			is MyMessageViewHolder -> holder.bind(message, rootViewDimens())
-			is OtherMessageViewHolder -> holder.bind(message, rootViewDimens(), markwon)
+			is OtherMessageViewHolder -> {
+				val prevMessage = if (messages.count() > position + 1) messages[position + 1] else null
+				val isPreviousFromOtherUser = prevMessage != null && prevMessage.My
+				holder.bind(message, isPreviousFromOtherUser, rootViewDimens(), markwon)
+			}
 			else -> Unit
 		}
 
@@ -337,6 +342,7 @@ internal class ChatMessagesAdapter(
 
 		rating.Sent = true
 		rating.Value = value
+		rating.State = RatingState.RATED
 		iqchannels.ratingsRate(rating.Id, value)
 		notifyItemChanged(position)
 	}

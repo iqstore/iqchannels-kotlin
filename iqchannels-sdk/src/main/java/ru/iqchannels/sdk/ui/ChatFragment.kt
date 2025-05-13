@@ -1471,7 +1471,10 @@ class ChatFragment : Fragment() {
 					val clip = ClipData.newPlainText(text, text)
 					clipboard.setPrimaryClip(clip)
 
-					if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+					val isXiaomi = Build.MANUFACTURER.equals("xiaomi", ignoreCase = true)
+					val isBelowTiramisu = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
+
+					if (isBelowTiramisu || isXiaomi) {
 						tnwMsgCopied?.show()
 					}
 				}

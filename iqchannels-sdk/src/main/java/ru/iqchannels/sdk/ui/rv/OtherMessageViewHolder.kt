@@ -46,7 +46,7 @@ import ru.iqchannels.sdk.ui.UiUtils
 import ru.iqchannels.sdk.ui.UiUtils.getRatingScaleMaxValue
 import ru.iqchannels.sdk.ui.widgets.DropDownButton
 import ru.iqchannels.sdk.Log
-import kotlin.math.max
+import ru.iqchannels.sdk.app.IQChannels
 
 interface RatingPollListener {
 	fun onRatingPollAnswersSend(
@@ -56,6 +56,7 @@ interface RatingPollListener {
 		callback: HttpCallback<Void>
 	)
 	fun onRatingPollFinished(value: Int?)
+	fun onRatingRenderQuestion()
 }
 
 internal class OtherMessageViewHolder(
@@ -68,7 +69,7 @@ internal class OtherMessageViewHolder(
 	private val timeFormat: DateFormat =
 		android.text.format.DateFormat.getTimeFormat(binding.root.context)
 
-	fun bind(message: ChatMessage, rootViewDimens: Pair<Int, Int>, markwon: Markwon) =
+	fun bind(message: ChatMessage, isPreviousFromOtherUser: Boolean, rootViewDimens: Pair<Int, Int>, markwon: Markwon) =
 		with(binding) {
 			val adapter = bindingAdapter as? ChatMessagesAdapter ?: return@with
 
@@ -79,6 +80,12 @@ internal class OtherMessageViewHolder(
 				date.applyIQStyles(IQStyles.iqChannelsStyles?.chat?.dateText)
 			} else {
 				date.visibility = View.GONE
+			}
+
+			if (isPreviousFromOtherUser){
+				other.setPadding(0, 0, 0, 30)
+			} else {
+				other.setPadding(0, 0, 0, 0)
 			}
 
 			val groupStart = adapter.isGroupStart(bindingAdapterPosition)
@@ -361,7 +368,7 @@ internal class OtherMessageViewHolder(
 			return
 		}
 
-		(bindingAdapter as? ChatMessagesAdapter)?.onRateClicked(adapterPosition, value)
+		(bindingAdapter as? ChatMessagesAdapter)?.onRateClicked(bindingAdapterPosition, value)
 	}
 
 	override fun onRatingPollAnswersSend(
@@ -380,8 +387,12 @@ internal class OtherMessageViewHolder(
 
 	override fun onRatingPollFinished(value: Int?) {
 		if (value != null) {
-			(bindingAdapter as? ChatMessagesAdapter)?.onRatePollClicked(adapterPosition, value)
+			(bindingAdapter as? ChatMessagesAdapter)?.onRatePollClicked(bindingAdapterPosition, value)
 		}
+	}
+
+	override fun onRatingRenderQuestion() {
+		IQChannels.ratingRenderQuestion()
 	}
 
 	private fun getRateButtonValue(view: View): Int {
@@ -433,6 +444,8 @@ internal class OtherMessageViewHolder(
 		msgRating: Rating,
 		rating: ru.iqchannels.sdk.databinding.ChatRatingBinding,
 	) = with(binding) {
+		binding.otherAvatar.visibility = View.GONE
+		binding.date.visibility = View.GONE
 		rating.root.visibility = View.VISIBLE
 		rating.ratingRate.visibility = View.GONE
 		rating.ratingRated.visibility = View.GONE

@@ -260,6 +260,13 @@ class ChatFragment : Fragment() {
 						} else {
 							val ctx = context
 
+							val mimeType = context?.contentResolver?.getType(uri)
+							if (mimeType != null && mimeType.startsWith("image/")) {
+								clFile?.imageView?.imageTintList = null
+								clFile?.imageView?.scaleType = ImageView.ScaleType.CENTER_CROP
+								clFile?.imageView?.setImageURI(uri)
+							}
+
 							val checkedFile = if (ctx != null) {
 								FileConfigChecker.checkFiles(ctx, listOf(uri), childFragmentManager).firstOrNull()
 							} else {
@@ -440,10 +447,10 @@ class ChatFragment : Fragment() {
 			IQStyles.iqChannelsStyles?.toolsToMessage?.backgroundChat
 				?.let {
 					background = GradientDrawable().apply {
-						setColor(it.color?.getColorInt(context) ?: ContextCompat.getColor(context, 0))
+						setColor(it.color?.getColorInt(context) ?: ContextCompat.getColor(context, R.color.default_color))
 						setStroke(
 							it.border?.size?.toPx?.roundToInt() ?: 0,
-							it.border?.color?.getColorInt(context) ?: ContextCompat.getColor(context, 0)
+							it.border?.color?.getColorInt(context) ?: ContextCompat.getColor(context, R.color.default_color)
 						)
 						cornerRadius = it.border?.borderRadius?.toPx ?: 12.toPx
 					}
@@ -697,7 +704,7 @@ class ChatFragment : Fragment() {
 
 				val message = when (e) {
 					is UnknownHostException -> {
-						getString(R.string.check_connection)
+						getString(R.string.chat_unavailable_description)
 					}
 
 					is SocketTimeoutException, is TimeoutException -> {
@@ -863,6 +870,10 @@ class ChatFragment : Fragment() {
 			override fun eventTyping(event: ChatEvent) {
 				this@ChatFragment.eventTyping(event)
 			}
+
+			override fun ratingRenderQuestion() {
+				this@ChatFragment.maybeScrollToBottomOnNewMessage()
+			}
 		})
 	}
 
@@ -1024,12 +1035,12 @@ class ChatFragment : Fragment() {
 				errMessage = if (exception.code == 413) {
 					getString(R.string.file_size_too_large)
 				} else {
-					getString(R.string.check_connection)
+					getString(R.string.chat_unavailable_description)
 				}
 			}
 
 			is UnknownHostException -> {
-				errMessage = getString(R.string.check_connection)
+				errMessage = getString(R.string.chat_unavailable_description)
 			}
 
 			is SocketTimeoutException, is TimeoutException, is java.net.SocketException -> {
@@ -1460,7 +1471,12 @@ class ChatFragment : Fragment() {
 					val clip = ClipData.newPlainText(text, text)
 					clipboard.setPrimaryClip(clip)
 
-					tnwMsgCopied?.show()
+					val isXiaomi = Build.MANUFACTURER.equals("xiaomi", ignoreCase = true)
+					val isBelowTiramisu = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
+
+					if (isBelowTiramisu || isXiaomi) {
+						tnwMsgCopied?.show()
+					}
 				}
 			}
 		}

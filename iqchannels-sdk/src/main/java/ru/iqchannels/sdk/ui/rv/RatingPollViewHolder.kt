@@ -1,11 +1,14 @@
 package ru.iqchannels.sdk.ui.rv
 
 import android.graphics.Color
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
+import androidx.core.view.setPadding
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import ru.iqchannels.sdk.R
@@ -80,7 +83,7 @@ internal class RatingPollViewHolder(
 
 	private fun renderCurrentQuestion() {
 		binding.pollOffer.visibility = View.GONE
-		binding.submitButton.visibility = View.VISIBLE
+//		binding.submitButton.visibility = View.VISIBLE
 		binding.submitButton.isEnabled = false
 		poll.Questions?.let {
 			if (currentQuestionIndex < it.size) {
@@ -96,6 +99,10 @@ internal class RatingPollViewHolder(
 				binding.submitButton.setBackgroundDrawable(it, R.drawable.bg_rating_poll_rounded_button)
 			}
 		binding.submitButton.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.sentRating?.textDisabled)
+
+		Handler(Looper.getMainLooper()).postDelayed({
+			listener?.onRatingRenderQuestion()
+		}, 30)
 	}
 
 	private fun hideAllQuestionLayouts() {
@@ -136,7 +143,6 @@ internal class RatingPollViewHolder(
 		}else{
 			binding.submitButton.visibility = View.VISIBLE
 		}
-
 		binding.submitButton.setOnClickListener {
 			if (currentAnswer != null) {
 				if (currentAnswer!!.AsTicketRating == true) {
@@ -416,9 +422,9 @@ internal class RatingPollViewHolder(
 				}
 				layoutParams = LinearLayout.LayoutParams(
 					0,
-					toPx(32)
+					toPx(42)
 				).apply {
-					setMargins(8, 0, 8, 0)
+					setPadding(15)
 					weight = 1f
 				}
 			}
@@ -496,6 +502,7 @@ internal class RatingPollViewHolder(
 		binding.root.visibility = View.GONE
 		rating.State = RatingState.FINISHED
 		listener?.onRatingPollFinished(rating.Value)
+		listener?.onRatingRenderQuestion()
 	}
 
 	private fun showThanksFeedback() {

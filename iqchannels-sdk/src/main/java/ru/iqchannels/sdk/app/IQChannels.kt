@@ -407,7 +407,6 @@ object IQChannels {
 			}
 			sendPushToken()
 			getChatSettings()
-			listenToUnread()
 		}
 	}
 
@@ -693,42 +692,22 @@ object IQChannels {
 	}
 
 	private fun listenToUnread() {
-		if (auth == null) {
-			return
+
+		CoroutineScope(Dispatchers.IO).launch {
+			val allMessages = messageDao?.getAllMessages()
+
+			val chatId = allMessages?.firstOrNull { it.clientId == auth?.Client?.Id }?.chatId
+
+			val allMessagesByChatId = allMessages?.filter { it.chatId == chatId }
+			val unreadCount = allMessagesByChatId?.count { !it.read && it.author == ActorType.USER}
+
+			unreadReceived(unreadCount)
 		}
-		if (unreadRequest != null) {
-			return
-		}
-		if (unreadListeners.isEmpty()) {
-			return
-		}
 
-		client?.let { client ->
-			unreadAttempt++
 
-			config?.channel?.let { channel ->
-				unreadRequest =
-					client.chatsChannelUnread(channel, object : HttpSseListener<Int> {
-						override fun onConnected() {}
 
-						override fun onException(e: Exception?) {
-							e?.let { execute { unreadException(e) } }
-						}
 
-						override fun onEvent(event: Int) {
-							execute { unreadReceived(event) }
-						}
 
-						override fun onDisconnected() {
-							execute { unreadDisconnected(Exception("disconnected")) }
-						}
-					})
-				Log.i(
-					TAG,
-					String.format("Listening to unread notifications, attempt=%d", unreadAttempt)
-				)
-			}
-		}
 	}
 
 	private fun unreadException(e: Exception) {
@@ -768,9 +747,6 @@ object IQChannels {
 	}
 
 	private fun unreadReceived(unread: Int?) {
-		if (unreadRequest == null) {
-			return
-		}
 		this.unread = unread ?: 0
 		unreadAttempt = 0
 		Log.i(TAG, String.format("Received an unread notification, unread=%d", this.unread))
@@ -801,7 +777,6 @@ object IQChannels {
 			override fun cancel() {
 				messageListeners.remove(listener)
 				Log.d(TAG, String.format("Removed a messages listener %s", listener))
-				cancelLoadMessagesWhenNoListeners()
 			}
 		}
 	}
@@ -884,6 +859,7 @@ object IQChannels {
 		} else {
 			if(settings?.TotalOpenedTickets == 0){
 				val now = Date()
+				val avatarUrl = String.format("%s/public/api/v1/files/image/%s?size=%s", getBaseUrl(), settings.AvatarId, FileImageSize.AVATAR)
 				message = when {
 					systemChat && settings.TotalOpenedTickets == 0 -> ChatMessage().apply {
 						Id = now.time
@@ -896,7 +872,10 @@ object IQChannels {
 						Received = true
 						UserId = now.time
 						AutoGreeting = true
-						User = User().apply { DisplayName = settings.OperatorName }
+						User = User().apply {
+							DisplayName = settings.Pseudonym
+							AvatarUrl = avatarUrl
+						}
 					}
 					else -> null
 				}
@@ -1286,6 +1265,11 @@ object IQChannels {
 		if (message.Read) {
 			return
 		}
+		CoroutineScope(Dispatchers.IO).launch {
+			val dbMessage = message.toDatabaseMessage().copy(read = true)
+			messageDao?.insertMessage(dbMessage)
+			listenToUnread()
+		}
 		readQueue.add(message.Id)
 		sendRead()
 	}
@@ -1404,7 +1388,7 @@ object IQChannels {
 		user.Online = true
 		user.Id = 1
 		val message = ChatMessage(user, localId)
-		message.Text = "2.2.0-rc1"
+		message.Text = "2.2.0"
 		messages?.add(message)
 		for (listener in messageListeners) {
 			execute {
@@ -1730,6 +1714,12 @@ object IQChannels {
 	}
 
 	// Ratings
+	internal fun ratingRenderQuestion() {
+		for (listener in messageListeners) {
+			listener.ratingRenderQuestion()
+		}
+	}
+
 	internal fun ratingsRate(ratingId: Long, value: Int) {
 		if (auth == null) {
 			return
@@ -1889,6 +1879,7 @@ object IQChannels {
 				existing.Client = message.Client
 				existing.Sending = false
 				existing.Received = true
+				existing.Read = true
 				existing.ReplyToMessageId = message.ReplyToMessageId
 				Log.i(
 					TAG, String.format(
@@ -2081,6 +2072,7 @@ object IQChannels {
 		Log.i(TAG, "insertMessageToDatabase: $message}")
 		CoroutineScope(Dispatchers.IO).launch {
 			messageDao?.insertMessage(message.toDatabaseMessage())
+			listenToUnread()
 		}
 	}
 

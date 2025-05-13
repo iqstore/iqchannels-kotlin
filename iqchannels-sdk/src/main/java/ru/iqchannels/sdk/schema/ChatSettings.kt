@@ -8,7 +8,8 @@ class ChatSettings {
     var Enabled: Boolean = true
     var GreetFrom: String = "user"
     var Lifetime: Int = 300
-    var OperatorName: String = "Оператор"
+    var Pseudonym: String = "Оператор"
+    var AvatarId: String = ""
     var TotalOpenedTickets: Int = 0
 
     override fun toString(): String {

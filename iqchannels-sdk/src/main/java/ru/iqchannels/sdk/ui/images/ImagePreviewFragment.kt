@@ -26,6 +26,8 @@ import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.load.model.GlideUrl
+import com.bumptech.glide.load.model.LazyHeaders
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import java.io.File
@@ -37,6 +39,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.iqchannels.sdk.Log
 import ru.iqchannels.sdk.R
+import ru.iqchannels.sdk.app.IQChannels
 
 class ImagePreviewFragment : Fragment() {
 
@@ -99,9 +102,14 @@ class ImagePreviewFragment : Fragment() {
 		setDateText(tvDate, msgDate)
 		tvName.text = senderName
 		tvMessage.text = message
-
+		val glideUrl = GlideUrl(
+			imageUrl,
+			LazyHeaders.Builder()
+				.addHeader("Cookie", "client-session=${IQChannels.getCurrentToken()}")
+				.build()
+		)
 		Glide.with(requireContext())
-			.load(imageUrl)
+			.load(glideUrl)
 			.error(R.drawable.placeholder_load_image)
 			.listener(object : RequestListener<Drawable?> {
 				override fun onLoadFailed(

@@ -58,6 +58,8 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.model.GlideUrl
+import com.bumptech.glide.load.model.LazyHeaders
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import io.noties.markwon.Markwon
@@ -370,8 +372,14 @@ class ChatFragment : Fragment() {
 
 		IQStyles.iqChannelsStyles?.error?.iconError?.let {
 			view.findViewById<ImageView?>(R.id.iv_error)?.apply {
+				val glideUrl = GlideUrl(
+					it,
+					LazyHeaders.Builder()
+						.addHeader("Cookie", "client-session=${IQChannels.getCurrentToken()}")
+						.build()
+				)
 				Glide.with(context)
-					.load(it)
+					.load(glideUrl)
 					.into(this)
 			}
 		}
@@ -478,8 +486,14 @@ class ChatFragment : Fragment() {
 
 		attachButton = view.findViewById<ImageButton?>(R.id.attachButton)?.apply {
 			IQStyles.iqChannelsStyles?.toolsToMessage?.iconClip?.let {
+				val glideUrl = GlideUrl(
+					it,
+					LazyHeaders.Builder()
+						.addHeader("Cookie", "client-session=${IQChannels.getCurrentToken()}")
+						.build()
+				)
 				Glide.with(context)
-					.load(it)
+					.load(glideUrl)
 					.into(this)
 			}
 		}
@@ -489,8 +503,14 @@ class ChatFragment : Fragment() {
 		}
 		sendButton = view.findViewById<ImageButton?>(R.id.sendButton)?.apply {
 			IQStyles.iqChannelsStyles?.toolsToMessage?.iconSent?.let {
+				val glideUrl = GlideUrl(
+					it,
+					LazyHeaders.Builder()
+						.addHeader("Cookie", "client-session=${IQChannels.getCurrentToken()}")
+						.build()
+				)
 				Glide.with(context)
-					.load(it)
+					.load(glideUrl)
 					.into(this)
 			}
 
@@ -534,8 +554,14 @@ class ChatFragment : Fragment() {
 		)
 
 		IQStyles.iqChannelsStyles?.answer?.iconCancel?.let {
+			val glideUrl = GlideUrl(
+				it,
+				LazyHeaders.Builder()
+//					.addHeader("Cookie", "client-session=${IQChannels.getCurrentToken()}")
+					.build()
+			)
 			Glide.with(context)
-				.load(it)
+				.load(glideUrl)
 				.into(ibClose)
 		}
 
@@ -554,8 +580,14 @@ class ChatFragment : Fragment() {
 		)
 
 		IQStyles.iqChannelsStyles?.answer?.iconCancel?.let {
+			val glideUrl = GlideUrl(
+				it,
+				LazyHeaders.Builder()
+					.addHeader("Cookie", "client-session=${IQChannels.getCurrentToken()}")
+					.build()
+			)
 			Glide.with(context)
-				.load(it)
+				.load(glideUrl)
 				.into(ibClose)
 		}
 	}
@@ -1405,7 +1437,9 @@ class ChatFragment : Fragment() {
 			lastUnreadMsgIndex = index
 			messagesMutable = messages.toMutableList()
 			val newMsgHeader = ChatMessage().apply {
-				newMsgHeader = true
+				Read = true
+				System = true
+				NewMsgHeader = true
 				Date = Date()
 			}
 			messagesMutable?.add(index, newMsgHeader)

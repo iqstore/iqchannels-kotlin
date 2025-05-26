@@ -8,10 +8,14 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
+import androidx.core.view.setMargins
 import androidx.core.view.setPadding
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.model.GlideUrl
+import com.bumptech.glide.load.model.LazyHeaders
 import ru.iqchannels.sdk.R
+import ru.iqchannels.sdk.app.IQChannels
 import ru.iqchannels.sdk.applyIQStyles
 import ru.iqchannels.sdk.schema.PollOptionType
 import ru.iqchannels.sdk.schema.Rating
@@ -329,8 +333,14 @@ internal class RatingPollViewHolder(
 			}
 
 			IQStyles.iqChannelsStyles?.rating?.emptyStar?.let {
+				val glideUrl = GlideUrl(
+					it,
+					LazyHeaders.Builder()
+						.addHeader("Cookie", "client-session=${IQChannels.getCurrentToken()}")
+						.build()
+				)
 				Glide.with(binding.root.context)
-					.load(it)
+					.load(glideUrl)
 					.into(button)
 			} ?: run {
 				button.setImageResource(R.drawable.star_empty)
@@ -350,8 +360,14 @@ internal class RatingPollViewHolder(
 		starButtons.forEachIndexed { index, button ->
 			if (index <= selectedIndex) {
 				IQStyles.iqChannelsStyles?.rating?.fullStar?.let {
+					val glideUrl = GlideUrl(
+						it,
+						LazyHeaders.Builder()
+							.addHeader("Cookie", "client-session=${IQChannels.getCurrentToken()}")
+							.build()
+					)
 					Glide.with(binding.root.context)
-						.load(it)
+						.load(glideUrl)
 						.into(button)
 				} ?: run {
 					button.setImageResource(R.drawable.star_filled)
@@ -360,8 +376,14 @@ internal class RatingPollViewHolder(
 //				button.setImageResource(R.drawable.star_filled)
 			} else {
 				IQStyles.iqChannelsStyles?.rating?.emptyStar?.let {
+					val glideUrl = GlideUrl(
+						it,
+						LazyHeaders.Builder()
+							.addHeader("Cookie", "client-session=${IQChannels.getCurrentToken()}")
+							.build()
+					)
 					Glide.with(binding.root.context)
-						.load(it)
+						.load(glideUrl)
 						.into(button)
 				} ?: run {
 					button.setImageResource(R.drawable.star_empty)
@@ -387,6 +409,8 @@ internal class RatingPollViewHolder(
 		for (i in fromValue..toValue) {
 			val button = Button(binding.root.context).apply {
 				text = i.toString()
+				isSingleLine = true
+
 
 				IQStyles.iqChannelsStyles?.rating?.scaleButton?.backgroundDisabled
 					?.let {
@@ -425,8 +449,21 @@ internal class RatingPollViewHolder(
 					toPx(42)
 				).apply {
 					setPadding(15)
+					setMargins(0)
 					weight = 1f
 				}
+
+				IQStyles.iqChannelsStyles?.rating?.scaleButton?.backgroundDisabled
+					?.let {
+						layoutParams = LinearLayout.LayoutParams(
+							0,
+							toPx(42)
+						).apply {
+							setPadding(15)
+							setMargins(3)
+							weight = 1f
+						}
+					}
 			}
 			binding.pollQuestionScale.addView(button)
 		}

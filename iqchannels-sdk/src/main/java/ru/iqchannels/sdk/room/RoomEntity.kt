@@ -87,7 +87,7 @@ fun ChatMessage.toDatabaseMessage(): DatabaseMessage {
         file = gson.toJson(this.File),
         rating = gson.toJson(this.Rating),
         date = this.Date?.time,
-        newMsgHeader = this.newMsgHeader,
+        newMsgHeader = this.NewMsgHeader,
         upload = this.Upload,
         error = this.Error
     )
@@ -130,7 +130,7 @@ fun DatabaseMessage?.toChatMessage(): ChatMessage? {
         File = gson.fromJson(this@toChatMessage.file, UploadedFile::class.java)
         Rating = gson.fromJson(this@toChatMessage.rating, RatingSchema::class.java)
         Date = this@toChatMessage.date?.let { Date(it) }
-        newMsgHeader = this@toChatMessage.newMsgHeader
+        NewMsgHeader = this@toChatMessage.newMsgHeader
         Upload = this@toChatMessage.upload
         Error = this@toChatMessage.error
     }

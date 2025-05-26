@@ -15,6 +15,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.model.GlideUrl
+import com.bumptech.glide.load.model.LazyHeaders
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.GranularRoundedCorners
 import io.noties.markwon.Markwon
@@ -108,9 +110,14 @@ internal class OtherMessageViewHolder(
 					// Avatar image
 					otherAvatarText.visibility = View.GONE
 					otherAvatarImage.visibility = View.VISIBLE
-
+					val glideUrl = GlideUrl(
+						avatarUrl,
+						LazyHeaders.Builder()
+							.addHeader("Cookie", "client-session=${IQChannels.getCurrentToken()}")
+							.build()
+					)
 					Glide.with(root.context)
-						.load(avatarUrl)
+						.load(glideUrl)
 						.placeholder(R.drawable.avatar_placeholder)
 						.into(otherAvatarImage)
 				} else {
@@ -136,8 +143,7 @@ internal class OtherMessageViewHolder(
 			run {
 				IQStyles.iqChannelsStyles?.messages?.backgroundOperator
 					?.let {
-						otherReply.setBackgroundDrawable(it, R.drawable.other_msg_reply_bg)
-						rating.root.setBackgroundDrawable(it, R.drawable.other_msg_bg)
+						otherMsgContainer.setBackgroundDrawable(it, R.drawable.other_msg_bg)
 					}
 				IQStyles.iqChannelsStyles?.rating?.backgroundContainer
 					?.let { rating.root.setBackgroundDrawable(it, R.drawable.other_msg_bg) }
@@ -154,8 +160,14 @@ internal class OtherMessageViewHolder(
 				tvOtherFileName.applyIQStyles(IQStyles.iqChannelsStyles?.messageFile?.textFilenameOperator)
 
 				IQStyles.iqChannelsStyles?.messageFile?.iconFileOperator?.let {
+					val glideUrl = GlideUrl(
+						it,
+						LazyHeaders.Builder()
+							.addHeader("Cookie", "client-session=${IQChannels.getCurrentToken()}")
+							.build()
+					)
 					Glide.with(root.context)
-						.load(it)
+						.load(glideUrl)
 						.into(ivFile)
 				} ?: run {
 					ivFile.imageTintList = ColorStateList.valueOf(
@@ -219,10 +231,6 @@ internal class OtherMessageViewHolder(
 				}
 			} else {
 				clTexts.visibility = View.VISIBLE
-				clTexts.setBackgroundDrawable(
-					IQStyles.iqChannelsStyles?.messages?.backgroundOperator,
-					R.drawable.other_msg_bg
-				)
 
 				otherText.visibility = View.VISIBLE
 				otherText.autoLinkMask = Linkify.ALL
@@ -233,7 +241,6 @@ internal class OtherMessageViewHolder(
 				LinearLayout.LayoutParams.WRAP_CONTENT,
 				LinearLayout.LayoutParams.WRAP_CONTENT
 			)
-			lp.setMargins(0, 0, UiUtils.toPx(40), 0)
 			clTexts.layoutParams = lp
 
 			// Reply message (attached message)
@@ -247,10 +254,6 @@ internal class OtherMessageViewHolder(
 					otherReply.setTvSenderNameColor(R.color.dark_text_color)
 					otherReply.setTvTextColor(R.color.other_name)
 					otherReply.layoutParams = lp
-					clTexts.setBackgroundDrawable(
-						IQStyles.iqChannelsStyles?.messages?.backgroundOperator,
-						R.drawable.other_msg_reply_text_bg
-					)
 
 					otherReply.post {
 						if (otherReply.width > clTexts.width) {
@@ -258,14 +261,12 @@ internal class OtherMessageViewHolder(
 								otherReply.width,
 								LinearLayout.LayoutParams.WRAP_CONTENT
 							)
-							layoutParams.setMargins(0, 0, UiUtils.toPx(40), 0)
 							clTexts.layoutParams = layoutParams
 						} else {
 							val layoutParams: LinearLayout.LayoutParams = LinearLayout.LayoutParams(
 								clTexts.width,
 								LinearLayout.LayoutParams.WRAP_CONTENT
 							)
-							layoutParams.setMargins(0, 0, UiUtils.toPx(40), 0)
 							otherReply.layoutParams = layoutParams
 						}
 					}
@@ -499,16 +500,28 @@ internal class OtherMessageViewHolder(
 					val button = ratingButtons[i]
 					if (value >= i + 1) {
 						IQStyles.iqChannelsStyles?.rating?.fullStar?.let {
+							val glideUrl = GlideUrl(
+								it,
+								LazyHeaders.Builder()
+									.addHeader("Cookie", "client-session=${IQChannels.getCurrentToken()}")
+									.build()
+							)
 							Glide.with(root.context)
-								.load(it)
+								.load(glideUrl)
 								.into(button)
 						} ?: run {
 							button.setImageResource(R.drawable.star_filled)
 						}
 					} else {
 						IQStyles.iqChannelsStyles?.rating?.emptyStar?.let {
+							val glideUrl = GlideUrl(
+								it,
+								LazyHeaders.Builder()
+									.addHeader("Cookie", "client-session=${IQChannels.getCurrentToken()}")
+									.build()
+							)
 							Glide.with(root.context)
-								.load(it)
+								.load(glideUrl)
 								.into(button)
 						} ?: run {
 							button.setImageResource(R.drawable.star_empty)
@@ -563,10 +576,6 @@ internal class OtherMessageViewHolder(
 				val text = message.Text
 				if (!text.isNullOrEmpty()) {
 					clTexts.visibility = View.VISIBLE
-					clTexts.setBackgroundDrawable(
-						IQStyles.iqChannelsStyles?.messages?.backgroundOperator,
-						R.drawable.other_msg_reply_text_bg
-					)
 					otherText.visibility = View.VISIBLE
 					message.Text?.let {
 						markwon.setMarkdown(otherText, it)
@@ -577,24 +586,20 @@ internal class OtherMessageViewHolder(
 				otherImageFrame.visibility = View.VISIBLE
 
 				val withText = !text.isNullOrEmpty()
-				if (withText) {
-					otherImageFrame.setBackgroundDrawable(
-						IQStyles.iqChannelsStyles?.messages?.backgroundOperator,
-						R.drawable.other_msg_reply_bg
-					)
-				} else {
-					otherImageFrame.setBackgroundDrawable(
-						IQStyles.iqChannelsStyles?.messages?.backgroundOperator,
-						R.drawable.other_msg_bg
-					)
-				}
 
 				otherImageFrame.layoutParams.width = size[0]
 				otherImageFrame.layoutParams.height = size[1]
 				otherImageFrame.requestLayout()
 				val radius = UiUtils.toPx(12).toFloat()
+
+				val glideUrl = GlideUrl(
+					imageUrl,
+					LazyHeaders.Builder()
+						.addHeader("Cookie", "client-session=${IQChannels.getCurrentToken()}")
+						.build()
+				)
 				Glide.with(otherImageFrame.context)
-					.load(imageUrl)
+					.load(glideUrl)
 					.transform(
 						CenterCrop(),
 						GranularRoundedCorners(
@@ -627,11 +632,6 @@ internal class OtherMessageViewHolder(
 			} else {
 				otherImageFrame.visibility = View.GONE
 				clTexts.visibility = View.VISIBLE
-
-				clTexts.setBackgroundDrawable(
-					IQStyles.iqChannelsStyles?.messages?.backgroundOperator,
-					R.drawable.other_msg_bg
-				)
 
 				tvOtherFileName.visibility = View.VISIBLE
 				ivFile.visibility = View.VISIBLE
@@ -668,8 +668,6 @@ internal class OtherMessageViewHolder(
 						markwon.setMarkdown(otherText, it)
 					}
 				}
-
-//                holder.otherText.setText(makeFileLink(file));
 			}
 		}
 	}

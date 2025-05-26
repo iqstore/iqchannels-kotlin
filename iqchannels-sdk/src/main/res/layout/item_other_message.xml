@@ -74,183 +74,189 @@
                 android:textSize="13sp"
                 />
 
-            <ru.iqchannels.sdk.ui.widgets.ReplyMessageView
-                android:id="@+id/otherReply"
+            <LinearLayout
+                android:id="@+id/otherMsgContainer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="20dp"
-                android:paddingHorizontal="15dp"
-                android:paddingTop="15dp"
-                android:background="@drawable/other_msg_reply_bg"
-                />
+                android:background="@drawable/other_msg_bg"
+                android:layout_marginRight="40dp"
+                android:orientation="vertical">
 
-            <!-- Image -->
-            <FrameLayout
-                android:id="@+id/otherImageFrame"
-                android:layout_width="200dp"
-                android:layout_height="150dp"
-                android:background="@drawable/other_msg_bg">
-
-                <ProgressBar
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:layout_gravity="center"
-                    android:indeterminate="true"/>
-
-                <ImageView
-                    android:id="@+id/otherImageSrc"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    tools:ignore="ContentDescription"/>
-
-                <!-- Flags -->
-                <LinearLayout
-                    android:id="@+id/otherImgFlags"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="end|bottom"
-                    android:layout_margin="8dp"
-                    android:paddingHorizontal="12dp"
-                    android:paddingVertical="2dp"
-                    android:gravity="end|center_vertical"
-                    android:orientation="horizontal"
-                    android:background="@drawable/bg_img_status"
-                    >
-
-                    <!-- Date -->
-                    <TextView
-                        android:id="@+id/otherImgDate"
-                        android:layout_height="wrap_content"
+                    <ru.iqchannels.sdk.ui.widgets.ReplyMessageView
+                        android:id="@+id/otherReply"
                         android:layout_width="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginEnd="4dp"
-                        android:textColor="@color/white_transparent_54"
-                        android:textSize="12sp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="20dp"
+                        android:paddingHorizontal="15dp"
+                        android:paddingTop="15dp"
                         />
 
-                    <!-- Read -->
-                    <ImageView
-                        android:id="@+id/otherImgRead"
+                    <!-- Image -->
+                    <FrameLayout
+                        android:id="@+id/otherImageFrame"
+                        android:layout_width="200dp"
+                        android:layout_height="150dp">
+
+                        <ProgressBar
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_gravity="center"
+                            android:indeterminate="true"/>
+
+                        <ImageView
+                            android:id="@+id/otherImageSrc"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            tools:ignore="ContentDescription"/>
+
+                        <!-- Flags -->
+                        <LinearLayout
+                            android:id="@+id/otherImgFlags"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="end|bottom"
+                            android:layout_margin="8dp"
+                            android:paddingHorizontal="12dp"
+                            android:paddingVertical="2dp"
+                            android:gravity="end|center_vertical"
+                            android:orientation="horizontal"
+                            android:background="@drawable/bg_img_status"
+                            >
+
+                            <!-- Date -->
+                            <TextView
+                                android:id="@+id/otherImgDate"
+                                android:layout_height="wrap_content"
+                                android:layout_width="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginEnd="4dp"
+                                android:textColor="@color/white_transparent_54"
+                                android:textSize="12sp"
+                                />
+
+                            <!-- Read -->
+                            <ImageView
+                                android:id="@+id/otherImgRead"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:src="@drawable/ic_read_16"
+                                app:tint="@color/white_transparent_54"
+                                tools:ignore="HardcodedText,SmallSp"/>
+
+                            <!-- Received -->
+                            <ImageView
+                                android:id="@+id/otherImgReceived"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:src="@drawable/ic_delivered_12x16"
+                                app:tint="@color/white_transparent_54"
+                                tools:ignore="HardcodedText,SmallSp"/>
+
+                        </LinearLayout>
+                    </FrameLayout>
+
+                    <!-- Text -->
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/cl_texts"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:src="@drawable/ic_read_16"
-                        app:tint="@color/white_transparent_54"
-                        tools:ignore="HardcodedText,SmallSp"/>
+                        android:layout_marginRight="20dp"
+                        android:paddingHorizontal="16dp"
+                        android:paddingBottom="10dp"
+                        android:paddingTop="8dp"
+                        >
 
-                    <!-- Received -->
-                    <ImageView
-                        android:id="@+id/otherImgReceived"
-                        android:layout_width="wrap_content"
+                        <ImageView
+                            android:id="@+id/iv_file"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:layout_marginTop="3dp"
+                            android:src="@drawable/doc_32"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <TextView
+                            android:id="@+id/tvOtherFileName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:autoLink="all"
+                            android:textColor="#3F51B5"
+                            android:textSize="16sp"
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constraintStart_toEndOf="@id/iv_file"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constrainedWidth="true"
+                            tools:text="user-146corporate-audio-message-2a9d1dc"
+                            />
+
+                        <TextView
+                            android:id="@+id/tvOtherFileSize"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="#ff979fa7"
+                            android:textSize="15sp"
+                            app:layout_constraintTop_toBottomOf="@id/tvOtherFileName"
+                            app:layout_constraintStart_toEndOf="@id/iv_file"
+                            tools:text="15.0 кб"
+                            />
+
+                        <TextView
+                            android:id="@+id/otherText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:autoLink="all"
+                            android:textSize="16sp"
+                            app:layout_constraintTop_toBottomOf="@id/tvOtherFileSize"
+                            app:layout_constraintStart_toEndOf="@id/iv_file"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constrainedWidth="true"
+                            app:layout_constraintHorizontal_bias="0"
+                            tools:text="Message Text"
+                            android:paddingBottom="3dp"
+                            />
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/rv_card_buttons"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                            app:layout_constraintTop_toBottomOf="@id/otherText"
+                            app:layout_constraintStart_toStartOf="parent"
+                            />
+
+                        <!-- Date -->
+                        <TextView
+                            android:id="@+id/otherDate"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="#ff979fa7"
+                            android:textSize="12sp"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/rv_card_buttons"/>
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_buttons"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="center_vertical"
-                        android:src="@drawable/ic_delivered_12x16"
-                        app:tint="@color/white_transparent_54"
-                        tools:ignore="HardcodedText,SmallSp"/>
-
+                        android:layout_marginRight="20dp"
+                        android:paddingBottom="1dp"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                        />
                 </LinearLayout>
-            </FrameLayout>
+            </LinearLayout>
 
-            <!-- Text -->
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:id="@+id/cl_texts"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="20dp"
-                android:paddingHorizontal="16dp"
-                android:paddingBottom="10dp"
-                android:paddingTop="8dp"
-                android:background="@drawable/other_msg_bg"
-                >
 
-                <ImageView
-                    android:id="@+id/iv_file"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_marginTop="3dp"
-                    android:src="@drawable/doc_32"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/tvOtherFileName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:autoLink="all"
-                    android:textColor="#3F51B5"
-                    android:textSize="16sp"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:layout_constraintStart_toEndOf="@id/iv_file"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constrainedWidth="true"
-                    tools:text="user-146corporate-audio-message-2a9d1dc"
-                    />
-
-                <TextView
-                    android:id="@+id/tvOtherFileSize"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#ff979fa7"
-                    android:textSize="15sp"
-                    app:layout_constraintTop_toBottomOf="@id/tvOtherFileName"
-                    app:layout_constraintStart_toEndOf="@id/iv_file"
-                    tools:text="15.0 кб"
-                    />
-
-                <TextView
-                    android:id="@+id/otherText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:autoLink="all"
-                    android:textSize="16sp"
-                    app:layout_constraintTop_toBottomOf="@id/tvOtherFileSize"
-                    app:layout_constraintStart_toEndOf="@id/iv_file"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constrainedWidth="true"
-                    app:layout_constraintHorizontal_bias="0"
-                    tools:text="Message Text"
-                    android:paddingBottom="3dp"
-                    />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rv_card_buttons"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                    app:layout_constraintTop_toBottomOf="@id/otherText"
-                    app:layout_constraintStart_toStartOf="parent"
-                    />
-
-                <!-- Date -->
-                <TextView
-                    android:id="@+id/otherDate"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#ff979fa7"
-                    android:textSize="12sp"
-                    app:layout_constraintTop_toBottomOf="@id/rv_card_buttons"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_buttons"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="20dp"
-                android:paddingBottom="1dp"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                />
-
+    </LinearLayout>
             <!-- Rating -->
             <include layout="@layout/chat_rating"
                 android:id="@+id/rating"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"/>
 
-        </LinearLayout>
-    </LinearLayout>
 
     <include layout="@layout/chat_rating_poll"
         android:id="@+id/ratingPoll"

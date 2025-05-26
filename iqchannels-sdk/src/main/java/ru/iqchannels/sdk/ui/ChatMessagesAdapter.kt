@@ -115,7 +115,7 @@ internal class ChatMessagesAdapter(
 	fun deleteNewMsgHeader() {
 		var oldMessage: ChatMessage? = null
 		for (message: ChatMessage in messages.reversed()) {
-			if (message.newMsgHeader) {
+			if (message.NewMsgHeader) {
 				oldMessage = message
 				break
 			}
@@ -150,7 +150,6 @@ internal class ChatMessagesAdapter(
 		} ?: -1
 	}
 
-	fun hasNewMsgHeader() = messages.reversed().any { it.newMsgHeader }
 
 	private fun getIndexByMessage(message: ChatMessage): Int {
 		if (message.My) {
@@ -203,7 +202,7 @@ internal class ChatMessagesAdapter(
 
 		return when {
 			msg.My -> R.layout.item_my_message
-			msg.newMsgHeader -> R.layout.item_new_msg_header
+			msg.NewMsgHeader -> R.layout.item_new_msg_header
 			else -> R.layout.item_other_message
 		}
 	}

@@ -1437,7 +1437,9 @@ class ChatFragment : Fragment() {
 			lastUnreadMsgIndex = index
 			messagesMutable = messages.toMutableList()
 			val newMsgHeader = ChatMessage().apply {
-				newMsgHeader = true
+				Read = true
+				System = true
+				NewMsgHeader = true
 				Date = Date()
 			}
 			messagesMutable?.add(index, newMsgHeader)

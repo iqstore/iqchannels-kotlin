@@ -8,7 +8,7 @@
     <string name="chat_send">Отпр.</string>
     <string name="send">Отправить</string>
     <string name="chat_login_hint">Имя</string>
-    <string name="chat_send_hint">Сообщение…</string>
+    <string name="chat_send_hint">Сообщение</string>
     <string name="chat_failed_to_load_messages">Ошибка загрузки сообщений</string>
     <string name="chat_upload_error">Ошибка</string>
     <string name="chat_upload_cancel">Отменить</string>

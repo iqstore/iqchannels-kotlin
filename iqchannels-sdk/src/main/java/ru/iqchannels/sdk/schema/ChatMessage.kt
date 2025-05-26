@@ -51,7 +51,7 @@ class ChatMessage {
 	var File: UploadedFile? = null
 	var Rating: Rating? = null
 	var Date: Date? = null
-	var newMsgHeader: Boolean = false
+	var NewMsgHeader: Boolean = false
 
 	override fun toString(): String {
 		return Gson().toJson(this)

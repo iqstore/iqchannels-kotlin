@@ -8,6 +8,7 @@ import android.text.TextWatcher
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
+import androidx.core.view.setMargins
 import androidx.core.view.setPadding
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
@@ -410,6 +411,8 @@ internal class RatingPollViewHolder(
 		for (i in fromValue..toValue) {
 			val button = Button(binding.root.context).apply {
 				text = i.toString()
+				isSingleLine = true
+
 
 				IQStyles.iqChannelsStyles?.rating?.scaleButton?.backgroundDisabled
 					?.let {
@@ -448,8 +451,21 @@ internal class RatingPollViewHolder(
 					toPx(42)
 				).apply {
 					setPadding(15)
+					setMargins(0)
 					weight = 1f
 				}
+
+				IQStyles.iqChannelsStyles?.rating?.scaleButton?.backgroundDisabled
+					?.let {
+						layoutParams = LinearLayout.LayoutParams(
+							0,
+							toPx(42)
+						).apply {
+							setPadding(15)
+							setMargins(3)
+							weight = 1f
+						}
+					}
 			}
 			binding.pollQuestionScale.addView(button)
 		}

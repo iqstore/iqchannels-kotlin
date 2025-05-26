@@ -12,7 +12,10 @@ import androidx.annotation.ColorRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.model.GlideUrl
+import com.bumptech.glide.load.model.LazyHeaders
 import ru.iqchannels.sdk.R
+import ru.iqchannels.sdk.app.IQChannels
 import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.ui.UiUtils.getRatingScaleMaxValue
 
@@ -71,9 +74,14 @@ class ReplyMessageView @JvmOverloads constructor(
 			if (imageUrl != null) {
 				tvFileName.visibility = GONE
 				imageView.visibility = VISIBLE
-
+				val glideUrl = GlideUrl(
+					imageUrl,
+					LazyHeaders.Builder()
+						.addHeader("Cookie", "client-session=${IQChannels.getCurrentToken()}")
+						.build()
+				)
 				Glide.with(context)
-					.load(imageUrl)
+					.load(glideUrl)
 					.into(imageView)
 			} else {
 				imageView.visibility = GONE

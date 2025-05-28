@@ -282,12 +282,13 @@
 
         </LinearLayout>
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/errorIcon"
             android:layout_marginLeft="5dp"
             android:layout_width="35dp"
             android:layout_height="35dp"
             android:background="@drawable/round_error_btn"
+            android:backgroundTint="@null"
             android:text="!"
             android:textColor="@android:color/white"
             android:textSize="24sp"/>

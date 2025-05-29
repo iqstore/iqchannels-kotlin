@@ -191,9 +191,9 @@ class IQAppActivity :
 			}
 
 			R.id.nav_listen_to_unread -> {
-				if (unread == null) {
-					unread = IQChannels.addUnreadListener(this)
-				}
+				unread?.cancel()
+				unread = null
+				unread = IQChannels.addUnreadListener(this)
 				return false
 			}
 

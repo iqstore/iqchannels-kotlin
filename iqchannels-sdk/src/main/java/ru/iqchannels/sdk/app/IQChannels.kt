@@ -692,12 +692,16 @@ object IQChannels {
 	}
 
 	private fun listenToUnread() {
+		listenToEvents()
 
 		CoroutineScope(Dispatchers.IO).launch {
 			val allMessages = messageDao?.getAllMessages()
 
-			val chatId = allMessages?.firstOrNull { it.clientId == auth?.Client?.Id }?.chatId
+			var chatId = allMessages?.firstOrNull { it.clientId == auth?.Client?.Id }?.chatId
 
+			if (chatId == 0L){
+				chatId = allMessages?.last()?.chatId
+			}
 			val allMessagesByChatId = allMessages?.filter { it.chatId == chatId }
 			val unreadCount = allMessagesByChatId?.count { !it.read && it.author == ActorType.USER}
 
@@ -1086,9 +1090,10 @@ object IQChannels {
 		if (auth == null) {
 			return
 		}
-		if (messages == null) {
-			return
-		}
+//		if (messages == null) {
+//			return
+//		}
+
 		val query = ChatEventQuery().apply {
 			ChatType = chatType.name.lowercase()
 		}

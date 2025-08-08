@@ -217,7 +217,6 @@ internal class RatingPollViewHolder(
 						PollOptionType.ONE_OF_LIST, null, answer.Id,
 						null, null, null, question.AsTicketRating,
 					)
-
 					currentQuestionIndex++
 					renderCurrentQuestion()
 					pollResult.add(currentAnswer!!)
@@ -268,7 +267,6 @@ internal class RatingPollViewHolder(
 						answer.FCR,
 						question.AsTicketRating,
 					)
-
 					currentQuestionIndex++
 					renderCurrentQuestion()
 					pollResult.add(currentAnswer!!)

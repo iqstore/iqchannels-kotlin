@@ -179,6 +179,90 @@ class HttpRequest {
 
 	@SuppressLint("DefaultLocale")
 	@Throws(IOException::class)
+	fun <T> getJSON(
+		resultType: TypeToken<Response<T>>?,
+		callback: HttpCallback<Response<T>>
+	) {
+		var conn: HttpURLConnection? = null
+		val gson = this.gson ?: return
+		try {
+			conn = openConnection()
+			if (conn == null) {
+				return
+			}
+			conn.requestMethod = "GET"
+			conn.setRequestProperty("Accept", "application/json")
+			if (token != null) {
+				conn.setRequestProperty("Authorization", String.format("Client %s", token))
+			}
+			conn.readTimeout = POST_READ_TIMEOUT_MILLIS
+			conn.connectTimeout = CONNECT_TIMEOUT_MILLIS
+			conn.useCaches = false
+			conn.defaultUseCaches = false
+			conn.doInput = true
+
+			d(TAG, String.format("GET: %s", url))
+
+			// Get status code
+			val status = conn.responseCode
+			val statusText = conn.responseMessage
+			if (status / 100 != 2) {
+				throw HttpException(statusText)
+			}
+
+			// Check content type
+			val ctype = conn.contentType
+			if (ctype == null || !ctype.contains("application/json")) {
+				throw HttpException(String.format("Unsupported response content type '%s'", ctype))
+			}
+
+			// Read response
+			val result: Response<T>
+			val clength = conn.contentLength
+			if (resultType == null) {
+				result = Response()
+				result.OK = true
+				result.Result = null
+				result.Rels = Relations()
+			} else {
+				if (clength == 0) {
+					throw HttpException("Empty server response")
+				}
+				val reader = BufferedReader(InputStreamReader(conn.inputStream))
+				try {
+					val builder = StringBuilder()
+					var line: String?
+					while (reader.readLine().also { line = it } != null) {
+						builder.append(line).append('\n')
+					}
+
+					result = gson.fromJson(builder.toString(), resultType.type)
+				} finally {
+					reader.close()
+				}
+			}
+
+			d(TAG, String.format("GET %d %s %db", status, url, clength))
+
+			if (result.OK) {
+				callback.onResult(result)
+				return
+			}
+
+			val error = result.Error
+			if (error == null) {
+				callback.onException(ChatException.unknown())
+				return
+			}
+			callback.onException(ChatException(error.Code, error.Text))
+		} finally {
+			conn?.disconnect()
+		}
+	}
+
+
+	@SuppressLint("DefaultLocale")
+	@Throws(IOException::class)
 	fun <T> multipart(
 		params: Map<String, String>,
 		files: Map<String, HttpFile>,

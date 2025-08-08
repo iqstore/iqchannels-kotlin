@@ -4,8 +4,6 @@
  */
 package ru.iqchannels.sdk.ui
 
-import android.os.Handler
-import android.os.Looper
 import android.text.Html
 import android.text.Spanned
 import android.text.TextUtils
@@ -21,11 +19,9 @@ import ru.iqchannels.sdk.databinding.ItemMyMessageBinding
 import ru.iqchannels.sdk.databinding.ItemNewMsgHeaderBinding
 import ru.iqchannels.sdk.databinding.ItemOtherMessageBinding
 import ru.iqchannels.sdk.http.HttpCallback
+import ru.iqchannels.sdk.localization.IQChannelsLanguage
 import ru.iqchannels.sdk.schema.Action
-import ru.iqchannels.sdk.schema.ActorType
-import ru.iqchannels.sdk.schema.ChatEvent
 import ru.iqchannels.sdk.schema.ChatMessage
-import ru.iqchannels.sdk.schema.ChatPayloadType
 import ru.iqchannels.sdk.schema.RatingPollClientAnswerInput
 import ru.iqchannels.sdk.schema.RatingState
 import ru.iqchannels.sdk.schema.SingleChoice
@@ -187,6 +183,7 @@ internal class ChatMessagesAdapter(
 
 			R.layout.item_new_msg_header -> {
 				val binding = ItemNewMsgHeaderBinding.inflate(inflater, parent, false)
+				binding.newMessages.text = IQChannelsLanguage.iqChannelsLanguage.newMessages
 				NewMessagesHeaderVH(binding)
 			}
 

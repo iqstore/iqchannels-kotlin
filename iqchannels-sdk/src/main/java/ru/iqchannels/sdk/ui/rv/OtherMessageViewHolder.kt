@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import androidx.annotation.ColorRes
-import androidx.annotation.StringRes
 import androidx.constraintlayout.helper.widget.Flow
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
@@ -30,7 +29,6 @@ import ru.iqchannels.sdk.schema.Action
 import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.schema.ChatPayloadType
 import ru.iqchannels.sdk.schema.FileValidState
-import ru.iqchannels.sdk.schema.PollOptionType
 import ru.iqchannels.sdk.schema.Rating
 import ru.iqchannels.sdk.schema.RatingPollClientAnswerInput
 import ru.iqchannels.sdk.schema.RatingState
@@ -47,8 +45,8 @@ import ru.iqchannels.sdk.ui.Colors
 import ru.iqchannels.sdk.ui.UiUtils
 import ru.iqchannels.sdk.ui.UiUtils.getRatingScaleMaxValue
 import ru.iqchannels.sdk.ui.widgets.DropDownButton
-import ru.iqchannels.sdk.Log
 import ru.iqchannels.sdk.app.IQChannels
+import ru.iqchannels.sdk.localization.IQChannelsLanguage
 
 interface RatingPollListener {
 	fun onRatingPollAnswersSend(
@@ -197,25 +195,25 @@ internal class OtherMessageViewHolder(
 			if (file != null) {
 				when (message.File?.State) {
 					FileValidState.Rejected -> showFileStateMsg(
-						R.string.unsecure_file,
+						IQChannelsLanguage.iqChannelsLanguage.textFileStateRejected,
 						R.color.red,
 						IQStyles.iqChannelsStyles?.messages?.textFileStateRejectedOperator
 					)
 
 					FileValidState.OnChecking -> showFileStateMsg(
-						R.string.file_on_checking,
+						IQChannelsLanguage.iqChannelsLanguage.textFileStateOnChecking,
 						R.color.blue,
 						IQStyles.iqChannelsStyles?.messages?.textFileStateOnCheckingOperator
 					)
 
 					FileValidState.SentForChecking -> showFileStateMsg(
-						R.string.file_sent_to_check,
+						IQChannelsLanguage.iqChannelsLanguage.textFileStateSentForCheck,
 						R.color.blue,
 						IQStyles.iqChannelsStyles?.messages?.textFileStateSentForCheckingOperator
 					)
 
 					FileValidState.CheckError -> showFileStateMsg(
-						R.string.error_on_checking,
+						IQChannelsLanguage.iqChannelsLanguage.textFileStateCheckError,
 						R.color.red,
 						IQStyles.iqChannelsStyles?.messages?.textFileStateCheckErrorOperator
 					)
@@ -451,19 +449,20 @@ internal class OtherMessageViewHolder(
 		rating.ratingRate.visibility = View.GONE
 		rating.ratingRated.visibility = View.GONE
 		rating.ratingRateText.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.ratingTitle)
+		rating.ratingRateText.text = IQChannelsLanguage.iqChannelsLanguage.ratingStatePending
+		rating.btnSendRating.text = IQChannelsLanguage.iqChannelsLanguage.sentRating
 
 		when (msgRating.State) {
 			RatingState.FINISHED, RatingState.RATED -> {
 				val value = msgRating.Value ?: 0
-				val text = root.resources.getString(R.string.chat_ratings_rated_custom, value, getRatingScaleMaxValue(msgRating))
+				val text = "${IQChannelsLanguage.iqChannelsLanguage.ratingStateRated} ${value}/${getRatingScaleMaxValue(msgRating)}"
 				rating.ratingRated.visibility = View.VISIBLE
 				rating.ratingRated.text = text
 				rating.ratingRated.applyIQStyles(IQStyles.iqChannelsStyles?.chat?.systemText)
 			}
 			RatingState.IGNORED -> {
 				rating.ratingRated.visibility = View.VISIBLE
-				val text = root.resources.getString(R.string.chat_ratings_ignored)
-				rating.ratingRated.text = text
+				rating.ratingRated.text = IQChannelsLanguage.iqChannelsLanguage.ratingStateIgnored
 				rating.ratingRated.applyIQStyles(IQStyles.iqChannelsStyles?.chat?.systemText)
 			}
 			RatingState.PENDING -> {
@@ -643,20 +642,17 @@ internal class OtherMessageViewHolder(
 					if (sizeKb > 1024) {
 						sizeMb = sizeKb / 1024
 					}
-					var strRes = 0
+					val str: String
 					val fileSize: String
 					if (sizeMb > 0) {
-						strRes = R.string.file_size_mb_placeholder
+						str = "mb"
 						val df = DecimalFormat("0.00")
 						fileSize = df.format(sizeMb.toDouble())
 					} else {
-						strRes = R.string.file_size_kb_placeholder
+						str = "kb"
 						fileSize = sizeKb.toString()
 					}
-					tvOtherFileSize.text = root.resources.getString(
-						strRes,
-						fileSize
-					)
+					tvOtherFileSize.text = "$fileSize $str"
 				} else {
 					tvOtherFileSize.text = null
 				}
@@ -673,14 +669,14 @@ internal class OtherMessageViewHolder(
 	}
 
 	private fun ItemOtherMessageBinding.showFileStateMsg(
-		@StringRes strRes: Int,
+		message: String,
 		@ColorRes colorRes: Int,
 		text: Text?
 	) {
 		otherImageFrame.visibility = View.GONE
 		clTexts.visibility = View.VISIBLE
 		otherText.visibility = View.VISIBLE
-		otherText.text = root.context.getString(strRes)
+		otherText.text = message
 		otherText.setTextColor(
 			ContextCompat.getColor(root.context, colorRes)
 		)

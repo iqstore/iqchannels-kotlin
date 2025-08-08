@@ -1,6 +1,5 @@
 package ru.iqchannels.sdk.ui.rv
 
-import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
 import android.text.Editable
@@ -24,6 +23,7 @@ import ru.iqchannels.sdk.schema.RatingPollClientAnswerInput
 import ru.iqchannels.sdk.schema.RatingPollQuestion
 import ru.iqchannels.sdk.databinding.ChatRatingPollBinding
 import ru.iqchannels.sdk.http.HttpCallback
+import ru.iqchannels.sdk.localization.IQChannelsLanguage
 import ru.iqchannels.sdk.schema.RatingState
 import ru.iqchannels.sdk.setBackgroundDrawable
 import ru.iqchannels.sdk.styling.IQStyles
@@ -64,8 +64,13 @@ internal class RatingPollViewHolder(
 			finishPoll()
 		}
 
+		binding.submitButton.text = IQChannelsLanguage.iqChannelsLanguage.sentRating
+		binding.buttonYes.text = IQChannelsLanguage.iqChannelsLanguage.ratingOfferYes
+		binding.buttonNo.text = IQChannelsLanguage.iqChannelsLanguage.ratingOfferNo
+
 
 		binding.questionText.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.ratingTitle)
+		binding.questionText.text = IQChannelsLanguage.iqChannelsLanguage.ratingOfferTitle
 
 		IQStyles.iqChannelsStyles?.rating?.backgroundContainer
 			?.let {

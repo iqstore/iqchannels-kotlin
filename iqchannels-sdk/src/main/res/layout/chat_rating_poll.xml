@@ -27,7 +27,6 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:gravity="center"
-            android:text="@string/rating_poll_show_offer_text"
             android:textColor="@color/dark_text_color"
             android:textSize="18sp" />
 
@@ -43,7 +42,6 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_rating_poll_rounded_button"
                 android:paddingHorizontal="20dp"
-                android:text="Нет"
                 android:textColor="@color/dark_text_color"
                 android:textSize="16sp" />
 
@@ -54,7 +52,6 @@
                 android:layout_marginStart="16dp"
                 android:background="@drawable/bg_button_rate"
                 android:paddingHorizontal="20dp"
-                android:text="Да"
                 android:textColor="@color/light_text_color"
                 android:textSize="16sp" />
         </LinearLayout>
@@ -140,7 +137,6 @@
             android:background="@drawable/bg_rating_poll_rounded_edit_text"
             android:radius="16dp"
             android:gravity="start"
-            android:hint="@string/rating_poll_edit_text_placeholder"
             android:padding="8dp"
             android:textSize="16sp" />
     </LinearLayout>
@@ -283,7 +279,6 @@
         android:layout_marginTop="20dp"
         android:paddingVertical="10dp"
         android:paddingHorizontal="25dp"
-        android:text="@string/rating_poll_submit"
         android:includeFontPadding="false"
         android:textColor="@color/light_text_color"
         android:background="@drawable/bg_button_rate"

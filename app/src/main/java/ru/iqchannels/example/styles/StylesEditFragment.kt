@@ -16,9 +16,7 @@ import ru.iqchannels.example.databinding.FragmentStylesEditBinding
 import ru.iqchannels.sdk.Log
 
 class StylesEditFragment : Fragment() {
-
 	companion object {
-
 		const val PREFS_STYLES = "StylesEditFragment#prefsStyles"
 		const val CONFIG_STYLES = "configStyles"
 	}

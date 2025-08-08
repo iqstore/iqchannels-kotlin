@@ -5,8 +5,6 @@ import org.json.JSONObject
 import ru.iqchannels.sdk.http.HttpException
 import ru.iqchannels.sdk.schema.ChatFilesConfig
 import ru.iqchannels.sdk.schema.UploadedFile
-import ru.iqchannels.sdk.Log
-import ru.iqchannels.sdk.schema.ChatFilesConfigResponse
 
 class GetConfigsInteractorImpl(
 	private val apiServices: GetFileConfigsApi

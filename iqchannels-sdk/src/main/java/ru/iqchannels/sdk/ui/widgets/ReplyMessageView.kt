@@ -16,6 +16,7 @@ import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
 import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.app.IQChannels
+import ru.iqchannels.sdk.localization.IQChannelsLanguage
 import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.ui.UiUtils.getRatingScaleMaxValue
 
@@ -62,7 +63,7 @@ class ReplyMessageView @JvmOverloads constructor(
 			tvText.text = message.Text
 		} else if (message.Rating != null) {
 			val value = message.Rating?.Value ?: 0
-			val text = resources.getString(R.string.chat_ratings_rated_custom, value, getRatingScaleMaxValue(message.Rating!!))
+			val text = "${IQChannelsLanguage.iqChannelsLanguage.ratingStateRated} ${value}/${getRatingScaleMaxValue(message.Rating!!)}"
 			tvText.visibility = VISIBLE
 			tvText.text = text
 		} else {

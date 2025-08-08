@@ -10,7 +10,6 @@ import android.app.AlertDialog
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
@@ -88,6 +87,7 @@ import ru.iqchannels.sdk.domain.models.PreFilledMessages
 import ru.iqchannels.sdk.download.FileConfigChecker
 import ru.iqchannels.sdk.http.HttpException
 import ru.iqchannels.sdk.lib.InternalIO.copy
+import ru.iqchannels.sdk.localization.IQChannelsLanguage
 import ru.iqchannels.sdk.schema.Action
 import ru.iqchannels.sdk.schema.ActionType
 import ru.iqchannels.sdk.schema.ActorType
@@ -95,6 +95,7 @@ import ru.iqchannels.sdk.schema.ChatEvent
 import ru.iqchannels.sdk.schema.ChatException
 import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.schema.ClientAuth
+import ru.iqchannels.sdk.schema.Language
 import ru.iqchannels.sdk.schema.SingleChoice
 import ru.iqchannels.sdk.setBackgroundDrawable
 import ru.iqchannels.sdk.styling.IQChannelsStyles
@@ -123,6 +124,7 @@ class ChatFragment : Fragment() {
 		private const val PARAM_LM_STATE = "ChatFragment#lmState"
 		private const val ARG_TITLE = "ChatFragment#title"
 		private const val ARG_STYLES = "ChatFragment#styles"
+		private const val ARG_LANGUAGE = "ChatFragment#language"
 		private const val ARG_HANDLED_EVENTS = "ChatFragment#handledEvents"
 		private const val ARG_PREFILLED_MSG = "ChatFragment#preFilledMsg"
 
@@ -135,6 +137,7 @@ class ChatFragment : Fragment() {
 		fun newInstance(
 			title: String? = null,
 			stylesJson: String? = null,
+			localizationJson: String? = null,
 			handledEvents: List<Class<out IQChatEvent>>? = null,
 			preFilledMessages: PreFilledMessages? = null
 		): ChatFragment {
@@ -142,6 +145,7 @@ class ChatFragment : Fragment() {
 			val args = Bundle().apply {
 				putString(ARG_TITLE, title)
 				putString(ARG_STYLES, stylesJson)
+				putString(ARG_LANGUAGE, localizationJson)
 				putParcelableArray(
 					ARG_HANDLED_EVENTS,
 					handledEvents?.map { it.toParcelable() }?.toTypedArray()
@@ -323,6 +327,16 @@ class ChatFragment : Fragment() {
 			}
 		}
 
+		arguments?.getString(ARG_LANGUAGE)?.let { json ->
+			try {
+				Gson().fromJson(json, TypeToken.get(Language::class.java))?.also {
+					IQChannelsLanguage.iqChannelsLanguage = it
+				}
+			} catch (e: Exception) {
+				Log.e("ChatFragment", "Error on parsing", e)
+			}
+		}
+
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
 			arguments?.getParcelable(ARG_PREFILLED_MSG, PreFilledMessages::class.java)?.let {
 				viewModel.applyPrefilledMessages(it)
@@ -353,6 +367,12 @@ class ChatFragment : Fragment() {
 		signupButton?.setOnClickListener { signup() }
 		signupError = view.findViewById<View>(R.id.signupError) as TextView
 
+		signupTitle?.text = IQChannelsLanguage.iqChannelsLanguage.signupTitle
+		signupSubtitle?.text = IQChannelsLanguage.iqChannelsLanguage.signupSubtitle
+		signupCheckBox?.text = IQChannelsLanguage.iqChannelsLanguage.signupCheckboxText
+		signupTextName?.hint = IQChannelsLanguage.iqChannelsLanguage.signupNamePlaceholder
+		signupButton?.text = IQChannelsLanguage.iqChannelsLanguage.signupButtonText
+
 		clReply = view.findViewById<ReplyMessageView?>(R.id.reply).apply {
 			applyReplyStyles()
 		}
@@ -364,9 +384,11 @@ class ChatFragment : Fragment() {
 		chatLayout = view.findViewById<View>(R.id.chatLayout) as RelativeLayout
 		chatUnavailableLayout = view.findViewById(R.id.chatUnavailableLayout)
 		chatUnavailableErrorText = view.findViewById<TextView?>(R.id.tv_description)?.apply {
+			text = IQChannelsLanguage.iqChannelsLanguage.textError
 			applyIQStyles(IQStyles.iqChannelsStyles?.error?.textError)
 		}
 		view.findViewById<TextView?>(R.id.tv_title)?.apply {
+			text = IQChannelsLanguage.iqChannelsLanguage.titleError
 			applyIQStyles(IQStyles.iqChannelsStyles?.error?.titleError)
 		}
 
@@ -386,6 +408,7 @@ class ChatFragment : Fragment() {
 
 		tnwMsgCopied = view.findViewById(R.id.tnw_msg_copied)
 		btnGoBack = view.findViewById(R.id.btn_go_back)
+		btnGoBack?.text = IQChannelsLanguage.iqChannelsLanguage.buttonError
 
 		// Messages.
 		progress = (view.findViewById<View>(R.id.messagesProgress) as ProgressBar)
@@ -450,9 +473,11 @@ class ChatFragment : Fragment() {
 
 		// Send.
 		sendText = view.findViewById<EditText?>(R.id.sendText)?.apply {
-			applyIQStyles(IQStyles.iqChannelsStyles?.toolsToMessage?.textChat)
+			applyIQStyles(IQStyles.iqChannelsStyles?.toolsToMessage?.textInput)
 
-			IQStyles.iqChannelsStyles?.toolsToMessage?.backgroundChat
+			hint = IQChannelsLanguage.iqChannelsLanguage.inputMessagePlaceholder
+
+			IQStyles.iqChannelsStyles?.toolsToMessage?.backgroundInput
 				?.let {
 					background = GradientDrawable().apply {
 						setColor(it.color?.getColorInt(context) ?: ContextCompat.getColor(context, R.color.default_color))
@@ -730,27 +755,29 @@ class ChatFragment : Fragment() {
 
 			override fun authFailed(e: Exception, attempt: Int) {
 				signupError?.text = String.format("Ошибка: %s", e.localizedMessage)
-				if (attempt >= 5) {
-					showUnavailableView(getString(R.string.chat_unavailable_description))
-				}
 
-				val message = when (e) {
-					is UnknownHostException -> {
-						getString(R.string.chat_unavailable_description)
-					}
+//				if (attempt >= 5) {
+//					showUnavailableView(IQChannelsLanguage.iqChannelsLanguage?.TextError ?: "Мы уже все исправляем. Обновите\nстраницу или попробуйте позже")
+//				}
+//
+//				val message = when (e) {
+//					is UnknownHostException -> {
+//						IQChannelsLanguage.iqChannelsLanguage?.TextError ?: "Мы уже все исправляем. Обновите\nстраницу или попробуйте позже"
+//					}
+//
+//					is SocketTimeoutException, is TimeoutException -> {
+//						getString(R.string.timeout_message)
+//					}
+//
+//					is HttpException -> {
+//						getString(R.string.chat_unavailable_description)
+//					}
+//
+//					else -> return
+//				}
+				showUnavailableView(IQChannelsLanguage.iqChannelsLanguage.textError)
 
-					is SocketTimeoutException, is TimeoutException -> {
-						getString(R.string.timeout_message)
-					}
-
-					is HttpException -> {
-						getString(R.string.chat_unavailable_description)
-					}
-
-					else -> return
-				}
-
-				showUnavailableView(message)
+//				showUnavailableView(message)
 			}
 		})
 
@@ -814,7 +841,7 @@ class ChatFragment : Fragment() {
 	private fun signup() {
 		val name = signupTextName?.text?.toString() ?: return
 		if (name.length < 3) {
-			signupError!!.text = "Ошибка: длина имени должна быть не менее 3-х символов."
+			signupError!!.text = IQChannelsLanguage.iqChannelsLanguage.signupError
 			return
 		}
 		signupError?.text = ""
@@ -830,6 +857,7 @@ class ChatFragment : Fragment() {
 		progress?.visibility = View.GONE
 		refresh?.isRefreshing = false
 		refresh?.isEnabled = false
+		updateViews()
 	}
 
 	private fun refreshMessages() {
@@ -1032,7 +1060,7 @@ class ChatFragment : Fragment() {
 		val name = if (event.User != null) event.User?.DisplayName else "Оператор"
 
 		val typingText = view?.findViewById<TextView?>(R.id.typing)
-		typingText?.text = "$name печатает..."
+		typingText?.text = "$name ${IQChannelsLanguage.iqChannelsLanguage.operatorTyping}..."
 		typingText?.applyIQStyles(IQStyles.iqChannelsStyles?.chat?.systemText)
 
 		typingText?.visibility = View.VISIBLE
@@ -1065,22 +1093,22 @@ class ChatFragment : Fragment() {
 		when (exception) {
 			is HttpException -> {
 				errMessage = if (exception.code == 413) {
-					getString(R.string.file_size_too_large)
+					IQChannelsLanguage.iqChannelsLanguage.fileWeightError
 				} else {
-					getString(R.string.chat_unavailable_description)
+					IQChannelsLanguage.iqChannelsLanguage.textError
 				}
 			}
 
 			is UnknownHostException -> {
-				errMessage = getString(R.string.chat_unavailable_description)
+				errMessage = IQChannelsLanguage.iqChannelsLanguage.textError
 			}
 
 			is SocketTimeoutException, is TimeoutException, is java.net.SocketException -> {
-				errMessage = getString(R.string.timeout_message)
+				errMessage = IQChannelsLanguage.iqChannelsLanguage.textError
 			}
 
 			is ChatException -> {
-				errMessage = exception.message ?: getString(R.string.error_occured)
+				errMessage = exception.message ?: "Exception"
 			}
 
 			else -> {
@@ -1088,7 +1116,7 @@ class ChatFragment : Fragment() {
 					"UploadException",
 					"Message load exception. Type: ${exception.javaClass}. Body: ${exception.stackTraceToString()}"
 				)
-				errMessage = getString(R.string.error_occured)
+				errMessage = "Upload exception"
 			}
 		}
 
@@ -1202,8 +1230,7 @@ class ChatFragment : Fragment() {
 		galleryIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
 
 		// Create and start an intent chooser.
-		val title = resources.getText(R.string.chat_camera_or_file)
-		val chooser = Intent.createChooser(galleryIntent, title)
+		val chooser = Intent.createChooser(galleryIntent, "")
 		if (cameraIntent != null) {
 			chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, arrayOf<Parcelable>(cameraIntent))
 		}
@@ -1221,7 +1248,7 @@ class ChatFragment : Fragment() {
 		}
 	}
 
-	private fun onGalleryMutipleFilesResult(uri: Uri, message: String) {
+	private fun onGalleryMutipleFilesResult(uri: Uri) {
 		selectedFile = viewModel.prepareFile(uri, requireActivity())
 
 		lifecycleScope.launch(Dispatchers.Main) {
@@ -1235,40 +1262,8 @@ class ChatFragment : Fragment() {
 			viewModel.addMultipleFilesQueue(fileUris.take(10))
 			val uri = viewModel.getNextFileFromQueue()
 
-			val message = if (fileUris.size <= 10) {
-				getString(
-					R.string.chat_send_file_confirmation_description_multiple,
-					fileUris.size.toString()
-				)
-			} else {
-				getString(R.string.chat_send_file_confirmation_description_multiple_cut)
-			}
-
-			uri?.let { onGalleryMutipleFilesResult(it, message) }
+			uri?.let { onGalleryMutipleFilesResult(it) }
 		}
-	}
-
-	private fun showConfirmDialog(file: File, message: String) {
-		val builder = AlertDialog.Builder(context)
-			.setTitle(R.string.chat_send_file_confirmation)
-			.setMessage(message)
-			.setPositiveButton(R.string.ok) { dialogInterface: DialogInterface?, i: Int ->
-				var replyToMessageId: Long? = null
-				if (replyingMessage != null) {
-					replyToMessageId = replyingMessage?.Id
-				}
-				val text = sendText?.text.toString()
-				sendText?.setText("")
-				IQChannels.sendFile(file, text, replyToMessageId)
-				hideReplying()
-			}
-			.setNegativeButton(R.string.cancel) { dialogInterface: DialogInterface?, i: Int ->
-				viewModel.clearFilesQueue()
-			}
-			.setOnCancelListener {
-				viewModel.clearFilesQueue()
-			}
-		builder.show()
 	}
 
 	private fun hideReplying() {
@@ -1315,15 +1310,11 @@ class ChatFragment : Fragment() {
 		}
 
 		addCameraPhotoToGallery(file)
-		if (IQChannels.config?.uiOptions?.disableIMGConfirmationModal == true) {
-			val text = sendText?.text.toString()
-			sendText?.setText("")
+		val text = sendText?.text.toString()
+		sendText?.setText("")
 
-			IQChannels.sendFile(file, text, replyingMessage?.Id)
-			hideReplying()
-		} else {
-			showConfirmDialog(file, file.name)
-		}
+		IQChannels.sendFile(file, text, replyingMessage?.Id)
+		hideReplying()
 	}
 
 	private fun addCameraPhotoToGallery(file: File) {
@@ -1386,13 +1377,13 @@ class ChatFragment : Fragment() {
 	// Error alerts
 	private fun showMessagesErrorAlert(e: Exception?) {
 		val builder = AlertDialog.Builder(context)
-			.setTitle(R.string.chat_failed_to_load_messages)
-			.setNeutralButton(R.string.ok, null)
+			.setTitle("Error")
+			.setNeutralButton("Ok", null)
 
 		if (e != null) {
 			builder.setMessage(e.toString())
 		} else {
-			builder.setMessage(R.string.unknown_exception)
+			builder.setMessage("Unknown exception")
 		}
 
 		builder.show()

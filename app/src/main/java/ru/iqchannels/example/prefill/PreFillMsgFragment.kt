@@ -165,8 +165,7 @@ class PreFillMsgFragment : Fragment() {
 		galleryIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
 
 		// Create and start an intent chooser.
-		val title = resources.getText(ru.iqchannels.sdk.R.string.chat_camera_or_file)
-		val chooser = Intent.createChooser(galleryIntent, title)
+		val chooser = Intent.createChooser(galleryIntent, "")
 
 		requestPickImageFromFiles.launch(chooser)
 	}

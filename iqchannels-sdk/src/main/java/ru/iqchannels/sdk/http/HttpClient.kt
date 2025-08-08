@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.Volatile
 import ru.iqchannels.sdk.Log.d
 import ru.iqchannels.sdk.Log.e
+import ru.iqchannels.sdk.localization.IQLanguage
 import ru.iqchannels.sdk.rels.Rels
 import ru.iqchannels.sdk.schema.ChatEvent
 import ru.iqchannels.sdk.schema.ChatEventQuery
@@ -34,6 +35,8 @@ import ru.iqchannels.sdk.schema.MaxIdQuery
 import ru.iqchannels.sdk.schema.PollRequest
 import ru.iqchannels.sdk.schema.PushTokenInput
 import ru.iqchannels.sdk.schema.GreetingSettings
+import ru.iqchannels.sdk.schema.LanguageQuery
+import ru.iqchannels.sdk.schema.LanguageResponse
 import ru.iqchannels.sdk.schema.RateRequest
 import ru.iqchannels.sdk.schema.RatingPollClientAnswerInput
 import ru.iqchannels.sdk.schema.UploadedFile
@@ -300,6 +303,56 @@ class HttpClient(
 							callback.onResult(messages)
 						}
 					}
+				}
+
+				override fun onException(exception: Exception) {
+					callback.onException(exception)
+				}
+			}
+		)
+	}
+
+	fun availableLanguages(
+		channel: String,
+		callback: HttpCallback<LanguageResponse>
+	): HttpRequest {
+		val path = "/widget/localization/$channel/languages"
+		val type: TypeToken<ru.iqchannels.sdk.schema.Response<LanguageResponse>> =
+			object : TypeToken<ru.iqchannels.sdk.schema.Response<LanguageResponse>>() {}
+
+		return get(
+			path,
+			type,
+			object : HttpCallback<ru.iqchannels.sdk.schema.Response<LanguageResponse>> {
+				override fun onResult(result: ru.iqchannels.sdk.schema.Response<LanguageResponse>?) {
+					val languages = result?.Data
+					languages?.let {
+						callback.onResult(languages)
+					}
+				}
+
+				override fun onException(exception: Exception) {
+					callback.onException(exception)
+				}
+			}
+		)
+	}
+
+	fun setLanguage(
+		query: LanguageQuery,
+		callback: HttpCallback<ResponseBody>
+	): HttpRequest {
+		val path = "/clients/set_language"
+		val type: TypeToken<ru.iqchannels.sdk.schema.Response<ResponseBody>> =
+			object : TypeToken<ru.iqchannels.sdk.schema.Response<ResponseBody>>() {}
+
+		return post(
+			path,
+			query,
+			type,
+			object : HttpCallback<ru.iqchannels.sdk.schema.Response<ResponseBody>> {
+				override fun onResult(result: ru.iqchannels.sdk.schema.Response<ResponseBody>?) {
+					callback.onResult(result?.Result)
 				}
 
 				override fun onException(exception: Exception) {
@@ -726,6 +779,38 @@ class HttpClient(
 
 		return request
 	}
+
+	// GET JSON
+	private fun <T> get(
+		path: String,
+		responseType: TypeToken<ru.iqchannels.sdk.schema.Response<T>>?,
+		callback: HttpCallback<ru.iqchannels.sdk.schema.Response<T>>
+	): HttpRequest {
+		val url: URL = try {
+			requestUrl(path)
+		} catch (e: MalformedURLException) {
+			e(TAG, String.format("GET exception, path=%s, exc=%s", path, e))
+			callback.onException(e)
+			return HttpRequest()
+		}
+
+		val request = HttpRequest(url, token, gson, executor)
+
+		executor.submit {
+			try {
+				request.getJSON(responseType, callback)
+			} catch (e: InterruptedIOException) {
+				d(TAG, String.format("GET cancelled, url=%s", url))
+				callback.onException(e)
+			} catch (e: Exception) {
+				e(TAG, String.format("GET exception, url=%s, exc=%s", url, e))
+				callback.onException(e)
+			}
+		}
+
+		return request
+	}
+
 
 	private fun <T> multipart(
 		path: String,

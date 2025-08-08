@@ -22,9 +22,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import ru.iqchannels.sdk.Log
 import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.download.FileDownloader.saveFileToDownloads
+import ru.iqchannels.sdk.localization.IQChannelsLanguage
 import ru.iqchannels.sdk.ui.Colors.textColor
 
 class FileActionsChooseFragment : BottomSheetDialogFragment() {
@@ -65,7 +65,9 @@ class FileActionsChooseFragment : BottomSheetDialogFragment() {
 	override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 		super.onViewCreated(view, savedInstanceState)
 		val tvOpenFile = view.findViewById<TextView>(R.id.tv_open_file)
+		tvOpenFile?.text = "Open file"
 		val tvSaveFile = view.findViewById<TextView>(R.id.tv_save_file)
+		tvSaveFile?.text = "Save file"
 		val url = requireArguments().getString(ARG_URL)
 		val fileName = requireArguments().getString(ARG_FILE_NAME)
 		tvOpenFile.setTextColor(textColor())
@@ -118,8 +120,8 @@ class FileActionsChooseFragment : BottomSheetDialogFragment() {
 
 	@RequiresApi(Build.VERSION_CODES.Q)
 	fun downloadAndFinish(context: Context?, url: String?, fileName: String?) {
-		val successMessage = getString(R.string.file_saved_success_msg)
-		val errorMessage = getString(R.string.file_saved_fail_msg)
+		val successMessage = IQChannelsLanguage.iqChannelsLanguage.fileSavedText
+		val errorMessage = IQChannelsLanguage.iqChannelsLanguage.fileSavedError
 
 		CoroutineScope(Dispatchers.IO).launch {
 			try {

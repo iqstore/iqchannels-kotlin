@@ -16,6 +16,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import okhttp3.ResponseBody
 import ru.iqchannels.sdk.Log
 import ru.iqchannels.sdk.configs.GetConfigsInteractorImpl
 import ru.iqchannels.sdk.domain.models.ChatType
@@ -25,6 +26,7 @@ import ru.iqchannels.sdk.http.HttpProgressCallback
 import ru.iqchannels.sdk.http.HttpRequest
 import ru.iqchannels.sdk.http.HttpSseListener
 import ru.iqchannels.sdk.http.retrofit.NetworkModule
+import ru.iqchannels.sdk.localization.IQLanguage
 import ru.iqchannels.sdk.rels.Rels
 import ru.iqchannels.sdk.room.AppDatabase
 import ru.iqchannels.sdk.room.DatabaseInstance
@@ -48,6 +50,8 @@ import ru.iqchannels.sdk.schema.ClientTypingForm
 import ru.iqchannels.sdk.schema.FileImageSize
 import ru.iqchannels.sdk.schema.FileType
 import ru.iqchannels.sdk.schema.GreetingSettings
+import ru.iqchannels.sdk.schema.LanguageQuery
+import ru.iqchannels.sdk.schema.LanguageResponse
 import ru.iqchannels.sdk.schema.MaxIdQuery
 import ru.iqchannels.sdk.schema.RatingPollClientAnswerInput
 import ru.iqchannels.sdk.schema.UploadedFile
@@ -564,6 +568,57 @@ object IQChannels {
 		}
 	}
 
+	suspend fun getAvailableLanguages(): List<IQLanguage>? {
+		if (auth == null) {
+			return emptyList()
+		}
+
+		return suspendCoroutine { continuation ->
+			client?.let { client ->
+				config?.channel?.let { channel ->
+					client.availableLanguages(
+						channel,
+						object : HttpCallback<LanguageResponse> {
+							override fun onResult(result: LanguageResponse?) {
+								continuation.resume(result?.Languages ?: emptyList())
+							}
+
+							override fun onException(exception: Exception) {
+								Log.e(TAG, "Languages loading failed", exception)
+								continuation.resumeWithException(exception)
+							}
+						}
+					)
+					Log.i(TAG, "Loading languages")
+				} ?: continuation.resume(emptyList())
+			} ?: continuation.resume(emptyList())
+		}
+	}
+
+	fun setLanguage(code: String) {
+		if (auth == null) {
+			return
+		}
+		val query = LanguageQuery().apply {
+			Code = code
+		}
+
+		client?.let { client ->
+			client.setLanguage(
+				query,
+				object : HttpCallback<ResponseBody> {
+					override fun onResult(result: ResponseBody?) {
+					}
+
+					override fun onException(exception: Exception) {
+						execute { messagesException(exception) }
+					}
+				}
+			)
+			Log.i(TAG, "Set language")
+		}
+	}
+
 	// Push token
 	fun setPushToken(token: String?, isHuawei: Boolean = false) {
 		if (token != null && pushToken != null && token == pushToken) {
@@ -795,7 +850,7 @@ object IQChannels {
 
 	private fun clearMessages() {
 		messageRequest?.cancel()
-		for (listener in messageListeners) {
+		for (listener in messageListeners.toList()) {
 			listener.messagesCleared()
 		}
 		messages = null
@@ -1393,7 +1448,7 @@ object IQChannels {
 		user.Online = true
 		user.Id = 1
 		val message = ChatMessage(user, localId)
-		message.Text = "2.2.3"
+		message.Text = "2.2.4"
 		messages?.add(message)
 		for (listener in messageListeners) {
 			execute {

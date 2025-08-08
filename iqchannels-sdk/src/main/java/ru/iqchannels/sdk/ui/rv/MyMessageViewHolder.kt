@@ -4,17 +4,14 @@ import android.content.res.Resources
 import android.text.util.Linkify
 import android.view.Gravity
 import android.view.LayoutInflater
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.LinearLayout
-import android.widget.PopupMenu
 import android.widget.PopupWindow
 import androidx.annotation.ColorRes
-import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -23,9 +20,6 @@ import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.text.DecimalFormat
 import kotlin.math.roundToInt
@@ -39,12 +33,9 @@ import ru.iqchannels.sdk.setBackgroundDrawable
 import ru.iqchannels.sdk.styling.IQStyles
 import ru.iqchannels.sdk.styling.Text
 import ru.iqchannels.sdk.ui.ChatMessagesAdapter
-import ru.iqchannels.sdk.ui.Colors
 import ru.iqchannels.sdk.ui.widgets.toPx
-import ru.iqchannels.sdk.Log
 import ru.iqchannels.sdk.app.IQChannels
-import ru.iqchannels.sdk.http.HttpCallback
-import ru.iqchannels.sdk.room.toDatabaseMessage
+import ru.iqchannels.sdk.localization.IQChannelsLanguage
 import ru.iqchannels.sdk.schema.ChatMessageForm
 
 
@@ -168,25 +159,25 @@ internal class MyMessageViewHolder(
 		} else if (message.File != null) {
 			when (message.File?.State) {
 				FileValidState.Rejected -> showFileStateMsg(
-					R.string.unsecure_file,
+					IQChannelsLanguage.iqChannelsLanguage.textFileStateRejected,
 					R.color.red,
 					IQStyles.iqChannelsStyles?.messages?.textFileStateRejectedClient
 				)
 
 				FileValidState.OnChecking -> showFileStateMsg(
-					R.string.file_on_checking,
+					IQChannelsLanguage.iqChannelsLanguage.textFileStateOnChecking,
 					R.color.blue,
 					IQStyles.iqChannelsStyles?.messages?.textFileStateOnCheckingClient
 				)
 
 				FileValidState.SentForChecking -> showFileStateMsg(
-					R.string.file_sent_to_check,
+					IQChannelsLanguage.iqChannelsLanguage.textFileStateSentForCheck,
 					R.color.blue,
 					IQStyles.iqChannelsStyles?.messages?.textFileStateSentForCheckingClient
 				)
 
 				FileValidState.CheckError -> showFileStateMsg(
-					R.string.error_on_checking,
+					IQChannelsLanguage.iqChannelsLanguage.textFileStateCheckError,
 					R.color.red,
 					IQStyles.iqChannelsStyles?.messages?.textFileStateCheckErrorClient
 				)
@@ -265,6 +256,9 @@ internal class MyMessageViewHolder(
 		val retryButton: Button = popupView.findViewById(R.id.retryButton)
 		val deleteButton: Button = popupView.findViewById(R.id.deleteButton)
 
+		retryButton.text = IQChannelsLanguage.iqChannelsLanguage.resend
+		deleteButton.text = IQChannelsLanguage.iqChannelsLanguage.delete
+
 		retryButton.setOnClickListener {
 			val form = ChatMessageForm.text(message.LocalId, message.Text, message.ReplyToMessageId)
 			IQChannels.resend( form, 0, true)
@@ -311,21 +305,18 @@ internal class MyMessageViewHolder(
 			if (sizeKb > 1024) {
 				sizeMb = sizeKb / 1024
 			}
-			val strRes: Int
+
+			val str: String
 			val fileSize: String
 			if (sizeMb > 0) {
-				strRes = R.string.file_size_mb_placeholder
+				str = "mb"
 				val df = DecimalFormat("0.00")
 				fileSize = df.format(sizeMb.toDouble())
 			} else {
-				strRes = R.string.file_size_kb_placeholder
-				fileSize = String.format("%.2f", sizeKb)
+				str = "kb"
+				fileSize = sizeKb.toString()
 			}
-
-			tvMyFileSize.text = root.resources.getString(
-				strRes,
-				fileSize
-			)
+			tvMyFileSize.text = "$fileSize $str"
 		} else {
 			tvMyFileSize.text = null
 		}
@@ -412,7 +403,7 @@ internal class MyMessageViewHolder(
 	}
 
 	private fun ItemMyMessageBinding.showFileStateMsg(
-		@StringRes strRes: Int,
+		message: String,
 		@ColorRes colorRes: Int,
 		text: Text?
 	) {
@@ -420,7 +411,7 @@ internal class MyMessageViewHolder(
 		myUpload.visibility = View.GONE
 		clTextsMy.visibility = View.VISIBLE
 		myText.visibility = View.VISIBLE
-		myText.text = root.context.getString(strRes)
+		myText.text = message
 		myText.setTextColor(
 			ContextCompat.getColor(root.context, colorRes)
 		)

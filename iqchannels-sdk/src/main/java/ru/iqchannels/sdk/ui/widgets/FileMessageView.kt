@@ -58,21 +58,18 @@ class FileMessageView @JvmOverloads constructor(
 				if (sizeKb > 1024) {
 					sizeMb = sizeKb / 1024
 				}
-				val strRes: Int
+
+				val str: String
 				val fileSize: String
 				if (sizeMb > 0) {
-					strRes = R.string.file_size_mb_placeholder
+					str = "mb"
 					val df = DecimalFormat("0.00")
 					fileSize = df.format(sizeMb.toDouble())
 				} else {
-					strRes = R.string.file_size_kb_placeholder
-					fileSize = String.format("%.2f", sizeKb)
+					str = "kb"
+					fileSize = sizeKb.toString()
 				}
-
-				tvFileSize.text = this.resources.getString(
-					strRes,
-					fileSize
-				)
+				tvFileSize.text = "$fileSize $str"
 			} else {
 				tvFileSize.text = null
 			}

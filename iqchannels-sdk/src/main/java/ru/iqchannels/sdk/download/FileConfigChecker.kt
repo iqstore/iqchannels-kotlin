@@ -4,12 +4,11 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.OpenableColumns
-import android.webkit.MimeTypeMap
 import androidx.fragment.app.FragmentManager
 import java.io.File
 import ru.iqchannels.sdk.Log
-import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.app.IQChannelsConfigRepository
+import ru.iqchannels.sdk.localization.IQChannelsLanguage
 import ru.iqchannels.sdk.ui.FileUtils
 import ru.iqchannels.sdk.ui.backdrop.ErrorPageBackdropDialog
 
@@ -43,7 +42,7 @@ internal object FileConfigChecker {
 		if (configs.maxFileSizeMb != null && configs.maxFileSizeMb < fileSizeMb) {
 			Log.d("FileConfigChecker", "notAllowedFileSize: $fileSizeMb")
 
-			val backdrop = ErrorPageBackdropDialog.newInstance(context.getString(R.string.file_size_too_large))
+			val backdrop = ErrorPageBackdropDialog.newInstance(IQChannelsLanguage.iqChannelsLanguage.fileWeightError)
 			backdrop.show(childFragmentManager, ErrorPageBackdropDialog.TRANSACTION_TAG)
 			return null
 		}
@@ -63,7 +62,7 @@ internal object FileConfigChecker {
 				if (!allowedWidth || !allowedHeight) {
 					Log.d("FileConfigChecker", "notAllowedImageSize: ${bitmap.width}  ${bitmap.height}")
 
-					val backdrop = ErrorPageBackdropDialog.newInstance(context.getString(R.string.image_size_too_large))
+					val backdrop = ErrorPageBackdropDialog.newInstance(IQChannelsLanguage.iqChannelsLanguage.fileSizeError)
 					backdrop.show(childFragmentManager, ErrorPageBackdropDialog.TRANSACTION_TAG)
 					return null
 				}
@@ -79,7 +78,7 @@ internal object FileConfigChecker {
 				if (!allowedExtensions.contains(ext)) {
 					Log.d("FileConfigChecker", "notAllowedExtension: $ext")
 
-					val backdrop = ErrorPageBackdropDialog.newInstance(context.getString(R.string.file_extension_not_allowed))
+					val backdrop = ErrorPageBackdropDialog.newInstance(IQChannelsLanguage.iqChannelsLanguage.fileNotAllowed)
 					backdrop.show(childFragmentManager, ErrorPageBackdropDialog.TRANSACTION_TAG)
 					return null
 				}
@@ -90,7 +89,7 @@ internal object FileConfigChecker {
 				if (forbiddenExtensions.contains(ext)) {
 					Log.d("FileConfigChecker", "forbiddenExtension: $ext")
 
-					val backdrop = ErrorPageBackdropDialog.newInstance(context.getString(R.string.file_extension_forbidden))
+					val backdrop = ErrorPageBackdropDialog.newInstance(IQChannelsLanguage.iqChannelsLanguage.fileForbidden)
 					backdrop.show(childFragmentManager, ErrorPageBackdropDialog.TRANSACTION_TAG)
 					return null
 				}

@@ -40,6 +40,7 @@ import kotlinx.coroutines.withContext
 import ru.iqchannels.sdk.Log
 import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.app.IQChannels
+import ru.iqchannels.sdk.localization.IQChannelsLanguage
 
 class ImagePreviewFragment : Fragment() {
 
@@ -162,7 +163,7 @@ class ImagePreviewFragment : Fragment() {
 				val result = saveImage(bitmapDrawable.bitmap, fileName)
 				if (result) {
 					withContext(Dispatchers.Main) {
-						Toast.makeText(context, getString(R.string.image_saved), Toast.LENGTH_LONG).show()
+						Toast.makeText(context, IQChannelsLanguage.iqChannelsLanguage.photoSavedSuccessText, Toast.LENGTH_LONG).show()
 					}
 				}
 			}
@@ -182,9 +183,9 @@ class ImagePreviewFragment : Fragment() {
 		val areSameDay =
 			todayCal[Calendar.YEAR] == msgCal[Calendar.YEAR] && todayCal[Calendar.MONTH] == msgCal[Calendar.MONTH] && todayCal[Calendar.DAY_OF_MONTH] == msgCal[Calendar.DAY_OF_MONTH]
 		if (areSameDay) {
-			dateStr = getString(R.string.today)
+			dateStr = IQChannelsLanguage.iqChannelsLanguage.today
 		}
-		tvDate.text = getString(R.string.msg_date_time, dateStr, time)
+		tvDate.text = "$dateStr, $time"
 	}
 
 	private fun saveImage(image: Bitmap, imageFileName: String?): Boolean {

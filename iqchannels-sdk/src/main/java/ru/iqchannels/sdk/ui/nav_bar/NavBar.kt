@@ -14,10 +14,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ru.iqchannels.sdk.R
+import ru.iqchannels.sdk.localization.IQChannelsLanguage
 import ru.iqchannels.sdk.ui.theming.Medium15
 import ru.iqchannels.sdk.ui.theming.Regular13
 
@@ -61,7 +61,7 @@ fun NavBar(
 				)
 
 				Text(
-					text = stringResource(id = R.string.online),
+					text = IQChannelsLanguage.iqChannelsLanguage.statusLabel,
 					color = colorResource(id = R.color.other_name),
 					textAlign = TextAlign.Center,
 					style = Regular13,

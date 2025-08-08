@@ -59,7 +59,7 @@
             android:text="Согласие на обработку персональных данных"
             android:textSize="14sp" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/signupButton"
             android:layout_width="match_parent"
             android:layout_height="52dp"
@@ -67,7 +67,7 @@
             android:textSize="16sp"
             android:textStyle="normal"
             android:textAllCaps="false"
-            android:background="@color/bg_btn_signup"
+            android:backgroundTint="@color/bg_btn_signup"
             android:layout_marginTop="30dp"
             android:layout_marginHorizontal="10dp"
             android:textColor="#FFF"
@@ -243,8 +243,6 @@
                 android:layout_alignParentLeft="true"
                 android:layout_alignBottom="@id/sendText"
                 android:background="@null"
-                android:contentDescription="@string/chat_attach"
-
                 android:src="@drawable/attach_40"/>
 
             <EditText
@@ -258,7 +256,6 @@
                 android:layout_toRightOf="@+id/attachButton"
                 android:background="@drawable/bg_text_field"
                 android:gravity="center_vertical"
-                android:hint="@string/chat_send_hint"
                 android:imeOptions="actionSend"
                 android:inputType="textShortMessage|textCapSentences|textAutoCorrect|textAutoComplete|textMultiLine"
                 android:maxLength="4096"
@@ -275,7 +272,6 @@
                 android:layout_alignParentRight="true"
                 android:layout_alignBottom="@id/sendText"
                 android:background="@null"
-                android:contentDescription="@string/chat_send"
                 android:src="@drawable/send_40"
                 android:visibility="gone"
                 />
@@ -303,7 +299,6 @@
             android:id="@+id/tv_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/chat_unavailable"
             android:textAlignment="center"
             android:gravity="center"
             android:textSize="17sp"
@@ -319,7 +314,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:layout_marginHorizontal="50dp"
-            android:text="@string/chat_unavailable_description"
             android:textAlignment="center"
             android:gravity="center"
             android:textSize="15sp"
@@ -337,7 +331,6 @@
             android:paddingHorizontal="20dp"
             android:background="@drawable/bg_button_primary"
             android:backgroundTint="@color/secondary_btn_bg"
-            android:text="@string/go_back"
             android:textAllCaps="false"
             android:textColor="@color/text_color"
             android:textSize="17sp"

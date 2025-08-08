@@ -6,6 +6,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.View
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -13,6 +14,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.iqchannels.sdk.R
+import ru.iqchannels.sdk.localization.IQChannelsLanguage
 
 class TopNotificationWidget @JvmOverloads constructor(
 	context: Context,
@@ -29,6 +31,9 @@ class TopNotificationWidget @JvmOverloads constructor(
 			setOnClickListener {
 				hide()
 			}
+		}
+		findViewById<TextView>(R.id.text)?.run {
+			text = IQChannelsLanguage.iqChannelsLanguage.textCopied
 		}
 	}
 

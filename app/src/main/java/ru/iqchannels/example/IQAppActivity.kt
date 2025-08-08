@@ -20,6 +20,7 @@ import androidx.fragment.app.Fragment
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.messaging.FirebaseMessaging
+import ru.iqchannels.example.localizations.LocalizationsEditFragment
 import ru.iqchannels.example.styles.StylesEditFragment
 import ru.iqchannels.sdk.app.Cancellable
 import ru.iqchannels.sdk.app.IQChannels
@@ -30,6 +31,7 @@ import ru.iqchannels.sdk.app.UIOptions
 import ru.iqchannels.sdk.app.UnreadListener
 import ru.iqchannels.sdk.ui.ChatFragment
 import ru.iqchannels.sdk.ui.channels.ChannelsFragment
+import java.io.File
 
 class IQAppActivity :
 	AppCompatActivity(),
@@ -148,7 +150,18 @@ class IQAppActivity :
 			R.id.nav_chat -> {
 				val stylesJson = getSharedPreferences(StylesEditFragment.PREFS_STYLES, Context.MODE_PRIVATE)
 					.getString(StylesEditFragment.CONFIG_STYLES, null)
-				fragment = ChatFragment.newInstance(stylesJson = stylesJson)
+
+				val languageCode = getSharedPreferences(LocalizationsEditFragment.PREFS_LOCALIZATIONS, Context.MODE_PRIVATE)
+					.getString(LocalizationsEditFragment.LANGUAGE_CODE, null)
+
+				var localizationJson: String? = null
+
+				val file = File(filesDir, "$languageCode.json")
+				if (file.exists()) {
+					localizationJson = file.readText()
+				}
+
+				fragment = ChatFragment.newInstance(stylesJson = stylesJson, localizationJson = localizationJson)
 			}
 			R.id.nav_login -> {
 				val prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -224,7 +237,7 @@ class IQAppActivity :
 				return false
 			}
 
-			R.id.enable_cutom_title -> {
+			R.id.enable_custom_title -> {
 				customNavBarEnabled = !customNavBarEnabled
 				return false
 			}

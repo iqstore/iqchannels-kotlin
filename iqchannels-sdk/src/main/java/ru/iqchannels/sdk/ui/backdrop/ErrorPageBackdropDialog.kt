@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.databinding.BackdropErrorPageBinding
+import ru.iqchannels.sdk.localization.IQChannelsLanguage
 
 class ErrorPageBackdropDialog : BottomSheetDialogFragment() {
 
@@ -38,7 +39,7 @@ class ErrorPageBackdropDialog : BottomSheetDialogFragment() {
 		val binding = BackdropErrorPageBinding.inflate(inflater, container, false)
 
 		binding.run {
-			tvTitle.text = getString(R.string.file_not_uploaded)
+			tvTitle.text = IQChannelsLanguage.iqChannelsLanguage.fileSavedError
 			tvDescription.text = requireArguments().getString(ARG_DESCRIPTION)
 
 			btnAction.setOnClickListener {

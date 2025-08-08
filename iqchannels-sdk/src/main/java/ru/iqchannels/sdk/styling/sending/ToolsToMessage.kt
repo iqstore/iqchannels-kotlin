@@ -12,8 +12,8 @@ class ToolsToMessage(
 	val iconClip: String?,
 	@SerializedName("background_icon")
 	val backgroundIcon: Color?,
-	@SerializedName("background_chat")
-	val backgroundChat: ContainerStyles?,
-	@SerializedName("text_chat")
-	val textChat: Text?
+	@SerializedName("background_input")
+	val backgroundInput: ContainerStyles?,
+	@SerializedName("text_input")
+	val textInput: Text?
 )

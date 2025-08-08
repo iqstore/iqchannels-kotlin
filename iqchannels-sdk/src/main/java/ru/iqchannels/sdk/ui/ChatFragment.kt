@@ -473,11 +473,11 @@ class ChatFragment : Fragment() {
 
 		// Send.
 		sendText = view.findViewById<EditText?>(R.id.sendText)?.apply {
-			applyIQStyles(IQStyles.iqChannelsStyles?.toolsToMessage?.textChat)
+			applyIQStyles(IQStyles.iqChannelsStyles?.toolsToMessage?.textInput)
 
 			hint = IQChannelsLanguage.iqChannelsLanguage.inputMessagePlaceholder
 
-			IQStyles.iqChannelsStyles?.toolsToMessage?.backgroundChat
+			IQStyles.iqChannelsStyles?.toolsToMessage?.backgroundInput
 				?.let {
 					background = GradientDrawable().apply {
 						setColor(it.color?.getColorInt(context) ?: ContextCompat.getColor(context, R.color.default_color))

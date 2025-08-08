@@ -1220,13 +1220,14 @@ class ChatFragment : Fragment() {
 		}
 
 		// Create a gallery intent.
-		val galleryIntent = Intent(Intent.ACTION_GET_CONTENT)
-		galleryIntent.setType("image/*")
-		galleryIntent.putExtra(
-			Intent.EXTRA_MIME_TYPES, arrayOf(
-				"audio/*", "video/*", "text/*", "application/*", "file/*"
-			)
-		)
+		val galleryIntent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+		galleryIntent.addCategory(Intent.CATEGORY_OPENABLE)
+		galleryIntent.type = "*/*"
+
+		galleryIntent.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf(
+			"image/*", "audio/*", "video/*", "text/*", "application/*"
+		))
+
 		galleryIntent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
 
 		// Create and start an intent chooser.

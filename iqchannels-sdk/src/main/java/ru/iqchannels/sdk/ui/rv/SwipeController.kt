@@ -22,7 +22,12 @@ class SwipeController(private val swipeListener: SwipeListener) : ItemTouchHelpe
 		recyclerView: RecyclerView,
 		viewHolder: RecyclerView.ViewHolder
 	): Int {
-		val position = viewHolder.getBindingAdapterPosition()
+		val position = viewHolder.bindingAdapterPosition
+
+		if (position == RecyclerView.NO_POSITION) {
+			return makeMovementFlags(0, 0)
+		}
+
 		val chatMessage = (recyclerView.adapter as ChatMessagesAdapter).getItem(position)
 
 		return if (!chatMessage.System && !chatMessage.AutoGreeting) {

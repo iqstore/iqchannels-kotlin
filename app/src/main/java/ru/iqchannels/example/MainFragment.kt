@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,6 +25,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,6 +36,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.compose.ui.platform.LocalFocusManager
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import ru.iqchannels.example.localizations.LocalizationsEditFragment
@@ -41,6 +44,7 @@ import ru.iqchannels.example.prefill.PreFillMsgFragment
 import ru.iqchannels.example.shortcuts.ShortCutsFragment
 import ru.iqchannels.example.styles.StylesEditFragment
 import ru.iqchannels.sdk.ui.theming.IQChannelsCompose
+
 
 class MainFragment : Fragment() {
 
@@ -52,14 +56,23 @@ class MainFragment : Fragment() {
 	) = IQChannelsCompose(requireContext()) {
 
 		Surface {
+			val focusManager = LocalFocusManager.current
 
 			val testingType by viewModel.testingType.collectAsState()
 			val address by viewModel.address.collectAsState()
 			val channels by viewModel.channels.collectAsState()
 
 			Column(
-				modifier = Modifier.padding(16.dp)
+				modifier = Modifier
+					.padding(16.dp)
+					.clickable(
+						indication = null,
+						interactionSource = remember { MutableInteractionSource() }
+					) {
+						focusManager.clearFocus()
+					}
 			) {
+
 				Text(
 					text = "Edit styles",
 					textDecoration = TextDecoration.Underline,

@@ -41,6 +41,7 @@ class ErrorPageBackdropDialog : BottomSheetDialogFragment() {
 		binding.run {
 			tvTitle.text = IQChannelsLanguage.iqChannelsLanguage.fileSavedError
 			tvDescription.text = requireArguments().getString(ARG_DESCRIPTION)
+			btnAction.text = IQChannelsLanguage.iqChannelsLanguage.buttonError
 
 			btnAction.setOnClickListener {
 				dismiss()

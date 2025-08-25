@@ -42,7 +42,7 @@ internal object FileConfigChecker {
 		if (configs.maxFileSizeMb != null && configs.maxFileSizeMb < fileSizeMb) {
 			Log.d("FileConfigChecker", "notAllowedFileSize: $fileSizeMb")
 
-			val backdrop = ErrorPageBackdropDialog.newInstance(IQChannelsLanguage.iqChannelsLanguage.fileWeightError)
+			val backdrop = ErrorPageBackdropDialog.newInstance("${IQChannelsLanguage.iqChannelsLanguage.fileWeightError} ${configs.maxFileSizeMb}Mb")
 			backdrop.show(childFragmentManager, ErrorPageBackdropDialog.TRANSACTION_TAG)
 			return null
 		}

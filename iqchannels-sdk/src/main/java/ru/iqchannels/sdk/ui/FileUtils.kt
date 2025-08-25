@@ -6,13 +6,20 @@ import android.provider.OpenableColumns
 import android.webkit.MimeTypeMap
 import ru.iqchannels.sdk.Log
 import java.io.File
+import java.io.FileOutputStream
 
 object FileUtils {
 
-	fun createGalleryTempFile(context: Context?, uri: Uri, ext: String?, dir: File? = null): File {
-		val filename = getFileNameFromUri(context, uri)
-		val file = File((dir ?: context?.cacheDir), "$filename")
-		file.createNewFile()
+	fun createGalleryTempFile(context: Context, uri: Uri, ext: String?, dir: File? = null): File {
+		val filename = getFileNameFromUri(context, uri) ?: "temp_${System.currentTimeMillis()}.$ext"
+		val file = File((dir ?: context.cacheDir), filename)
+
+		context.contentResolver.openInputStream(uri)?.use { input ->
+			FileOutputStream(file).use { output ->
+				input.copyTo(output)
+			}
+		}
+
 		return file
 	}
 

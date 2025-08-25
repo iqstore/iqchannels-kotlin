@@ -13,6 +13,8 @@ data class ChatFilesConfigResponse(
 )
 
 data class ChatFilesConfig(
+	@SerializedName("title_label")
+	val titleLabel: String?,
 	@SerializedName("MaxFileSizeMb")
 	val maxFileSizeMb: Int?,
 	@SerializedName("MaxImageHeight")

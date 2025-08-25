@@ -48,11 +48,11 @@ allprojects {
 }
 ```
 
-5. Добавьте зависимосить `implementation 'ru.iqstore:iqchannels-sdk-2:2.2.4'` в `build.gradle` модуля приложения.
+5. Добавьте зависимосить `implementation 'ru.iqstore:iqchannels-sdk-2:2.2.5-rc1'` в `build.gradle` модуля приложения.
 ```build.gradle
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])   
-    implementation 'ru.iqstore:iqchannels-sdk-2:2.2.4'
+    implementation 'ru.iqstore:iqchannels-sdk-2:2.2.5-rc1'
     // etc...
 }
 ```
@@ -1216,7 +1216,7 @@ ChatFragment принимает предзаполненная сообщени�
   "signup_button_text": "Начать чат",
   "signup_error": "Ошибка: длина имени должна быть не менее 3-х символов.",
   "title_error": "Чат временно недоступен",
-  "text_error": "Мы уже все исправляем. Обновите\nстраницу или попробуйте позже",
+  "text_error": "Мы уже все исправляем. Обновите страницу или попробуйте позже",
   "button_error": "Вернуться",
   "status_label": "На связи",
   "status_label_awaiting_network": "Ожидание сети...",

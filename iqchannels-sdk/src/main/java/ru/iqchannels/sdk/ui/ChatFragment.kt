@@ -667,7 +667,7 @@ class ChatFragment : Fragment() {
 		authLayout?.visibility =
 			if (IQChannels.auth == null && IQChannels.authRequest != null && token != null) View.VISIBLE else View.GONE
 
-		if(IQChannels.auth == null && IQChannels.authRequest == null && token == null){
+		if(IQChannels.auth == null && IQChannels.authRequest == null && token == null && !IQChannels.authFailed){
 			changeStyleButton(signupButton?.isEnabled)
 
 			IQStyles.iqChannelsStyles?.signup?.button?.backgroundDisabled
@@ -711,7 +711,10 @@ class ChatFragment : Fragment() {
 			)
 
 			signupError?.applyIQStyles(IQStyles.iqChannelsStyles?.signup?.errorText)
-		}else{
+		} else if(IQChannels.authFailed){
+			showUnavailableView(IQChannelsLanguage.iqChannelsLanguage.textError)
+		}
+		else{
 			signupLayout?.visibility = View.GONE
 		}
 		signupTextName?.isEnabled = IQChannels.authRequest == null

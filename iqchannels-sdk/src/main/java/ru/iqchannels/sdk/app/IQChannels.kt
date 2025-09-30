@@ -87,6 +87,7 @@ object IQChannels {
 		private set
 	var authRequest: HttpRequest? = null
 		private set
+	var authFailed: Boolean = false
 
 	private var authAttempt = 0
 	private val listeners: MutableSet<IQChannelsListener>
@@ -274,6 +275,7 @@ object IQChannels {
 		authRequest = null
 		client?.clearToken()
 		signupName = null
+		authFailed = false
 		Log.d(TAG, "Cleared auth")
 	}
 
@@ -329,11 +331,13 @@ object IQChannels {
 		val callback: HttpCallback<ClientAuth> = object : HttpCallback<ClientAuth> {
 			override fun onResult(result: ClientAuth?) {
 				result?.let {
+					authFailed = false
 					continuation.resume(it)
 				}
 			}
 
 			override fun onException(exception: Exception) {
+				authFailed = true
 				continuation.resumeWithException(exception)
 			}
 		}
@@ -362,6 +366,7 @@ object IQChannels {
 		}
 
 		authRequest = null
+		authFailed = true
 
 		if (credentials == null) {
 			Log.e(TAG, String.format("Failed to auth, exc=%s", exception))
@@ -395,6 +400,7 @@ object IQChannels {
 		}
 
 		authRequest = null
+		authFailed = false
 
 		client?.let { client ->
 			this.auth = auth
@@ -884,10 +890,18 @@ object IQChannels {
 									messageDao?.insertMessage(message.toDatabaseMessage())
 								}
 							}
+
+							var chatId = messages?.firstOrNull { it.ClientId == auth?.Client?.Id }?.ChatId
+
+							if (chatId == 0L){
+								chatId = messages?.last()?.ChatId
+							}
+
 							messageDao?.deleteMessageByLocalId(0)
+							messageDao?.deleteMessageByChatId(0)
 							val databaseMessages = messageDao?.getAllMessages()
 							var copy: MutableList<ChatMessage> = ArrayList(messages)
-							checkUnsendMessages(databaseMessages).let {copy += it}
+							checkUnsendMessages(databaseMessages, chatId ?: 0).let {copy += it}
 
 							autoGreeting?.let {
 								copy.add(autoGreeting)
@@ -1415,7 +1429,13 @@ object IQChannels {
 
 		auth?.Client?.let { client ->
 			val localId = nextLocalId()
-			val message = ChatMessage(client, localId, text)
+			var chatId = messages?.firstOrNull { it.ClientId == auth?.Client?.Id }?.ChatId
+
+			if (chatId == 0L){
+				chatId = messages?.last()?.ChatId
+			}
+
+			val message = ChatMessage(client, localId, chatId ?: 0, text)
 			message.Sending = true
 			messages?.add(message)
 
@@ -1448,7 +1468,7 @@ object IQChannels {
 		user.Online = true
 		user.Id = 1
 		val message = ChatMessage(user, localId)
-		message.Text = "2.2.5-rc1"
+		message.Text = "2.2.5"
 		messages?.add(message)
 		for (listener in messageListeners) {
 			execute {
@@ -1469,7 +1489,12 @@ object IQChannels {
 
 		auth?.Client?.let { client ->
 			val localId = nextLocalId()
-			val message = ChatMessage(client, localId)
+			var chatId = messages?.firstOrNull { it.ClientId == auth?.Client?.Id }?.ChatId
+
+			if (chatId == 0L){
+				chatId = messages?.last()?.ChatId
+			}
+			val message = ChatMessage(client, localId, chatId ?: 0)
 			message.Sending = true
 			messages?.add(message)
 
@@ -1501,7 +1526,14 @@ object IQChannels {
 
 		auth?.Client?.let { client ->
 			val localId = nextLocalId()
-			val message = ChatMessage(client, localId, text, file, replyToMessageId)
+
+			var chatId = messages?.firstOrNull { it.ClientId == auth?.Client?.Id }?.ChatId
+
+			if (chatId == 0L){
+				chatId = messages?.last()?.ChatId
+			}
+
+			val message = ChatMessage(client, localId, chatId ?: 0L, text, file, replyToMessageId)
 			message.Sending = true
 			messages?.add(message)
 			insertMessageToDatabase(message)
@@ -2139,31 +2171,33 @@ object IQChannels {
 		}
 	}
 
-	private fun checkUnsendMessages(databaseMessages: List<DatabaseMessage>?): List<ChatMessage> {
+	private fun checkUnsendMessages(databaseMessages: List<DatabaseMessage>?, chatId: Long): List<ChatMessage> {
 		val messagesToAdd: MutableList<ChatMessage> = mutableListOf()
 		val messagesToSend = databaseMessages?.filter { it.id == 0L }
 
 		messagesToSend?.forEach {
-			if(it.sending && !it.error) {
-				if (it.upload != null) {
-					it.toChatMessage()?.let { chatMessage ->
-						sendFile(chatMessage)
-					}
-				} else {
-					if (!it.text.isNullOrEmpty()) {
-						val form = ChatMessageForm.text(it.localId, it.text, it.replyToMessageId)
-						sendQueue.add(form)
-					} else {
-						CoroutineScope(Dispatchers.IO).launch {
-							messageDao?.deleteMessageByLocalId(it.localId)
+			if(chatId == it.chatId && chatId != 0L){
+				if(it.sending && !it.error) {
+					if (it.upload != null) {
+						it.toChatMessage()?.let { chatMessage ->
+							sendFile(chatMessage)
 						}
-						return@forEach
+					} else {
+						if (!it.text.isNullOrEmpty()) {
+							val form = ChatMessageForm.text(it.localId, it.text, it.replyToMessageId)
+							sendQueue.add(form)
+						} else {
+							CoroutineScope(Dispatchers.IO).launch {
+								messageDao?.deleteMessageByLocalId(it.localId)
+							}
+							return@forEach
+						}
 					}
 				}
-			}
 
-			it.toChatMessage()?.let {
-					chatMessage -> messagesToAdd.add(chatMessage)
+				it.toChatMessage()?.let {
+						chatMessage -> messagesToAdd.add(chatMessage)
+				}
 			}
 		}
 

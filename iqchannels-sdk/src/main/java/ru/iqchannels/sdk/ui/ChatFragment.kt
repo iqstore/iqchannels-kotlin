@@ -77,6 +77,7 @@ import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.app.Callback
 import ru.iqchannels.sdk.app.Cancellable
 import ru.iqchannels.sdk.app.IQChannels
+import ru.iqchannels.sdk.app.IQChannels.sendingFile
 import ru.iqchannels.sdk.app.IQChannelsConfig
 import ru.iqchannels.sdk.app.IQChannelsConfigRepository
 import ru.iqchannels.sdk.app.IQChannelsListener
@@ -1342,6 +1343,9 @@ class ChatFragment : Fragment() {
 	}
 
 	private fun sendMessage() {
+		if(sendingFile){
+			return
+		}
 		val text = sendText?.text.toString()
 		sendText?.setText("")
 

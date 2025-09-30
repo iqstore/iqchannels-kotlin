@@ -81,6 +81,7 @@ object IQChannels {
 		SupervisorJob() + Dispatchers.IO + CoroutineName("IQChannels-coroutine-worker") + excHandler
 	)
 	var fileСhooser: Boolean = false
+	var sendingFile: Boolean = false
 
 	// Auth
 	var auth: ClientAuth? = null
@@ -1567,7 +1568,7 @@ object IQChannels {
 		if (ext != null) {
 			mimetype = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext) ?: ""
 		}
-
+		sendingFile = true
 		message.Sending = true
 		message.UploadExc = null
 		message.UploadRequest =
@@ -1577,6 +1578,7 @@ object IQChannels {
 						if (message.UploadRequest == null) {
 							return@Runnable
 						}
+						sendingFile = false
 						message.Upload = null
 						message.UploadExc = null
 						message.UploadRequest = null
@@ -1607,6 +1609,7 @@ object IQChannels {
 						if (message.UploadRequest == null) {
 							return@Runnable
 						}
+						sendingFile = false
 						message.Sending = false
 						message.UploadExc = e
 						message.UploadProgress = 0
@@ -1971,7 +1974,7 @@ object IQChannels {
 				existing.Client = message.Client
 				existing.Sending = false
 				existing.Received = true
-				existing.Read = true
+				existing.Read = false
 				existing.ReplyToMessageId = message.ReplyToMessageId
 				Log.i(
 					TAG, String.format(

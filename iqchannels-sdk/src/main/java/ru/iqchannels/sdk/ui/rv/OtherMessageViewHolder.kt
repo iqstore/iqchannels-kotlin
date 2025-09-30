@@ -483,7 +483,11 @@ internal class OtherMessageViewHolder(
 		when (msgRating.State) {
 			RatingState.FINISHED, RatingState.RATED -> {
 				val value = msgRating.Value ?: 0
-				val text = "${IQChannelsLanguage.iqChannelsLanguage.ratingStateRated} ${value}/${getRatingScaleMaxValue(msgRating)}"
+				val template = IQChannelsLanguage.iqChannelsLanguage.ratingStateRated
+				val text = template
+					.replace("{{client_rating}}", value.toString())
+					.replace("{{max_rating}}", getRatingScaleMaxValue(msgRating).toString())
+
 				rating.ratingRated.visibility = View.VISIBLE
 				rating.ratingRated.text = text
 				rating.ratingRated.applyIQStyles(IQStyles.iqChannelsStyles?.chat?.systemText)

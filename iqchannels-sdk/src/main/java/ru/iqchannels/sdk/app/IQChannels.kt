@@ -871,9 +871,6 @@ object IQChannels {
 		if (auth == null) {
 			return
 		}
-		if (messageListeners.isEmpty()) {
-			return
-		}
 		val query = MaxIdQuery().apply {
 			ChatType = chatType.name.lowercase()
 		}

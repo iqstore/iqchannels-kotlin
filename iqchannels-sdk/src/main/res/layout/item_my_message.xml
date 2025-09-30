@@ -213,7 +213,6 @@
                             android:id="@+id/myText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:autoLink="all"
                             android:textColor="@color/my_text_color"
                             android:textSize="16sp"
                             app:layout_constrainedWidth="true"

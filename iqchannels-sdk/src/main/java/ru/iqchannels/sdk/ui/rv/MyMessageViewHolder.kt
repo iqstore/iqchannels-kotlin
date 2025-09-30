@@ -1,6 +1,8 @@
 package ru.iqchannels.sdk.ui.rv
 
 import android.content.res.Resources
+import android.os.Build
+import android.text.SpannableString
 import android.text.util.Linkify
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -8,6 +10,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
+import android.view.textclassifier.TextClassificationManager
+import android.view.textclassifier.TextLinks
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.PopupWindow
@@ -37,6 +41,7 @@ import ru.iqchannels.sdk.ui.widgets.toPx
 import ru.iqchannels.sdk.app.IQChannels
 import ru.iqchannels.sdk.localization.IQChannelsLanguage
 import ru.iqchannels.sdk.schema.ChatMessageForm
+import java.util.regex.Pattern
 
 
 internal class MyMessageViewHolder(
@@ -189,8 +194,30 @@ internal class MyMessageViewHolder(
 			myUpload.visibility = View.GONE
 			clTextsMy.visibility = View.VISIBLE
 			myText.visibility = View.VISIBLE
-			myText.autoLinkMask = Linkify.ALL
-			myText.text = message.Text
+
+			val text = message.Text
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+				val textClassifier = myText.context
+					.getSystemService(TextClassificationManager::class.java)
+					.textClassifier
+
+				val request = TextLinks.Request.Builder(text ?: "").build()
+				val textLinks = textClassifier.generateLinks(request)
+
+				val spannable = SpannableString(text)
+				textLinks.apply(spannable, TextLinks.APPLY_STRATEGY_REPLACE, null)
+
+				myText.text = spannable
+				myText.movementMethod = android.text.method.LinkMovementMethod.getInstance()
+
+				val phonePattern = Pattern.compile("7\\d{10}")
+				Linkify.addLinks(myText, phonePattern, "tel:")
+			} else {
+				myText.autoLinkMask = Linkify.ALL
+				myText.text = text
+				myText.movementMethod = android.text.method.LinkMovementMethod.getInstance()
+			}
+
 			myText.setTextColor(ContextCompat.getColor(root.context, R.color.my_text_color))
 			myText.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textClient)
 			myText.minWidth = 0

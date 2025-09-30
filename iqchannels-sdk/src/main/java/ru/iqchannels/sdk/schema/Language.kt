@@ -44,7 +44,7 @@ class Language {
     @SerializedName("rating_state_ignored")
     var ratingStateIgnored: String = "Без оценки оператора"
     @SerializedName("rating_state_rated")
-    var ratingStateRated: String = "Оценка оператора"
+    var ratingStateRated: String = "Оценка оператора {{client_rating}} из {{max_rating}}"
     @SerializedName("new_messages")
     var newMessages: String = "Новые сообщения"
     @SerializedName("sent_rating")

@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.android.material.snackbar.Snackbar
+import org.json.JSONException
 import kotlin.system.exitProcess
 import org.json.JSONObject
 import ru.iqchannels.example.IQAppActivity
@@ -73,7 +74,31 @@ class StylesEditFragment : Fragment() {
 				Toast.LENGTH_SHORT
 			).show()
 
-			Log.e(javaClass.name, "Error on saving styles", e)
+			if (e is JSONException) {
+				val pos = Regex("character (\\d+)")
+					.find(e.message ?: "")
+					?.groupValues
+					?.getOrNull(1)
+					?.toIntOrNull()
+
+				if (pos != null) {
+					var line = 0
+					for (i in 0 until pos) {
+						if (itemBody[i] == '\n') {
+							line++
+						}
+					}
+
+					val start = (pos - 40).coerceAtLeast(0)
+					val end = (pos + 40).coerceAtMost(itemBody.length)
+					val context = itemBody.substring(start, end)
+
+					Log.e(
+						"Styles",
+						"JSON parse error at line $line, char $pos: ...$context..."
+					)
+				}
+			}
 		}
 	}
 

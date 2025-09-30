@@ -61,11 +61,6 @@ class ReplyMessageView @JvmOverloads constructor(
 		if (message.Text != null && message.Text?.isNotEmpty() == true) {
 			tvText.visibility = VISIBLE
 			tvText.text = message.Text
-		} else if (message.Rating != null) {
-			val value = message.Rating?.Value ?: 0
-			val text = "${IQChannelsLanguage.iqChannelsLanguage.ratingStateRated} ${value}/${getRatingScaleMaxValue(message.Rating!!)}"
-			tvText.visibility = VISIBLE
-			tvText.text = text
 		} else {
 			tvText.visibility = GONE
 		}

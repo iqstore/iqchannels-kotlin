@@ -48,11 +48,11 @@ allprojects {
 }
 ```
 
-5. Добавьте зависимосить `implementation 'ru.iqstore:iqchannels-sdk-2:2.2.5-rc1'` в `build.gradle` модуля приложения.
+5. Добавьте зависимосить `implementation 'ru.iqstore:iqchannels-sdk-2:2.2.5'` в `build.gradle` модуля приложения.
 ```build.gradle
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])   
-    implementation 'ru.iqstore:iqchannels-sdk-2:2.2.5-rc1'
+    implementation 'ru.iqstore:iqchannels-sdk-2:2.2.5'
     // etc...
 }
 ```
@@ -1228,7 +1228,7 @@ ChatFragment принимает предзаполненная сообщени�
   "text_file_state_check_error": "Ошибка проверки файла",
   "rating_state_pending": "Пожалуйста, оцените качество консультации",
   "rating_state_ignored": "Без оценки оператора",
-  "rating_state_rated": "Оценка оператора",
+  "rating_state_rated": "Оценка оператора {{client_rating}} из {{max_rating}}",
   "new_messages": "Новые сообщения",
   "sent_rating": "Отправить",
   "invalid_messsage": "Неподдерживаемый тип сообщения",

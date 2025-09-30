@@ -92,7 +92,7 @@
                     tools:ignore="ContentDescription" />
             </LinearLayout>
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btn_send_rating"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -116,8 +116,7 @@
             android:textAlignment="center"
             android:textColor="#ff4c4c4c"
             android:textSize="16sp"
-            android:textStyle="italic"
-            android:visibility="gone"></TextView>
+            android:visibility="gone" />
 
     </LinearLayout>
 </RelativeLayout>

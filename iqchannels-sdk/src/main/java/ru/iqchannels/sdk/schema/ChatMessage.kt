@@ -71,22 +71,25 @@ class ChatMessage {
 	var UploadProgress = 0
 
 	constructor()
-	constructor(client: Client, localId: Long, text: String?) : this(client, localId) {
+	constructor(client: Client, localId: Long, chatId: Long, text: String?) : this(client, localId, chatId) {
 		Payload = ChatPayloadType.TEXT
 		Text = text
+		ChatId = chatId
 	}
 
-	constructor(client: Client, localId: Long, text: String, file: File, replyToMessageId: Long?) : this(
+	constructor(client: Client, localId: Long, chatId: Long, text: String, file: File, replyToMessageId: Long?) : this(
 		client,
-		localId
+		localId,
+		chatId
 	) {
+		ChatId = chatId
 		Payload = ChatPayloadType.FILE
 		Text = text
 		Upload = file
 		ReplyToMessageId = replyToMessageId
 	}
 
-	constructor(client: Client, localId: Long) {
+	constructor(client: Client, localId: Long, chatId: Long) {
 		LocalId = localId
 		Public = true
 
@@ -95,6 +98,7 @@ class ChatMessage {
 		ClientId = client.Id
 		val now = Date()
 		CreatedAt = now.time
+		ChatId = chatId
 
 		// Transitive
 		My = true

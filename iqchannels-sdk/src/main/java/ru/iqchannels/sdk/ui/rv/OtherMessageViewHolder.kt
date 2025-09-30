@@ -2,10 +2,14 @@ package ru.iqchannels.sdk.ui.rv
 
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
+import android.os.Build
+import android.text.SpannableString
 import android.text.util.Linkify
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.textclassifier.TextClassificationManager
+import android.view.textclassifier.TextLinks
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import androidx.annotation.ColorRes
@@ -47,6 +51,7 @@ import ru.iqchannels.sdk.ui.UiUtils.getRatingScaleMaxValue
 import ru.iqchannels.sdk.ui.widgets.DropDownButton
 import ru.iqchannels.sdk.app.IQChannels
 import ru.iqchannels.sdk.localization.IQChannelsLanguage
+import java.util.regex.Pattern
 
 interface RatingPollListener {
 	fun onRatingPollAnswersSend(
@@ -229,11 +234,34 @@ internal class OtherMessageViewHolder(
 				}
 			} else {
 				clTexts.visibility = View.VISIBLE
-
 				otherText.visibility = View.VISIBLE
-				otherText.autoLinkMask = Linkify.ALL
+
+				val text = message.Text
+
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+					val textClassifier = otherText.context
+						.getSystemService(TextClassificationManager::class.java)
+						.textClassifier
+
+					val request = TextLinks.Request.Builder(text ?: "").build()
+					val textLinks = textClassifier.generateLinks(request)
+
+					val spannable = SpannableString(text)
+					textLinks.apply(spannable, TextLinks.APPLY_STRATEGY_REPLACE, null)
+
+					otherText.text = spannable
+					otherText.movementMethod = android.text.method.LinkMovementMethod.getInstance()
+
+					val phonePattern = Pattern.compile("7\\d{10}")
+					Linkify.addLinks(otherText, phonePattern, "tel:")
+				} else {
+					otherText.autoLinkMask = Linkify.ALL
+					otherText.text = text
+					otherText.movementMethod = android.text.method.LinkMovementMethod.getInstance()
+				}
+
+
 				otherText.setTextColor(Colors.textColor())
-				otherText.text = message.Text
 			}
 			val lp = LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -455,7 +483,11 @@ internal class OtherMessageViewHolder(
 		when (msgRating.State) {
 			RatingState.FINISHED, RatingState.RATED -> {
 				val value = msgRating.Value ?: 0
-				val text = "${IQChannelsLanguage.iqChannelsLanguage.ratingStateRated} ${value}/${getRatingScaleMaxValue(msgRating)}"
+				val template = IQChannelsLanguage.iqChannelsLanguage.ratingStateRated
+				val text = template
+					.replace("{{client_rating}}", value.toString())
+					.replace("{{max_rating}}", getRatingScaleMaxValue(msgRating).toString())
+
 				rating.ratingRated.visibility = View.VISIBLE
 				rating.ratingRated.text = text
 				rating.ratingRated.applyIQStyles(IQStyles.iqChannelsStyles?.chat?.systemText)

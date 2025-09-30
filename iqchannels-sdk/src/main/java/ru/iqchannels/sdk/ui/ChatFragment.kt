@@ -77,6 +77,7 @@ import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.app.Callback
 import ru.iqchannels.sdk.app.Cancellable
 import ru.iqchannels.sdk.app.IQChannels
+import ru.iqchannels.sdk.app.IQChannels.sendingFile
 import ru.iqchannels.sdk.app.IQChannelsConfig
 import ru.iqchannels.sdk.app.IQChannelsConfigRepository
 import ru.iqchannels.sdk.app.IQChannelsListener
@@ -667,7 +668,7 @@ class ChatFragment : Fragment() {
 		authLayout?.visibility =
 			if (IQChannels.auth == null && IQChannels.authRequest != null && token != null) View.VISIBLE else View.GONE
 
-		if(IQChannels.auth == null && IQChannels.authRequest == null && token == null){
+		if(IQChannels.auth == null && IQChannels.authRequest == null && token == null && !IQChannels.authFailed){
 			changeStyleButton(signupButton?.isEnabled)
 
 			IQStyles.iqChannelsStyles?.signup?.button?.backgroundDisabled
@@ -711,7 +712,10 @@ class ChatFragment : Fragment() {
 			)
 
 			signupError?.applyIQStyles(IQStyles.iqChannelsStyles?.signup?.errorText)
-		}else{
+		} else if(IQChannels.authFailed){
+			showUnavailableView(IQChannelsLanguage.iqChannelsLanguage.textError)
+		}
+		else{
 			signupLayout?.visibility = View.GONE
 		}
 		signupTextName?.isEnabled = IQChannels.authRequest == null
@@ -1339,6 +1343,9 @@ class ChatFragment : Fragment() {
 	}
 
 	private fun sendMessage() {
+		if(sendingFile){
+			return
+		}
 		val text = sendText?.text.toString()
 		sendText?.setText("")
 

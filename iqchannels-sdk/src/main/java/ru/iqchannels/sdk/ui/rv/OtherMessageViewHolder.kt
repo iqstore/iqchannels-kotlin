@@ -151,6 +151,7 @@ internal class OtherMessageViewHolder(
 				IQStyles.iqChannelsStyles?.rating?.backgroundContainer
 					?.let { rating.root.setBackgroundDrawable(it, R.drawable.other_msg_bg) }
 
+				otherText.setTextColor(Colors.textColor())
 				otherText.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textOperator)
 				otherDate.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textTimeOperator)
 				otherName.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textUp)
@@ -259,9 +260,6 @@ internal class OtherMessageViewHolder(
 					otherText.text = text
 					otherText.movementMethod = android.text.method.LinkMovementMethod.getInstance()
 				}
-
-
-				otherText.setTextColor(Colors.textColor())
 			}
 			val lp = LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT,

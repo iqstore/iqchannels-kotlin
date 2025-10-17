@@ -37,7 +37,7 @@ import java.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import ru.iqchannels.sdk.Log
+import ru.iqchannels.sdk.IQLog
 import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.app.IQChannels
 import ru.iqchannels.sdk.localization.IQChannelsLanguage
@@ -209,7 +209,7 @@ class ImagePreviewFragment : Fragment() {
 				image.compress(Bitmap.CompressFormat.JPEG, 100, fOut)
 				fOut.close()
 			} catch (e: Exception) {
-				Log.e(this.javaClass.name, e.message, e)
+				IQLog.e(this.javaClass.name, e.message, e)
 				return false
 			}
 
@@ -229,7 +229,7 @@ class ImagePreviewFragment : Fragment() {
 			mediaScanIntent.setData(contentUri)
 			context?.sendBroadcast(mediaScanIntent)
 		} catch (e: Exception) {
-			Log.e(this.javaClass.name, e.message, e)
+			IQLog.e(this.javaClass.name, e.message, e)
 		}
 	}
 }

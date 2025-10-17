@@ -2,7 +2,6 @@ package ru.iqchannels.sdk.room
 
 import androidx.room.*
 import com.google.gson.Gson
-import ru.iqchannels.sdk.Log
 import java.util.*
 import ru.iqchannels.sdk.schema.*
 import java.io.File

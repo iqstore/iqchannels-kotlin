@@ -7,7 +7,6 @@ package ru.iqchannels.sdk.http
 import android.annotation.SuppressLint
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import ru.iqchannels.sdk.Log
 import java.io.BufferedOutputStream
 import java.io.BufferedReader
 import java.io.ByteArrayOutputStream
@@ -19,7 +18,7 @@ import java.net.URL
 import java.nio.charset.Charset
 import java.util.*
 import java.util.concurrent.ExecutorService
-import ru.iqchannels.sdk.Log.d
+import ru.iqchannels.sdk.IQLog.d
 import ru.iqchannels.sdk.lib.InternalIO
 import ru.iqchannels.sdk.schema.ChatException
 import ru.iqchannels.sdk.schema.Relations

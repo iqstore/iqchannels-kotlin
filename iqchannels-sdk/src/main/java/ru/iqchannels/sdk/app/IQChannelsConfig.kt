@@ -1,6 +1,6 @@
 package ru.iqchannels.sdk.app
 
-import ru.iqchannels.sdk.Log
+import ru.iqchannels.sdk.IQLog
 
 class IQChannelsConfig @JvmOverloads constructor(
 	val address: String?,
@@ -10,6 +10,6 @@ class IQChannelsConfig @JvmOverloads constructor(
 ) {
 
 	init {
-		Log.configure(logging)
+		IQLog.configure(logging)
 	}
 }

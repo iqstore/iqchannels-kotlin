@@ -4,7 +4,7 @@ import androidx.room.*
 import android.content.Context
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import ru.iqchannels.sdk.Log
+import ru.iqchannels.sdk.IQLog
 
 @Database(entities = [DatabaseMessage::class], version = 2, exportSchema = false)
 @TypeConverters(SingleChoiceListConverter::class, ActionListConverter::class, FileConverter::class)
@@ -23,7 +23,7 @@ object DatabaseInstance {
 
     fun getDatabase(context: Context): AppDatabase {
         if (instance == null) {
-            Log.i("database", "init database")
+            IQLog.i("database", "init database")
             instance = Room.databaseBuilder(
                 context.applicationContext,
                 AppDatabase::class.java,

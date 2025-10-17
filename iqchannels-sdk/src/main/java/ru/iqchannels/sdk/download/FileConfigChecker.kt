@@ -6,7 +6,7 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.fragment.app.FragmentManager
 import java.io.File
-import ru.iqchannels.sdk.Log
+import ru.iqchannels.sdk.IQLog
 import ru.iqchannels.sdk.app.IQChannelsConfigRepository
 import ru.iqchannels.sdk.localization.IQChannelsLanguage
 import ru.iqchannels.sdk.ui.FileUtils
@@ -40,7 +40,7 @@ internal object FileConfigChecker {
 		val fileSizeMb = file.length() / 1024 / 1024
 
 		if (configs.maxFileSizeMb != null && configs.maxFileSizeMb < fileSizeMb) {
-			Log.d("FileConfigChecker", "notAllowedFileSize: $fileSizeMb")
+			IQLog.d("FileConfigChecker", "notAllowedFileSize: $fileSizeMb")
 
 			val backdrop = ErrorPageBackdropDialog.newInstance("${IQChannelsLanguage.iqChannelsLanguage.fileWeightError} ${configs.maxFileSizeMb}Mb")
 			backdrop.show(childFragmentManager, ErrorPageBackdropDialog.TRANSACTION_TAG)
@@ -60,14 +60,14 @@ internal object FileConfigChecker {
 
 
 				if (!allowedWidth || !allowedHeight) {
-					Log.d("FileConfigChecker", "notAllowedImageSize: ${bitmap.width}  ${bitmap.height}")
+					IQLog.d("FileConfigChecker", "notAllowedImageSize: ${bitmap.width}  ${bitmap.height}")
 
 					val backdrop = ErrorPageBackdropDialog.newInstance(IQChannelsLanguage.iqChannelsLanguage.fileSizeError)
 					backdrop.show(childFragmentManager, ErrorPageBackdropDialog.TRANSACTION_TAG)
 					return null
 				}
 			} catch (e: Exception) {
-				Log.d("FileConfigChecker", "error on reading bitmap: ${e.message}")
+				IQLog.d("FileConfigChecker", "error on reading bitmap: ${e.message}")
 			}
 		}
 
@@ -76,7 +76,7 @@ internal object FileConfigChecker {
 			val allowedExtensions = configs.allowedExtensions
 			if (!allowedExtensions.isNullOrEmpty()) {
 				if (!allowedExtensions.contains(ext)) {
-					Log.d("FileConfigChecker", "notAllowedExtension: $ext")
+					IQLog.d("FileConfigChecker", "notAllowedExtension: $ext")
 
 					val backdrop = ErrorPageBackdropDialog.newInstance(IQChannelsLanguage.iqChannelsLanguage.fileNotAllowed)
 					backdrop.show(childFragmentManager, ErrorPageBackdropDialog.TRANSACTION_TAG)
@@ -87,7 +87,7 @@ internal object FileConfigChecker {
 			val forbiddenExtensions = configs.forbiddenExtensions
 			if (!forbiddenExtensions.isNullOrEmpty()) {
 				if (forbiddenExtensions.contains(ext)) {
-					Log.d("FileConfigChecker", "forbiddenExtension: $ext")
+					IQLog.d("FileConfigChecker", "forbiddenExtension: $ext")
 
 					val backdrop = ErrorPageBackdropDialog.newInstance(IQChannelsLanguage.iqChannelsLanguage.fileForbidden)
 					backdrop.show(childFragmentManager, ErrorPageBackdropDialog.TRANSACTION_TAG)
@@ -123,7 +123,7 @@ internal object FileConfigChecker {
 			dir.isDirectory || dir.mkdirs() -> dir
 
 			else -> {
-				Log.e("FileConfigChecker", "Failed to get directory for path: ${dir.path}")
+				IQLog.e("FileConfigChecker", "Failed to get directory for path: ${dir.path}")
 				null
 			}
 		}

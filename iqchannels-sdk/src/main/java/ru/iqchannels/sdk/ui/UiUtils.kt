@@ -2,8 +2,6 @@ package ru.iqchannels.sdk.ui
 
 import android.content.res.Resources
 import android.util.TypedValue
-import com.google.gson.Gson
-import ru.iqchannels.sdk.Log
 import ru.iqchannels.sdk.schema.PollOptionType
 import ru.iqchannels.sdk.schema.Rating
 import ru.iqchannels.sdk.schema.RatingState

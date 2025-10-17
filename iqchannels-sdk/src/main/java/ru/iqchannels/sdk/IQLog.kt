@@ -1,11 +1,11 @@
 package ru.iqchannels.sdk
 
-object Log {
+object IQLog {
 
 	private var LOGGING = true
 
 	fun configure(state: Boolean) {
-		synchronized(Log::class.java) { LOGGING = state }
+		synchronized(IQLog::class.java) { LOGGING = state }
 	}
 
 	fun d(tag: String, message: String) {

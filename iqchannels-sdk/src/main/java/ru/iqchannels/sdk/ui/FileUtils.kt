@@ -3,8 +3,6 @@ package ru.iqchannels.sdk.ui
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
-import android.webkit.MimeTypeMap
-import ru.iqchannels.sdk.Log
 import java.io.File
 import java.io.FileOutputStream
 

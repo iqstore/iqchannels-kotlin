@@ -1,6 +1,5 @@
 package ru.iqchannels.sdk.ui.rv
 
-import android.animation.Animator
 import android.annotation.SuppressLint
 import android.content.res.Resources
 import android.graphics.Canvas
@@ -10,7 +9,6 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
-import ru.iqchannels.sdk.Log
 import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.ui.ChatMessagesAdapter
 

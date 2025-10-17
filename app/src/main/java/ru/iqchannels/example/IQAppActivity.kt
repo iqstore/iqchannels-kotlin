@@ -7,7 +7,7 @@ package ru.iqchannels.example
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
-import ru.iqchannels.sdk.Log
+import ru.iqchannels.sdk.IQLog
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -255,7 +255,7 @@ class IQAppActivity :
 	}
 
 	override fun unreadChanged(unread: Int) {
-		Log.i(TAG, String.format("Unread: %d", unread))
+		IQLog.i(TAG, String.format("Unread: %d", unread))
 		val nav = findViewById<NavigationView>(R.id.nav_view)
 		val menu = nav.menu
 		val item = menu.findItem(R.id.nav_chat)

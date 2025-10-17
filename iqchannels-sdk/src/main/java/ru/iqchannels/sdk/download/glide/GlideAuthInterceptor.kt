@@ -4,7 +4,6 @@ import java.io.IOException
 import okhttp3.Interceptor
 import okhttp3.Response
 import okhttp3.OkHttpClient
-import ru.iqchannels.sdk.Log
 import ru.iqchannels.sdk.app.IQChannels
 
 class GlideAuthInterceptor : Interceptor {

@@ -72,7 +72,7 @@ import java.util.*
 import java.util.concurrent.TimeoutException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import ru.iqchannels.sdk.Log
+import ru.iqchannels.sdk.IQLog
 import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.app.Callback
 import ru.iqchannels.sdk.app.Cancellable
@@ -324,7 +324,7 @@ class ChatFragment : Fragment() {
 					IQStyles.iqChannelsStyles = it
 				}
 			} catch (e: Exception) {
-				Log.e("ChatFragment", "Error on parsing", e)
+				IQLog.e("ChatFragment", "Error on parsing", e)
 			}
 		}
 
@@ -334,7 +334,7 @@ class ChatFragment : Fragment() {
 					IQChannelsLanguage.iqChannelsLanguage = it
 				}
 			} catch (e: Exception) {
-				Log.e("ChatFragment", "Error on parsing", e)
+				IQLog.e("ChatFragment", "Error on parsing", e)
 			}
 		}
 
@@ -1036,7 +1036,7 @@ class ChatFragment : Fragment() {
 		adapter?.updated(message)
 		maybeScrollToBottomOnNewMessage()
 
-		Log.d("abctag", "messageUploaded")
+		IQLog.d("abctag", "messageUploaded")
 		viewModel.sendNextFile(requireActivity())
 	}
 
@@ -1116,7 +1116,7 @@ class ChatFragment : Fragment() {
 			}
 
 			else -> {
-				Log.d(
+				IQLog.d(
 					"UploadException",
 					"Message load exception. Type: ${exception.javaClass}. Body: ${exception.stackTraceToString()}"
 				)
@@ -1215,7 +1215,7 @@ class ChatFragment : Fragment() {
 				}
 				cameraIntent = intent
 			} catch (e: IOException) {
-				Log.e(
+				IQLog.e(
 					TAG, String.format(
 						"showAttachChooser: Failed to create a temp file for the camera, e=%s", e
 					)
@@ -1285,7 +1285,7 @@ class ChatFragment : Fragment() {
 	// Camera
 	private fun onCameraResult(resultCode: Int) {
 		if (resultCode != Activity.RESULT_OK || cameraTempFile == null) {
-			Log.i(
+			IQLog.i(
 				TAG, String.format(
 					"onCameraResult: Did not capture a photo, activity result=%d", resultCode
 				)
@@ -1310,7 +1310,7 @@ class ChatFragment : Fragment() {
 			cameraTempFile?.delete()
 			cameraTempFile = null
 		} catch (e: IOException) {
-			Log.e(TAG, String.format("showCamera: Failed to save a captured file, error=%s", e))
+			IQLog.e(TAG, String.format("showCamera: Failed to save a captured file, error=%s", e))
 			return
 		}
 

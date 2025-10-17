@@ -14,7 +14,7 @@ import kotlin.system.exitProcess
 import org.json.JSONObject
 import ru.iqchannels.example.IQAppActivity
 import ru.iqchannels.example.databinding.FragmentStylesEditBinding
-import ru.iqchannels.sdk.Log
+import ru.iqchannels.sdk.IQLog
 
 class StylesEditFragment : Fragment() {
 	companion object {
@@ -93,7 +93,7 @@ class StylesEditFragment : Fragment() {
 					val end = (pos + 40).coerceAtMost(itemBody.length)
 					val context = itemBody.substring(start, end)
 
-					Log.e(
+					IQLog.e(
 						"Styles",
 						"JSON parse error at line $line, char $pos: ...$context..."
 					)

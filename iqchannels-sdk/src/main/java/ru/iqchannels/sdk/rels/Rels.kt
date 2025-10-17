@@ -4,7 +4,6 @@
  */
 package ru.iqchannels.sdk.rels
 
-import ru.iqchannels.sdk.Log
 import java.util.*
 import ru.iqchannels.sdk.schema.ChatEvent
 import ru.iqchannels.sdk.schema.ChatMessage
@@ -12,7 +11,6 @@ import ru.iqchannels.sdk.schema.Client
 import ru.iqchannels.sdk.schema.ClientAuth
 import ru.iqchannels.sdk.schema.FileImageSize
 import ru.iqchannels.sdk.schema.FileType
-import ru.iqchannels.sdk.schema.RatingPoll
 import ru.iqchannels.sdk.schema.RelationMap
 import ru.iqchannels.sdk.schema.Relations
 import ru.iqchannels.sdk.schema.UploadedFile

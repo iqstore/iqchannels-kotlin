@@ -1,6 +1,6 @@
 package ru.iqchannels.sdk.app
 
-import ru.iqchannels.sdk.Log
+import ru.iqchannels.sdk.IQLog
 
 class UIOptions {
 	var disableIMGConfirmationModal: Boolean = false
@@ -22,6 +22,6 @@ class IQChannelsConfig2 @JvmOverloads constructor(
 ) {
 
 	init {
-		Log.configure(logging)
+		IQLog.configure(logging)
 	}
 }

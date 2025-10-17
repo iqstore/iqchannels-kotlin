@@ -1,7 +1,7 @@
 package ru.iqchannels.sdk.http
 
 import android.annotation.SuppressLint
-import ru.iqchannels.sdk.Log
+import ru.iqchannels.sdk.IQLog
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import okhttp3.ResponseBody
@@ -13,9 +13,8 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.Volatile
-import ru.iqchannels.sdk.Log.d
-import ru.iqchannels.sdk.Log.e
-import ru.iqchannels.sdk.localization.IQLanguage
+import ru.iqchannels.sdk.IQLog.d
+import ru.iqchannels.sdk.IQLog.e
 import ru.iqchannels.sdk.rels.Rels
 import ru.iqchannels.sdk.schema.ChatEvent
 import ru.iqchannels.sdk.schema.ChatEventQuery
@@ -424,11 +423,11 @@ class HttpClient(
 			null,
 			object : HttpCallback<ru.iqchannels.sdk.schema.Response<ResponseBody>> {
 				override fun onResult(result: ru.iqchannels.sdk.schema.Response<ResponseBody>?) {
-					Log.d("openSystemChat", result.toString())
+					IQLog.d("openSystemChat", result.toString())
 				}
 
 				override fun onException(exception: Exception) {
-					Log.e("openSystemChat", "${exception.message}")
+					IQLog.e("openSystemChat", "${exception.message}")
 				}
 			}
 		)

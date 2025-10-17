@@ -17,7 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
-import ru.iqchannels.sdk.Log
+import ru.iqchannels.sdk.IQLog
 import ru.iqchannels.sdk.configs.GetConfigsInteractorImpl
 import ru.iqchannels.sdk.domain.models.ChatType
 import ru.iqchannels.sdk.http.HttpCallback
@@ -74,7 +74,7 @@ object IQChannels {
 	private var signupName: String? = null
 
 	private val excHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
-		Log.e(TAG, "IQChannels", throwable)
+		IQLog.e(TAG, "IQChannels", throwable)
 	}
 
 	private val coroutineScope = CoroutineScope(
@@ -241,7 +241,7 @@ object IQChannels {
 		clear()
 		credentials = null
 		token = null
-		Log.i(TAG, "Logout")
+		IQLog.i(TAG, "Logout")
 	}
 
 	fun logoutAnonymous() {
@@ -250,7 +250,7 @@ object IQChannels {
 			val editor = preferences.edit()
 			editor.remove(ANONYMOUS_TOKEN)
 			editor.apply()
-			Log.i(TAG, "Logout anonymous")
+			IQLog.i(TAG, "Logout anonymous")
 		}
 	}
 
@@ -266,7 +266,7 @@ object IQChannels {
 		clearReceived()
 		clearRead()
 		clearSend()
-		Log.d(TAG, "Cleared")
+		IQLog.d(TAG, "Cleared")
 	}
 
 	// Auth
@@ -277,7 +277,7 @@ object IQChannels {
 		client?.clearToken()
 		signupName = null
 		authFailed = false
-		Log.d(TAG, "Cleared auth")
+		IQLog.d(TAG, "Cleared auth")
 	}
 
 	private fun auth() {
@@ -320,7 +320,7 @@ object IQChannels {
 				}
 			}
 
-			Log.i(TAG, String.format("Authenticating, attempt=%d", authAttempt))
+			IQLog.i(TAG, String.format("Authenticating, attempt=%d", authAttempt))
 			for (listener in listeners) {
 				execute { listener.authenticating() }
 			}
@@ -357,7 +357,7 @@ object IQChannels {
 				}
 			}
 
-			Log.i(TAG, String.format("Authenticating, attempt=%d", authAttempt))
+			IQLog.i(TAG, String.format("Authenticating, attempt=%d", authAttempt))
 		}
 	}
 
@@ -370,7 +370,7 @@ object IQChannels {
 		authFailed = true
 
 		if (credentials == null) {
-			Log.e(TAG, String.format("Failed to auth, exc=%s", exception))
+			IQLog.e(TAG, String.format("Failed to auth, exc=%s", exception))
 			return
 		}
 
@@ -381,7 +381,7 @@ object IQChannels {
 		handler?.let { handler ->
 			val delaySec = Retry.delaySeconds(authAttempt)
 			handler.postDelayed({ auth() }, (delaySec * 1000).toLong())
-			Log.e(
+			IQLog.e(
 				TAG, String.format(
 					"Failed to auth, will retry in %d seconds, exc=%s",
 					delaySec, exception
@@ -407,7 +407,7 @@ object IQChannels {
 			this.auth = auth
 			authAttempt = 0
 			client.setToken(auth.Session?.Token)
-			Log.i(
+			IQLog.i(
 				TAG, String.format(
 					"Authenticated, clientId=%d, sessionId=%d",
 					auth.Client?.Id, auth.Session?.Id
@@ -454,7 +454,7 @@ object IQChannels {
 
 		authAttempt++
 		authRequest = token?.let { client?.clientsAuth(it, callback) }
-		Log.i(TAG, String.format("Authenticating anonymous, attempt=%d", authAttempt))
+		IQLog.i(TAG, String.format("Authenticating anonymous, attempt=%d", authAttempt))
 		for (listener in listeners) {
 			execute { listener.authenticating() }
 		}
@@ -467,7 +467,7 @@ object IQChannels {
 
 		authRequest = null
 		if (credentials == null) {
-			Log.e(TAG, String.format("Failed to auth, exc=%s", exception))
+			IQLog.e(TAG, String.format("Failed to auth, exc=%s", exception))
 			return
 		}
 
@@ -478,7 +478,7 @@ object IQChannels {
 		if (exception is ChatException) {
 			val code = exception.code
 			if (code == ChatExceptionCode.UNAUTHORIZED) {
-				Log.e(TAG, "Failed to auth, invalid anonymous token")
+				IQLog.e(TAG, "Failed to auth, invalid anonymous token")
 				assert(preferences != null)
 				val editor = preferences?.edit()
 				editor?.remove(ANONYMOUS_TOKEN)
@@ -493,7 +493,7 @@ object IQChannels {
 		handler?.let { handler ->
 			val delaySec = Retry.delaySeconds(authAttempt)
 			handler.postDelayed({ auth() }, (delaySec * 1000).toLong())
-			Log.e(
+			IQLog.e(
 				TAG, String.format(
 					"Failed to auth, will retry in %d seconds, exc=%s",
 					delaySec, exception
@@ -526,7 +526,7 @@ object IQChannels {
 			}
 
 
-			Log.i(TAG, "Signing up anonymous client")
+			IQLog.i(TAG, "Signing up anonymous client")
 		}
 
 	}
@@ -545,7 +545,7 @@ object IQChannels {
 			val editor = preferences.edit()
 			editor.putString(ANONYMOUS_TOKEN, auth.Session?.Token)
 			editor.apply()
-			Log.i(TAG, String.format("Signed up anonymous client, clientId=%d", auth.Client?.Id))
+			IQLog.i(TAG, String.format("Signed up anonymous client, clientId=%d", auth.Client?.Id))
 			authComplete(auth)
 		}
 
@@ -556,7 +556,7 @@ object IQChannels {
 			return
 		}
 		authRequest = null
-		Log.e(TAG, String.format("Failed to sign up anonymous client, exc=%s", exception))
+		IQLog.e(TAG, String.format("Failed to sign up anonymous client, exc=%s", exception))
 		for (listener in listeners) {
 			execute { listener.authFailed(exception, authAttempt) }
 		}
@@ -566,7 +566,7 @@ object IQChannels {
 			handler.postDelayed({
 				logout()
 				signupAnonymous()}, (delaySec * 1000).toLong())
-			Log.e(
+			IQLog.e(
 				TAG, String.format(
 					"Failed to signup, will retry in %d seconds, exc=%s",
 					delaySec, exception
@@ -591,12 +591,12 @@ object IQChannels {
 							}
 
 							override fun onException(exception: Exception) {
-								Log.e(TAG, "Languages loading failed", exception)
+								IQLog.e(TAG, "Languages loading failed", exception)
 								continuation.resumeWithException(exception)
 							}
 						}
 					)
-					Log.i(TAG, "Loading languages")
+					IQLog.i(TAG, "Loading languages")
 				} ?: continuation.resume(emptyList())
 			} ?: continuation.resume(emptyList())
 		}
@@ -622,7 +622,7 @@ object IQChannels {
 					}
 				}
 			)
-			Log.i(TAG, "Set language")
+			IQLog.i(TAG, "Set language")
 		}
 	}
 
@@ -647,7 +647,7 @@ object IQChannels {
 		pushTokenSent = false
 		pushTokenAttempt = 0
 		pushTokenRequest = null
-		Log.d(TAG, "Cleared push token state")
+		IQLog.d(TAG, "Cleared push token state")
 	}
 
 	private fun sendPushToken() {
@@ -689,7 +689,7 @@ object IQChannels {
 							}
 						})
 					}
-					Log.i(TAG, String.format("Sending a push token, attempt=%d", pushTokenAttempt))
+					IQLog.i(TAG, String.format("Sending a push token, attempt=%d", pushTokenAttempt))
 				}
 			}
 		}
@@ -701,7 +701,7 @@ object IQChannels {
 		}
 		pushTokenRequest = null
 		pushTokenSent = true
-		Log.i(TAG, "Sent a push token")
+		IQLog.i(TAG, "Sent a push token")
 	}
 
 	private fun onFailedToSendPushToken(e: Exception) {
@@ -711,7 +711,7 @@ object IQChannels {
 		pushTokenRequest = null
 		val delaySec = Retry.delaySeconds(pushTokenAttempt)
 		handler?.postDelayed({ sendPushToken() }, (delaySec * 1000).toLong())
-		Log.e(
+		IQLog.e(
 			TAG, String.format(
 				"Failed to send a push token, will retyr in %ds, exc=%s",
 				delaySec, e
@@ -724,13 +724,13 @@ object IQChannels {
 		Preconditions.checkNotNull(listener, "null listener")
 		unreadListeners.add(listener)
 		listenToUnread()
-		Log.d(TAG, String.format("Added an unread listener %s", listener))
+		IQLog.d(TAG, String.format("Added an unread listener %s", listener))
 		val copy = unread
 		execute { listener.unreadChanged(copy) }
 		return object : Cancellable {
 			override fun cancel() {
 				unreadListeners.remove(listener)
-				Log.d(TAG, String.format("Removed an unread listener %s", listener))
+				IQLog.d(TAG, String.format("Removed an unread listener %s", listener))
 				clearUnreadWhenNoListeners()
 			}
 		}
@@ -744,7 +744,7 @@ object IQChannels {
 		for (listener in unreadListeners) {
 			execute { listener.unreadChanged(0) }
 		}
-		Log.d(TAG, "Cleared unread")
+		IQLog.d(TAG, "Cleared unread")
 	}
 
 	private fun clearUnreadWhenNoListeners() {
@@ -782,12 +782,12 @@ object IQChannels {
 		}
 		unreadRequest = null
 		if (auth == null) {
-			Log.i(TAG, String.format("Failed to listen to unread notifications, exc=%s", e))
+			IQLog.i(TAG, String.format("Failed to listen to unread notifications, exc=%s", e))
 			return
 		}
 		val delaySec = Retry.delaySeconds(unreadAttempt)
 		handler?.postDelayed({ listenToUnread() }, (delaySec * 1000).toLong())
-		Log.e(
+		IQLog.e(
 			TAG, String.format(
 				"Failed to listen to unread notifications, will retry in %ds, exc=%s",
 				delaySec, e
@@ -801,12 +801,12 @@ object IQChannels {
 		}
 		unreadRequest = null
 		if (auth == null) {
-			Log.i(TAG, String.format("Failed to listen to unread notifications, exc=%s", e))
+			IQLog.i(TAG, String.format("Failed to listen to unread notifications, exc=%s", e))
 			return
 		}
 
 		handler?.postDelayed({ listenToUnread() }, 1000)
-		Log.e(
+		IQLog.e(
 			TAG,
 			String.format("Failed to listen to unread notifications, will retry in 1s, exc=%s", e)
 		)
@@ -815,7 +815,7 @@ object IQChannels {
 	private fun unreadReceived(unread: Int?) {
 		this.unread = unread ?: 0
 		unreadAttempt = 0
-		Log.i(TAG, String.format("Received an unread notification, unread=%d", this.unread))
+		IQLog.i(TAG, String.format("Received an unread notification, unread=%d", this.unread))
 		val copy = this.unread
 		for (listener in unreadListeners) {
 			execute { listener.unreadChanged(copy) }
@@ -826,7 +826,7 @@ object IQChannels {
 	fun loadMessages(listener: MessagesListener): Cancellable {
 		Preconditions.checkNotNull(listener, "null listener")
 		messageListeners.add(listener)
-		Log.d(TAG, String.format("Added a messages listener %s", listener))
+		IQLog.d(TAG, String.format("Added a messages listener %s", listener))
 
 		if(!fileСhooser) {
 			getChatSettings()
@@ -842,7 +842,7 @@ object IQChannels {
 		return object : Cancellable {
 			override fun cancel() {
 				messageListeners.remove(listener)
-				Log.d(TAG, String.format("Removed a messages listener %s", listener))
+				IQLog.d(TAG, String.format("Removed a messages listener %s", listener))
 			}
 		}
 	}
@@ -862,7 +862,7 @@ object IQChannels {
 		}
 		messages = null
 		messageRequest = null
-		Log.d(TAG, "Cleared messages")
+		IQLog.d(TAG, "Cleared messages")
 	}
 
 	private fun loadMessages(autoGreeting: ChatMessage?) {
@@ -914,13 +914,13 @@ object IQChannels {
 						}
 					}
 				)
-				Log.i(TAG, "Loading messages")
+				IQLog.i(TAG, "Loading messages")
 			}
 		}
 	}
 
 	private fun showAutoGreeting(settings: ChatSettings?) {
-		Log.d("chatSettings", settings.toString())
+		IQLog.d("chatSettings", settings.toString())
 		systemChat = settings?.Enabled == true
 
 		var message: ChatMessage? = null
@@ -974,11 +974,11 @@ object IQChannels {
 						}
 
 						override fun onException(exception: Exception) {
-							Log.e(TAG, "Failed to get chat settings, exc=${exception.message}")
+							IQLog.e(TAG, "Failed to get chat settings, exc=${exception.message}")
 						}
 					}
 				)
-				Log.i(TAG, "get chat settings")
+				IQLog.i(TAG, "get chat settings")
 			}
 		}
 	}
@@ -994,11 +994,11 @@ object IQChannels {
 						}
 
 						override fun onException(exception: Exception) {
-							Log.e(TAG, "Failed to get signup greeting settings, exc=${exception.message}")
+							IQLog.e(TAG, "Failed to get signup greeting settings, exc=${exception.message}")
 						}
 					}
 				)
-				Log.i(TAG, "get signup greeting settings")
+				IQLog.i(TAG, "get signup greeting settings")
 			}
 		}
 	}
@@ -1016,7 +1016,7 @@ object IQChannels {
 			return
 		}
 		messageRequest = null
-		Log.e(TAG, String.format("Failed to load messages, exc=%s", exception))
+		IQLog.e(TAG, String.format("Failed to load messages, exc=%s", exception))
 		for (listener in messageListeners) {
 			execute { listener.messagesException(exception) }
 		}
@@ -1029,7 +1029,7 @@ object IQChannels {
 		}
 		messageRequest = null
 		setMessages(messages)
-		Log.i(TAG, String.format("Loaded messages, size=%d", messages.size))
+		IQLog.i(TAG, String.format("Loaded messages, size=%d", messages.size))
 		this.messages?.let {
 			val copy: List<ChatMessage> = ArrayList(it)
 			for (listener in messageListeners) {
@@ -1103,7 +1103,7 @@ object IQChannels {
 								execute { moreMessagesException(exception) }
 							}
 						})
-					Log.i(TAG, String.format("Loading more messages, maxId=%s", query.MaxId))
+					IQLog.i(TAG, String.format("Loading more messages, maxId=%s", query.MaxId))
 				}
 			}
 		}
@@ -1114,7 +1114,7 @@ object IQChannels {
 			return
 		}
 		moreMessageRequest = null
-		Log.e(TAG, String.format("Failed to load more messages, exc=%s", exception))
+		IQLog.e(TAG, String.format("Failed to load more messages, exc=%s", exception))
 		for (callback in moreMessageCallbacks) {
 			execute { callback.onException(exception) }
 		}
@@ -1128,7 +1128,7 @@ object IQChannels {
 		moreMessageRequest = null
 		val newMessages = prependMessages(moreMessages)
 
-		Log.i(
+		IQLog.i(
 			TAG, String.format(
 				"Loaded more messages, count=%d, total=%d",
 				moreMessages.size, messages?.size
@@ -1147,7 +1147,7 @@ object IQChannels {
 		eventsRequest?.cancel()
 		eventsAttempt = 0
 		eventsRequest = null
-		Log.d(TAG, "Cleared events")
+		IQLog.d(TAG, "Cleared events")
 	}
 
 	private fun listenToEvents() {
@@ -1213,13 +1213,13 @@ object IQChannels {
 		}
 		eventsRequest = null
 		if (auth == null) {
-			Log.i(TAG, String.format("Failed to listen to events, exc=%s", e))
+			IQLog.i(TAG, String.format("Failed to listen to events, exc=%s", e))
 			return
 		}
 
 		val delaySec = Retry.delaySeconds(eventsAttempt)
 		handler?.postDelayed({ listenToEvents() }, (delaySec * 1000).toLong())
-		Log.e(
+		IQLog.e(
 			TAG, String.format(
 				"Failed to listen to events, will retry in %d seconds, exc=%s",
 				delaySec, e
@@ -1233,11 +1233,11 @@ object IQChannels {
 		}
 		eventsRequest = null
 		if (auth == null) {
-			Log.i(TAG, String.format("Failed to listen to events, exc=%s", e))
+			IQLog.i(TAG, String.format("Failed to listen to events, exc=%s", e))
 			return
 		}
 		handler?.postDelayed({ listenToEvents() }, 1000)
-		Log.e(TAG, String.format("Failed to listen to events, will retry in 1 seconds, exc=%s", e))
+		IQLog.e(TAG, String.format("Failed to listen to events, will retry in 1 seconds, exc=%s", e))
 	}
 
 	private fun eventsReceived(events: List<ChatEvent>) {
@@ -1246,7 +1246,7 @@ object IQChannels {
 		}
 
 		eventsAttempt = 0
-		Log.i(TAG, String.format("Received chat events, count=%d", events.size))
+		IQLog.i(TAG, String.format("Received chat events, count=%d", events.size))
 		applyEvents(events)
 	}
 
@@ -1256,7 +1256,7 @@ object IQChannels {
 		receiveAttempt = 0
 		receivedQueue.clear()
 		receivedRequest = null
-		Log.d(TAG, "Cleared received queue")
+		IQLog.d(TAG, "Cleared received queue")
 	}
 
 	private fun enqueueReceived(message: ChatMessage) {
@@ -1293,7 +1293,7 @@ object IQChannels {
 			}
 		})
 
-		Log.i(TAG, String.format("Sending received message ids, count=%d", messageIds.size))
+		IQLog.i(TAG, String.format("Sending received message ids, count=%d", messageIds.size))
 	}
 
 	private fun sendReceivedMessageIdsException(exception: Exception, messageIds: List<Long>) {
@@ -1303,14 +1303,14 @@ object IQChannels {
 
 		receivedRequest = null
 		if (auth == null) {
-			Log.i(TAG, "Failed to send received message ids")
+			IQLog.i(TAG, "Failed to send received message ids")
 			return
 		}
 		receivedQueue.addAll(messageIds)
 
 		val delaySec = Retry.delaySeconds(receiveAttempt)
 		handler?.postDelayed({ sendReceived() }, (delaySec * 1000).toLong())
-		Log.e(
+		IQLog.e(
 			TAG, String.format(
 				"Failed to send received message ids, will retry in %d seconds, exc=%s",
 				delaySec, exception
@@ -1325,7 +1325,7 @@ object IQChannels {
 
 		receivedRequest = null
 		receiveAttempt = 0
-		Log.i(TAG, String.format("Sent received message ids, count=%d", messageIds.size))
+		IQLog.i(TAG, String.format("Sent received message ids, count=%d", messageIds.size))
 		sendReceived()
 	}
 
@@ -1351,7 +1351,7 @@ object IQChannels {
 		readAttempt = 0
 		readRequest = null
 		readQueue.clear()
-		Log.d(TAG, "Cleared read queue")
+		IQLog.d(TAG, "Cleared read queue")
 	}
 
 	private fun sendRead() {
@@ -1378,7 +1378,7 @@ object IQChannels {
 			}
 		})
 
-		Log.i(TAG, String.format("Sending read message ids, count=%d", messageIds.size))
+		IQLog.i(TAG, String.format("Sending read message ids, count=%d", messageIds.size))
 	}
 
 	private fun sendReadMessageIdsException(exception: Exception, messageIds: List<Long>) {
@@ -1388,14 +1388,14 @@ object IQChannels {
 		readRequest = null
 
 		if (auth == null) {
-			Log.i(TAG, "Failed to send read message ids")
+			IQLog.i(TAG, "Failed to send read message ids")
 			return
 		}
 		readQueue.addAll(messageIds)
 		val delaySec = Retry.delaySeconds(readAttempt)
 
 		handler?.postDelayed({ sendRead() }, (delaySec * 1000).toLong())
-		Log.e(
+		IQLog.e(
 			TAG, String.format(
 				"Failed to send read message ids, will retry in %d seconds, exc=%s",
 				delaySec, exception
@@ -1409,7 +1409,7 @@ object IQChannels {
 		}
 		readRequest = null
 		readAttempt = 0
-		Log.i(TAG, String.format("Sent read message ids, count=%d", messageIds.size))
+		IQLog.i(TAG, String.format("Sent read message ids, count=%d", messageIds.size))
 		sendRead()
 	}
 
@@ -1446,7 +1446,7 @@ object IQChannels {
 			val form = ChatMessageForm.text(localId, text, replyToMessageId)
 			sendQueue.add(form)
 			form.ChatType = chatType.name.lowercase()
-			Log.i(TAG, String.format("Enqueued an outgoing message, localId=%d", localId))
+			IQLog.i(TAG, String.format("Enqueued an outgoing message, localId=%d", localId))
 			send()
 
 			return message
@@ -1503,22 +1503,22 @@ object IQChannels {
 			val form = ChatMessageForm.payloadReply(localId, title, botpressPayload)
 			sendQueue.add(form)
 			form.ChatType = chatType.name.lowercase()
-			Log.i(TAG, String.format("Enqueued an outgoing message, localId=%d", localId))
+			IQLog.i(TAG, String.format("Enqueued an outgoing message, localId=%d", localId))
 			send()
 		}
 	}
 
 	internal fun sendFile(file: File?, text: String, replyToMessageId: Long?): ChatMessage? {
 		if (file == null) {
-			Log.d("prefilledmsg", "sendFile: file == null")
+			IQLog.d("prefilledmsg", "sendFile: file == null")
 			return null
 		}
 		if (!file.exists()) {
-			Log.d("prefilledmsg", "sendFile: file doesn't exist")
+			IQLog.d("prefilledmsg", "sendFile: file doesn't exist")
 			return null
 		}
 		if (auth == null) {
-			Log.d("prefilledmsg", "sendFile: auth == null")
+			IQLog.d("prefilledmsg", "sendFile: auth == null")
 			return null
 		}
 
@@ -1538,7 +1538,7 @@ object IQChannels {
 			for (listener in messageListeners) {
 				execute { listener.messageSent(message) }
 			}
-			Log.d("prefilledmsg", "start sendFile $message")
+			IQLog.d("prefilledmsg", "start sendFile $message")
 			sendFile(message)
 
 			return message
@@ -1584,7 +1584,7 @@ object IQChannels {
 						message.UploadRequest = null
 						message.UploadProgress = 100
 						message.File = result
-						Log.i(
+						IQLog.i(
 							TAG,
 							String.format("sendFile: Uploaded a file, fileId=%s", result?.Id)
 						)
@@ -1593,7 +1593,7 @@ object IQChannels {
 						val form = ChatMessageForm.file(localId, message.Text, result?.Id, message.ReplyToMessageId)
 						form.ChatType = chatType.name.lowercase()
 						sendQueue.add(form)
-						Log.i(
+						IQLog.i(
 							TAG,
 							String.format("Enqueued an outgoing message, localId=%d", localId)
 						)
@@ -1614,7 +1614,7 @@ object IQChannels {
 						message.UploadExc = e
 						message.UploadProgress = 0
 						message.UploadRequest = null
-						Log.e(TAG, String.format("sendFile: Failed to upload a file, e=%s", e))
+						IQLog.e(TAG, String.format("sendFile: Failed to upload a file, e=%s", e))
 						for (listener in messageListeners) {
 							execute { listener.messageUpdated(message) }
 						}
@@ -1631,7 +1631,7 @@ object IQChannels {
 				}
 			})
 
-		Log.i(
+		IQLog.i(
 			TAG, String.format(
 				"Uploading a file, messageLocalId=%d, filename=%s",
 				localId, file.name
@@ -1662,7 +1662,7 @@ object IQChannels {
 		sendRequest?.cancel()
 		sendQueue.clear()
 		sendRequest = null
-		Log.d(TAG, "Cleared send queue")
+		IQLog.d(TAG, "Cleared send queue")
 	}
 
 	private fun nextLocalId(): Long {
@@ -1701,7 +1701,7 @@ object IQChannels {
 					}
 				})
 
-			Log.i(TAG, String.format("Sending a message, localId=%d", form.LocalId))
+			IQLog.i(TAG, String.format("Sending a message, localId=%d", form.LocalId))
 		}
 	}
 
@@ -1735,7 +1735,7 @@ object IQChannels {
 				}
 			})
 
-			Log.i(TAG, String.format("Resending a message, localId=%d", form.LocalId))
+			IQLog.i(TAG, String.format("Resending a message, localId=%d", form.LocalId))
 		}
 	}
 
@@ -1753,7 +1753,7 @@ object IQChannels {
 
 	private fun sendException(exception: Exception, form: ChatMessageForm, sendAttempt: Int) {
 		if (auth == null) {
-			Log.i(TAG, String.format("Failed to send a message, exc=%s", exception))
+			IQLog.i(TAG, String.format("Failed to send a message, exc=%s", exception))
 			return
 		}
 
@@ -1776,7 +1776,7 @@ object IQChannels {
 			}
 		}
 
-		Log.e(
+		IQLog.e(
 			TAG, String.format(
 				"Failed to send a message, will retry in %d seconds, exc=%s",
 				3, exception
@@ -1789,7 +1789,7 @@ object IQChannels {
 			return
 		}
 		sendRequest = null
-		Log.i(TAG, String.format("Sent a message, localId=%d", form.LocalId))
+		IQLog.i(TAG, String.format("Sent a message, localId=%d", form.LocalId))
 		send()
 	}
 
@@ -1822,7 +1822,7 @@ object IQChannels {
 			override fun onException(exception: Exception) {}
 		})
 
-		Log.i(TAG, String.format("Sent rating, ratingId=%d, value=%d", ratingId, value))
+		IQLog.i(TAG, String.format("Sent rating, ratingId=%d, value=%d", ratingId, value))
 	}
 
 	internal fun ratingsSendPoll(
@@ -1845,7 +1845,7 @@ object IQChannels {
 			}
 		})
 
-		Log.i(
+		IQLog.i(
 			TAG,
 			String.format("Sent rating poll answers, ratingId=%d, pollId=%d", ratingId, pollId)
 		)
@@ -1868,16 +1868,16 @@ object IQChannels {
 			sendTypingRequest =
 				client?.chatsChannelTyping(channel, body, object : HttpCallback<Void> {
 					override fun onResult(result: Void?) {
-						Log.d("sendTypingRequest", "successfully sent self 'Typing...'")
+						IQLog.d("sendTypingRequest", "successfully sent self 'Typing...'")
 					}
 
 					override fun onException(exception: Exception) {
-						Log.e("sendTypingRequest", exception.localizedMessage)
+						IQLog.e("sendTypingRequest", exception.localizedMessage)
 					}
 				})
 
 			handler?.postDelayed({ sendTypingRequest = null }, 5000)
-			Log.i(TAG, String.format("Sending a typing message"))
+			IQLog.i(TAG, String.format("Sending a typing message"))
 		}
 	}
 
@@ -1937,7 +1937,7 @@ object IQChannels {
 
 	private fun applyEvent(event: ChatEvent) {
 		if (event.Type == null) {
-			Log.i(TAG, String.format("applyEvent: skipping %s", event))
+			IQLog.i(TAG, String.format("applyEvent: skipping %s", event))
 			return
 		}
 
@@ -1952,7 +1952,7 @@ object IQChannels {
 			ChatEventType.CLOSE_SYSTEM_CHAT -> systemChat = false
 			ChatEventType.CHAT_CHANNEL_CHANGE -> changeChannel(event)
 			ChatEventType.FILE_UPDATED -> fileUpdated(event)
-			else -> Log.i(TAG, String.format("applyEvent: %s", event.Type))
+			else -> IQLog.i(TAG, String.format("applyEvent: %s", event.Type))
 		}
 	}
 
@@ -1973,7 +1973,7 @@ object IQChannels {
 				existing.Received = true
 				existing.Read = false
 				existing.ReplyToMessageId = message.ReplyToMessageId
-				Log.i(
+				IQLog.i(
 					TAG, String.format(
 						"Received a message confirmation, localId=%d",
 						message.LocalId
@@ -1998,7 +1998,7 @@ object IQChannels {
 
 		messages?.add(message)
 		insertMessageToDatabase(message)
-		Log.i(TAG, String.format("Received a new message, messageId=%d", message.Id))
+		IQLog.i(TAG, String.format("Received a new message, messageId=%d", message.Id))
 		for (listener in messageListeners) {
 			execute { listener.messageReceived(message) }
 		}
@@ -2026,7 +2026,7 @@ object IQChannels {
 
 			oldMessage?.let { oldMessage ->
 				messages?.remove(oldMessage)
-				Log.i(TAG, String.format("Deleted message, messageId=%d", oldMessage.Id))
+				IQLog.i(TAG, String.format("Deleted message, messageId=%d", oldMessage.Id))
 			}
 
 			CoroutineScope(Dispatchers.IO).launch {
@@ -2051,7 +2051,7 @@ object IQChannels {
 			message.EventId = event.Id
 			message.Received = true
 			message.ReceivedAt = event.CreatedAt
-			Log.i(TAG, String.format("Marked a message as received, messageId=%d", message.Id))
+			IQLog.i(TAG, String.format("Marked a message as received, messageId=%d", message.Id))
 			for (listener in messageListeners) {
 				execute { listener.messageUpdated(message) }
 			}
@@ -2078,7 +2078,7 @@ object IQChannels {
 				message.Received = true
 				message.ReceivedAt = event.CreatedAt
 			}
-			Log.i(TAG, String.format("Marked a message as read, messageId=%d", message.Id))
+			IQLog.i(TAG, String.format("Marked a message as read, messageId=%d", message.Id))
 
 			for (listener in messageListeners) {
 				execute { listener.messageUpdated(message) }
@@ -2093,7 +2093,7 @@ object IQChannels {
 
 		if (existing != null) {
 			existing.Rating = message.Rating
-			Log.i(
+			IQLog.i(
 				TAG, String.format(
 					"Received a rating confirmation, localId=%d",
 					message.LocalId
@@ -2131,14 +2131,14 @@ object IQChannels {
 						GetConfigsInteractorImpl(NetworkModule.provideGetConfigApiService())
 					val file = interactor.getFile(fileId)
 					file?.let { prepareFile(it) }
-					Log.d(TAG, "success got file: ${file?.Id}")
+					IQLog.d(TAG, "success got file: ${file?.Id}")
 					message.File = file
 
 					for (listener in messageListeners) {
 						execute { listener.messageUpdated(message) }
 					}
 				} catch (e: Exception) {
-					Log.e(TAG, e.message, e)
+					IQLog.e(TAG, e.message, e)
 				}
 			}
 		}
@@ -2161,7 +2161,7 @@ object IQChannels {
 	}
 
 	private fun insertMessageToDatabase(message: ChatMessage) {
-		Log.i(TAG, "insertMessageToDatabase: $message}")
+		IQLog.i(TAG, "insertMessageToDatabase: $message}")
 		CoroutineScope(Dispatchers.IO).launch {
 			messageDao?.insertMessage(message.toDatabaseMessage())
 			listenToUnread()

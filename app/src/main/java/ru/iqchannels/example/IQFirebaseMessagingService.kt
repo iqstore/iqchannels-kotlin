@@ -1,6 +1,6 @@
 package ru.iqchannels.example
 
-import ru.iqchannels.sdk.Log
+import ru.iqchannels.sdk.IQLog
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import ru.iqchannels.sdk.app.IQChannels
@@ -12,12 +12,12 @@ class IQFirebaseMessagingService : FirebaseMessagingService() {
 	}
 
 	override fun onNewToken(token: String) {
-		Log.d(TAG, "Refreshed token: $token")
+		IQLog.d(TAG, "Refreshed token: $token")
 		IQChannels.setPushToken(token)
 	}
 
 	override fun onMessageReceived(remoteMessage: RemoteMessage) {
-		Log.d(TAG, "Message received: $remoteMessage")
+		IQLog.d(TAG, "Message received: $remoteMessage")
 		super.onMessageReceived(remoteMessage)
 	}
 }

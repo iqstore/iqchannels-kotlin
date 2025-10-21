@@ -34,6 +34,7 @@
         android:id="@+id/ib_close"
         android:layout_width="24dp"
         android:layout_height="24dp"
+        android:background="?selectableItemBackgroundBorderless"
         android:src="@drawable/close_24"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"

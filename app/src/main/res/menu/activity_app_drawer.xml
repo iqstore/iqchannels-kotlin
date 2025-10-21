@@ -53,5 +53,11 @@
         <item
             android:id="@+id/enable_custom_title"
             android:title="Показать свою шапку"/>
+        <item
+            android:id="@+id/enable_auth_screen"
+            android:title="Включить экран авторизации"/>
+        <item
+            android:id="@+id/disable_auth_screen"
+            android:title="Отключить экран авторизации"/>
     </group>
 </menu>

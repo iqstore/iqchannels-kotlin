@@ -48,11 +48,11 @@ allprojects {
 }
 ```
 
-5. Добавьте зависимосить `implementation 'ru.iqstore:iqchannels-sdk-2:2.2.6-rc1'` в `build.gradle` модуля приложения.
+5. Добавьте зависимосить `implementation 'ru.iqstore:iqchannels-sdk-2:2.2.6'` в `build.gradle` модуля приложения.
 ```build.gradle
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])   
-    implementation 'ru.iqstore:iqchannels-sdk-2:2.2.6-rc1'
+    implementation 'ru.iqstore:iqchannels-sdk-2:2.2.6'
     // etc...
 }
 ```
@@ -116,6 +116,14 @@ IQChannels.loginAnonymous()
 
 ```kotlin
 IQChannels.logoutAnonymous()
+```
+
+# Отключение экрана авторизации
+Если анонимный режим не требуется, то экран авторизации можно отключить, вместо него будет появляться
+экран с ошибкой. Для отключения требуется добавить:
+
+```kotlin
+IQChannels.authScreenEnabled = false
 ```
 
 # Логин

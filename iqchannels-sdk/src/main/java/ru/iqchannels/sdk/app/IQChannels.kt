@@ -89,6 +89,8 @@ object IQChannels {
 	var authRequest: HttpRequest? = null
 		private set
 	var authFailed: Boolean = false
+	var authScreenEnabled: Boolean = true
+
 
 	private var authAttempt = 0
 	private val listeners: MutableSet<IQChannelsListener>
@@ -1466,7 +1468,7 @@ object IQChannels {
 		user.Online = true
 		user.Id = 1
 		val message = ChatMessage(user, localId)
-		message.Text = "2.2.6-rc1"
+		message.Text = "2.2.6"
 		messages?.add(message)
 		for (listener in messageListeners) {
 			execute {

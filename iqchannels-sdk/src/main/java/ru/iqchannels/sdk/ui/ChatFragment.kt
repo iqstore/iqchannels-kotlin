@@ -665,10 +665,12 @@ class ChatFragment : Fragment() {
 
 	private fun updateViews() {
 		val token = IQChannels.getCurrentToken()
+
+		chatUnavailableLayout?.isVisible = false
 		authLayout?.visibility =
 			if (IQChannels.auth == null && IQChannels.authRequest != null && token != null) View.VISIBLE else View.GONE
 
-		if(IQChannels.auth == null && IQChannels.authRequest == null && token == null && !IQChannels.authFailed){
+		if(IQChannels.auth == null && IQChannels.authRequest == null && token == null && !IQChannels.authFailed && IQChannels.authScreenEnabled){
 			changeStyleButton(signupButton?.isEnabled)
 
 			IQStyles.iqChannelsStyles?.signup?.button?.backgroundDisabled
@@ -712,7 +714,7 @@ class ChatFragment : Fragment() {
 			)
 
 			signupError?.applyIQStyles(IQStyles.iqChannelsStyles?.signup?.errorText)
-		} else if(IQChannels.authFailed){
+		} else if((IQChannels.authFailed || !IQChannels.authScreenEnabled) && token == null){
 			showUnavailableView(IQChannelsLanguage.iqChannelsLanguage.textError)
 		}
 		else{
@@ -720,7 +722,6 @@ class ChatFragment : Fragment() {
 		}
 		signupTextName?.isEnabled = IQChannels.authRequest == null
 		chatLayout?.visibility = if (IQChannels.auth != null) View.VISIBLE else View.GONE
-		chatUnavailableLayout?.isVisible = false
 	}
 
 	private fun showLoading() {

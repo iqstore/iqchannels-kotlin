@@ -89,6 +89,8 @@ object IQChannels {
 	var authRequest: HttpRequest? = null
 		private set
 	var authFailed: Boolean = false
+	var authScreenEnabled: Boolean = true
+
 
 	private var authAttempt = 0
 	private val listeners: MutableSet<IQChannelsListener>

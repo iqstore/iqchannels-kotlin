@@ -242,6 +242,17 @@ class IQAppActivity :
 				return false
 			}
 
+			R.id.enable_auth_screen -> {
+				IQChannels.authScreenEnabled = true
+				return false
+			}
+
+
+			R.id.disable_auth_screen -> {
+				IQChannels.authScreenEnabled = false
+				return false
+			}
+
 			else -> return false
 		}
 

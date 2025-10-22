@@ -28,6 +28,7 @@ import ru.iqchannels.sdk.schema.RatingState
 import ru.iqchannels.sdk.setBackgroundDrawable
 import ru.iqchannels.sdk.styling.IQStyles
 import ru.iqchannels.sdk.ui.UiUtils.toPx
+import ru.iqchannels.sdk.IQLog
 
 internal class RatingPollViewHolder(
 	private val binding: ChatRatingPollBinding
@@ -67,6 +68,7 @@ internal class RatingPollViewHolder(
 		binding.submitButton.text = IQChannelsLanguage.iqChannelsLanguage.sentRating
 		binding.buttonYes.text = IQChannelsLanguage.iqChannelsLanguage.ratingOfferYes
 		binding.buttonNo.text = IQChannelsLanguage.iqChannelsLanguage.ratingOfferNo
+		IQLog.d("sentRating", binding.submitButton.text.toString())
 
 
 		binding.questionText.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.ratingTitle)
@@ -94,6 +96,7 @@ internal class RatingPollViewHolder(
 		binding.pollOffer.visibility = View.GONE
 //		binding.submitButton.visibility = View.VISIBLE
 		binding.submitButton.isEnabled = false
+		binding.submitButton.text = IQChannelsLanguage.iqChannelsLanguage.sentRating
 		poll.Questions?.let {
 			if (currentQuestionIndex < it.size) {
 				val question = it[currentQuestionIndex]

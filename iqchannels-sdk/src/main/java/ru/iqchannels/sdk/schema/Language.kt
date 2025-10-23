@@ -20,7 +20,7 @@ class Language {
     @SerializedName("title_error")
     var titleError: String = "Чат временно недоступен"
     @SerializedName("text_error")
-    var textError: String = "Мы уже все исправляем. Обновите\\nстраницу или попробуйте позже"
+    var textError: String = "Мы уже все исправляем. Обновите страницу или попробуйте позже"
     @SerializedName("button_error")
     var buttonError: String = "Вернуться"
     @SerializedName("status_label")

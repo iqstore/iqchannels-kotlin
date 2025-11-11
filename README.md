@@ -350,7 +350,7 @@ ChatFragment принимает предзаполненная сообщени�
 
 ```json
 {
-  "signup": {                 //Авторизация:
+  "signup": {                 //Авторизация: (только Android)
     "background": {           //Фон
       "light": "#FFFFFF",     //Цвет для светлой темы
       "dark": "#FFFFE0"       //Цвет для темной темы
@@ -404,6 +404,14 @@ ChatFragment принимает предзаполненная сообщени�
         "bold": false,
         "italic": false
       }
+    },
+    "check_box_disabled": {       //Цвет неактивного чекбокса
+      "light": "#сссссс",
+      "dark": "#сссссс"
+    },
+    "check_box_enabled": {       //Цвет активного чекбокса
+      "light": "#0d35ff",
+      "dark": "#0d35ff"
     },
     "check_box_text": {       //Текст возле чекбокса
       "color": {
@@ -519,7 +527,31 @@ ChatFragment принимает предзаполненная сообщени�
       "text_align": "center",
       "text_style": {
         "bold": false,
-        "italic": true
+        "italic": false
+      }
+    },
+    "status_label": {         //Текст статуса в шапке чата (Только iOS)
+      "color": {
+        "light": "#888888",
+        "dark": "#888888"
+      },
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
+    },
+    "title_label": {          //Заголовок в шапке чата (Только iOS)
+      "color": {
+        "light": "#888888",
+        "dark": "#888888"
+      },
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
       }
     }
   },
@@ -539,7 +571,7 @@ ChatFragment принимает предзаполненная сообщени�
       }
     },
     "background_client": {    //Фон контейнера (клиент)
-       "color": {
+      "color": {
         "light": "#242729",
         "dark": "#808080"
       },
@@ -660,7 +692,7 @@ ChatFragment принимает предзаполненная сообщени�
         "italic": false
       }
     },
-    "text_file_state_rejected_operator": { // Текст файла от оператора при статусе rejected
+    "text_file_state_rejected_operator": { //Текст файла от оператора при статусе rejected
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
@@ -672,7 +704,7 @@ ChatFragment принимает предзаполненная сообщени�
         "italic": false
       }
     },
-    "text_file_state_on_checking_operator": { // Текст файла от оператора при статусе on_checking
+    "text_file_state_on_checking_operator": { //Текст файла от оператора при статусе on_checking
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
@@ -684,7 +716,7 @@ ChatFragment принимает предзаполненная сообщени�
         "italic": false
       }
     },
-    "text_file_state_sent_for_checking_operator": { // Текст файла от оператора при статусе sent_for_checking
+    "text_file_state_sent_for_checking_operator": { //Текст файла от оператора при статусе sent_for_checking
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
@@ -696,7 +728,7 @@ ChatFragment принимает предзаполненная сообщени�
         "italic": false
       }
     },
-    "text_file_state_check_error_operator": { // Текст файла от оператора при статусе check_error
+    "text_file_state_check_error_operator": { //Текст файла от оператора при статусе check_error
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
@@ -708,7 +740,7 @@ ChatFragment принимает предзаполненная сообщени�
         "italic": false
       }
     },
-    "text_file_state_rejected_client": { // Текст файла от клиента при статусе rejected
+    "text_file_state_rejected_client": { //Текст файла от клиента при статусе rejected
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
@@ -720,7 +752,7 @@ ChatFragment принимает предзаполненная сообщени�
         "italic": false
       }
     },
-    "text_file_state_on_checking_client": { // Текст файла от клиента при статусе on_checking
+    "text_file_state_on_checking_client": { //Текст файла от клиента при статусе on_checking
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
@@ -732,7 +764,7 @@ ChatFragment принимает предзаполненная сообщени�
         "italic": false
       }
     },
-    "text_file_state_sent_for_checking_client": { // Текст файла от клиента при статусе sent_for_checking
+    "text_file_state_sent_for_checking_client": { //Текст файла от клиента при статусе sent_for_checking
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
@@ -744,7 +776,61 @@ ChatFragment принимает предзаполненная сообщени�
         "italic": false
       }
     },
-    "text_file_state_check_error_client": { // Текст файла от клиента при статусе check_error
+    "text_file_state_check_error_client": { //Текст файла от клиента при статусе check_error
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
+    },
+    "checkmark_read": {                   //Цвет прочитаннной галочки
+      "light": "#cccccc",
+      "dark": "#cccccc"
+    },
+    "checkmark_received": {                //Цвет доставленной галочки
+      "light": "#cccccc",
+      "dark": "#cccccc"
+    },
+    "sending": {                          //Цвет кружочка загрузки
+      "light": "#cccccc",
+      "dark": "#cccccc"
+    },
+    "error_icon": {                       //Восклицательный знак у ошибки сообщения
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
+    },
+    "error_background": {                 //Фон иконки у ошибки сообщения
+      "light": "#FF0000",
+      "dark": "#FF0000"
+    },
+    "error_popup_menu_background": {       //Фон попап меню у ошибки сообщения
+      "color": {
+        "light": "#ffffff",
+        "dark": "#ffffff"
+      },
+      "border": {
+        "size": 1,
+        "color": {
+          "light": "#cccccc",
+          "dark": "#cccccc"
+        },
+        "border-radius": 10
+      }
+    },
+    "error_popup_menu_text": {             //Текст кнопок в попап меню у ошибки сообщения
       "color": {
         "light": "#000000",
         "dark": "#FFFFFF"
@@ -790,6 +876,22 @@ ChatFragment принимает предзаполненная сообщени�
     "left_line": {                        //Прямая вертикальная линия рядом с сообщением, на которое отвечаем - цвет
       "light": "#FF0000",
       "dark": "#FF0000"
+    },
+    "text_operator_typing": {             //Текст "Оператор печатает..." (Только Android)
+      "color": {
+        "light": "#000000",
+        "dark": "#FFFFFF"
+      },
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
+    },
+    "background_operator_typing": {       //Фон плашки "Оператор печатает..." (Только Android)
+      "light": "#FFFACD",
+      "dark": "#808080"
     }
   },
   "messages_file": {                      //Сообщение отправка файла:
@@ -1099,10 +1201,24 @@ ChatFragment принимает предзаполненная сообщени�
     }
   },
   "tools_to_message": {                   //Панель инструментов (для отправки сообщений):
-    "icon_sent": "https://e7.pngegg.com/pngimages/414/329/png-clipart-computer-icons-share-icon-edit-angle-triangle.png", //Иконка-кнопка для отправки – вид кнопки(изменяется с помощью файла с иконкой)
-    "background_icon": {                  //Фон иконки для отправки
-      "light": "#DEB887",
+    "background": {                       //Фон панели
+      "light": "#ffffff",
       "dark": "#696969"
+    },
+    "icon_sent": "https://e7.pngegg.com/pngimages/414/329/png-clipart-computer-icons-share-icon-edit-angle-triangle.png", //Иконка-кнопка для отправки – вид кнопки(изменяется с помощью файла с иконкой)
+    "background_icon_sent": {                  //Фон иконки для отправки
+      "color": {
+        "light": "#DEB887",
+        "dark": "#696969"
+      },
+      "border": {
+        "size": 0,
+        "color": {
+          "light": "#000000",
+          "dark": "#000000"
+        },
+        "border-radius": 0
+      }
     },
     "background_input": {                  //Фон области ввода текста
       "color": {
@@ -1129,9 +1245,27 @@ ChatFragment принимает предзаполненная сообщени�
         "italic": false
       }
     },
-    "icon_clip": "https://cdn-icons-png.flaticon.com/512/84/84281.png"  //Иконка-кнопка 'скрепка' - вид кнопки(изменяется с помощью файла с иконкой)
+    "icon_clip": "https://cdn-icons-png.flaticon.com/512/84/84281.png",  //Иконка-кнопка 'скрепка' - вид кнопки(изменяется с помощью файла с иконкой)
+    "background_icon_clip": {                  //Фон иконки для выбора вложений
+      "color": {
+        "light": "#DEB887",
+        "dark": "#696969"
+      },
+      "border": {
+        "size": 0,
+        "color": {
+          "light": "#000000",
+          "dark": "#000000"
+        },
+        "border-radius": 0
+      }
+    },
+    "cursor_color": {                     //Цвет курсора (Только iOS)
+      "light": "#525252",
+      "dark": "#525252"
+    }
   },
-  "error": {                              //Страница ошибки (для отправки сообщений):
+  "error": {                              //Страница ошибки:
     "title_error": {                      //Заголовок
       "color": {
         "light": "#000000",
@@ -1156,7 +1290,33 @@ ChatFragment принимает предзаполненная сообщени�
         "italic": false
       }
     },
-    "icon_error": "https://w7.pngwing.com/pngs/285/84/png-transparent-computer-icons-error-super-8-film-angle-triangle-computer-icons.png"          //Иконка ошибки - вид иконки(изменяется с помощью файла с иконкой)
+    "icon_error": "https://w7.pngwing.com/pngs/285/84/png-transparent-computer-icons-error-super-8-film-angle-triangle-computer-icons.png",          //Иконка ошибки - вид иконки(изменяется с помощью файла с иконкой)
+    "background_button_error": {                  //Фон кнопки
+      "color": {
+        "light": "#cccccc",
+        "dark": "#cccccc"
+      },
+      "border": {
+        "size": 0,
+        "color": {
+          "light": "#000000",
+          "dark": "#000000"
+        },
+        "border-radius": 0
+      }
+    },
+    "text_button_error": {                       //Текст кнопки
+      "color": {
+        "light": "#000000",
+        "dark": "#000000"
+      },
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
+    }
   },
   "single-choice": {                    //Single-choice сообщение:
     "background_button": {              //Фон кнопки Single-choice

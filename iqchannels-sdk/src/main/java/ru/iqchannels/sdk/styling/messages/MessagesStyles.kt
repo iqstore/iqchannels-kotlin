@@ -43,5 +43,19 @@ class MessagesStyles(
 	@SerializedName("text_file_state_sent_for_checking_operator")
 	val textFileStateSentForCheckingOperator: Text?,
 	@SerializedName("text_file_state_check_error_operator")
-	val textFileStateCheckErrorOperator: Text?
+	val textFileStateCheckErrorOperator: Text?,
+	@SerializedName("checkmark_read")
+	val checkmarkRead: Color?,
+	@SerializedName("checkmark_received")
+	val checkmarkReceived: Color?,
+	@SerializedName("sending")
+	val sending: Color?,
+	@SerializedName("error_icon")
+	val errorIcon: Text?,
+	@SerializedName("error_background")
+	val errorBackground: Color?,
+	@SerializedName("error_popup_menu_background")
+	val errorPopupMenuBackground: ContainerStyles?,
+	@SerializedName("error_popup_menu_text")
+	val errorPopupMenuText: Text?
 )

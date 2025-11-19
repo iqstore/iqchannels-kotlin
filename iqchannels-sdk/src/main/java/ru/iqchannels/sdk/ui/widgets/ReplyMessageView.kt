@@ -104,18 +104,6 @@ class ReplyMessageView @JvmOverloads constructor(
 		dividerStart.setBackgroundColor(color)
 	}
 
-	fun setTvSenderNameColor(@ColorRes id: Int) {
-		tvSenderName.setTextColor(
-			ContextCompat.getColor(context, id)
-		)
-	}
-
-	fun setTvTextColor(@ColorRes id: Int) {
-		tvText.setTextColor(
-			ContextCompat.getColor(context, id)
-		)
-	}
-
 	fun setCloseBtnClickListener(listener: OnClickListener?) {
 		ibClose.setOnClickListener(listener)
 	}

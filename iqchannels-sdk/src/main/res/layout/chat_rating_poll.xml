@@ -23,7 +23,7 @@
 
         <TextView
             android:id="@+id/questionText"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:gravity="center"
@@ -67,7 +67,7 @@
 
         <TextView
             android:id="@+id/singleChoiceQuestion"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:gravity="center"
@@ -94,7 +94,7 @@
 
         <TextView
             android:id="@+id/yesNoQuestion"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:gravity="center"
@@ -122,7 +122,7 @@
 
         <TextView
             android:id="@+id/inputQuestion"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:gravity="center"
@@ -151,7 +151,7 @@
 
         <TextView
             android:id="@+id/starRatingQuestion"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:gravity="center"
@@ -229,7 +229,7 @@
 
         <TextView
             android:id="@+id/scaleQuestion"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:gravity="center"

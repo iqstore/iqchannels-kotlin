@@ -21,6 +21,10 @@ class Language {
     var titleError: String = "Чат временно недоступен"
     @SerializedName("text_error")
     var textError: String = "Мы уже все исправляем. Обновите страницу или попробуйте позже"
+    @SerializedName("title_error_pm")
+    var titleErrorPm: String = "Нет закреплённого персонального менеджера"
+    @SerializedName("text_error_pm")
+    var textErrorPm: String = "Обратитесь в чат с тех. поддержкой"
     @SerializedName("button_error")
     var buttonError: String = "Вернуться"
     @SerializedName("status_label")

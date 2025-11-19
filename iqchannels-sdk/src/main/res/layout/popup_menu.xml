@@ -12,7 +12,7 @@
         android:id="@+id/retryButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="#ffffff"
+        android:background="@null"
         android:backgroundTint="@null"
         android:gravity="start|center_vertical"
         android:elevation="0dp"
@@ -20,16 +20,11 @@
         android:layout_margin="1dp"
         android:textSize="12sp"/>
 
-    <com.google.android.material.divider.MaterialDivider
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        app:dividerColor="#CCCCCC" />
-
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/deleteButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#ffffff"
+        android:background="@null"
         android:backgroundTint="@null"
         android:gravity="start|center_vertical"
         android:elevation="0dp"

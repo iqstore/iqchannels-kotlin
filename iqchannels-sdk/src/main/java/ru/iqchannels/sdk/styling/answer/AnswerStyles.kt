@@ -14,5 +14,9 @@ class AnswerStyles(
 	@SerializedName("icon_cancel")
 	val iconCancel: String?,
 	@SerializedName("left_line")
-	val leftLine: Color?
+	val leftLine: Color?,
+	@SerializedName("text_operator_typing")
+	val textOperatorTyping: Text?,
+	@SerializedName("background_operator_typing")
+	val backgroundOperatorTyping: Color?
 )

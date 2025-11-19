@@ -48,11 +48,11 @@ allprojects {
 }
 ```
 
-5. Добавьте зависимосить `implementation 'ru.iqstore:iqchannels-sdk-2:2.2.7-rc2'` в `build.gradle` модуля приложения.
+5. Добавьте зависимосить `implementation 'ru.iqstore:iqchannels-sdk-2:2.2.7'` в `build.gradle` модуля приложения.
 ```build.gradle
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])   
-    implementation 'ru.iqstore:iqchannels-sdk-2:2.2.7-rc2'
+    implementation 'ru.iqstore:iqchannels-sdk-2:2.2.7'
     // etc...
 }
 ```
@@ -492,6 +492,56 @@ ChatFragment принимает предзаполненная сообщени�
       }
     }
   },
+  "app_bar": {                 //Верхняя панель (Только iOS)
+    "background": {           //Фон панели
+      "light": "#FFFFFF",
+      "dark": "#FFFFE0"
+    },
+    "back_button": {          //Фон кнопки назад
+      "light": "#FFFFFF",
+      "dark": "#FFFFE0"
+    },
+    "status_label": {         //Текст статуса 
+      "color": {
+        "light": "#888888",
+        "dark": "#888888"
+      },
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
+    },
+    "title_label": {          //Заголовок в шапке чата
+      "color": {
+        "light": "#888888",
+        "dark": "#888888"
+      },
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
+    },
+    "language_button": {          //Фон кнопки с выбором языка
+      "light": "#FFFFFF",
+      "dark": "#FFFFE0"
+    },
+    "language_button_text": {     //Текст кнопки с выбором языка
+      "color": {
+        "light": "#888888",
+        "dark": "#888888"
+      },
+      "text_size": 10,
+      "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
+    }
+  },
   "chat": {                   //Общий чат:
     "background": {           //Фон чата
       "light": "#FFFFFF",
@@ -519,30 +569,6 @@ ChatFragment принимает предзаполненная сообщени�
     },
     "icon_operator": "https://gas-kvas.com/grafic/uploads/posts/2024-01/gas-kvas-com-p-logotip-cheloveka-na-prozrachnom-fone-4.png", //Иконка оператора
     "system_text": {          //Системные сообщения
-      "color": {
-        "light": "#888888",
-        "dark": "#888888"
-      },
-      "text_size": 10,
-      "text_align": "center",
-      "text_style": {
-        "bold": false,
-        "italic": false
-      }
-    },
-    "status_label": {         //Текст статуса в шапке чата (Только iOS)
-      "color": {
-        "light": "#888888",
-        "dark": "#888888"
-      },
-      "text_size": 10,
-      "text_align": "center",
-      "text_style": {
-        "bold": false,
-        "italic": false
-      }
-    },
-    "title_label": {          //Заголовок в шапке чата (Только iOS)
       "color": {
         "light": "#888888",
         "dark": "#888888"
@@ -614,7 +640,6 @@ ChatFragment принимает предзаполненная сообщени�
         "dark": "#FFFFFF"
       },
       "text_size": 10,
-      "text_align": "center",
       "text_style": {
         "bold": false,
         "italic": false
@@ -626,7 +651,6 @@ ChatFragment принимает предзаполненная сообщени�
         "dark": "#FFFFFF"
       },
       "text_size": 10,
-      "text_align": "center",
       "text_style": {
         "bold": false,
         "italic": false
@@ -638,7 +662,6 @@ ChatFragment принимает предзаполненная сообщени�
         "dark": "#FFFFFF"
       },
       "text_size": 10,
-      "text_align": "center",
       "text_style": {
         "bold": false,
         "italic": false
@@ -650,7 +673,6 @@ ChatFragment принимает предзаполненная сообщени�
         "dark": "#FFFFFF"
       },
       "text_size": 10,
-      "text_align": "center",
       "text_style": {
         "bold": false,
         "italic": false
@@ -662,7 +684,6 @@ ChatFragment принимает предзаполненная сообщени�
         "dark": "#FFFFFF"
       },
       "text_size": 10,
-      "text_align": "center",
       "text_style": {
         "bold": false,
         "italic": false
@@ -674,7 +695,6 @@ ChatFragment принимает предзаполненная сообщени�
         "dark": "#FFFFFF"
       },
       "text_size": 10,
-      "text_align": "center",
       "text_style": {
         "bold": false,
         "italic": false
@@ -1193,7 +1213,6 @@ ChatFragment принимает предзаполненная сообщени�
         "dark": "#000000"
       },
       "text_size": 10,
-      "text_align": "center",
       "text_style": {
         "bold": false,
         "italic": false

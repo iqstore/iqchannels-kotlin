@@ -14,6 +14,10 @@ class SignupStyles(
 	val inputBackground: ContainerStyles?,
 	@SerializedName("input_text")
 	val inputText: Text?,
+	@SerializedName("check_box_disabled")
+	val checkBoxDisabled: Color?,
+	@SerializedName("check_box_enabled")
+	val checkBoxEnabled: Color?,
 	@SerializedName("check_box_text")
 	val checkBoxText: Text?,
 	val button: ButtonStyles?,

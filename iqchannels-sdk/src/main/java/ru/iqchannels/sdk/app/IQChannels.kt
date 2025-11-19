@@ -139,7 +139,7 @@ object IQChannels {
 
 	// chat
 	@Volatile
-	internal var chatType: ChatType = ChatType.REGULAR
+	var chatType: ChatType = ChatType.REGULAR
 	internal var systemChat: Boolean = false
 	private var chatSettingsRequest: HttpRequest? = null
 
@@ -1468,7 +1468,7 @@ object IQChannels {
 		user.Online = true
 		user.Id = 1
 		val message = ChatMessage(user, localId)
-		message.Text = "2.2.7-rc2"
+		message.Text = "2.2.7"
 		messages?.add(message)
 		for (listener in messageListeners) {
 			execute {

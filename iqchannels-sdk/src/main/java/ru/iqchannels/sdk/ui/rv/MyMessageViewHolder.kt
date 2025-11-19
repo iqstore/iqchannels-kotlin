@@ -1,6 +1,7 @@
 package ru.iqchannels.sdk.ui.rv
 
 import android.content.res.Resources
+import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.text.SpannableString
 import android.text.util.Linkify
@@ -94,6 +95,14 @@ internal class MyMessageViewHolder(
 
 		// Error icon
 		if (message.Error) {
+			IQStyles.iqChannelsStyles?.messages?.errorBackground
+				?.let {
+					val background = errorIcon.background.mutate() as GradientDrawable
+					background.setColor(it.getColorInt(root.context))
+				}
+
+			errorIcon.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.errorIcon)
+
 			errorIcon.visibility = View.VISIBLE
 		} else {
 			errorIcon.visibility = View.GONE
@@ -106,6 +115,19 @@ internal class MyMessageViewHolder(
 				}
 
 			myDate.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textTimeClient)
+
+			IQStyles.iqChannelsStyles?.messages?.checkmarkRead
+				?.let {
+					myRead.setColorFilter(it.getColorInt(binding.root.context))
+				}
+			IQStyles.iqChannelsStyles?.messages?.checkmarkReceived
+				?.let {
+					myReceived.setColorFilter(it.getColorInt(binding.root.context))
+				}
+			IQStyles.iqChannelsStyles?.messages?.sending
+				?.let {
+					mySending.setIndicatorColor(it.getColorInt(binding.root.context))
+				}
 
 			myReply.tvSenderName.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.replySenderTextClient)
 			myReply.tvText.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.replyTextClient)
@@ -169,11 +191,7 @@ internal class MyMessageViewHolder(
 					IQStyles.iqChannelsStyles?.messages?.textFileStateRejectedClient
 				)
 
-				FileValidState.OnChecking -> showFileStateMsg(
-					IQChannelsLanguage.iqChannelsLanguage.textFileStateOnChecking,
-					R.color.blue,
-					IQStyles.iqChannelsStyles?.messages?.textFileStateOnCheckingClient
-				)
+				FileValidState.OnChecking -> showApprovedFile(message, rootViewDimens)
 
 				FileValidState.SentForChecking -> showFileStateMsg(
 					IQChannelsLanguage.iqChannelsLanguage.textFileStateSentForCheck,
@@ -233,8 +251,6 @@ internal class MyMessageViewHolder(
 				myReply.showReplyingMessage(replyMsg)
 				myReply.setCloseBtnVisibility(View.GONE)
 				myReply.setVerticalDividerColor(R.color.white)
-				myReply.setTvSenderNameColor(R.color.white)
-				myReply.setTvTextColor(R.color.white_transparent_54)
 				val lp = LinearLayout.LayoutParams(
 					LinearLayout.LayoutParams.WRAP_CONTENT,
 					LinearLayout.LayoutParams.WRAP_CONTENT
@@ -271,6 +287,13 @@ internal class MyMessageViewHolder(
 		val inflater = LayoutInflater.from(view.context)
 		val popupView = inflater.inflate(R.layout.popup_menu, null)
 
+
+		IQStyles.iqChannelsStyles?.messages?.errorPopupMenuBackground
+			?.let {
+				popupView?.setBackgroundDrawable(it, null)
+			}
+
+
 		val popupWindow = PopupWindow(
 			popupView,
 			ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -282,6 +305,9 @@ internal class MyMessageViewHolder(
 
 		val retryButton: Button = popupView.findViewById(R.id.retryButton)
 		val deleteButton: Button = popupView.findViewById(R.id.deleteButton)
+
+		retryButton.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.errorPopupMenuText)
+		deleteButton.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.errorPopupMenuText)
 
 		retryButton.text = IQChannelsLanguage.iqChannelsLanguage.resend
 		deleteButton.text = IQChannelsLanguage.iqChannelsLanguage.delete

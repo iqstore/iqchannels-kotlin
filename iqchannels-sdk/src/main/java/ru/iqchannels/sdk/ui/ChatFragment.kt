@@ -374,6 +374,26 @@ class ChatFragment : Fragment() {
 		signupTextName?.hint = IQChannelsLanguage.iqChannelsLanguage.signupNamePlaceholder
 		signupButton?.text = IQChannelsLanguage.iqChannelsLanguage.signupButtonText
 
+		IQStyles.iqChannelsStyles?.signup?.let { signupStyles ->
+			val context = requireContext()
+
+			val activeColor = signupStyles.checkBoxEnabled?.getColorInt(context)
+				?: ContextCompat.getColor(context, android.R.color.holo_blue_light)
+
+			val inactiveColor = signupStyles.checkBoxDisabled?.getColorInt(context)
+				?: ContextCompat.getColor(context, android.R.color.darker_gray)
+
+			val states = arrayOf(
+				intArrayOf(android.R.attr.state_checked),
+				intArrayOf(-android.R.attr.state_checked)
+			)
+
+			val colors = intArrayOf(activeColor, inactiveColor)
+			val colorStateList = ColorStateList(states, colors)
+
+			signupCheckBox?.buttonTintList = colorStateList
+		}
+
 		clReply = view.findViewById<ReplyMessageView?>(R.id.reply).apply {
 			applyReplyStyles()
 		}
@@ -410,6 +430,14 @@ class ChatFragment : Fragment() {
 		tnwMsgCopied = view.findViewById(R.id.tnw_msg_copied)
 		btnGoBack = view.findViewById(R.id.btn_go_back)
 		btnGoBack?.text = IQChannelsLanguage.iqChannelsLanguage.buttonError
+
+		IQStyles.iqChannelsStyles?.error?.backgroundButtonError
+			?.let {
+				btnGoBack?.backgroundTintList = null
+				btnGoBack?.backgroundTintMode = null
+				btnGoBack?.setBackgroundDrawable(it, R.drawable.my_msg_bg)
+			}
+		btnGoBack?.applyIQStyles(IQStyles.iqChannelsStyles?.error?.textButtonError)
 
 		// Messages.
 		progress = (view.findViewById<View>(R.id.messagesProgress) as ProgressBar)
@@ -476,6 +504,11 @@ class ChatFragment : Fragment() {
 		sendText = view.findViewById<EditText?>(R.id.sendText)?.apply {
 			applyIQStyles(IQStyles.iqChannelsStyles?.toolsToMessage?.textInput)
 
+			setHintTextColor(
+				IQStyles.iqChannelsStyles?.toolsToMessage?.textInput?.color?.getColorInt(requireContext())
+					?: ContextCompat.getColor(requireContext(), R.color.default_color)
+			)
+
 			hint = IQChannelsLanguage.iqChannelsLanguage.inputMessagePlaceholder
 
 			IQStyles.iqChannelsStyles?.toolsToMessage?.backgroundInput
@@ -510,6 +543,12 @@ class ChatFragment : Fragment() {
 			}
 		})
 
+		view.findViewById<RelativeLayout?>(R.id.send)?.apply {
+			IQStyles.iqChannelsStyles?.toolsToMessage?.background?.let {
+				this.setBackgroundColor(it.getColorInt(context))
+			}
+		}
+
 		attachButton = view.findViewById<ImageButton?>(R.id.attachButton)?.apply {
 			IQStyles.iqChannelsStyles?.toolsToMessage?.iconClip?.let {
 				val glideUrl = GlideUrl(
@@ -522,6 +561,11 @@ class ChatFragment : Fragment() {
 					.load(glideUrl)
 					.into(this)
 			}
+
+			IQStyles.iqChannelsStyles?.toolsToMessage?.backgroundIconClip
+				?.let {
+					this.setBackgroundDrawable(it, null)
+				}
 		}
 		attachButton?.setOnClickListener {
 			IQChannels.fileСhooser = true
@@ -540,9 +584,10 @@ class ChatFragment : Fragment() {
 					.into(this)
 			}
 
-			IQStyles.iqChannelsStyles?.toolsToMessage?.backgroundIcon?.getColorInt(context)?.let {
-				this.setBackgroundColor(it)
-			}
+			IQStyles.iqChannelsStyles?.toolsToMessage?.backgroundIconSent
+				?.let {
+					this.setBackgroundDrawable(it, null)
+				}
 		}
 		sendButton?.setOnClickListener { sendMessage() }
 
@@ -574,6 +619,8 @@ class ChatFragment : Fragment() {
 		tvFileName.applyIQStyles(IQStyles.iqChannelsStyles?.answer?.textMessage)
 		tvText.applyIQStyles(IQStyles.iqChannelsStyles?.answer?.textMessage)
 		tvSenderName.applyIQStyles(IQStyles.iqChannelsStyles?.answer?.textSender)
+		tvText.width = maxWidth
+		tvSenderName.width = maxWidth
 		setBackgroundColor(
 			IQStyles.iqChannelsStyles?.answer?.backgroundTextUpMessage?.getColorInt(context)
 				?: ContextCompat.getColor(requireContext(), R.color.white)
@@ -670,11 +717,29 @@ class ChatFragment : Fragment() {
 		authLayout?.visibility =
 			if (IQChannels.auth == null && IQChannels.authRequest != null && token != null) View.VISIBLE else View.GONE
 
+
+
+		if((IQChannels.auth?.Client?.PersonalManagerID != null || IQChannels.auth?.Client?.PersonalManagerGroupID != null) && IQChannels.chatType == ChatType.PERSONAL_MANAGER){
+			IQChannels.chatType = ChatType.REGULAR
+
+			view?.findViewById<TextView?>(R.id.tv_title)?.apply {
+				text = IQChannelsLanguage.iqChannelsLanguage.titleErrorPm
+				applyIQStyles(IQStyles.iqChannelsStyles?.error?.titleError)
+			}
+
+			showUnavailableView(IQChannelsLanguage.iqChannelsLanguage.textErrorPm)
+			return
+		}
+
+
+
 		if(IQChannels.auth == null && IQChannels.authRequest == null && token == null && !IQChannels.authFailed && IQChannels.authScreenEnabled){
 			changeStyleButton(signupButton?.isEnabled)
 
 			IQStyles.iqChannelsStyles?.signup?.button?.backgroundDisabled
 				?.let {
+					signupButton?.backgroundTintList = null
+					signupButton?.backgroundTintMode = null
 					signupButton?.setBackgroundDrawable(it, null)
 				}
 			signupButton?.applyIQStyles(IQStyles.iqChannelsStyles?.signup?.button?.textDisabled)
@@ -1066,7 +1131,11 @@ class ChatFragment : Fragment() {
 
 		val typingText = view?.findViewById<TextView?>(R.id.typing)
 		typingText?.text = "$name ${IQChannelsLanguage.iqChannelsLanguage.operatorTyping}..."
-		typingText?.applyIQStyles(IQStyles.iqChannelsStyles?.chat?.systemText)
+		typingText?.applyIQStyles(IQStyles.iqChannelsStyles?.answer?.textOperatorTyping)
+		typingText?.setBackgroundColor(
+			IQStyles.iqChannelsStyles?.answer?.backgroundOperatorTyping?.getColorInt(requireContext())
+				?: ContextCompat.getColor(requireContext(), R.color.white)
+		)
 
 		typingText?.visibility = View.VISIBLE
 

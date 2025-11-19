@@ -2,6 +2,7 @@ package ru.iqchannels.sdk.ui.rv
 
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
+import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.text.SpannableString
 import android.text.util.Linkify
@@ -51,7 +52,9 @@ import ru.iqchannels.sdk.ui.UiUtils.getRatingScaleMaxValue
 import ru.iqchannels.sdk.ui.widgets.DropDownButton
 import ru.iqchannels.sdk.app.IQChannels
 import ru.iqchannels.sdk.localization.IQChannelsLanguage
+import ru.iqchannels.sdk.ui.widgets.toPx
 import java.util.regex.Pattern
+import kotlin.math.roundToInt
 
 interface RatingPollListener {
 	fun onRatingPollAnswersSend(
@@ -109,6 +112,7 @@ internal class OtherMessageViewHolder(
 				otherName.visibility = View.VISIBLE
 				otherAvatar.visibility = View.VISIBLE
 				val avatarUrl = user.AvatarUrl
+				val iconOperator = IQStyles.iqChannelsStyles?.chat?.iconOperator
 				if (!avatarUrl.isNullOrEmpty()) {
 					// Avatar image
 					otherAvatarText.visibility = View.GONE
@@ -122,8 +126,24 @@ internal class OtherMessageViewHolder(
 					Glide.with(root.context)
 						.load(glideUrl)
 						.placeholder(R.drawable.avatar_placeholder)
+						.circleCrop()
 						.into(otherAvatarImage)
-				} else {
+				} else if (!iconOperator.isNullOrEmpty()){
+					// Icon operator
+					otherAvatarText.visibility = View.GONE
+					otherAvatarImage.visibility = View.VISIBLE
+					val glideUrl = GlideUrl(
+						iconOperator,
+						LazyHeaders.Builder()
+							.addHeader("Cookie", "client-session=${IQChannels.getCurrentToken()}")
+							.build()
+					)
+					Glide.with(root.context)
+						.load(glideUrl)
+						.placeholder(R.drawable.avatar_placeholder)
+						.circleCrop()
+						.into(otherAvatarImage)
+				} else{
 					// Avatar circle with a letter inside
 					otherAvatarImage.visibility = View.GONE
 					otherAvatarText.visibility = View.VISIBLE
@@ -206,11 +226,7 @@ internal class OtherMessageViewHolder(
 						IQStyles.iqChannelsStyles?.messages?.textFileStateRejectedOperator
 					)
 
-					FileValidState.OnChecking -> showFileStateMsg(
-						IQChannelsLanguage.iqChannelsLanguage.textFileStateOnChecking,
-						R.color.blue,
-						IQStyles.iqChannelsStyles?.messages?.textFileStateOnCheckingOperator
-					)
+					FileValidState.OnChecking -> showApprovedState(message, file, rootViewDimens, markwon)
 
 					FileValidState.SentForChecking -> showFileStateMsg(
 						IQChannelsLanguage.iqChannelsLanguage.textFileStateSentForCheck,
@@ -274,9 +290,6 @@ internal class OtherMessageViewHolder(
 				if (replyMsg != null) {
 					otherReply.showReplyingMessage(replyMsg)
 					otherReply.setCloseBtnVisibility(View.GONE)
-					otherReply.setVerticalDividerColor(R.color.red)
-					otherReply.setTvSenderNameColor(R.color.dark_text_color)
-					otherReply.setTvTextColor(R.color.other_name)
 					otherReply.layoutParams = lp
 
 					otherReply.post {
@@ -496,28 +509,33 @@ internal class OtherMessageViewHolder(
 				rating.ratingRated.applyIQStyles(IQStyles.iqChannelsStyles?.chat?.systemText)
 			}
 			RatingState.PENDING -> {
+				this.rating.ratingRate.visibility = View.VISIBLE
+				val value = msgRating.Value
+
 				IQStyles.iqChannelsStyles?.rating?.sentRating?.let {
-					val states = arrayOf(
-						intArrayOf(android.R.attr.state_enabled),
-						intArrayOf(-android.R.attr.state_enabled),
-					)
-
-					val btnColors = intArrayOf(
-						it.backgroundEnabled?.color?.getColorInt(root.context) ?: ContextCompat.getColor(
-							root.context,
-							R.color.red
-						),
-						it.backgroundDisabled?.color?.getColorInt(root.context) ?: ContextCompat.getColor(
-							root.context,
-							R.color.disabled_grey
-						)
-					)
-
-					rating.btnSendRating.backgroundTintList = ColorStateList(states, btnColors)
+					if(value == null){
+						val style = IQStyles.iqChannelsStyles?.rating?.sentRating?.backgroundDisabled
+						rating.btnSendRating.background = GradientDrawable().apply {
+							setColor(style?.color?.getColorInt(root.context) ?: ContextCompat.getColor(root.context, R.color.default_color))
+							setStroke(
+								style?.border?.size?.toPx?.roundToInt() ?: 0,
+								style?.border?.color?.getColorInt(root.context) ?: ContextCompat.getColor(root.context, R.color.default_color)
+							)
+							cornerRadius = style?.border?.borderRadius?.toPx ?: 12.toPx
+						}
+					} else {
+						val style = IQStyles.iqChannelsStyles?.rating?.sentRating?.backgroundEnabled
+						rating.btnSendRating.background = GradientDrawable().apply {
+							setColor(style?.color?.getColorInt(root.context) ?: ContextCompat.getColor(root.context, R.color.default_color))
+							setStroke(
+								style?.border?.size?.toPx?.roundToInt() ?: 0,
+								style?.border?.color?.getColorInt(root.context) ?: ContextCompat.getColor(root.context, R.color.default_color)
+							)
+							cornerRadius = style?.border?.borderRadius?.toPx ?: 12.toPx
+						}
+					}
 				}
 
-				this.rating.ratingRate.visibility = View.VISIBLE
-				val value = msgRating.Value ?: 0
 				val ratingButtons = arrayOf(
 					this.rating.ratingRate1,
 					this.rating.ratingRate2,
@@ -527,7 +545,7 @@ internal class OtherMessageViewHolder(
 				)
 				for (i in ratingButtons.indices) {
 					val button = ratingButtons[i]
-					if (value >= i + 1) {
+					if ((value ?: 0) >= i + 1) {
 						IQStyles.iqChannelsStyles?.rating?.fullStar?.let {
 							val glideUrl = GlideUrl(
 								it,
@@ -560,6 +578,23 @@ internal class OtherMessageViewHolder(
 
 				for (button: ImageButton in ratingButtons) {
 					button.setOnTouchListener { view, motionEvent ->
+						IQStyles.iqChannelsStyles?.rating?.sentRating?.let {
+							val style = IQStyles.iqChannelsStyles?.rating?.sentRating?.backgroundEnabled
+							rating.btnSendRating.background = GradientDrawable().apply {
+								setColor(
+									style?.color?.getColorInt(root.context) ?: ContextCompat.getColor(root.context,
+										R.color.default_color
+									)
+								)
+								setStroke(
+									style?.border?.size?.toPx?.roundToInt() ?: 0,
+									style?.border?.color?.getColorInt(root.context)
+										?: ContextCompat.getColor(root.context, R.color.default_color)
+								)
+								cornerRadius = style?.border?.borderRadius?.toPx ?: 12.toPx
+							}
+						}
+
 						onRateButtonTouch(
 							view,
 							motionEvent

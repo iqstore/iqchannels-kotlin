@@ -250,7 +250,11 @@ internal class MyMessageViewHolder(
 			if (replyMsg != null) {
 				myReply.showReplyingMessage(replyMsg)
 				myReply.setCloseBtnVisibility(View.GONE)
-				myReply.setVerticalDividerColor(R.color.white)
+
+				IQStyles.iqChannelsStyles?.messages?.replyLeftLineClient?.getColorInt(root.context)?.let {
+					myReply.setVerticalDividerColorInt(it)
+				}
+
 				val lp = LinearLayout.LayoutParams(
 					LinearLayout.LayoutParams.WRAP_CONTENT,
 					LinearLayout.LayoutParams.WRAP_CONTENT

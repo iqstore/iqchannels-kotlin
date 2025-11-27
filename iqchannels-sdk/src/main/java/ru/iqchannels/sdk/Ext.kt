@@ -6,7 +6,7 @@ import android.graphics.Typeface
 import android.graphics.drawable.GradientDrawable
 import android.util.TypedValue
 import android.view.View
-import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
@@ -87,5 +87,22 @@ fun View.setBackgroundStyle(
 			border?.color?.getColorInt(context) ?: ContextCompat.getColor(context, defaultBorderColor)
 		)
 		cornerRadius = border?.borderRadius?.toPx ?: defaultBorderRadius.toPx
+	}
+}
+
+fun ImageView.setRoundedBackground(style: ContainerStyles?) {
+	style ?: return
+
+	background = GradientDrawable().apply {
+		setColor(
+			style.color?.getColorInt(context)
+				?: ContextCompat.getColor(context, android.R.color.transparent)
+		)
+		setStroke(
+			style.border?.size?.toPx?.roundToInt() ?: 0,
+			style.border?.color?.getColorInt(context)
+				?: ContextCompat.getColor(context, android.R.color.transparent)
+		)
+		cornerRadius = 999.toPx
 	}
 }

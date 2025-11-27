@@ -18,10 +18,14 @@ class MessagesStyles(
 	val replyTextClient: Text?,
 	@SerializedName("reply_sender_text_client")
 	val replySenderTextClient: Text?,
+	@SerializedName("reply_left_line_client")
+	val replyLeftLineClient: Color?,
 	@SerializedName("reply_text_operator")
 	val replyTextOperator: Text?,
 	@SerializedName("reply_sender_text_operator")
 	val replySenderTextOperator: Text?,
+	@SerializedName("reply_left_line_operator")
+	val replyLeftLineOperator: Color?,
 	@SerializedName("text_time_operator")
 	val textTimeOperator: Text?,
 	@SerializedName("text_time_client")

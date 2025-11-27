@@ -99,6 +99,7 @@ import ru.iqchannels.sdk.schema.ClientAuth
 import ru.iqchannels.sdk.schema.Language
 import ru.iqchannels.sdk.schema.SingleChoice
 import ru.iqchannels.sdk.setBackgroundDrawable
+import ru.iqchannels.sdk.setRoundedBackground
 import ru.iqchannels.sdk.styling.IQChannelsStyles
 import ru.iqchannels.sdk.styling.IQStyles
 import ru.iqchannels.sdk.ui.backdrop.ErrorPageBackdropDialog
@@ -190,6 +191,7 @@ class ChatFragment : Fragment() {
 	private var adapter: ChatMessagesAdapter? = null
 	private var recycler: RecyclerView? = null
 	private var btnScrollToBottom: FrameLayout? = null
+	private var btnScrollToBottomBackground: ImageView? = null
 	private var btnScrollToBottomDot: ImageView? = null
 
 	// Send views
@@ -470,6 +472,17 @@ class ChatFragment : Fragment() {
 		recycler?.adapter = adapter
 		btnScrollToBottom = view.findViewById(R.id.fl_scroll_down)
 		btnScrollToBottomDot = view.findViewById(R.id.iv_scroll_down_dot)
+		btnScrollToBottomBackground = view.findViewById(R.id.iv_scroll_down)
+
+		IQStyles.iqChannelsStyles?.chat?.scrollDownButtonBackground?.let { style ->
+			btnScrollToBottomBackground?.apply {
+				setRoundedBackground(style)
+			}
+		}
+		IQStyles.iqChannelsStyles?.chat?.scrollDownButtonIconColor
+			?.let {
+				btnScrollToBottomBackground?.setColorFilter(it.getColorInt(requireContext()))
+			}
 
 		btnScrollToBottom?.setOnClickListener {
 			adapter?.itemCount?.let {

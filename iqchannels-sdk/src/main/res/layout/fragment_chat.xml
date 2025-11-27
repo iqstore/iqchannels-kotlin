@@ -166,7 +166,8 @@
                 android:id="@+id/iv_scroll_down"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/scroll_down_40"
+                android:background="@drawable/scroll_down_40"
+                android:src="@drawable/scroll_down_icon"
                 />
 
             <ImageView

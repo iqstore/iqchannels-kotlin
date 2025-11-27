@@ -290,6 +290,10 @@ internal class OtherMessageViewHolder(
 				if (replyMsg != null) {
 					otherReply.showReplyingMessage(replyMsg)
 					otherReply.setCloseBtnVisibility(View.GONE)
+
+					IQStyles.iqChannelsStyles?.messages?.replyLeftLineOperator?.getColorInt(root.context)?.let {
+						otherReply.setVerticalDividerColorInt(it)
+					}
 					otherReply.layoutParams = lp
 
 					otherReply.post {

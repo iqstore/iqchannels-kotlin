@@ -792,7 +792,7 @@ class ChatFragment : Fragment() {
 			)
 
 			signupError?.applyIQStyles(IQStyles.iqChannelsStyles?.signup?.errorText)
-		} else if((IQChannels.authFailed || !IQChannels.authScreenEnabled) && token == null){
+		} else if(IQChannels.authFailed || !IQChannels.authScreenEnabled){
 			showUnavailableView(IQChannelsLanguage.iqChannelsLanguage.textError)
 		}
 		else{

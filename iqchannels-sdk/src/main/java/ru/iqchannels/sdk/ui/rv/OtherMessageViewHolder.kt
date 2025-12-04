@@ -266,11 +266,14 @@ internal class OtherMessageViewHolder(
 					val spannable = SpannableString(text)
 					textLinks.apply(spannable, TextLinks.APPLY_STRATEGY_REPLACE, null)
 
+					Linkify.addLinks(spannable, Linkify.WEB_URLS)
+
+					val phonePattern = Pattern.compile("7\\d{10}")
+					Linkify.addLinks(spannable, phonePattern, "tel:")
+
 					otherText.text = spannable
 					otherText.movementMethod = android.text.method.LinkMovementMethod.getInstance()
 
-					val phonePattern = Pattern.compile("7\\d{10}")
-					Linkify.addLinks(otherText, phonePattern, "tel:")
 				} else {
 					otherText.autoLinkMask = Linkify.ALL
 					otherText.text = text

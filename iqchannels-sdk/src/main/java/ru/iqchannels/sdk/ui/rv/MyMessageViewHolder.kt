@@ -4,6 +4,7 @@ import android.content.res.Resources
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.text.SpannableString
+import android.text.method.LinkMovementMethod
 import android.text.util.Linkify
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -225,11 +226,13 @@ internal class MyMessageViewHolder(
 				val spannable = SpannableString(text)
 				textLinks.apply(spannable, TextLinks.APPLY_STRATEGY_REPLACE, null)
 
-				myText.text = spannable
-				myText.movementMethod = android.text.method.LinkMovementMethod.getInstance()
+				Linkify.addLinks(spannable, Linkify.WEB_URLS)
 
 				val phonePattern = Pattern.compile("7\\d{10}")
-				Linkify.addLinks(myText, phonePattern, "tel:")
+				Linkify.addLinks(spannable, phonePattern, "tel:")
+
+				myText.text = spannable
+				myText.movementMethod = LinkMovementMethod.getInstance()
 			} else {
 				myText.autoLinkMask = Linkify.ALL
 				myText.text = text

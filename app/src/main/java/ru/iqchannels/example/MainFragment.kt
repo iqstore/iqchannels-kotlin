@@ -61,10 +61,12 @@ class MainFragment : Fragment() {
 			val testingType by viewModel.testingType.collectAsState()
 			val address by viewModel.address.collectAsState()
 			val channels by viewModel.channels.collectAsState()
+			val chatToOpen by viewModel.chatToOpen.collectAsState()
 
 			Column(
 				modifier = Modifier
 					.padding(16.dp)
+					.verticalScroll(rememberScrollState())
 					.clickable(
 						indication = null,
 						interactionSource = remember { MutableInteractionSource() }
@@ -129,7 +131,10 @@ class MainFragment : Fragment() {
 				Text(text = "Channels:")
 				TextField(value = channels.joinToString(), onValueChange = viewModel::onChannelsChange)
 
-				Button(onClick = { saveConfigs(address, channels) }) {
+				Text(text = "Chat to open:")
+				TextField(value = chatToOpen, onValueChange = viewModel::onChatToOpenChange)
+
+				Button(onClick = { saveConfigs(address, channels, chatToOpen) }) {
 					Text(text = "Save configs")
 				}
 
@@ -193,6 +198,10 @@ class MainFragment : Fragment() {
 			viewModel.onChannelsChange(it.joinToString())
 		}
 
+		prefs.getString(IQAppActivity.CHATTOOPEN, "")?.let {
+			viewModel.onChatToOpenChange(it)
+		}
+
 		viewModel.testingType
 			.flowWithLifecycle(viewLifecycleOwner.lifecycle)
 			.onEach {
@@ -232,12 +241,31 @@ class MainFragment : Fragment() {
 			.commit()
 	}
 
-	private fun saveConfigs(address: String, channels: List<String>) {
+	private fun saveConfigs(address: String, channels: List<String>, chatToOpen: String) {
 		requireContext().getSharedPreferences(IQAppActivity.PREFS, Context.MODE_PRIVATE)
 			.edit()
 			.putString(IQAppActivity.ADDRESS, address)
 			.putStringSet(IQAppActivity.CHANNELS, channels.toSet())
+			.putString(IQAppActivity.CHATTOOPEN, chatToOpen)
 			.apply()
+
+		Snackbar.make(
+			requireView(),
+			"Saved",
+			Snackbar.LENGTH_SHORT
+		).apply {
+			setAction("Restart") {
+				restartAppToApply()
+			}
+			show()
+		}
 	}
 
+	private fun restartAppToApply() {
+		activity?.finish()
+		val intent = Intent(context?.applicationContext, IQAppActivity::class.java)
+		intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+		context?.startActivity(intent)
+		exitProcess(0)
+	}
 }

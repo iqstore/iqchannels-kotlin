@@ -4,7 +4,8 @@ import ru.iqchannels.sdk.IQLog
 
 class IQChannelsConfig @JvmOverloads constructor(
 	val address: String?,
-	val channel: String?,
+	val channels: List<String>?,
+	val chatToOpen: String?,
 	logging: Boolean = true,
 	val uiOptions: UIOptions = UIOptions(),
 ) {

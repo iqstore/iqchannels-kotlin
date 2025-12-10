@@ -70,7 +70,7 @@ object IQChannels {
 	private var preferences: SharedPreferences? = null
 
 	private var token: String? = null
-	private var credentials: String? = null
+	var credentials: String? = null
 	private var signupName: String? = null
 
 	private val excHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
@@ -311,7 +311,7 @@ object IQChannels {
 		client?.let { client ->
 			authAttempt++
 			authRequest = if (credentials != null) {
-				config?.channel?.let { channel ->
+				config?.chatToOpen?.let { channel ->
 					credentials?.let { credentials ->
 						client.clientsIntegrationAuth(credentials, channel, callback)
 					}
@@ -348,7 +348,7 @@ object IQChannels {
 		client?.let { client ->
 			authAttempt++
 			authRequest = if (credentials != null) {
-				config?.channel?.let { channel ->
+				config?.chatToOpen?.let { channel ->
 					credentials?.let { credentials ->
 						client.clientsIntegrationAuth(credentials, channel, callback)
 					}
@@ -512,7 +512,7 @@ object IQChannels {
 
 		config?.let { config ->
 			val name = signupName
-			config.channel?.let { channel ->
+			config.chatToOpen?.let { channel ->
 				authRequest =
 					client?.clientsSignup(name, channel, object : HttpCallback<ClientAuth> {
 						override fun onResult(result: ClientAuth?) {
@@ -584,7 +584,7 @@ object IQChannels {
 
 		return suspendCoroutine { continuation ->
 			client?.let { client ->
-				config?.channel?.let { channel ->
+				config?.chatToOpen?.let { channel ->
 					client.availableLanguages(
 						channel,
 						object : HttpCallback<LanguageResponse> {
@@ -667,7 +667,7 @@ object IQChannels {
 		}
 
 		client?.let { client ->
-			config?.channel?.let { channel ->
+			config?.chatToOpen?.let { channel ->
 				pushToken?.let { pushToken ->
 					pushTokenAttempt++
 					pushTokenRequest = if (isHuawei) {
@@ -879,7 +879,7 @@ object IQChannels {
 		}
 
 		client?.let { client ->
-			config?.channel?.let { channel ->
+			config?.chatToOpen?.let { channel ->
 				messageRequest = client.chatsChannelMessages(
 					channel,
 					query,
@@ -966,7 +966,7 @@ object IQChannels {
 		}
 
 		client?.let { client ->
-			config?.channel?.let { channel ->
+			config?.chatToOpen?.let { channel ->
 				chatSettingsRequest = client.getChatSettings(
 					channel,
 					query,
@@ -987,7 +987,7 @@ object IQChannels {
 
 	fun getSignupGreetingSettings() {
 		client?.let { client ->
-			config?.channel?.let { channel ->
+			config?.chatToOpen?.let { channel ->
 				client.getSignupGreetingSettings(
 					channel,
 					object : HttpCallback<GreetingSettings> {
@@ -1007,7 +1007,7 @@ object IQChannels {
 
 	private fun openSystemChat() {
 		client?.let { client ->
-			config?.channel?.let { channel ->
+			config?.chatToOpen?.let { channel ->
 				 client.openSystemChat(channel)
 			}
 		}
@@ -1090,7 +1090,7 @@ object IQChannels {
 			}
 
 			client?.let { client ->
-				config?.channel?.let { channel ->
+				config?.chatToOpen?.let { channel ->
 					moreMessageRequest = client.chatsChannelMessages(
 						channel,
 						query,
@@ -1186,7 +1186,7 @@ object IQChannels {
 		eventsAttempt++
 
 		client?.let { client ->
-			config?.channel?.let { channel ->
+			config?.chatToOpen?.let { channel ->
 				eventsRequest = client.chatsChannelEvents(
 					channel,
 					query,
@@ -1693,7 +1693,7 @@ object IQChannels {
 		val form = sendQueue.removeAt(0)
 		val sendAttempt: Int = 1
 
-		config?.channel?.let { channel ->
+		config?.chatToOpen?.let { channel ->
 			sendRequest =
 				client?.chatsChannelSend(channel, form, object : HttpCallback<Void> {
 					override fun onResult(result: Void?) {
@@ -1729,7 +1729,7 @@ object IQChannels {
 
 		val nextAttempt = sendAttempt + 1
 
-		config?.channel?.let { channel ->
+		config?.chatToOpen?.let { channel ->
 			client?.chatsChannelSend(channel, form, object : HttpCallback<Void> {
 				override fun onResult(result: Void?) {
 					execute { sent(form) }
@@ -1869,7 +1869,7 @@ object IQChannels {
 			ChatType = chatType.name.lowercase()
 		}
 
-		config?.channel?.let { channel ->
+		config?.chatToOpen?.let { channel ->
 			sendTypingRequest =
 				client?.chatsChannelTyping(channel, body, object : HttpCallback<Void> {
 					override fun onResult(result: Void?) {

@@ -98,7 +98,7 @@ class MainActivity : AppCompatActivity(),
 
     private fun setupIQChannels() {
         // Настраиваем сервер и канал iqchannels.
-        IQChannels.configure(this, IQChannelsConfig("http://192.168.31.158:3001/", "support"))
+        IQChannels.configure(this, IQChannelsConfig("http://192.168.31.158:3001/", listOf("support"), "support"))
     }
 }
 ```
@@ -227,7 +227,7 @@ SDK поддерживает пуш-уведомления о новых соо�
         super.onCreate(savedInstanceState)
         val token = FirebaseInstanceId.getInstance().getToken()
 
-	    IQChannels.configure(this, IQChannelsConfig("https://chat.example.com/", "support"))
+	    IQChannels.configure(this, IQChannelsConfig("https://chat.example.com/", listOf("support"), "support"))
 	    IQChannels.setPushToken(token)
     }
 ```
@@ -334,7 +334,8 @@ ChatFragment принимает предзаполненная сообщени�
 
     class IQChannelsConfig @JvmOverloads constructor(
         val address: String?,
-        val channel: String?,
+        val channels: List<String>?,
+        val chatToOpen: String?,
         logging: Boolean = true,
         val uiOptions: UIOptions = UIOptions(),
     )
@@ -342,7 +343,7 @@ ChatFragment принимает предзаполненная сообщени�
     // Example
     IQChannels.configure(
         this, 
-        IQChannelsConfig(address, channels.first(), true, UIOptions(true)),
+        IQChannelsConfig(address, channels, channels.first(), true, UIOptions(true)),
     )
 ```
 

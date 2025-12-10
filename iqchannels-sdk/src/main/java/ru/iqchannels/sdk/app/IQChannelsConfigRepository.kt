@@ -41,7 +41,7 @@ internal object IQChannelsConfigRepository {
 				job = CoroutineScope(coroutineContext).launch {
 					val channels = mutableListOf<Channel>()
 					config.channels.forEach { channel ->
-						IQChannels.configureClient(IQChannelsConfig(config.address, channel))
+						IQChannels.configureClient(IQChannelsConfig(config.address, config.channels, channel))
 						val clientAuth = IQChannels.login2(credentials)
 
 						clientAuth.Client?.MultiChatsInfo?.let { multiChatsInfo ->

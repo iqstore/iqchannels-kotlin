@@ -387,6 +387,13 @@ internal class ChatMessagesAdapter(
 		itemClickListener.onImageClick(message)
 	}
 
+	fun onChangeSegment(
+		messageId: Long,
+		callback: HttpCallback<Void>
+	) {
+		iqchannels.changeSegment(messageId, callback)
+	}
+
 	internal interface ItemClickListener {
 		fun onFileClick(url: String, fileName: String)
 		fun onImageClick(message: ChatMessage)

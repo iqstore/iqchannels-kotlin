@@ -44,7 +44,8 @@ class ChannelsViewModel : ViewModel() {
 		IQChannels.configureClient(
 			IQChannelsConfig(
 				address = IQChannelsConfigRepository.config?.address,
-				channel = channel.id
+				channels =  IQChannelsConfigRepository.config?.channels,
+				chatToOpen = channel.id
 			)
 		)
 		IQChannels.chatType = channel.chatType

@@ -29,6 +29,7 @@ import ru.iqchannels.sdk.app.IQChannelsConfig2
 import ru.iqchannels.sdk.app.IQChannelsFactory
 import ru.iqchannels.sdk.app.UIOptions
 import ru.iqchannels.sdk.app.UnreadListener
+import ru.iqchannels.sdk.domain.models.ChatType
 import ru.iqchannels.sdk.ui.ChatFragment
 import ru.iqchannels.sdk.ui.channels.ChannelsFragment
 import java.io.File
@@ -45,6 +46,7 @@ class IQAppActivity :
 		const val TESTING_TYPE = "IQAppActivity#testingType"
 		const val ADDRESS = "IQAppActivity#address"
 		const val CHANNELS = "IQAppActivity#channels"
+		const val CHATTOOPEN = "IQAppActivity#chatToOpen"
 	}
 
 	private var unread: Cancellable? = null
@@ -99,13 +101,18 @@ class IQAppActivity :
 			}
 
 		val address = prefs.getString(ADDRESS, null) ?: "https://sandbox.iqstore.ru"
-		val channels = prefs.getStringSet(CHANNELS, null) ?: setOf("support", "finance")
+		val channels = prefs.getStringSet(CHANNELS, null) ?.toList() ?: listOf("support", "finance")
+		var chatToOpen = prefs.getString(CHATTOOPEN, null) ?: ""
+
+		if (chatToOpen.isEmpty()){
+			chatToOpen = channels.first()
+		}
 
 		when (testingType) {
 			TestingType.SingleChat -> {
 				IQChannels.configure(
 					this,
-					IQChannelsConfig(address, channels.first(), true, UIOptions(true))
+					IQChannelsConfig(address, channels, chatToOpen, true, UIOptions(true))
 				)
 				token = preferences?.getString("anonymous_token", null)
 				if (token != null && token?.isEmpty() == false) {
@@ -148,6 +155,43 @@ class IQAppActivity :
 		when (item.itemId) {
 			R.id.nav_index -> fragment = MainFragment()
 			R.id.nav_chat -> {
+				IQChannels.chatType = ChatType.REGULAR
+
+				val stylesJson = getSharedPreferences(StylesEditFragment.PREFS_STYLES, Context.MODE_PRIVATE)
+					.getString(StylesEditFragment.CONFIG_STYLES, null)
+
+				val languageCode = getSharedPreferences(LocalizationsEditFragment.PREFS_LOCALIZATIONS, Context.MODE_PRIVATE)
+					.getString(LocalizationsEditFragment.LANGUAGE_CODE, null)
+
+				var localizationJson: String? = null
+
+				val file = File(filesDir, "$languageCode.json")
+				if (file.exists()) {
+					localizationJson = file.readText()
+				}
+
+				fragment = ChatFragment.newInstance(stylesJson = stylesJson, localizationJson = localizationJson)
+			}
+			R.id.nav_chat_pm -> {
+				val prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+				val address = prefs.getString(ADDRESS, null) ?: "https://sandbox.iqstore.ru"
+				val channels = prefs.getStringSet(CHANNELS, null) ?.toList() ?: listOf("support", "finance")
+				var chatToOpen = prefs.getString(CHATTOOPEN, null) ?: ""
+
+				if (chatToOpen.isEmpty()){
+					chatToOpen = channels.first()
+				}
+
+				IQChannels.chatType = ChatType.PERSONAL_MANAGER
+
+				IQChannels.configure(
+					this,
+					IQChannelsConfig(address, channels, chatToOpen, true, UIOptions(true))
+				)
+				IQChannels.login("101")
+
+				IQChannels.getSignupGreetingSettings()
+
 				val stylesJson = getSharedPreferences(StylesEditFragment.PREFS_STYLES, Context.MODE_PRIVATE)
 					.getString(StylesEditFragment.CONFIG_STYLES, null)
 

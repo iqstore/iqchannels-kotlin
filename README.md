@@ -48,11 +48,11 @@ allprojects {
 }
 ```
 
-5. Добавьте зависимосить `implementation 'ru.iqstore:iqchannels-sdk-2:2.3.0-rc1'` в `build.gradle` модуля приложения.
+5. Добавьте зависимосить `implementation 'ru.iqstore:iqchannels-sdk-2:2.3.0'` в `build.gradle` модуля приложения.
 ```build.gradle
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])   
-    implementation 'ru.iqstore:iqchannels-sdk-2:2.3.0-rc1'
+    implementation 'ru.iqstore:iqchannels-sdk-2:2.3.0'
     // etc...
 }
 ```
@@ -98,7 +98,7 @@ class MainActivity : AppCompatActivity(),
 
     private fun setupIQChannels() {
         // Настраиваем сервер и канал iqchannels.
-        IQChannels.configure(this, IQChannelsConfig("http://192.168.31.158:3001/", "support"))
+        IQChannels.configure(this, IQChannelsConfig("http://192.168.31.158:3001/", listOf("support"), "support"))
     }
 }
 ```
@@ -227,7 +227,7 @@ SDK поддерживает пуш-уведомления о новых соо�
         super.onCreate(savedInstanceState)
         val token = FirebaseInstanceId.getInstance().getToken()
 
-	    IQChannels.configure(this, IQChannelsConfig("https://chat.example.com/", "support"))
+	    IQChannels.configure(this, IQChannelsConfig("https://chat.example.com/", listOf("support"), "support"))
 	    IQChannels.setPushToken(token)
     }
 ```
@@ -334,7 +334,8 @@ ChatFragment принимает предзаполненная сообщени�
 
     class IQChannelsConfig @JvmOverloads constructor(
         val address: String?,
-        val channel: String?,
+        val channels: List<String>?,
+        val chatToOpen: String?,
         logging: Boolean = true,
         val uiOptions: UIOptions = UIOptions(),
     )
@@ -342,7 +343,7 @@ ChatFragment принимает предзаполненная сообщени�
     // Example
     IQChannels.configure(
         this, 
-        IQChannelsConfig(address, channels.first(), true, UIOptions(true)),
+        IQChannelsConfig(address, channels, channels.first(), true, UIOptions(true)),
     )
 ```
 
@@ -1407,6 +1408,8 @@ ChatFragment принимает предзаполненная сообщени�
   "signup_error": "Ошибка: длина имени должна быть не менее 3-х символов.",
   "title_error": "Чат временно недоступен",
   "text_error": "Мы уже все исправляем. Обновите страницу или попробуйте позже",
+  "title_error_pm": "Нет закреплённого персонального менеджера",
+  "text_error_pm": "Обратитесь в чат с тех. поддержкой",
   "button_error": "Вернуться",
   "status_label": "На связи",
   "status_label_awaiting_network": "Ожидание сети...",

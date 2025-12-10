@@ -70,7 +70,7 @@ object IQChannels {
 	private var preferences: SharedPreferences? = null
 
 	private var token: String? = null
-	private var credentials: String? = null
+	var credentials: String? = null
 	private var signupName: String? = null
 
 	private val excHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
@@ -311,7 +311,7 @@ object IQChannels {
 		client?.let { client ->
 			authAttempt++
 			authRequest = if (credentials != null) {
-				config?.channel?.let { channel ->
+				config?.chatToOpen?.let { channel ->
 					credentials?.let { credentials ->
 						client.clientsIntegrationAuth(credentials, channel, callback)
 					}
@@ -348,7 +348,7 @@ object IQChannels {
 		client?.let { client ->
 			authAttempt++
 			authRequest = if (credentials != null) {
-				config?.channel?.let { channel ->
+				config?.chatToOpen?.let { channel ->
 					credentials?.let { credentials ->
 						client.clientsIntegrationAuth(credentials, channel, callback)
 					}
@@ -512,7 +512,7 @@ object IQChannels {
 
 		config?.let { config ->
 			val name = signupName
-			config.channel?.let { channel ->
+			config.chatToOpen?.let { channel ->
 				authRequest =
 					client?.clientsSignup(name, channel, object : HttpCallback<ClientAuth> {
 						override fun onResult(result: ClientAuth?) {
@@ -584,7 +584,7 @@ object IQChannels {
 
 		return suspendCoroutine { continuation ->
 			client?.let { client ->
-				config?.channel?.let { channel ->
+				config?.chatToOpen?.let { channel ->
 					client.availableLanguages(
 						channel,
 						object : HttpCallback<LanguageResponse> {
@@ -667,7 +667,7 @@ object IQChannels {
 		}
 
 		client?.let { client ->
-			config?.channel?.let { channel ->
+			config?.chatToOpen?.let { channel ->
 				pushToken?.let { pushToken ->
 					pushTokenAttempt++
 					pushTokenRequest = if (isHuawei) {
@@ -879,7 +879,7 @@ object IQChannels {
 		}
 
 		client?.let { client ->
-			config?.channel?.let { channel ->
+			config?.chatToOpen?.let { channel ->
 				messageRequest = client.chatsChannelMessages(
 					channel,
 					query,
@@ -966,7 +966,7 @@ object IQChannels {
 		}
 
 		client?.let { client ->
-			config?.channel?.let { channel ->
+			config?.chatToOpen?.let { channel ->
 				chatSettingsRequest = client.getChatSettings(
 					channel,
 					query,
@@ -987,7 +987,7 @@ object IQChannels {
 
 	fun getSignupGreetingSettings() {
 		client?.let { client ->
-			config?.channel?.let { channel ->
+			config?.chatToOpen?.let { channel ->
 				client.getSignupGreetingSettings(
 					channel,
 					object : HttpCallback<GreetingSettings> {
@@ -1007,7 +1007,7 @@ object IQChannels {
 
 	private fun openSystemChat() {
 		client?.let { client ->
-			config?.channel?.let { channel ->
+			config?.chatToOpen?.let { channel ->
 				 client.openSystemChat(channel)
 			}
 		}
@@ -1090,7 +1090,7 @@ object IQChannels {
 			}
 
 			client?.let { client ->
-				config?.channel?.let { channel ->
+				config?.chatToOpen?.let { channel ->
 					moreMessageRequest = client.chatsChannelMessages(
 						channel,
 						query,
@@ -1186,7 +1186,7 @@ object IQChannels {
 		eventsAttempt++
 
 		client?.let { client ->
-			config?.channel?.let { channel ->
+			config?.chatToOpen?.let { channel ->
 				eventsRequest = client.chatsChannelEvents(
 					channel,
 					query,
@@ -1468,7 +1468,7 @@ object IQChannels {
 		user.Online = true
 		user.Id = 1
 		val message = ChatMessage(user, localId)
-		message.Text = "2.3.0-rc1"
+		message.Text = "2.3.0"
 		messages?.add(message)
 		for (listener in messageListeners) {
 			execute {
@@ -1690,7 +1690,7 @@ object IQChannels {
 		val form = sendQueue.removeAt(0)
 		val sendAttempt: Int = 1
 
-		config?.channel?.let { channel ->
+		config?.chatToOpen?.let { channel ->
 			sendRequest =
 				client?.chatsChannelSend(channel, form, object : HttpCallback<Void> {
 					override fun onResult(result: Void?) {
@@ -1726,7 +1726,7 @@ object IQChannels {
 
 		val nextAttempt = sendAttempt + 1
 
-		config?.channel?.let { channel ->
+		config?.chatToOpen?.let { channel ->
 			client?.chatsChannelSend(channel, form, object : HttpCallback<Void> {
 				override fun onResult(result: Void?) {
 					execute { sent(form) }
@@ -1853,6 +1853,30 @@ object IQChannels {
 		)
 	}
 
+	internal fun changeSegment(
+		messageId: Long,
+		callback: HttpCallback<Void>,
+	) {
+		if (auth == null) {
+			return
+		}
+
+		client?.changeSegment(messageId, object : HttpCallback<Void> {
+			override fun onResult(result: Void?) {
+				client?.changeSegment(messageId, callback)
+			}
+
+			override fun onException(exception: Exception) {
+				callback.onException(exception)
+			}
+		})
+
+		IQLog.i(
+			TAG,
+			String.format("Sent change segment, messageId=$messageId")
+		)
+	}
+
 	// Typing
 	internal fun sendTyping() {
 		if (auth == null) {
@@ -1866,7 +1890,7 @@ object IQChannels {
 			ChatType = chatType.name.lowercase()
 		}
 
-		config?.channel?.let { channel ->
+		config?.chatToOpen?.let { channel ->
 			sendTypingRequest =
 				client?.chatsChannelTyping(channel, body, object : HttpCallback<Void> {
 					override fun onResult(result: Void?) {
@@ -1952,7 +1976,6 @@ object IQChannels {
 			ChatEventType.TYPING -> messageTyping(event)
 			ChatEventType.CHAT_CLOSED -> systemChat = false
 			ChatEventType.CLOSE_SYSTEM_CHAT -> systemChat = false
-			ChatEventType.CHAT_CHANNEL_CHANGE -> changeChannel(event)
 			ChatEventType.FILE_UPDATED -> fileUpdated(event)
 			else -> IQLog.i(TAG, String.format("applyEvent: %s", event.Type))
 		}
@@ -2111,14 +2134,6 @@ object IQChannels {
 	private fun messageTyping(event: ChatEvent) {
 		for (listener in messageListeners) {
 			execute { listener.eventTyping(event) }
-		}
-	}
-
-	private fun changeChannel(event: ChatEvent) {
-		event.NextChannelName?.let { channel ->
-			for (listener in messageListeners) {
-				execute { listener.eventChangeChannel(channel) }
-			}
 		}
 	}
 

@@ -27,7 +27,8 @@ object IQChannelsShortCuts {
 						IQChannels.configureClient(
 							IQChannelsConfig(
 								address = IQChannelsConfigRepository.config?.address,
-								channel = channel
+								channels = IQChannelsConfigRepository.config?.channels,
+								chatToOpen = channel
 							)
 						)
 						IQChannels.chatType = chatType

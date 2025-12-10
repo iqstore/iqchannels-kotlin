@@ -732,9 +732,7 @@ class ChatFragment : Fragment() {
 
 
 
-		if((IQChannels.auth?.Client?.PersonalManagerID != null || IQChannels.auth?.Client?.PersonalManagerGroupID != null) && IQChannels.chatType == ChatType.PERSONAL_MANAGER){
-			IQChannels.chatType = ChatType.REGULAR
-
+		if((IQChannels.auth?.Client?.PersonalManagerId == 0L && IQChannels.auth?.Client?.PersonalManagerGroupId == 0L) && IQChannels.chatType == ChatType.PERSONAL_MANAGER){
 			view?.findViewById<TextView?>(R.id.tv_title)?.apply {
 				text = IQChannelsLanguage.iqChannelsLanguage.titleErrorPm
 				applyIQStyles(IQStyles.iqChannelsStyles?.error?.titleError)
@@ -1485,7 +1483,8 @@ class ChatFragment : Fragment() {
 		IQChannels.configureClient(
 			IQChannelsConfig(
 				address = IQChannelsConfigRepository.config?.address,
-				channel = channel
+				channels = IQChannelsConfigRepository.config?.channels,
+				chatToOpen = channel
 			)
 		)
 		IQChannels.chatType = ChatType.REGULAR

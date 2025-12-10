@@ -15,6 +15,9 @@ class PlusOneViewModel : ViewModel() {
 	private val _channels = MutableStateFlow(listOf("support", "finance"))
 	val channels = _channels.asStateFlow()
 
+	private val _chatToOpen = MutableStateFlow("")
+	val chatToOpen = _chatToOpen.asStateFlow()
+
 	fun onTestingChange(testingType: TestingType) {
 		_testingType.value = testingType
 	}
@@ -27,5 +30,9 @@ class PlusOneViewModel : ViewModel() {
 		value.split(',').let {
 			_channels.value = it.map { it.trim() }
 		}
+	}
+
+	fun onChatToOpenChange(value: String) {
+		_chatToOpen.value = value
 	}
 }

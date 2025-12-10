@@ -749,6 +749,27 @@ class HttpClient(
 		)
 	}
 
+	fun changeSegment(
+		messageId: Long,
+		callback: HttpCallback<Void>,
+	): HttpRequest {
+		val path = "/chats/messages/$messageId/delete_transfer_to_channel_id"
+		return post(
+			path,
+			null,
+			null,
+			object : HttpCallback<ru.iqchannels.sdk.schema.Response<Any>> {
+				override fun onResult(result: ru.iqchannels.sdk.schema.Response<Any>?) {
+					callback.onResult(null)
+				}
+
+				override fun onException(exception: Exception) {
+					callback.onException(exception)
+				}
+			}
+		)
+	}
+
 	// POST JSON
 	private fun <T> post(
 		path: String,

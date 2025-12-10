@@ -50,6 +50,7 @@ class ChatMessage {
 	var User: User? = null
 	var File: UploadedFile? = null
 	var Rating: Rating? = null
+	var TransferToChannel: TransferToChannel? = null
 	var Date: Date? = null
 	var NewMsgHeader: Boolean = false
 

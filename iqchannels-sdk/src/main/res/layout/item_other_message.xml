@@ -258,12 +258,19 @@
                 android:layout_width="wrap_content"/>
 
 
-    <include layout="@layout/chat_rating_poll"
-        android:id="@+id/ratingPoll"
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:layout_marginTop="10dp"
-        android:layout_gravity="center" />
+            <include layout="@layout/chat_rating_poll"
+                android:id="@+id/ratingPoll"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_marginTop="10dp"
+                android:layout_gravity="center" />
+
+            <include layout="@layout/chat_change_segment"
+                android:id="@+id/changeSegment"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_marginTop="10dp"
+                android:layout_gravity="center" />
 
     <!-- DropDown buttons -->
 

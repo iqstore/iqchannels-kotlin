@@ -5,6 +5,7 @@
 package ru.iqchannels.example
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,6 +18,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
 import androidx.compose.material.RadioButton
@@ -37,6 +40,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.compose.ui.platform.LocalFocusManager
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import ru.iqchannels.example.localizations.LocalizationsEditFragment
@@ -44,6 +48,7 @@ import ru.iqchannels.example.prefill.PreFillMsgFragment
 import ru.iqchannels.example.shortcuts.ShortCutsFragment
 import ru.iqchannels.example.styles.StylesEditFragment
 import ru.iqchannels.sdk.ui.theming.IQChannelsCompose
+import kotlin.system.exitProcess
 
 
 class MainFragment : Fragment() {

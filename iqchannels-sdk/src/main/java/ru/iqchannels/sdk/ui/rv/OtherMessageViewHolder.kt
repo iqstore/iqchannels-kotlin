@@ -67,10 +67,18 @@ interface RatingPollListener {
 	fun onRatingRenderQuestion()
 }
 
+interface ChangeSegmentListener {
+	fun onChangeSegment(
+		messageId: Long,
+		callback: HttpCallback<Void>
+	)
+}
+
+
 internal class OtherMessageViewHolder(
 	private val binding: ItemOtherMessageBinding,
 	private val itemClickListener: ChatMessagesAdapter.ItemClickListener
-) : ViewHolder(binding.root), RatingPollListener {
+) : ViewHolder(binding.root), RatingPollListener, ChangeSegmentListener {
 
 	private val dateFormat: DateFormat =
 		android.text.format.DateFormat.getDateFormat(binding.root.context)
@@ -214,10 +222,12 @@ internal class OtherMessageViewHolder(
 				clDropdownBtns.visibility = View.GONE
 				rvCardButtons.visibility = View.GONE
 				ratingPoll.root.visibility = View.GONE
+				changeSegment.root.visibility = View.GONE
 			}
 
 			val file = message.File
 			val msgRating = message.Rating
+			val msgTransfer = message.TransferToChannel
 			if (file != null) {
 				when (message.File?.State) {
 					FileValidState.Rejected -> showFileStateMsg(
@@ -249,6 +259,9 @@ internal class OtherMessageViewHolder(
 				} else {
 					showRating(msgRating, rating)
 				}
+			} else if (msgTransfer != null) {
+				message.System = true
+				showChangeSegmentMessage(message, changeSegment)
 			} else {
 				clTexts.visibility = View.VISIBLE
 				otherText.visibility = View.VISIBLE
@@ -438,6 +451,16 @@ internal class OtherMessageViewHolder(
 
 	override fun onRatingRenderQuestion() {
 		IQChannels.ratingRenderQuestion()
+	}
+
+	override fun onChangeSegment(
+		messageId: Long,
+		callback: HttpCallback<Void>
+	) {
+		(bindingAdapter as? ChatMessagesAdapter)?.onChangeSegment(
+			messageId,
+			callback
+		)
 	}
 
 	private fun getRateButtonValue(view: View): Int {
@@ -755,4 +778,23 @@ internal class OtherMessageViewHolder(
 		otherText.applyIQStyles(text)
 	}
 
+
+
+	private fun showChangeSegmentMessage(
+		message: ChatMessage,
+		changeSegmentBinding: ru.iqchannels.sdk.databinding.ChatChangeSegmentBinding,
+	) = with(binding) {
+		IQStyles.iqChannelsStyles?.messages?.backgroundOperator
+			?.let {
+				rating.root.setBackgroundDrawable(it, R.drawable.other_msg_rating_poll_bg)
+			}
+		val data = message.TransferToChannel
+		val changeSegmentViewHolder = ChangeSegmentViewHolder(changeSegmentBinding)
+
+		binding.otherAvatar.visibility = View.GONE
+		binding.date.visibility = View.GONE
+		changeSegmentViewHolder.bind(message)
+		changeSegmentViewHolder.setChangeSegmentListener(this@OtherMessageViewHolder)
+		changeSegment.root.visibility = View.VISIBLE
+	}
 }

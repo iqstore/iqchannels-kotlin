@@ -48,11 +48,11 @@ allprojects {
 }
 ```
 
-5. Добавьте зависимосить `implementation 'ru.iqstore:iqchannels-sdk-2:2.3.0'` в `build.gradle` модуля приложения.
+5. Добавьте зависимосить `implementation 'ru.iqstore:iqchannels-sdk-2:2.3.1'` в `build.gradle` модуля приложения.
 ```build.gradle
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])   
-    implementation 'ru.iqstore:iqchannels-sdk-2:2.3.0'
+    implementation 'ru.iqstore:iqchannels-sdk-2:2.3.1'
     // etc...
 }
 ```
@@ -98,7 +98,27 @@ class MainActivity : AppCompatActivity(),
 
     private fun setupIQChannels() {
         // Настраиваем сервер и канал iqchannels.
-        IQChannels.configure(this, IQChannelsConfig("http://192.168.31.158:3001/", listOf("support"), "support"))
+        IQChannels.configure(this, IQChannelsConfig("https://chat.example.com/", listOf("support"), "support"))
+    }
+}
+```
+
+Пример конфигурации c определенным чатом в `Activity.onCreate`.
+```kotlin
+class MainActivity : AppCompatActivity(),
+         NavigationView.OnNavigationItemSelectedListener {
+			 
+    override fun onCreate(savedInstanceState: Bundle) {
+        super.onCreate(savedInstanceState)
+        
+        setupIQChannels()
+    }
+
+    private fun setupIQChannels() {
+        // Настраиваем тип чата (Обычный или с персональным менеджером)
+        IQChannels.chatType = ChatType.PERSONAL_MANAGER // REGULAR или PERSONAL_MANAGER
+        // Настраиваем сервер со списком каналов iqchannels и каналом для открытия.
+        IQChannels.configure(this, IQChannelsConfig("https://chat.example.com/", listOf("support"), "support"), "support")
     }
 }
 ```

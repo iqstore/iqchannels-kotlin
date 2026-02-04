@@ -46,7 +46,9 @@
         <item
             android:id="@+id/send_huawei_token"
             android:title="Send Huawei token"/>
-
+        <item
+            android:id="@+id/copy_token"
+            android:title="Copy push token"/>
         <item
             android:id="@+id/hide_action_bar"
             android:title="Скрыть ActionBar"/>

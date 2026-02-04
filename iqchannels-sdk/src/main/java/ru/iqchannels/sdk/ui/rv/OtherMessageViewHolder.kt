@@ -745,7 +745,8 @@ internal class OtherMessageViewHolder(
 						fileSize = df.format(sizeMb.toDouble())
 					} else {
 						str = "kb"
-						fileSize = sizeKb.toString()
+						val df = DecimalFormat("0.00")
+						fileSize = df.format(sizeKb.toDouble())
 					}
 					tvOtherFileSize.text = "$fileSize $str"
 				} else {

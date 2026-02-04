@@ -1424,9 +1424,9 @@ class ChatFragment : Fragment() {
 	}
 
 	private fun sendMessage() {
-		if(sendingFile){
-			return
-		}
+//		if(sendingFile){
+//			return
+//		}
 		val text = sendText?.text.toString()
 		sendText?.setText("")
 

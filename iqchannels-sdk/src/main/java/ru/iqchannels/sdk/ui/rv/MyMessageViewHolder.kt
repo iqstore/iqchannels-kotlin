@@ -320,9 +320,12 @@ internal class MyMessageViewHolder(
 		deleteButton.text = IQChannelsLanguage.iqChannelsLanguage.delete
 
 		retryButton.setOnClickListener {
-			val form = ChatMessageForm.text(message.LocalId, message.Text, message.ReplyToMessageId)
-			IQChannels.resend( form, 0, true)
-
+			if(message.Upload != null){
+				IQChannels.sendFile(message, 0, true)
+			}else{
+				val form = ChatMessageForm.text(message.LocalId, message.Text, message.ReplyToMessageId)
+				IQChannels.resend( form, 0, true)
+			}
 			popupWindow.dismiss()
 		}
 

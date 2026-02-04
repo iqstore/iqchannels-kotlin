@@ -238,6 +238,10 @@ internal class MyMessageViewHolder(
 				myText.text = text
 				myText.movementMethod = android.text.method.LinkMovementMethod.getInstance()
 			}
+			myText.setOnLongClickListener {
+				itemClickListener.onMessageLongClick(message)
+				true
+			}
 
 			myText.setTextColor(ContextCompat.getColor(root.context, R.color.my_text_color))
 			myText.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textClient)

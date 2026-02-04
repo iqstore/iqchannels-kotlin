@@ -292,6 +292,10 @@ internal class OtherMessageViewHolder(
 					otherText.text = text
 					otherText.movementMethod = android.text.method.LinkMovementMethod.getInstance()
 				}
+				otherText.setOnLongClickListener {
+					itemClickListener.onMessageLongClick(message)
+					true
+				}
 			}
 			val lp = LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT,

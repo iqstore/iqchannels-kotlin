@@ -27,13 +27,19 @@
         android:layout_height="wrap_content">
 
         <!-- Avatar -->
-        <FrameLayout
+        <androidx.cardview.widget.CardView
             android:id="@+id/otherAvatar"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/avatar_placeholder"
             android:layout_gravity="bottom"
-            android:layout_marginRight="8dp">
+            android:layout_marginRight="8dp"
+            app:cardCornerRadius="20dp"
+            app:cardUseCompatPadding="false"
+            app:cardElevation="0dp">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
             <ImageView
                 android:id="@+id/otherAvatarImage"
@@ -49,14 +55,11 @@
                 android:background="#ff78909c"
                 android:gravity="center"
                 android:textColor="#ffffffff"
-                android:textSize="16sp"
+                android:textSize="20sp"
+                android:paddingBottom="4dp"
                 android:textStyle="bold"/>
-
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                tools:ignore="ContentDescription"/>
         </FrameLayout>
+        </androidx.cardview.widget.CardView>
 
         <!-- Name, payload, date-->
         <LinearLayout
@@ -178,37 +181,66 @@
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent" />
 
-                        <TextView
-                            android:id="@+id/tvOtherFileName"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:autoLink="all"
-                            android:textColor="#3F51B5"
-                            android:textSize="16sp"
-                            app:layout_constraintTop_toTopOf="parent"
-                            app:layout_constraintStart_toEndOf="@id/iv_file"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constrainedWidth="true"
-                            tools:text="user-146corporate-audio-message-2a9d1dc"
-                            />
 
-                        <TextView
-                            android:id="@+id/tvOtherFileSize"
+                        <LinearLayout
+                            android:id="@+id/other_file_texts"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="#ff979fa7"
-                            android:textSize="15sp"
-                            app:layout_constraintEnd_toEndOf="parent"
+                            android:orientation="vertical"
                             app:layout_constraintStart_toEndOf="@id/iv_file"
-                            app:layout_constraintTop_toBottomOf="@id/tvOtherFileName"
-                            tools:text="15.0 кб" />
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent">
+
+                            <TextView
+                                android:id="@+id/tvOtherFileName"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:autoLink="all"
+                                android:textColor="#3F51B5"
+                                android:textSize="16sp"
+                                tools:text="user-146corporate-audio-message-2a9d1dc"/>
+
+                            <TextView
+                                android:id="@+id/tvOtherFileSize"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textColor="#ff979fa7"
+                                android:textSize="15sp"
+                                tools:text="15.0 кб" />
+
+                        </LinearLayout>
+<!--                        <TextView-->
+<!--                            android:id="@+id/tvOtherFileName"-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:autoLink="all"-->
+<!--                            android:textColor="#3F51B5"-->
+<!--                            android:textSize="16sp"-->
+<!--                            app:layout_constraintTop_toTopOf="parent"-->
+<!--                            app:layout_constraintStart_toEndOf="@id/iv_file"-->
+<!--                            app:layout_constraintEnd_toEndOf="parent"-->
+<!--                            app:layout_constrainedWidth="true"-->
+<!--                            tools:text="user-146corporate-audio-message-2a9d1dc"-->
+<!--                            />-->
+
+<!--                        <TextView-->
+<!--                            android:id="@+id/tvOtherFileSize"-->
+<!--                            android:layout_width="0dp"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:textColor="#ff979fa7"-->
+<!--                            app:layout_constrainedWidth="true"-->
+<!--                            android:textSize="15sp"-->
+<!--                            app:layout_constraintEnd_toEndOf="parent"-->
+<!--                            app:layout_constraintStart_toEndOf="@id/iv_file"-->
+<!--                            app:layout_constraintTop_toBottomOf="@id/tvOtherFileName"-->
+<!--                            tools:text="15.0 кб" />-->
 
                         <TextView
                             android:id="@+id/otherText"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:textSize="16sp"
-                            app:layout_constraintTop_toBottomOf="@id/tvOtherFileSize"
+                            app:layout_constraintTop_toBottomOf="@id/other_file_texts"
                             app:layout_constraintStart_toEndOf="@id/iv_file"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constrainedWidth="true"

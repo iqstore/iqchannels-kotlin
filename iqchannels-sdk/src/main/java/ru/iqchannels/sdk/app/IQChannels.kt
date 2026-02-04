@@ -1468,7 +1468,7 @@ object IQChannels {
 		user.Online = true
 		user.Id = 1
 		val message = ChatMessage(user, localId)
-		message.Text = "2.3.0"
+		message.Text = "2.3.1"
 		messages?.add(message)
 		for (listener in messageListeners) {
 			execute {
@@ -1541,7 +1541,7 @@ object IQChannels {
 				execute { listener.messageSent(message) }
 			}
 			IQLog.d("prefilledmsg", "start sendFile $message")
-			sendFile(message)
+			sendFile(message, 0, false)
 
 			return message
 		}
@@ -1549,7 +1549,7 @@ object IQChannels {
 		return null
 	}
 
-	internal fun sendFile(message: ChatMessage) {
+	internal fun sendFile(message: ChatMessage, sendAttempt: Int, changeErrorStatus: Boolean) {
 		if (auth == null) {
 			return
 		}
@@ -1570,6 +1570,24 @@ object IQChannels {
 		if (ext != null) {
 			mimetype = MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext) ?: ""
 		}
+
+
+		if(changeErrorStatus) {
+			val existing = getMessageByLocalId(message.LocalId)
+			if (existing != null) {
+				existing.Error = false
+
+				insertMessageToDatabase(existing)
+				for (listener in messageListeners) {
+					execute { listener.messageUpdated(existing) }
+				}
+			}
+		}
+
+		val nextAttempt = sendAttempt + 1
+
+
+
 		sendingFile = true
 		message.Sending = true
 		message.UploadExc = null
@@ -1606,21 +1624,8 @@ object IQChannels {
 					})
 				}
 
-				override fun onException(e: Exception) {
-					execute(Runnable {
-						if (message.UploadRequest == null) {
-							return@Runnable
-						}
-						sendingFile = false
-						message.Sending = false
-						message.UploadExc = e
-						message.UploadProgress = 0
-						message.UploadRequest = null
-						IQLog.e(TAG, String.format("sendFile: Failed to upload a file, e=%s", e))
-						for (listener in messageListeners) {
-							execute { listener.messageUpdated(message) }
-						}
-					})
+				override fun onException(exception: Exception) {
+					execute { sendFileException(exception, message, nextAttempt) }
 				}
 			}, object : HttpProgressCallback {
 				override fun onProgress(progress: Int) {
@@ -1688,7 +1693,6 @@ object IQChannels {
 		}
 
 		val form = sendQueue.removeAt(0)
-		val sendAttempt: Int = 1
 
 		config?.chatToOpen?.let { channel ->
 			sendRequest =
@@ -1699,10 +1703,9 @@ object IQChannels {
 
 					override fun onException(exception: Exception) {
 						sendRequest = null
-						execute { sendException(exception, form, sendAttempt) }
+						execute { sendException(exception, form, 1) }
 					}
 				})
-
 			IQLog.i(TAG, String.format("Sending a message, localId=%d", form.LocalId))
 		}
 	}
@@ -1785,6 +1788,73 @@ object IQChannels {
 			)
 		)
 	}
+
+
+
+
+
+
+
+
+
+	private fun sendFileException(exception: Exception, message: ChatMessage, sendAttempt: Int) {
+		if (auth == null) {
+			IQLog.i(TAG, String.format("Failed to send a file message, exc=%s", exception))
+			return
+		}
+
+		sendingFile = false
+		message.UploadProgress = 0
+		message.UploadRequest = null
+
+		// Resend after 3 seconds if there are less than 3 attempts
+		if(sendAttempt <= 3) {
+			handler?.postDelayed({ sendFile(message, sendAttempt, false) }, 3000)
+		}
+		//Set message to error and do not resend
+		else{
+			val existing = getMessageByLocalId(message.LocalId)
+			if (existing != null) {
+				existing.Error = true
+				existing.Sending = false
+
+				insertMessageToDatabase(existing)
+				for (listener in messageListeners) {
+					execute { listener.messageUpdated(existing) }
+				}
+
+
+
+//				if (message.UploadRequest == null) {
+//					return@Runnable
+//				}
+//				sendingFile = false
+//				message.Sending = false
+////						message.UploadExc = e
+//				message.UploadProgress = 0
+//				message.UploadRequest = null
+//				IQLog.e(TAG, String.format("sendFile: Failed to upload a file, e=%s", e))
+//				for (listener in messageListeners) {
+//					execute { listener.messageUpdated(message) }
+//				}
+				return
+			}
+		}
+
+		IQLog.e(
+			TAG, String.format(
+				"Failed to send a file message, will retry in %d seconds, exc=%s",
+				3, exception
+			)
+		)
+	}
+
+
+
+
+
+
+
 
 	private fun sent(form: ChatMessageForm) {
 		if (sendRequest == null) {
@@ -2194,7 +2264,7 @@ object IQChannels {
 				if(it.sending && !it.error) {
 					if (it.upload != null) {
 						it.toChatMessage()?.let { chatMessage ->
-							sendFile(chatMessage)
+							sendFile(chatMessage, 0, false)
 						}
 					} else {
 						if (!it.text.isNullOrEmpty()) {

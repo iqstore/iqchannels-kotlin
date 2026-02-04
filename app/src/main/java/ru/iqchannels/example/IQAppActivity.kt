@@ -4,6 +4,8 @@
  */
 package ru.iqchannels.example
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
@@ -11,9 +13,11 @@ import ru.iqchannels.sdk.IQLog
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.Fragment
@@ -55,6 +59,7 @@ class IQAppActivity :
 
 	private var preferences: SharedPreferences? = null
 	private var token: String? = null
+	private var pushToken: String? = null
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
@@ -89,9 +94,10 @@ class IQAppActivity :
 				}
 
 				// Get new Instance ID token.
-				val token = task.result
+				pushToken = task.result
 				val iq = IQChannels
-				iq.setPushToken(token)
+
+				iq.setPushToken(pushToken)
 			})
 
 		val prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE)
@@ -219,7 +225,7 @@ class IQAppActivity :
 
 				when(testingType) {
 					TestingType.SingleChat -> {
-						IQChannels.login("3")
+						IQChannels.login("101")
 					}
 					TestingType.MultiChat -> {
 						IQChannelsFactory().create(
@@ -228,7 +234,7 @@ class IQAppActivity :
 								address = address,
 								channels = channels.toList()
 							),
-							credentials = "3"
+							credentials = "101"
 						)
 					}
 					null -> Unit
@@ -264,6 +270,16 @@ class IQAppActivity :
 
 			R.id.send_huawei_token -> {
 				IQChannels.setPushToken("test", isHuawei = true)
+				return false
+			}
+
+			R.id.copy_token -> {
+				val clipboard = this.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+				val clip = ClipData.newPlainText("text", pushToken)
+				clipboard.setPrimaryClip(clip)
+
+				Toast.makeText(this, "Токен скопирован", Toast.LENGTH_SHORT).show()
+
 				return false
 			}
 

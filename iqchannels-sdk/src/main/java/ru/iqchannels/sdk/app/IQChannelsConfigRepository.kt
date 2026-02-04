@@ -56,16 +56,16 @@ internal object IQChannelsConfigRepository {
 								)
 							}
 
-							if (multiChatsInfo.EnableForPersonalManagers) {
-								channels.add(
-									Channel(
-										id = channel,
-										name = multiChatsInfo.ChannelName,
-										chatType = ChatType.PERSONAL_MANAGER,
-										iconColor = multiChatsInfo.ChannelIconColor
-									)
-								)
-							}
+//							if (multiChatsInfo.EnableForPersonalManagers) {
+//								channels.add(
+//									Channel(
+//										id = channel,
+//										name = multiChatsInfo.ChannelName,
+//										chatType = ChatType.PERSONAL_MANAGER,
+//										iconColor = multiChatsInfo.ChannelIconColor
+//									)
+//								)
+//							}
 						}
 					}
 

@@ -238,6 +238,10 @@ internal class MyMessageViewHolder(
 				myText.text = text
 				myText.movementMethod = android.text.method.LinkMovementMethod.getInstance()
 			}
+			myText.setOnLongClickListener {
+				itemClickListener.onMessageLongClick(message)
+				true
+			}
 
 			myText.setTextColor(ContextCompat.getColor(root.context, R.color.my_text_color))
 			myText.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textClient)
@@ -320,9 +324,12 @@ internal class MyMessageViewHolder(
 		deleteButton.text = IQChannelsLanguage.iqChannelsLanguage.delete
 
 		retryButton.setOnClickListener {
-			val form = ChatMessageForm.text(message.LocalId, message.Text, message.ReplyToMessageId)
-			IQChannels.resend( form, 0, true)
-
+			if(message.Upload != null){
+				IQChannels.sendFile(message, 0, true)
+			}else{
+				val form = ChatMessageForm.text(message.LocalId, message.Text, message.ReplyToMessageId)
+				IQChannels.resend( form, 0, true)
+			}
 			popupWindow.dismiss()
 		}
 
@@ -374,7 +381,8 @@ internal class MyMessageViewHolder(
 				fileSize = df.format(sizeMb.toDouble())
 			} else {
 				str = "kb"
-				fileSize = sizeKb.toString()
+				val df = DecimalFormat("0.00")
+				fileSize = df.format(sizeKb.toDouble())
 			}
 			tvMyFileSize.text = "$fileSize $str"
 		} else {

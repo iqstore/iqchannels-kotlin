@@ -315,7 +315,7 @@ internal class ChatMessagesAdapter(
 
 	fun onUploadRetryClicked(position: Int) {
 		val message = messages[position]
-		iqchannels.sendFile(message)
+		iqchannels.sendFile(message, 0, false)
 	}
 
 	fun onRateDown(position: Int, value: Int) {

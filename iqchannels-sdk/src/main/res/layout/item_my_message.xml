@@ -185,30 +185,83 @@
                             app:barrierMargin="8dp"
                             app:constraint_referenced_ids="iv_file, myUpload" />
 
-                        <TextView
-                            android:id="@+id/tvMyFileName"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginEnd="16dp"
-                            android:autoLink="all"
-                            android:textColor="@color/my_text_color"
-                            android:textSize="16sp"
-                            app:layout_constrainedWidth="true"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toEndOf="@id/barrier_icon_file"
-                            app:layout_constraintTop_toTopOf="parent"
-                            tools:text="CJM.pdf" />
 
-                        <TextView
-                            android:id="@+id/tvMyFileSize"
+                        <LinearLayout
+                            android:id="@+id/my_file_texts"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="#ff979fa7"
-                            android:textSize="15sp"
-                            app:layout_constraintEnd_toEndOf="parent"
+                            android:orientation="vertical"
+                            android:layout_marginEnd="16dp"
                             app:layout_constraintStart_toEndOf="@id/barrier_icon_file"
-                            app:layout_constraintTop_toBottomOf="@id/tvMyFileName"
-                            tools:text="15.0 кб" />
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintTop_toTopOf="parent">
+
+                            <TextView
+                                android:id="@+id/tvMyFileName"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:autoLink="all"
+                                android:textColor="@color/my_text_color"
+                                android:textSize="16sp"
+                                tools:text="CJM.pdf" />
+
+                            <TextView
+                                android:id="@+id/tvMyFileSize"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textColor="#ff979fa7"
+                                android:textSize="15sp"
+                                tools:text="15.0 кб" />
+
+                        </LinearLayout>
+
+<!--                        <TextView-->
+<!--                            android:id="@+id/tvMyFileName"-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:autoLink="all"-->
+<!--                            android:textColor="@color/my_text_color"-->
+<!--                            android:textSize="16sp"-->
+<!--                            app:layout_constrainedWidth="true"-->
+<!--                            app:layout_constraintEnd_toEndOf="parent"-->
+<!--                            app:layout_constraintStart_toEndOf="@id/barrier_icon_file"-->
+<!--                            app:layout_constraintTop_toTopOf="parent"-->
+<!--                            tools:text="CJM.pdf" />-->
+
+<!--                        <TextView-->
+<!--                            android:id="@+id/tvMyFileSize"-->
+<!--                            android:layout_width="0dp"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:textColor="#ff979fa7"-->
+<!--                            android:textSize="15sp"-->
+<!--                            app:layout_constrainedWidth="true"-->
+<!--                            app:layout_constraintStart_toEndOf="@id/barrier_icon_file"-->
+<!--                            app:layout_constraintEnd_toEndOf="parent"-->
+<!--                            app:layout_constraintTop_toBottomOf="@id/tvMyFileName"-->
+<!--                            tools:text="15.0 кб" />-->
+<!--                        <TextView-->
+<!--                            android:id="@+id/tvMyFileSize"-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:layout_marginEnd="16dp"-->
+<!--                            android:textColor="#ff979fa7"-->
+<!--                            android:textSize="15sp"-->
+<!--                            android:singleLine="true"-->
+<!--                            app:layout_constraintStart_toEndOf="@id/barrier_icon_file"-->
+<!--                            app:layout_constraintTop_toBottomOf="@id/tvMyFileName"-->
+<!--                            tools:text="15.0 кб" />-->
+<!--                        <TextView-->
+<!--                            android:id="@+id/tvMyFileSize"-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:textColor="#ff979fa7"-->
+<!--                            android:textSize="15sp"-->
+<!--                            android:maxLines="1"-->
+<!--                            app:layout_constraintStart_toEndOf="@id/barrier_icon_file"-->
+<!--                            app:layout_constraintEnd_toEndOf="parent"-->
+<!--                            app:layout_constrainedWidth="true"-->
+<!--                            app:layout_constraintTop_toBottomOf="@id/tvMyFileName"-->
+<!--                            tools:text="15.0 кб" />-->
 
                         <TextView
                             android:id="@+id/myText"
@@ -220,7 +273,7 @@
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintHorizontal_bias="0"
                             app:layout_constraintStart_toEndOf="@id/barrier_icon_file"
-                            app:layout_constraintTop_toBottomOf="@+id/tvMyFileSize"
+                            app:layout_constraintTop_toBottomOf="@+id/my_file_texts"
                             tools:text="Message Text" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>

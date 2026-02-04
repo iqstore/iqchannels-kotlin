@@ -292,6 +292,10 @@ internal class OtherMessageViewHolder(
 					otherText.text = text
 					otherText.movementMethod = android.text.method.LinkMovementMethod.getInstance()
 				}
+				otherText.setOnLongClickListener {
+					itemClickListener.onMessageLongClick(message)
+					true
+				}
 			}
 			val lp = LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -745,7 +749,8 @@ internal class OtherMessageViewHolder(
 						fileSize = df.format(sizeMb.toDouble())
 					} else {
 						str = "kb"
-						fileSize = sizeKb.toString()
+						val df = DecimalFormat("0.00")
+						fileSize = df.format(sizeKb.toDouble())
 					}
 					tvOtherFileSize.text = "$fileSize $str"
 				} else {

@@ -610,10 +610,11 @@ class ChatFragment : Fragment() {
 
 		arguments?.getString(ARG_TITLE)?.let { title ->
 			view.findViewById<ComposeView>(R.id.nav_bar)?.let {
+				val chatTitle = IQChannels.chatTitle ?: title
 
 				it.setContent {
 					IQChannelsTheme {
-						NavBar(title = title) {
+						NavBar(title = chatTitle) {
 							if (checkEvent(IQChatEvent.NavBarBackButtonPressed::class.java)) {
 								sendChatEvent(IQChatEvent.NavBarBackButtonPressed)
 							} else {

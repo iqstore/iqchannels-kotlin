@@ -11,6 +11,7 @@ class ChatSettings {
     var Pseudonym: String = "Оператор"
     var AvatarId: String = ""
     var TotalOpenedTickets: Int = 0
+    var ChatTitle: String? = null
 
     override fun toString(): String {
         return Gson().toJson(this)

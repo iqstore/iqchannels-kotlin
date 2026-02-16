@@ -140,6 +140,7 @@ object IQChannels {
 	// chat
 	@Volatile
 	var chatType: ChatType = ChatType.REGULAR
+	var chatTitle: String? = null
 	internal var systemChat: Boolean = false
 	private var chatSettingsRequest: HttpRequest? = null
 
@@ -972,6 +973,7 @@ object IQChannels {
 					query,
 					object : HttpCallback<ChatSettings> {
 						override fun onResult(result: ChatSettings?) {
+							chatTitle = result?.ChatTitle
 							showAutoGreeting(result)
 						}
 
@@ -1468,7 +1470,7 @@ object IQChannels {
 		user.Online = true
 		user.Id = 1
 		val message = ChatMessage(user, localId)
-		message.Text = "2.3.1"
+		message.Text = "2.3.2"
 		messages?.add(message)
 		for (listener in messageListeners) {
 			execute {

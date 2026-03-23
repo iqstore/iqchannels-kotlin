@@ -44,6 +44,8 @@ import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -79,7 +81,7 @@ import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.app.Callback
 import ru.iqchannels.sdk.app.Cancellable
 import ru.iqchannels.sdk.app.IQChannels
-import ru.iqchannels.sdk.app.IQChannels.sendingFile
+import ru.iqchannels.sdk.app.IQChannels.chatTitleFlow
 import ru.iqchannels.sdk.app.IQChannelsConfig
 import ru.iqchannels.sdk.app.IQChannelsConfigRepository
 import ru.iqchannels.sdk.app.IQChannelsListener
@@ -612,21 +614,7 @@ class ChatFragment : Fragment() {
 		}
 
 		arguments?.getString(ARG_TITLE)?.let { title ->
-			view.findViewById<ComposeView>(R.id.nav_bar)?.let {
-				val chatTitle = IQChannels.chatTitle ?: title
-
-				it.setContent {
-					IQChannelsTheme {
-						NavBar(title = chatTitle) {
-							if (checkEvent(IQChatEvent.NavBarBackButtonPressed::class.java)) {
-								sendChatEvent(IQChatEvent.NavBarBackButtonPressed)
-							} else {
-								parentFragmentManager.popBackStack()
-							}
-						}
-					}
-				}
-			}
+			chatTitleFlow.value = title
 		}
 
 		view.findViewById<ComposeView>(R.id.nav_bar)?.setContent {

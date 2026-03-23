@@ -15,6 +15,7 @@ import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
 import ru.iqchannels.sdk.IQLog
@@ -140,7 +141,8 @@ object IQChannels {
 	// chat
 	@Volatile
 	var chatType: ChatType = ChatType.REGULAR
-	var chatTitle: String? = null
+	var chatTitleFlow = MutableStateFlow<String?>(null)
+
 	internal var systemChat: Boolean = false
 	private var chatSettingsRequest: HttpRequest? = null
 
@@ -973,7 +975,7 @@ object IQChannels {
 					query,
 					object : HttpCallback<ChatSettings> {
 						override fun onResult(result: ChatSettings?) {
-							chatTitle = result?.ChatTitle
+							chatTitleFlow.value = result?.ChatTitle
 							showAutoGreeting(result)
 						}
 

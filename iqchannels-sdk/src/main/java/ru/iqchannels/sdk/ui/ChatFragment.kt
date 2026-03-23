@@ -16,6 +16,8 @@ import android.content.res.ColorStateList
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -114,6 +116,7 @@ import ru.iqchannels.sdk.ui.widgets.ReplyMessageView
 import ru.iqchannels.sdk.ui.widgets.FileMessageView
 import ru.iqchannels.sdk.ui.widgets.TopNotificationWidget
 import ru.iqchannels.sdk.ui.widgets.toPx
+import java.net.NetworkInterface
 import kotlin.math.roundToInt
 
 class ChatFragment : Fragment() {
@@ -626,7 +629,57 @@ class ChatFragment : Fragment() {
 			}
 		}
 
+		view.findViewById<ComposeView>(R.id.nav_bar)?.setContent {
+			IQChannelsTheme {
+				val chatTitle by chatTitleFlow.collectAsState()
+
+				NavBar(
+					title = chatTitle ?: ""
+				) {
+					if (checkEvent(IQChatEvent.NavBarBackButtonPressed::class.java)) {
+						sendChatEvent(IQChatEvent.NavBarBackButtonPressed)
+					} else {
+						parentFragmentManager.popBackStack()
+					}
+				}
+			}
+		}
+
+		IQLog.d(TAG, "isVpnActive   ${isVpnActive(context = requireContext())}")
+
 		return view
+	}
+
+
+
+	fun isVpnActive(context: Context): Boolean {
+		return isVpnActiveMain(context) || isVpnActiveFallback()
+	}
+
+	fun isVpnActiveMain(context: Context): Boolean {
+		val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+		val network = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			cm.activeNetwork ?: return false
+		} else {
+			TODO("VERSION.SDK_INT < M")
+		}
+		val capabilities = cm.getNetworkCapabilities(network) ?: return false
+
+		return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN)
+	}
+
+	fun isVpnActiveFallback(): Boolean {
+		return try {
+			NetworkInterface.getNetworkInterfaces().toList().any {
+				it.isUp && (
+						it.name.contains("tun") ||
+								it.name.contains("ppp") ||
+								it.name.contains("pptp")
+						)
+			}
+		} catch (e: Exception) {
+			false
+		}
 	}
 
 	private fun ReplyMessageView.applyReplyStyles() {

@@ -63,7 +63,14 @@ internal class MyMessageViewHolder(
 
 		// Day
 		if (adapter.isNewDay(bindingAdapterPosition) && message.Payload !== ChatPayloadType.TYPING) {
-			date.text = message.Date?.let { dateFormat.format(it) }
+			date.text = message.Date?.let { msgDate ->
+				if (android.text.format.DateUtils.isToday(msgDate.time)) {
+					IQChannelsLanguage.iqChannelsLanguage.today
+				} else {
+					dateFormat.format(msgDate)
+				}
+			}
+
 			date.visibility = View.VISIBLE
 			date.applyIQStyles(IQStyles.iqChannelsStyles?.chat?.dateText)
 		} else {

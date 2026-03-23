@@ -39,6 +39,7 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.PopupMenu
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.TextView
@@ -1620,20 +1621,38 @@ class ChatFragment : Fragment() {
 			}
 		}
 
-		override fun onMessageLongClick(message: ChatMessage) {
+		override fun onMessageLongClick(message: ChatMessage, anchor: View) {
 			if (!message.System) {
 				message.Text?.let { text ->
-					val clipboard =
-						requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-					val clip = ClipData.newPlainText(text, text)
-					clipboard.setPrimaryClip(clip)
+					val popup = PopupMenu(anchor.context, anchor)
 
-					val isXiaomi = Build.MANUFACTURER.equals("xiaomi", ignoreCase = true)
-					val isBelowTiramisu = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
+					popup.menu.add(0, 1, 1, IQChannelsLanguage.iqChannelsLanguage.copy)
 
-					if (isBelowTiramisu || isXiaomi) {
-						tnwMsgCopied?.show()
+					popup.setOnMenuItemClickListener { item ->
+						when (item.itemId) {
+							1 -> {
+								message.Text?.let { text ->
+									val clipboard =
+										requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+									val clip = ClipData.newPlainText(text, text)
+									clipboard.setPrimaryClip(clip)
+
+									val isXiaomi =
+										Build.MANUFACTURER.equals("xiaomi", ignoreCase = true)
+									val isBelowTiramisu =
+										Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
+
+									if (isBelowTiramisu || isXiaomi) {
+										tnwMsgCopied?.show()
+									}
+								}
+								true
+							}
+							else -> false
+						}
 					}
+
+					popup.show()
 				}
 			}
 		}

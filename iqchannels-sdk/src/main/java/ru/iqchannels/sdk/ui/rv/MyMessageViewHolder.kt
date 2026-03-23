@@ -246,7 +246,7 @@ internal class MyMessageViewHolder(
 				myText.movementMethod = android.text.method.LinkMovementMethod.getInstance()
 			}
 			myText.setOnLongClickListener {
-				itemClickListener.onMessageLongClick(message)
+				itemClickListener.onMessageLongClick(message, it)
 				true
 			}
 
@@ -296,7 +296,7 @@ internal class MyMessageViewHolder(
 		}
 
 		binding.root.setOnLongClickListener {
-			itemClickListener.onMessageLongClick(message)
+			itemClickListener.onMessageLongClick(message, myText)
 			true
 		}
 	}

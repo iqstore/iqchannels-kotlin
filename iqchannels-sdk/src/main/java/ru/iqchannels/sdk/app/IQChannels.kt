@@ -935,7 +935,12 @@ object IQChannels {
 		} else {
 			if(settings?.TotalOpenedTickets == 0){
 				val now = Date()
-				val avatarUrl = String.format("%s/public/api/v1/files/image/%s?size=%s", getBaseUrl(), settings.AvatarId, FileImageSize.AVATAR)
+				var avatarUrl: String? = null
+
+				if(settings.AvatarId.isNotEmpty()){
+					avatarUrl = String.format("%s/public/api/v1/files/image/%s?size=%s", getBaseUrl(), settings.AvatarId, FileImageSize.AVATAR)
+				}
+
 				message = when {
 					systemChat && settings.TotalOpenedTickets == 0 -> ChatMessage().apply {
 						Id = now.time

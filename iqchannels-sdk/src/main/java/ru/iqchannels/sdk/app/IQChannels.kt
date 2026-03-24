@@ -904,7 +904,7 @@ object IQChannels {
 							messageDao?.deleteMessageByChatId(0)
 							val databaseMessages = messageDao?.getAllMessages()
 							var copy: MutableList<ChatMessage> = ArrayList(messages)
-							checkUnsendMessages(databaseMessages, chatId ?: 0).let {copy += it}
+//							checkUnsendMessages(databaseMessages, chatId ?: 0L).let {copy += it} !!!
 
 							autoGreeting?.let {
 								copy.add(autoGreeting)

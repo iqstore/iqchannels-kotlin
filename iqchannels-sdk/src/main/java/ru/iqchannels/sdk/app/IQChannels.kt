@@ -15,6 +15,7 @@ import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
 import ru.iqchannels.sdk.IQLog
@@ -140,7 +141,8 @@ object IQChannels {
 	// chat
 	@Volatile
 	var chatType: ChatType = ChatType.REGULAR
-	var chatTitle: String? = null
+	var chatTitleFlow = MutableStateFlow<String?>(null)
+
 	internal var systemChat: Boolean = false
 	private var chatSettingsRequest: HttpRequest? = null
 
@@ -902,7 +904,7 @@ object IQChannels {
 							messageDao?.deleteMessageByChatId(0)
 							val databaseMessages = messageDao?.getAllMessages()
 							var copy: MutableList<ChatMessage> = ArrayList(messages)
-							checkUnsendMessages(databaseMessages, chatId ?: 0).let {copy += it}
+//							checkUnsendMessages(databaseMessages, chatId ?: 0L).let {copy += it} !!!
 
 							autoGreeting?.let {
 								copy.add(autoGreeting)
@@ -933,7 +935,12 @@ object IQChannels {
 		} else {
 			if(settings?.TotalOpenedTickets == 0){
 				val now = Date()
-				val avatarUrl = String.format("%s/public/api/v1/files/image/%s?size=%s", getBaseUrl(), settings.AvatarId, FileImageSize.AVATAR)
+				var avatarUrl: String? = null
+
+				if(settings.AvatarId.isNotEmpty()){
+					avatarUrl = String.format("%s/public/api/v1/files/image/%s?size=%s", getBaseUrl(), settings.AvatarId, FileImageSize.AVATAR)
+				}
+
 				message = when {
 					systemChat && settings.TotalOpenedTickets == 0 -> ChatMessage().apply {
 						Id = now.time
@@ -960,6 +967,8 @@ object IQChannels {
 	}
 
 	private fun getChatSettings() {
+		chatTitleFlow.value = ""
+
 		val clientId = auth?.Client?.Id ?: return
 
 		val query = ChatSettingsQuery().apply {
@@ -973,7 +982,7 @@ object IQChannels {
 					query,
 					object : HttpCallback<ChatSettings> {
 						override fun onResult(result: ChatSettings?) {
-							chatTitle = result?.ChatTitle
+							chatTitleFlow.value = result?.ChatTitle
 							showAutoGreeting(result)
 						}
 
@@ -1470,7 +1479,7 @@ object IQChannels {
 		user.Online = true
 		user.Id = 1
 		val message = ChatMessage(user, localId)
-		message.Text = "2.3.2"
+		message.Text = "2.3.3"
 		messages?.add(message)
 		for (listener in messageListeners) {
 			execute {

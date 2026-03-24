@@ -6,6 +6,7 @@ import ru.iqchannels.sdk.styling.buttons.SingleChoiceBtnStyles
 import ru.iqchannels.sdk.styling.chat.ChatStyles
 import ru.iqchannels.sdk.styling.chat.SignupStyles
 import ru.iqchannels.sdk.styling.error.ErrorStyles
+import ru.iqchannels.sdk.styling.messages.ChangeSegmentStyles
 import ru.iqchannels.sdk.styling.messages.MessagesFileStyles
 import ru.iqchannels.sdk.styling.messages.MessagesStyles
 import ru.iqchannels.sdk.styling.messages.RatingStyles
@@ -18,6 +19,8 @@ class IQChannelsStyles(
 	val answer: AnswerStyles?,
 	@SerializedName("messages_file")
 	val messageFile: MessagesFileStyles?,
+	@SerializedName("change_segment")
+	val changeSegment: ChangeSegmentStyles?,
 	val rating: RatingStyles?,
 	@SerializedName("tools_to_message")
 	val toolsToMessage: ToolsToMessage?,

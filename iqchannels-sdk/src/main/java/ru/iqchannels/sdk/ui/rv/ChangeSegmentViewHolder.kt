@@ -30,21 +30,21 @@ internal class ChangeSegmentViewHolder(
 			onButtonTap(message)
 		}
 
-		binding.title.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.ratingTitle)
+		binding.title.applyIQStyles(IQStyles.iqChannelsStyles?.changeSegment?.title)
 		binding.title.text = message.Text
 
 		binding.button.text = "Перейти в канал \"${message.TransferToChannel?.Title}\""
 
-		IQStyles.iqChannelsStyles?.rating?.backgroundContainer
+		IQStyles.iqChannelsStyles?.changeSegment?.backgroundContainer
 			?.let {
 				binding.background.setBackgroundDrawable(it, R.drawable.other_msg_bg)
 			}
 
-		IQStyles.iqChannelsStyles?.rating?.sentRating?.backgroundDisabled
+		IQStyles.iqChannelsStyles?.changeSegment?.backgroundButton
 			?.let {
-				binding.button.setBackgroundDrawable(it, R.drawable.bg_rating_poll_rounded_button)
+				binding.button.setBackgroundDrawable(it, R.drawable.bg_button_rate)
 			}
-		binding.button.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.sentRating?.textDisabled)
+		binding.button.applyIQStyles(IQStyles.iqChannelsStyles?.changeSegment?.textButton)
 	}
 
 	private fun onButtonTap(message: ChatMessage) {

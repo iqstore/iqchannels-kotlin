@@ -16,6 +16,8 @@ import android.content.res.ColorStateList
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -37,11 +39,14 @@ import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.PopupMenu
 import android.widget.ProgressBar
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
@@ -77,7 +82,7 @@ import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.app.Callback
 import ru.iqchannels.sdk.app.Cancellable
 import ru.iqchannels.sdk.app.IQChannels
-import ru.iqchannels.sdk.app.IQChannels.sendingFile
+import ru.iqchannels.sdk.app.IQChannels.chatTitleFlow
 import ru.iqchannels.sdk.app.IQChannelsConfig
 import ru.iqchannels.sdk.app.IQChannelsConfigRepository
 import ru.iqchannels.sdk.app.IQChannelsListener
@@ -114,6 +119,7 @@ import ru.iqchannels.sdk.ui.widgets.ReplyMessageView
 import ru.iqchannels.sdk.ui.widgets.FileMessageView
 import ru.iqchannels.sdk.ui.widgets.TopNotificationWidget
 import ru.iqchannels.sdk.ui.widgets.toPx
+import java.net.NetworkInterface
 import kotlin.math.roundToInt
 
 class ChatFragment : Fragment() {
@@ -609,24 +615,60 @@ class ChatFragment : Fragment() {
 		}
 
 		arguments?.getString(ARG_TITLE)?.let { title ->
-			view.findViewById<ComposeView>(R.id.nav_bar)?.let {
-				val chatTitle = IQChannels.chatTitle ?: title
+			chatTitleFlow.value = title
+		}
 
-				it.setContent {
-					IQChannelsTheme {
-						NavBar(title = chatTitle) {
-							if (checkEvent(IQChatEvent.NavBarBackButtonPressed::class.java)) {
-								sendChatEvent(IQChatEvent.NavBarBackButtonPressed)
-							} else {
-								parentFragmentManager.popBackStack()
-							}
-						}
+		view.findViewById<ComposeView>(R.id.nav_bar)?.setContent {
+			IQChannelsTheme {
+				val chatTitle by chatTitleFlow.collectAsState()
+
+				NavBar(
+					title = chatTitle ?: ""
+				) {
+					if (checkEvent(IQChatEvent.NavBarBackButtonPressed::class.java)) {
+						sendChatEvent(IQChatEvent.NavBarBackButtonPressed)
+					} else {
+						parentFragmentManager.popBackStack()
 					}
 				}
 			}
 		}
 
+		IQLog.d(TAG, "isVpnActive   ${isVpnActive(context = requireContext())}")
+
 		return view
+	}
+
+
+
+	fun isVpnActive(context: Context): Boolean {
+		return isVpnActiveMain(context) || isVpnActiveFallback()
+	}
+
+	fun isVpnActiveMain(context: Context): Boolean {
+		val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+		val network = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+			cm.activeNetwork ?: return false
+		} else {
+			TODO("VERSION.SDK_INT < M")
+		}
+		val capabilities = cm.getNetworkCapabilities(network) ?: return false
+
+		return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN)
+	}
+
+	fun isVpnActiveFallback(): Boolean {
+		return try {
+			NetworkInterface.getNetworkInterfaces().toList().any {
+				it.isUp && (
+						it.name.contains("tun") ||
+								it.name.contains("ppp") ||
+								it.name.contains("pptp")
+						)
+			}
+		} catch (e: Exception) {
+			false
+		}
 	}
 
 	private fun ReplyMessageView.applyReplyStyles() {
@@ -1579,20 +1621,38 @@ class ChatFragment : Fragment() {
 			}
 		}
 
-		override fun onMessageLongClick(message: ChatMessage) {
+		override fun onMessageLongClick(message: ChatMessage, anchor: View) {
 			if (!message.System) {
 				message.Text?.let { text ->
-					val clipboard =
-						requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-					val clip = ClipData.newPlainText(text, text)
-					clipboard.setPrimaryClip(clip)
+					val popup = PopupMenu(anchor.context, anchor)
 
-					val isXiaomi = Build.MANUFACTURER.equals("xiaomi", ignoreCase = true)
-					val isBelowTiramisu = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
+					popup.menu.add(0, 1, 1, IQChannelsLanguage.iqChannelsLanguage.copy)
 
-					if (isBelowTiramisu || isXiaomi) {
-						tnwMsgCopied?.show()
+					popup.setOnMenuItemClickListener { item ->
+						when (item.itemId) {
+							1 -> {
+								message.Text?.let { text ->
+									val clipboard =
+										requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+									val clip = ClipData.newPlainText(text, text)
+									clipboard.setPrimaryClip(clip)
+
+									val isXiaomi =
+										Build.MANUFACTURER.equals("xiaomi", ignoreCase = true)
+									val isBelowTiramisu =
+										Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
+
+									if (isBelowTiramisu || isXiaomi) {
+										tnwMsgCopied?.show()
+									}
+								}
+								true
+							}
+							else -> false
+						}
 					}
+
+					popup.show()
 				}
 			}
 		}

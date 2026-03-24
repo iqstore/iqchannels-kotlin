@@ -399,7 +399,7 @@ internal class ChatMessagesAdapter(
 		fun onImageClick(message: ChatMessage)
 		fun onButtonClick(message: ChatMessage, singleChoice: SingleChoice)
 		fun onActionClick(message: ChatMessage, action: Action)
-		fun onMessageLongClick(message: ChatMessage)
+		fun onMessageLongClick(message: ChatMessage, anchor: View)
 		fun fileUploadException(errorMessage: String?)
 		fun onReplyMessageClick(message: ChatMessage)
 	}

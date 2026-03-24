@@ -967,6 +967,8 @@ object IQChannels {
 	}
 
 	private fun getChatSettings() {
+		chatTitleFlow.value = ""
+
 		val clientId = auth?.Client?.Id ?: return
 
 		val query = ChatSettingsQuery().apply {
@@ -1477,7 +1479,7 @@ object IQChannels {
 		user.Online = true
 		user.Id = 1
 		val message = ChatMessage(user, localId)
-		message.Text = "2.3.2"
+		message.Text = "2.3.3"
 		messages?.add(message)
 		for (listener in messageListeners) {
 			execute {

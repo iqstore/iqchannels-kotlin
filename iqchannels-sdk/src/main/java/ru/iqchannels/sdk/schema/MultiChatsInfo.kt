@@ -6,4 +6,5 @@ class MultiChatsInfo {
 	var ChannelIconColor: String? = null
 	var EnableForPersonalManagers: Boolean = false
 	var EnableChat: Boolean = true
+	var ChannelType: String? = null
 }

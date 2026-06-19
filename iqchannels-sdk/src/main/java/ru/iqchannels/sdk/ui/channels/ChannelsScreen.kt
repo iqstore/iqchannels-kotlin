@@ -82,6 +82,7 @@ private fun ChannelItem(channel: Channel, onClick: (Channel) -> Unit) {
 					id = when (channel.chatType) {
 						ChatType.REGULAR -> R.drawable.ic_chat_common
 						ChatType.PERSONAL_MANAGER -> R.drawable.ic_pm_24
+						ChatType.INFO -> R.drawable.ic_chat_common
 					}
 				),
 				contentDescription = null,

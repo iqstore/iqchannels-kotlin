@@ -15,6 +15,9 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.Volatile
 import ru.iqchannels.sdk.IQLog.d
 import ru.iqchannels.sdk.IQLog.e
+import ru.iqchannels.sdk.app.IQChannels.chatType
+import ru.iqchannels.sdk.app.IQChannels.isInfoChat
+import ru.iqchannels.sdk.domain.models.ChatType
 import ru.iqchannels.sdk.rels.Rels
 import ru.iqchannels.sdk.schema.ChatEvent
 import ru.iqchannels.sdk.schema.ChatEventQuery
@@ -34,6 +37,7 @@ import ru.iqchannels.sdk.schema.MaxIdQuery
 import ru.iqchannels.sdk.schema.PollRequest
 import ru.iqchannels.sdk.schema.PushTokenInput
 import ru.iqchannels.sdk.schema.GreetingSettings
+import ru.iqchannels.sdk.schema.InfoChatSettingsResponse
 import ru.iqchannels.sdk.schema.LanguageQuery
 import ru.iqchannels.sdk.schema.LanguageResponse
 import ru.iqchannels.sdk.schema.RateRequest
@@ -169,6 +173,11 @@ class HttpClient(
 					if (auth != null) {
 						rels.clientAuth(auth, map)
 					}
+					if(auth?.Client?.MultiChatsInfo?.ChannelType == "info") {
+						chatType = ChatType.INFO
+						isInfoChat = true
+					}
+
 					callback.onResult(auth)
 				}
 
@@ -403,6 +412,31 @@ class HttpClient(
 				override fun onResult(result: ru.iqchannels.sdk.schema.Response<ChatSettings>?) {
 					val chatSettings = result?.Data
 					callback.onResult(chatSettings)
+				}
+
+				override fun onException(exception: Exception) {
+					callback.onException(exception)
+				}
+			}
+		)
+	}
+
+	fun getBlocker(
+		channel: String,
+		callback: HttpCallback<InfoChatSettingsResponse>
+	): HttpRequest {
+		val path = "/chats/channel/blocker/$channel"
+		val type: TypeToken<ru.iqchannels.sdk.schema.Response<InfoChatSettingsResponse>> =
+			object : TypeToken<ru.iqchannels.sdk.schema.Response<InfoChatSettingsResponse>>() {}
+
+		return post(
+			path,
+			null,
+			type,
+			object : HttpCallback<ru.iqchannels.sdk.schema.Response<InfoChatSettingsResponse>> {
+				override fun onResult(result: ru.iqchannels.sdk.schema.Response<InfoChatSettingsResponse>?) {
+					val infoChatSettingsResponse = result?.Data
+					callback.onResult(infoChatSettingsResponse)
 				}
 
 				override fun onException(exception: Exception) {

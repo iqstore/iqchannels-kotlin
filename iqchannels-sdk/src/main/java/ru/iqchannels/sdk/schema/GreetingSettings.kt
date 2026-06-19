@@ -6,6 +6,7 @@ class GreetingSettings {
 	var Greeting: String? = null
 	var GreetingBold: String? = null
 	var PersonalDataRequestType: DataRequestType = DataRequestType.default
+	var ChannelType: String? = null
 
 	override fun toString(): String {
 		return Gson().toJson(this)

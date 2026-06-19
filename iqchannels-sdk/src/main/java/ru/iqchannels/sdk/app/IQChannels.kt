@@ -51,6 +51,8 @@ import ru.iqchannels.sdk.schema.ClientTypingForm
 import ru.iqchannels.sdk.schema.FileImageSize
 import ru.iqchannels.sdk.schema.FileType
 import ru.iqchannels.sdk.schema.GreetingSettings
+import ru.iqchannels.sdk.schema.InfoChatSettings
+import ru.iqchannels.sdk.schema.InfoChatSettingsResponse
 import ru.iqchannels.sdk.schema.LanguageQuery
 import ru.iqchannels.sdk.schema.LanguageResponse
 import ru.iqchannels.sdk.schema.MaxIdQuery
@@ -142,9 +144,14 @@ object IQChannels {
 	@Volatile
 	var chatType: ChatType = ChatType.REGULAR
 	var chatTitleFlow = MutableStateFlow<String?>(null)
+	var isInfoChat: Boolean = false
+	var isAnonim: Boolean = false
 
 	internal var systemChat: Boolean = false
 	private var chatSettingsRequest: HttpRequest? = null
+
+	internal var infoChatSettings: InfoChatSettings? = null
+	private var infoChatSettingsRequest: HttpRequest? = null
 
 	// Signup greeting
 	var signupGreetingSettings: GreetingSettings? = null
@@ -221,6 +228,7 @@ object IQChannels {
 
 	fun login(credentials: String) {
 		logout()
+		isAnonim = false
 		this.credentials = credentials
 		auth()
 	}
@@ -234,6 +242,7 @@ object IQChannels {
 	fun loginAnonymous() {
 		logout()
 		authAnonymous()
+		isAnonim = true
 		token = preferences?.getString(ANONYMOUS_TOKEN, null)
 		if (token == null || token?.isEmpty() == true) {
 			signup("")
@@ -423,6 +432,10 @@ object IQChannels {
 			}
 			sendPushToken()
 			getChatSettings()
+			if(auth.Client?.MultiChatsInfo?.ChannelType == "info") {
+				chatType = ChatType.INFO
+				isInfoChat = true
+			}
 		}
 	}
 
@@ -545,6 +558,8 @@ object IQChannels {
 		if (authRequest == null) {
 			return
 		}
+
+		isAnonim = true
 
 		preferences?.let { preferences ->
 			val editor = preferences.edit()
@@ -906,8 +921,10 @@ object IQChannels {
 							var copy: MutableList<ChatMessage> = ArrayList(messages)
 //							checkUnsendMessages(databaseMessages, chatId ?: 0L).let {copy += it} !!!
 
-							autoGreeting?.let {
-								copy.add(autoGreeting)
+							if(!isInfoChat) {
+								autoGreeting?.let {
+									copy.add(autoGreeting)
+								}
 							}
 							messages?.let {
 								execute { messagesLoaded(copy) }
@@ -930,37 +947,46 @@ object IQChannels {
 
 		var message: ChatMessage? = null
 
-		if (settings?.GreetFrom == "bot") {
-			openSystemChat()
-		} else {
-			if(settings?.TotalOpenedTickets == 0){
-				val now = Date()
-				var avatarUrl: String? = null
 
-				if(settings.AvatarId.isNotEmpty()){
-					avatarUrl = String.format("%s/public/api/v1/files/image/%s?size=%s", getBaseUrl(), settings.AvatarId, FileImageSize.AVATAR)
-				}
+		if(!isInfoChat) {
+			if (settings?.GreetFrom == "bot") {
+				openSystemChat()
+			} else {
+				if (settings?.TotalOpenedTickets == 0) {
+					val now = Date()
+					var avatarUrl: String? = null
 
-				message = when {
-					systemChat && settings.TotalOpenedTickets == 0 -> ChatMessage().apply {
-						Id = now.time
-						Author = ActorType.USER
-						CreatedAt = now.time
-						Date = now
-						Text = settings.Message
-						Payload = ChatPayloadType.TEXT
-						Read = true
-						Received = true
-						UserId = now.time
-						AutoGreeting = true
-						User = User().apply {
-							DisplayName = settings.Pseudonym
-							AvatarUrl = avatarUrl
-						}
+					if (settings.AvatarId.isNotEmpty()) {
+						avatarUrl = String.format(
+							"%s/public/api/v1/files/image/%s?size=%s",
+							getBaseUrl(),
+							settings.AvatarId,
+							FileImageSize.AVATAR
+						)
 					}
-					else -> null
+
+					message = when {
+						systemChat && settings.TotalOpenedTickets == 0 -> ChatMessage().apply {
+							Id = now.time
+							Author = ActorType.USER
+							CreatedAt = now.time
+							Date = now
+							Text = settings.Message
+							Payload = ChatPayloadType.TEXT
+							Read = true
+							Received = true
+							UserId = now.time
+							AutoGreeting = true
+							User = User().apply {
+								DisplayName = settings.Pseudonym
+								AvatarUrl = avatarUrl
+							}
+						}
+
+						else -> null
+					}
+	//				lifeTime = settings.lifetime
 				}
-//				lifeTime = settings.lifetime
 			}
 		}
 		loadMessages(message)
@@ -996,7 +1022,42 @@ object IQChannels {
 		}
 	}
 
+	fun getBlocker(onComplete: () -> Unit) {
+		client?.let { client ->
+			config?.chatToOpen?.let { channel ->
+				infoChatSettingsRequest = client.getBlocker(
+					channel,
+					object : HttpCallback<InfoChatSettingsResponse> {
+						override fun onResult(result: InfoChatSettingsResponse?) {
+							IQLog.d("!!!!!!!!!!!!", "InfoChatSettingsResponse messages   $messages")
+
+							infoChatSettings = InfoChatSettings(
+								BlockerText = result?.Text,
+								BlockerIcon = fileUrl(result?.BlockerFileId ?: ""),
+								IsVisibleBlocker = messages?.isEmpty() ?: false
+							)
+
+							IQLog.d("!!!!!!!!!!!!", "infoChatSettings    $infoChatSettings")
+
+							onComplete()
+						}
+
+						override fun onException(exception: Exception) {
+							IQLog.e(TAG, "Failed to get blocker settings, exc=${exception.message}")
+							onComplete()
+						}
+					}
+				)
+				IQLog.i(TAG, "get blocker settings")
+			}
+		}
+	}
+
 	fun getSignupGreetingSettings() {
+		if(isAnonim) {
+			getBlocker {}
+		}
+
 		client?.let { client ->
 			config?.chatToOpen?.let { channel ->
 				client.getSignupGreetingSettings(
@@ -1004,6 +1065,11 @@ object IQChannels {
 					object : HttpCallback<GreetingSettings> {
 						override fun onResult(result: GreetingSettings?) {
 							signupGreetingSettings = result
+
+							if(signupGreetingSettings?.ChannelType == "info") {
+								chatType = ChatType.INFO
+								isInfoChat = true
+							}
 						}
 
 						override fun onException(exception: Exception) {
@@ -1479,7 +1545,7 @@ object IQChannels {
 		user.Online = true
 		user.Id = 1
 		val message = ChatMessage(user, localId)
-		message.Text = "2.3.3"
+		message.Text = "2.3.4-rc1"
 		messages?.add(message)
 		for (listener in messageListeners) {
 			execute {

@@ -82,7 +82,12 @@ import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.app.Callback
 import ru.iqchannels.sdk.app.Cancellable
 import ru.iqchannels.sdk.app.IQChannels
+import ru.iqchannels.sdk.app.IQChannels.auth
 import ru.iqchannels.sdk.app.IQChannels.chatTitleFlow
+import ru.iqchannels.sdk.app.IQChannels.chatType
+import ru.iqchannels.sdk.app.IQChannels.getBlocker
+import ru.iqchannels.sdk.app.IQChannels.isAnonim
+import ru.iqchannels.sdk.app.IQChannels.isInfoChat
 import ru.iqchannels.sdk.app.IQChannelsConfig
 import ru.iqchannels.sdk.app.IQChannelsConfigRepository
 import ru.iqchannels.sdk.app.IQChannelsListener
@@ -566,6 +571,12 @@ class ChatFragment : Fragment() {
 			IQStyles.iqChannelsStyles?.toolsToMessage?.background?.let {
 				this.setBackgroundColor(it.getColorInt(context))
 			}
+
+			if(auth?.Client?.MultiChatsInfo?.ChannelType == "info") {
+				chatType = ChatType.INFO
+				isInfoChat = true
+				this.visibility = View.INVISIBLE
+			}
 		}
 
 		attachButton = view.findViewById<ImageButton?>(R.id.attachButton)?.apply {
@@ -766,16 +777,14 @@ class ChatFragment : Fragment() {
 		super.onDestroy()
 	}
 
-	private fun updateViews() {
+	fun updateViews() {
 		val token = IQChannels.getCurrentToken()
 
 		chatUnavailableLayout?.isVisible = false
 		authLayout?.visibility =
 			if (IQChannels.auth == null && IQChannels.authRequest != null && token != null) View.VISIBLE else View.GONE
 
-
-
-		if((IQChannels.auth?.Client?.PersonalManagerId == 0L && IQChannels.auth?.Client?.PersonalManagerGroupId == 0L) && IQChannels.chatType == ChatType.PERSONAL_MANAGER){
+		if((IQChannels.auth?.Client?.PersonalManagerId == 0L && IQChannels.auth?.Client?.PersonalManagerGroupId == 0L) && chatType == ChatType.PERSONAL_MANAGER){
 			view?.findViewById<TextView?>(R.id.tv_title)?.apply {
 				text = IQChannelsLanguage.iqChannelsLanguage.titleErrorPm
 				applyIQStyles(IQStyles.iqChannelsStyles?.error?.titleError)
@@ -785,7 +794,37 @@ class ChatFragment : Fragment() {
 			return
 		}
 
+		if((chatType == ChatType.INFO || isInfoChat) && (IQChannels.infoChatSettings?.IsVisibleBlocker ?: false || isAnonim)){
+			lifecycleScope.launch(Dispatchers.Main) {
+				view?.findViewById<TextView?>(R.id.tv_title)?.apply {
+					text = IQChannels.infoChatSettings?.BlockerText
+					applyIQStyles(IQStyles.iqChannelsStyles?.error?.titleError)
+				}
+				btnGoBack?.visibility = View.GONE
 
+				IQChannels.infoChatSettings?.BlockerIcon?.let { icon ->
+					view?.findViewById<ImageView>(R.id.iv_error)?.apply {
+
+						val glideUrl = GlideUrl(
+							icon,
+							LazyHeaders.Builder()
+								.addHeader(
+									"Cookie",
+									"client-session=${IQChannels.getCurrentToken()}"
+								)
+								.build()
+						)
+
+						Glide.with(context)
+							.load(glideUrl)
+							.into(this)
+					}
+				}
+
+				showUnavailableView("")
+			}
+			return
+		}
 
 		if(IQChannels.auth == null && IQChannels.authRequest == null && token == null && !IQChannels.authFailed && IQChannels.authScreenEnabled){
 			changeStyleButton(signupButton?.isEnabled)
@@ -905,7 +944,7 @@ class ChatFragment : Fragment() {
 			}
 		})
 
-		if (IQChannels.auth != null) {
+		if (auth != null) {
 			loadMessages()
 		}
 		updateViews()
@@ -1012,6 +1051,9 @@ class ChatFragment : Fragment() {
 
 		messagesRequest = IQChannels.loadMessages(object : MessagesListener {
 			override fun messagesLoaded(messages: List<ChatMessage>) {
+				getBlocker {
+					updateViews()
+				}
 				this@ChatFragment.messagesLoaded(messages)
 			}
 
@@ -1530,7 +1572,7 @@ class ChatFragment : Fragment() {
 				chatToOpen = channel
 			)
 		)
-		IQChannels.chatType = ChatType.REGULAR
+		chatType = ChatType.REGULAR
 		IQChannelsConfigRepository.credentials?.let { IQChannels.login(it) }
 	}
 

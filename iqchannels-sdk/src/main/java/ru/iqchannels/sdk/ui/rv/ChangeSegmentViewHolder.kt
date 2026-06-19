@@ -13,6 +13,7 @@ import ru.iqchannels.sdk.app.IQChannelsConfig
 import ru.iqchannels.sdk.app.IQChannelsConfigRepository
 import ru.iqchannels.sdk.app.UIOptions
 import ru.iqchannels.sdk.databinding.ChatChangeSegmentBinding
+import ru.iqchannels.sdk.domain.models.ChatType
 import ru.iqchannels.sdk.http.HttpCallback
 import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.schema.RatingPoll

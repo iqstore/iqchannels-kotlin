@@ -15,6 +15,7 @@ class Rating {
 	val CreatedAt: Long = 0
 	val UpdatedAt: Long = 0
 	val RatingPollId: Long? = null
+	val QuestionText: String? = null
 
 	// Local
 	var Sent = false

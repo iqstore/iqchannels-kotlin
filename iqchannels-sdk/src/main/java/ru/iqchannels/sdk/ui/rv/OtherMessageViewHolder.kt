@@ -529,7 +529,7 @@ internal class OtherMessageViewHolder(
 		rating.ratingRate.visibility = View.GONE
 		rating.ratingRated.visibility = View.GONE
 		rating.ratingRateText.applyIQStyles(IQStyles.iqChannelsStyles?.rating?.ratingTitle)
-		rating.ratingRateText.text = IQChannelsLanguage.iqChannelsLanguage.ratingStatePending
+		rating.ratingRateText.text = msgRating.QuestionText
 		rating.btnSendRating.text = IQChannelsLanguage.iqChannelsLanguage.sentRating
 
 		when (msgRating.State) {

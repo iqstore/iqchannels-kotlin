@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
 import ru.iqchannels.sdk.IQLog
+import ru.iqchannels.sdk.IQLogFileManager
 import ru.iqchannels.sdk.configs.GetConfigsInteractorImpl
 import ru.iqchannels.sdk.domain.models.ChatType
 import ru.iqchannels.sdk.http.HttpCallback
@@ -199,6 +200,8 @@ object IQChannels {
 	}
 
 	fun configure(context: Context, config: IQChannelsConfig) {
+		IQLogFileManager.init(context)
+
 		config.channels?.let {
 			channels = config.channels
 		}
@@ -1852,6 +1855,11 @@ object IQChannels {
 				}
 
 				override fun onException(exception: Exception) {
+					val shouldIgnore = exception is okhttp3.internal.http2.StreamResetException &&
+							exception.message?.contains("CANCEL") == true
+					if (shouldIgnore) {
+						return
+					}
 					execute { sendFileException(exception, message, nextAttempt) }
 				}
 			}, object : HttpProgressCallback {

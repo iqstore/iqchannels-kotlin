@@ -392,12 +392,21 @@ internal class OtherMessageViewHolder(
 						clDropdownBtns.visibility = View.VISIBLE
 					}
 				} else {
+					val screenWidth = itemView.resources.displayMetrics.widthPixels
+
+					val params = rvButtons.layoutParams
+					params.width = (screenWidth * 0.7f).toInt()
+					rvButtons.layoutParams = params
+
+
 					val adapter = ButtonsAdapter(object : ButtonsAdapter.ClickListener {
 						override fun onClick(item: SingleChoice) {
 							itemClickListener.onButtonClick(message, item)
 						}
 					})
-					adapter.setItems(message.SingleChoices)
+					adapter.setItems(
+						message.SingleChoices?.filter { it.Deleted != true }
+					)
 					rvButtons.adapter = adapter
 					rvButtons.visibility = View.VISIBLE
 				}

@@ -229,7 +229,7 @@ class MainActivity : AppCompatActivity,
         unreadSubscription = IQChannels.addUnreadListener(this)
     }
 
-    // Показывает текущие количество непрочитанных сообщений.
+    // Показывает текущее количество непрочитанных сообщений.
     override fun unreadChanged(unread: Int) {
 
     }

@@ -65,6 +65,7 @@ internal class ChangeSegmentViewHolder(
 		} else {
 			IQChannels.chatType = ChatType.PERSONAL_MANAGER
 		}
+		IQChannels.chatType = ChatType.PERSONAL_MANAGER
 
 		IQChannels.configure(
 			binding.root.context,

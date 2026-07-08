@@ -48,11 +48,11 @@ allprojects {
 }
 ```
 
-5. Добавьте зависимосить `implementation 'ru.iqstore:iqchannels-sdk-2:2.3.4'` в `build.gradle` модуля приложения.
+5. Добавьте зависимосить `implementation 'ru.iqstore:iqchannels-sdk-2:2.3.5'` в `build.gradle` модуля приложения.
 ```build.gradle
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])   
-    implementation 'ru.iqstore:iqchannels-sdk-2:2.3.4'
+    implementation 'ru.iqstore:iqchannels-sdk-2:2.3.5'
     // etc...
 }
 ```
@@ -229,9 +229,43 @@ class MainActivity : AppCompatActivity,
         unreadSubscription = IQChannels.addUnreadListener(this)
     }
 
-    // Показывает текущие количество непрочитанных сообщений.
+    // Показывает текущее количество непрочитанных сообщений.
     override fun unreadChanged(unread: Int) {
 
+    }
+}
+```
+
+# Отображение расширенных непрочитанных сообщений
+Для отображения и обновления расширенных непрочитанных сообщений нужно добавить слушателя в IQChannels.
+Слушателя нужно добавлять после конфигурации и логина.
+
+Пример добавления слушателя в `Activity.onCreate`:
+```kotlin
+class MainActivity : AppCompatActivity,
+        NavigationView.OnNavigationItemSelectedListener,
+            AdvancedUnreadListener {
+
+    private var advancedUnreadSubscription : Cancellable? = null
+
+    override fun onCreate(savedInstanceState: Bundle) {
+        super.onCreate(savedInstanceState)
+        listenToAdvancedUnread()
+    }
+
+    // Добавляем слушателя расширенных непрочитанных сообщений.
+    private fun listenToAdvancedUnread() {
+        advancedUnreadSubscription = IQChannels.addAdvancedUnreadListener(this)
+    }
+
+    // Показывает текущее количество расширенных непрочитанных сообщений.
+    override fun advancedUnreadChanged(unread: AdvancedUnread?) {
+
+    }
+
+    // Выводит ошибки расширенных непрочитанных сообщений
+    override fun advancedUnreadException(e: Exception) {
+        
     }
 }
 ```

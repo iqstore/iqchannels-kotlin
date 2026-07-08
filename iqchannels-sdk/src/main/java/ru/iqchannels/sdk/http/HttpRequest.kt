@@ -6,7 +6,20 @@ package ru.iqchannels.sdk.http
 
 import android.annotation.SuppressLint
 import com.google.gson.Gson
+import com.google.gson.JsonNull
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import com.google.gson.reflect.TypeToken
+import okhttp3.Call
+import okhttp3.Callback
+import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody
+import okio.BufferedSink
+import ru.iqchannels.sdk.IQLog
 import java.io.BufferedOutputStream
 import java.io.BufferedReader
 import java.io.ByteArrayOutputStream
@@ -23,6 +36,8 @@ import ru.iqchannels.sdk.lib.InternalIO
 import ru.iqchannels.sdk.schema.ChatException
 import ru.iqchannels.sdk.schema.Relations
 import ru.iqchannels.sdk.schema.Response
+import java.io.File
+import java.util.concurrent.TimeUnit
 
 class HttpRequest {
 
@@ -42,6 +57,7 @@ class HttpRequest {
 	// Guarded by synchronized.
 	private var closed = false
 	private var conn: HttpURLConnection? = null
+	private var call: Call? = null
 
 	internal constructor() {
 		url = null
@@ -66,6 +82,7 @@ class HttpRequest {
 	private fun closeConnection() {
 		closed = true
 		conn?.disconnect()
+		call?.cancel()
 	}
 
 	@Synchronized
@@ -126,7 +143,14 @@ class HttpRequest {
 			val status = conn.responseCode
 			val statusText = conn.responseMessage
 			if (status / 100 != 2) {
-				throw HttpException(statusText)
+
+				val errorBody = try {
+					conn.errorStream?.bufferedReader()?.use { it.readText() }
+				} catch (e: Exception) {
+					null
+				}
+
+				throw HttpException("$status $statusText\n$errorBody")
 			}
 
 			// Assert an application/json response.
@@ -154,8 +178,21 @@ class HttpRequest {
 					while (reader.readLine().also { line = it } != null) {
 						builder.append(line).append('\n')
 					}
-					result = gson.fromJson(builder.toString(), resultType.type)
-					// result = gson.fromJson(reader, resultType.getType());
+					var responseJson = builder.toString()
+
+					val jsonObject = JsonParser.parseString(responseJson).asJsonObject
+					if (!jsonObject.has("OK")) {
+						val wrapped = JsonObject().apply {
+							addProperty("OK", true)
+							add("Result", jsonObject)
+							add("Rels", JsonObject())
+							add("Error", JsonNull.INSTANCE)
+						}
+
+						responseJson = wrapped.toString()
+					}
+
+					result = gson.fromJson(responseJson, resultType.type)
 				} finally {
 					reader.close()
 				}
@@ -269,89 +306,122 @@ class HttpRequest {
 		callback: HttpCallback<Response<T>>,
 		progressCallback: HttpProgressCallback?
 	) {
-		var conn: HttpURLConnection? = null
 		val gson = this.gson ?: return
 
-		try {
-			conn = openConnection()
-			if (conn == null) {
-				return
-			}
-			val boundary = generateMultipartBoundary()
-			conn.requestMethod = "POST"
-			conn.setRequestProperty(
-				"Content-Type",
-				String.format("multipart/form-data;boundary=%s", boundary)
+		val multipartBuilder = MultipartBody.Builder()
+			.setType(MultipartBody.FORM)
+
+		params.forEach { (key, value) ->
+			multipartBuilder.addFormDataPart(key, value)
+		}
+
+		files.forEach { (key, httpFile) ->
+
+			val body = ProgressRequestBody(
+				httpFile.file,
+				httpFile.mimeType,
+				progressCallback
 			)
-			if (token != null) {
-				conn.setRequestProperty("Authorization", String.format("Client %s", token))
-			}
-			conn.readTimeout = POST_READ_TIMEOUT_MILLIS
-			conn.connectTimeout = CONNECT_TIMEOUT_MILLIS
-			conn.useCaches = false
-			conn.defaultUseCaches = false
-			conn.doInput = true
-			conn.doOutput = true
 
-			// Write a multipart body.
-			val body = generateMultipartBody(boundary, params, files).toByteArray()
-			conn.setRequestProperty("Content-Length", String.format("%d", body.size))
-			val out = conn.outputStream
-			out.use { out ->
-				InternalIO.copy(body, out, object : InternalIO.ProgressCallback {
-					override fun onProgress(progress: Int) {
-						progressCallback?.onProgress(progress)
+			multipartBuilder.addFormDataPart(
+				key,
+				httpFile.file.name,
+				body
+			)
+		}
+
+		val requestBuilder = Request.Builder()
+			.url(url!!)
+
+		if (token != null) {
+			requestBuilder.addHeader(
+				"Authorization",
+				"Client $token"
+			)
+		}
+
+		requestBuilder.post(multipartBuilder.build())
+
+		val client = OkHttpClient.Builder()
+			.connectTimeout(15, TimeUnit.SECONDS)
+			.readTimeout(15, TimeUnit.SECONDS)
+			.build()
+
+		val request = requestBuilder.build()
+
+		call = client.newCall(request)
+
+		call!!.enqueue(object : Callback {
+
+			override fun onFailure(call: Call, e: IOException) {
+				callback.onException(e)
+			}
+
+			override fun onResponse(call: Call, response: okhttp3.Response) {
+
+				try {
+
+					if (!response.isSuccessful) {
+						throw HttpException(response.message)
 					}
-				})
-			}
 
-			// Get a status code.
-			val status = conn.responseCode
-			val statusText = conn.responseMessage
-			if (status / 100 != 2) {
-				val exception = HttpException(statusText)
-				exception.code = status
-				throw exception
-			}
+					val body = response.body?.string()
+						?: throw HttpException("Empty response")
 
-			// Assert an application/json response.
-			val ctype = conn.contentType
-			if (ctype == null || !ctype.contains("application/json")) {
-				throw HttpException(String.format("Unsupported response content type '%s'", ctype))
-			}
+					val result: Response<T> =
+						gson.fromJson(body, resultType?.type)
 
-			// Read a response when not void.
-			val result: Response<T>
-			val clength = conn.contentLength
-			if (resultType == null) {
-				result = Response()
-				result.OK = true
-				result.Result = null
-				result.Rels = Relations()
-			} else {
-				if (clength == 0) {
-					throw HttpException("Empty server response")
-				}
-				val reader = BufferedReader(InputStreamReader(conn.inputStream))
-				result = try {
-					gson.fromJson(reader, resultType.type)
-				} finally {
-					reader.close()
+					if (result.OK && !closed) {
+						callback.onResult(result)
+					} else {
+						callback.onException(
+							Exception(result.Error?.Text ?: "Unknown error")
+						)
+					}
+
+				} catch (e: Exception) {
+					callback.onException(e)
 				}
 			}
-			d(TAG, String.format("POST %d %s %db", status, url, clength))
-			if (result.OK) {
-				callback.onResult(result)
-				return
+		})
+	}
+
+	class ProgressRequestBody(
+		private val file: File,
+		private val mimeType: String,
+		private val progressCallback: HttpProgressCallback?
+	) : RequestBody() {
+
+		override fun contentType(): MediaType? {
+			return mimeType.toMediaTypeOrNull()
+		}
+
+		override fun contentLength(): Long {
+			return file.length()
+		}
+
+		override fun writeTo(sink: BufferedSink) {
+
+			val total = file.length()
+
+			file.inputStream().use { input ->
+
+				val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+
+				var uploaded = 0L
+				var read: Int
+
+				while (input.read(buffer).also { read = it } != -1) {
+
+					sink.write(buffer, 0, read)
+
+					uploaded += read
+
+					progressCallback?.onProgress(
+						((uploaded * 100) / total).toInt()
+					)
+				}
 			}
-			val error = result.Error
-			if (error == null) {
-				callback.onException(ChatException.unknown())
-				return
-			}
-			callback.onException(ChatException(error.Code, error.Text))
-		} finally {
-			conn?.disconnect()
 		}
 	}
 

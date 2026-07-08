@@ -4,6 +4,7 @@ import android.content.res.Resources
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.text.SpannableString
+import android.text.SpannableStringBuilder
 import android.text.method.LinkMovementMethod
 import android.text.util.Linkify
 import android.view.Gravity
@@ -19,6 +20,7 @@ import android.widget.LinearLayout
 import android.widget.PopupWindow
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
+import androidx.core.text.HtmlCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
@@ -221,37 +223,54 @@ internal class MyMessageViewHolder(
 			clTextsMy.visibility = View.VISIBLE
 			myText.visibility = View.VISIBLE
 
-			val text = message.Text
+			val rawText = message.Text.orEmpty()
+
+			val htmlText = HtmlCompat.fromHtml(
+				rawText,
+				HtmlCompat.FROM_HTML_MODE_LEGACY
+			)
+
+			val spannable = SpannableStringBuilder(htmlText)
+
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
 				val textClassifier = myText.context
 					.getSystemService(TextClassificationManager::class.java)
 					.textClassifier
 
-				val request = TextLinks.Request.Builder(text ?: "").build()
+				val request = TextLinks.Request.Builder(htmlText.toString()).build()
 				val textLinks = textClassifier.generateLinks(request)
 
-				val spannable = SpannableString(text)
-				textLinks.apply(spannable, TextLinks.APPLY_STRATEGY_REPLACE, null)
-
-				Linkify.addLinks(spannable, Linkify.WEB_URLS)
-
-				val phonePattern = Pattern.compile("7\\d{10}")
-				Linkify.addLinks(spannable, phonePattern, "tel:")
-
-				myText.text = spannable
-				myText.movementMethod = LinkMovementMethod.getInstance()
-			} else {
-				myText.autoLinkMask = Linkify.ALL
-				myText.text = text
-				myText.movementMethod = android.text.method.LinkMovementMethod.getInstance()
+				textLinks.apply(
+					spannable,
+					TextLinks.APPLY_STRATEGY_REPLACE,
+					null
+				)
 			}
+
+			Linkify.addLinks(spannable, Linkify.WEB_URLS)
+
+			val phonePattern = Pattern.compile("7\\d{10}")
+			Linkify.addLinks(spannable, phonePattern, "tel:")
+
+			myText.text = spannable
+			myText.movementMethod = LinkMovementMethod.getInstance()
+
 			myText.setOnLongClickListener {
 				itemClickListener.onMessageLongClick(message, it)
 				true
 			}
 
-			myText.setTextColor(ContextCompat.getColor(root.context, R.color.my_text_color))
-			myText.applyIQStyles(IQStyles.iqChannelsStyles?.messages?.textClient)
+			myText.setTextColor(
+				ContextCompat.getColor(
+					root.context,
+					R.color.my_text_color
+				)
+			)
+
+			myText.applyIQStyles(
+				IQStyles.iqChannelsStyles?.messages?.textClient
+			)
+
 			myText.minWidth = 0
 			myText.maxWidth = Int.MAX_VALUE
 		}
@@ -411,7 +430,39 @@ internal class MyMessageViewHolder(
 				if (!message.Text.isNullOrEmpty()) {
 					clTextsMy.visibility = View.VISIBLE
 					myText.visibility = View.VISIBLE
-					myText.text = message.Text
+
+					val rawText = message.Text.orEmpty()
+
+					val htmlText = HtmlCompat.fromHtml(
+						rawText,
+						HtmlCompat.FROM_HTML_MODE_LEGACY
+					)
+
+					val spannable = SpannableStringBuilder(htmlText)
+
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+						val textClassifier = myText.context
+							.getSystemService(TextClassificationManager::class.java)
+							.textClassifier
+
+						val request = TextLinks.Request.Builder(htmlText.toString()).build()
+						val textLinks = textClassifier.generateLinks(request)
+
+						textLinks.apply(
+							spannable,
+							TextLinks.APPLY_STRATEGY_REPLACE,
+							null
+						)
+					}
+
+					Linkify.addLinks(spannable, Linkify.WEB_URLS)
+
+					val phonePattern = Pattern.compile("7\\d{10}")
+					Linkify.addLinks(spannable, phonePattern, "tel:")
+
+					myText.text = spannable
+					myText.movementMethod = LinkMovementMethod.getInstance()
+
 					myFlags.isVisible = true
 
 					myImgFlags.isVisible = false

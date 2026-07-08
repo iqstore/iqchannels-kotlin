@@ -4,7 +4,10 @@ import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
+import android.text.Html
 import android.text.SpannableString
+import android.text.SpannableStringBuilder
+import android.text.method.LinkMovementMethod
 import android.text.util.Linkify
 import android.view.MotionEvent
 import android.view.View
@@ -273,32 +276,40 @@ internal class OtherMessageViewHolder(
 				clTexts.visibility = View.VISIBLE
 				otherText.visibility = View.VISIBLE
 
-				val text = message.Text
+				val text = message.Text.orEmpty()
+
+				val spanned = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+					Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY)
+				} else {
+					@Suppress("DEPRECATION")
+					Html.fromHtml(text)
+				}
+
+				val spannable = SpannableStringBuilder(spanned)
 
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
 					val textClassifier = otherText.context
 						.getSystemService(TextClassificationManager::class.java)
 						.textClassifier
 
-					val request = TextLinks.Request.Builder(text ?: "").build()
+					val request = TextLinks.Request.Builder(spannable.toString()).build()
 					val textLinks = textClassifier.generateLinks(request)
 
-					val spannable = SpannableString(text)
-					textLinks.apply(spannable, TextLinks.APPLY_STRATEGY_REPLACE, null)
-
-					Linkify.addLinks(spannable, Linkify.WEB_URLS)
-
-					val phonePattern = Pattern.compile("7\\d{10}")
-					Linkify.addLinks(spannable, phonePattern, "tel:")
-
-					otherText.text = spannable
-					otherText.movementMethod = android.text.method.LinkMovementMethod.getInstance()
-
-				} else {
-					otherText.autoLinkMask = Linkify.ALL
-					otherText.text = text
-					otherText.movementMethod = android.text.method.LinkMovementMethod.getInstance()
+					textLinks.apply(
+						spannable,
+						TextLinks.APPLY_STRATEGY_IGNORE,
+						null
+					)
 				}
+
+				Linkify.addLinks(spannable, Linkify.WEB_URLS)
+
+				val phonePattern = Pattern.compile("7\\d{10}")
+				Linkify.addLinks(spannable, phonePattern, "tel:")
+
+				otherText.text = spannable
+				otherText.movementMethod = LinkMovementMethod.getInstance()
+
 				otherText.setOnLongClickListener {
 					itemClickListener.onMessageLongClick(message, it)
 					true
@@ -392,12 +403,21 @@ internal class OtherMessageViewHolder(
 						clDropdownBtns.visibility = View.VISIBLE
 					}
 				} else {
+					val screenWidth = itemView.resources.displayMetrics.widthPixels
+
+					val params = rvButtons.layoutParams
+					params.width = (screenWidth * 0.7f).toInt()
+					rvButtons.layoutParams = params
+
+
 					val adapter = ButtonsAdapter(object : ButtonsAdapter.ClickListener {
 						override fun onClick(item: SingleChoice) {
 							itemClickListener.onButtonClick(message, item)
 						}
 					})
-					adapter.setItems(message.SingleChoices)
+					adapter.setItems(
+						message.SingleChoices?.filter { it.Deleted != true }
+					)
 					rvButtons.adapter = adapter
 					rvButtons.visibility = View.VISIBLE
 				}
@@ -682,9 +702,39 @@ internal class OtherMessageViewHolder(
 				if (!text.isNullOrEmpty()) {
 					clTexts.visibility = View.VISIBLE
 					otherText.visibility = View.VISIBLE
-					message.Text?.let {
-						markwon.setMarkdown(otherText, it)
+
+					val spanned = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+						Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY)
+					} else {
+						@Suppress("DEPRECATION")
+						Html.fromHtml(text)
 					}
+
+					val spannable = SpannableStringBuilder(spanned)
+
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+
+						val textClassifier = otherText.context
+							.getSystemService(TextClassificationManager::class.java)
+							.textClassifier
+
+						val request = TextLinks.Request.Builder(spannable.toString()).build()
+						val textLinks = textClassifier.generateLinks(request)
+
+						textLinks.apply(
+							spannable,
+							TextLinks.APPLY_STRATEGY_IGNORE,
+							null
+						)
+					}
+
+					Linkify.addLinks(spannable, Linkify.WEB_URLS)
+
+					val phonePattern = Pattern.compile("7\\d{10}")
+					Linkify.addLinks(spannable, phonePattern, "tel:")
+
+					otherText.text = spannable
+					otherText.movementMethod = LinkMovementMethod.getInstance()
 				} else {
 					otherText.visibility = View.GONE
 				}
@@ -765,12 +815,6 @@ internal class OtherMessageViewHolder(
 				}
 
 				val text = message.Text
-				if (!text.isNullOrEmpty()) {
-					otherText.visibility = View.VISIBLE
-					message.Text?.let {
-						markwon.setMarkdown(otherText, it)
-					}
-				}
 			}
 		}
 	}
@@ -783,7 +827,6 @@ internal class OtherMessageViewHolder(
 		otherImageFrame.visibility = View.GONE
 		clTexts.visibility = View.VISIBLE
 		otherText.visibility = View.VISIBLE
-		otherText.text = message
 		otherText.setTextColor(
 			ContextCompat.getColor(root.context, colorRes)
 		)
@@ -800,7 +843,6 @@ internal class OtherMessageViewHolder(
 			?.let {
 				rating.root.setBackgroundDrawable(it, R.drawable.other_msg_rating_poll_bg)
 			}
-		val data = message.TransferToChannel
 		val changeSegmentViewHolder = ChangeSegmentViewHolder(changeSegmentBinding)
 
 		binding.otherAvatar.visibility = View.GONE

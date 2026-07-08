@@ -13,6 +13,8 @@ import ru.iqchannels.sdk.IQLog
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.FrameLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
@@ -31,6 +33,8 @@ import ru.iqchannels.sdk.app.IQChannels
 import ru.iqchannels.sdk.app.IQChannelsConfig
 import ru.iqchannels.sdk.app.IQChannelsConfig2
 import ru.iqchannels.sdk.app.IQChannelsFactory
+import ru.iqchannels.sdk.app.AdvancedUnread
+import ru.iqchannels.sdk.app.AdvancedUnreadListener
 import ru.iqchannels.sdk.app.UIOptions
 import ru.iqchannels.sdk.app.UnreadListener
 import ru.iqchannels.sdk.domain.models.ChatType
@@ -41,7 +45,7 @@ import java.io.File
 class IQAppActivity :
 	AppCompatActivity(),
 	NavigationView.OnNavigationItemSelectedListener,
-	UnreadListener {
+	UnreadListener, AdvancedUnreadListener {
 
 	companion object {
 		private const val TAG = "iqchannels-app"
@@ -54,6 +58,7 @@ class IQAppActivity :
 	}
 
 	private var unread: Cancellable? = null
+	private var advancedUnread: Cancellable? = null
 
 	private var customNavBarEnabled = false
 
@@ -260,10 +265,33 @@ class IQAppActivity :
 				return false
 			}
 
+			R.id.nav_listen_to_new_unread -> {
+				advancedUnread?.cancel()
+				advancedUnread = null
+				advancedUnread = IQChannels.addAdvancedUnreadListener(this)
+				return false
+			}
+
+			R.id.toggle_log_view -> {
+				val container = findViewById<FrameLayout>(R.id.container)
+
+				container.visibility =
+					if (container.visibility == View.GONE) {
+						View.VISIBLE
+					} else {
+						View.GONE
+					}
+				return false
+			}
+
 			R.id.nav_remove_unread_listener -> {
 				if (unread != null) {
 					unread!!.cancel()
 					unread = null
+				}
+				if (advancedUnread != null) {
+					advancedUnread!!.cancel()
+					advancedUnread = null
 				}
 				return false
 			}
@@ -336,6 +364,17 @@ class IQAppActivity :
 			item.setTitle(String.format("Chat (%d)", unread))
 		}
 	}
+
+	override fun advancedUnreadChanged(unread: AdvancedUnread?) {
+		val textView = findViewById<TextView>(R.id.text)
+		textView.text = "$unread"
+	}
+
+	override fun advancedUnreadException(e: Exception) {
+		val textView = findViewById<TextView>(R.id.text)
+		textView.text = "$e"
+	}
+
 
 	private fun setStylesPrefs() {
 		val prefs = getSharedPreferences(StylesEditFragment.PREFS_STYLES, Context.MODE_PRIVATE)

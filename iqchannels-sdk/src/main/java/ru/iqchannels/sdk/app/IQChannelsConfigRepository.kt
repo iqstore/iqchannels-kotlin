@@ -32,6 +32,8 @@ internal object IQChannelsConfigRepository {
 		this.credentials = credentials
 
 		if (config.channels.isNotEmpty()) {
+			IQChannels.channels = config.channels
+
 			if (job == null || job?.isActive == false) {
 				val excHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
 					IQLog.e("applyConfig", "Apply conf error", throwable)
@@ -56,16 +58,16 @@ internal object IQChannelsConfigRepository {
 								)
 							}
 
-//							if (multiChatsInfo.EnableForPersonalManagers) {
-//								channels.add(
-//									Channel(
-//										id = channel,
-//										name = multiChatsInfo.ChannelName,
-//										chatType = ChatType.PERSONAL_MANAGER,
-//										iconColor = multiChatsInfo.ChannelIconColor
-//									)
-//								)
-//							}
+							if (multiChatsInfo.EnableForPersonalManagers) {
+								channels.add(
+									Channel(
+										id = channel,
+										name = multiChatsInfo.ChannelName,
+										chatType = ChatType.PERSONAL_MANAGER,
+										iconColor = multiChatsInfo.ChannelIconColor
+									)
+								)
+							}
 						}
 					}
 

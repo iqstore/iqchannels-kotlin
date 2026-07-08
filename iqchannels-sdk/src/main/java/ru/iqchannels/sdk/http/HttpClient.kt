@@ -17,8 +17,11 @@ import ru.iqchannels.sdk.IQLog.d
 import ru.iqchannels.sdk.IQLog.e
 import ru.iqchannels.sdk.app.IQChannels.chatType
 import ru.iqchannels.sdk.app.IQChannels.isInfoChat
+import ru.iqchannels.sdk.app.AdvancedUnread
+import ru.iqchannels.sdk.app.AdvancedUnreadResult
 import ru.iqchannels.sdk.domain.models.ChatType
 import ru.iqchannels.sdk.rels.Rels
+import ru.iqchannels.sdk.schema.ChannelsQuery
 import ru.iqchannels.sdk.schema.ChatEvent
 import ru.iqchannels.sdk.schema.ChatEventQuery
 import ru.iqchannels.sdk.schema.ChatMessage
@@ -288,6 +291,33 @@ class HttpClient(
 			})
 	}
 
+	fun getAdvancedUnread(
+		query: ChannelsQuery,
+		callback: HttpCallback<AdvancedUnread>
+	): HttpRequest {
+		val path = "/clients/get_last_messages"
+		val type: TypeToken<ru.iqchannels.sdk.schema.Response<AdvancedUnread>> =
+			object : TypeToken<ru.iqchannels.sdk.schema.Response<AdvancedUnread>>() {}
+
+		return post(
+			path,
+			query,
+			type,
+			object : HttpCallback<ru.iqchannels.sdk.schema.Response<AdvancedUnread>> {
+				override fun onResult(result: ru.iqchannels.sdk.schema.Response<AdvancedUnread>?) {
+					val advancedUnread = result?.Result
+					advancedUnread?.let {
+						callback.onResult(advancedUnread)
+					}
+				}
+
+				override fun onException(exception: Exception) {
+					callback.onException(exception)
+				}
+			}
+		)
+	}
+
 	fun chatsChannelMessages(
 		channel: String,
 		query: MaxIdQuery,
@@ -532,6 +562,39 @@ class HttpClient(
 							listener.onEvent(events)
 						}
 					}
+				}
+
+				override fun onException(e: Exception?) {
+					listener.onException(e)
+				}
+
+				override fun onDisconnected() {
+					listener.onDisconnected()
+				}
+			}
+		)
+	}
+
+	// Channel advanced unread events
+	@SuppressLint("DefaultLocale")
+	fun advancedUnreadEvents(
+		listener: HttpSseListener<AdvancedUnreadResult>
+	): HttpRequest {
+		var path = "/sse/chats/channel/unread/multichat"
+
+		val type: TypeToken<ru.iqchannels.sdk.schema.Response<AdvancedUnreadResult>> =
+			object : TypeToken<ru.iqchannels.sdk.schema.Response<AdvancedUnreadResult>>() {}
+
+		return sse(
+			path,
+			type,
+			object : HttpSseListener<ru.iqchannels.sdk.schema.Response<AdvancedUnreadResult>> {
+				override fun onConnected() {
+					listener.onConnected()
+				}
+
+				override fun onEvent(event: ru.iqchannels.sdk.schema.Response<AdvancedUnreadResult>) {
+					event.Result?.let { listener.onEvent(it) }
 				}
 
 				override fun onException(e: Exception?) {

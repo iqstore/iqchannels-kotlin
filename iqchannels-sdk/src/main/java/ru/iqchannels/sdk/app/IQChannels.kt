@@ -36,6 +36,7 @@ import ru.iqchannels.sdk.room.MessageDao
 import ru.iqchannels.sdk.room.toChatMessage
 import ru.iqchannels.sdk.room.toDatabaseMessage
 import ru.iqchannels.sdk.schema.ActorType
+import ru.iqchannels.sdk.schema.ChannelsQuery
 import ru.iqchannels.sdk.schema.ChatEvent
 import ru.iqchannels.sdk.schema.ChatEventQuery
 import ru.iqchannels.sdk.schema.ChatEventType
@@ -111,6 +112,17 @@ object IQChannels {
 	private var unreadRequest: HttpRequest? = null
 	private val unreadListeners: MutableSet<UnreadListener>
 
+
+	private var advancedUnread: AdvancedUnread? = null
+	private var advancedUnreadAttempt = 0
+	private var advancedUnreadRequest: HttpRequest? = null
+	private val advancedUnreadListeners: MutableSet<AdvancedUnreadListener>
+
+	private var advancedUnreadEventsAttempt = 0
+	private var advancedUnreadEventsRequest: HttpRequest? = null
+
+	var channels: List<String>? = null
+
 	// Messages
 	private var messages: MutableList<ChatMessage>? = null
 	private var messageRequest: HttpRequest? = null
@@ -163,6 +175,7 @@ object IQChannels {
 	init {
 		listeners = HashSet()
 		unreadListeners = HashSet()
+		advancedUnreadListeners = HashSet()
 		messageListeners = HashSet()
 		moreMessageCallbacks = HashSet()
 		receivedQueue = HashSet()
@@ -186,6 +199,9 @@ object IQChannels {
 	}
 
 	fun configure(context: Context, config: IQChannelsConfig) {
+		config.channels?.let {
+			channels = config.channels
+		}
 		config.address?.let {
 			if (this.config != null) {
 				clear()
@@ -756,6 +772,22 @@ object IQChannels {
 		}
 	}
 
+	fun addAdvancedUnreadListener(listener: AdvancedUnreadListener): Cancellable {
+		Preconditions.checkNotNull(listener, "null listener")
+		advancedUnreadListeners.add(listener)
+		listenToAdvancedUnread()
+		IQLog.d(TAG, String.format("Added an advanced unread listener %s", listener))
+		val copy = advancedUnread
+		execute { listener.advancedUnreadChanged(copy) }
+		return object : Cancellable {
+			override fun cancel() {
+				advancedUnreadListeners.remove(listener)
+				IQLog.d(TAG, String.format("Removed an advanced unread listener %s", listener))
+				clearAdvancedUnreadWhenNoListeners()
+			}
+		}
+	}
+
 	private fun clearUnread() {
 		unreadRequest?.cancel()
 		unread = 0
@@ -767,9 +799,35 @@ object IQChannels {
 		IQLog.d(TAG, "Cleared unread")
 	}
 
+	private fun clearAdvancedUnread() {
+		advancedUnreadRequest?.cancel()
+		advancedUnread = null
+		advancedUnreadAttempt = 0
+		advancedUnreadRequest = null
+		for (listener in advancedUnreadListeners) {
+			execute { listener.advancedUnreadChanged(null) }
+		}
+		IQLog.d(TAG, "Cleared advanced unread")
+	}
+
 	private fun clearUnreadWhenNoListeners() {
 		if (unreadListeners.isEmpty()) {
 			clearUnread()
+		}
+	}
+
+	private fun clearAdvancedUnreadWhenNoListeners() {
+		if (advancedUnreadListeners.isEmpty()) {
+			clearAdvancedUnread()
+		}
+	}
+
+	private fun advancedUnreadReceived(unread: AdvancedUnread?) {
+		this.advancedUnread = unread
+		advancedUnreadAttempt = 0
+		val copy = this.advancedUnread
+		for (listener in advancedUnreadListeners) {
+			execute { listener.advancedUnreadChanged(copy) }
 		}
 	}
 
@@ -789,11 +847,65 @@ object IQChannels {
 
 			unreadReceived(unreadCount)
 		}
+	}
 
+	private fun listenToAdvancedUnread() {
+		listenToAdvancedUnreadEvents()
 
+		CoroutineScope(Dispatchers.IO).launch {
+			getAdvancedUnread()
+		}
+	}
 
+	private fun listenToAdvancedUnreadEvents() {
+		if (advancedUnreadEventsRequest != null) {
+			return
+		}
+		if (auth == null) {
+			return
+		}
 
+		advancedUnreadEventsAttempt++
 
+		client?.let { client ->
+			advancedUnreadEventsRequest = client.advancedUnreadEvents(
+				object : HttpSseListener<AdvancedUnreadResult> {
+					override fun onConnected() {}
+					override fun onEvent(event: AdvancedUnreadResult) {
+						execute { advancedUnreadEventsReceived(event) }
+					}
+
+					override fun onException(e: Exception?) {
+						e?.let { execute { eventsException(e) } }
+					}
+
+					override fun onDisconnected() {
+						execute { eventsDisconnected(Exception("disconnected")) }
+					}
+				}
+			)
+		}
+	}
+
+	private fun advancedUnreadEventsReceived(event: AdvancedUnreadResult) {
+		if (advancedUnreadEventsRequest == null) {
+			return
+		}
+
+		advancedUnreadAttempt = 0
+		IQLog.i(TAG, String.format("Received advanced unread event: $event"))
+
+		this.advancedUnread?.channels
+			?.find { it.name == event.name }
+			?.apply {
+				unreadCount = event.unreadCount
+				lastMessage = event.lastMessage
+			}
+
+		val copy = this.advancedUnread
+		for (listener in advancedUnreadListeners) {
+			execute { listener.advancedUnreadChanged(copy) }
+		}
 	}
 
 	private fun unreadException(e: Exception) {
@@ -839,6 +951,35 @@ object IQChannels {
 		val copy = this.unread
 		for (listener in unreadListeners) {
 			execute { listener.unreadChanged(copy) }
+		}
+	}
+
+	private fun getAdvancedUnread() {
+		if (advancedUnreadRequest != null) {
+			return
+		}
+		if (auth == null) {
+			return
+		}
+
+		val query = ChannelsQuery().apply {
+			ChannelNames = channels
+		}
+
+		client?.let { client ->
+			advancedUnreadRequest = client.getAdvancedUnread(
+				query,
+				object : HttpCallback<AdvancedUnread> {
+					override fun onResult(advancedUnreadResult: AdvancedUnread?) {
+						advancedUnreadReceived(advancedUnreadResult)
+					}
+
+					override fun onException(exception: Exception) {
+						execute { advancedUnreadException(exception) }
+					}
+				}
+			)
+			IQLog.i(TAG, "Loading advanced unread")
 		}
 	}
 
@@ -1029,15 +1170,12 @@ object IQChannels {
 					channel,
 					object : HttpCallback<InfoChatSettingsResponse> {
 						override fun onResult(result: InfoChatSettingsResponse?) {
-							IQLog.d("!!!!!!!!!!!!", "InfoChatSettingsResponse messages   $messages")
 
 							infoChatSettings = InfoChatSettings(
 								BlockerText = result?.Text,
 								BlockerIcon = fileUrl(result?.BlockerFileId ?: ""),
 								IsVisibleBlocker = messages?.isEmpty() ?: false
 							)
-
-							IQLog.d("!!!!!!!!!!!!", "infoChatSettings    $infoChatSettings")
 
 							onComplete()
 						}
@@ -1100,6 +1238,18 @@ object IQChannels {
 			execute { listener.messagesException(exception) }
 		}
 		messageListeners.clear()
+	}
+
+	private fun advancedUnreadException(exception: Exception) {
+		if (advancedUnreadRequest == null) {
+			return
+		}
+		advancedUnreadRequest = null
+		IQLog.e(TAG, String.format("Failed to get advanced unread, exc=%s", exception))
+		for (listener in advancedUnreadListeners) {
+			execute { listener.advancedUnreadException(exception) }
+		}
+		advancedUnreadListeners.clear()
 	}
 
 	private fun messagesLoaded(messages: List<ChatMessage>) {

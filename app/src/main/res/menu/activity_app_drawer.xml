@@ -41,6 +41,12 @@
             android:title="Listen to unread"/>
 
         <item
+            android:id="@+id/nav_listen_to_new_unread"
+            android:title="Listen to advanced unread"/>
+        <item
+            android:id="@+id/toggle_log_view"
+            android:title="Toggle log view"/>
+        <item
             android:id="@+id/nav_remove_unread_listener"
             android:title="Remove unread listener"/>
         <item

@@ -29,4 +29,23 @@
 
     <include layout="@layout/content_app"/>
 
+    <FrameLayout
+        android:id="@+id/container"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="#FFFFFF">
+
+        <TextView
+            android:id="@+id/text"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="Тест"
+            android:textSize="16sp"
+            android:textColor="@color/dark_text_color"/>
+    </FrameLayout>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

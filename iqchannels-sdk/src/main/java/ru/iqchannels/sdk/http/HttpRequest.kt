@@ -154,8 +154,21 @@ class HttpRequest {
 					while (reader.readLine().also { line = it } != null) {
 						builder.append(line).append('\n')
 					}
-					result = gson.fromJson(builder.toString(), resultType.type)
-					// result = gson.fromJson(reader, resultType.getType());
+					var responseJson = builder.toString()
+
+					val jsonObject = JsonParser.parseString(responseJson).asJsonObject
+					if (!jsonObject.has("OK")) {
+						val wrapped = JsonObject().apply {
+							addProperty("OK", true)
+							add("Result", jsonObject)
+							add("Rels", JsonObject())
+							add("Error", JsonNull.INSTANCE)
+						}
+
+						responseJson = wrapped.toString()
+					}
+
+					result = gson.fromJson(responseJson, resultType.type)
 				} finally {
 					reader.close()
 				}

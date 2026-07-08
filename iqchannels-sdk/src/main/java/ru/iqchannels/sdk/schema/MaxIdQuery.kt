@@ -5,3 +5,8 @@ class MaxIdQuery {
 	var Limit: Int? = null
 	var ChatType: String = ru.iqchannels.sdk.domain.models.ChatType.REGULAR.name.lowercase()
 }
+
+
+class ChannelsQuery {
+	var ChannelNames: List<String>? = null
+}

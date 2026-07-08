@@ -236,6 +236,40 @@ class MainActivity : AppCompatActivity,
 }
 ```
 
+# Отображение расширенных непрочитанных сообщений
+Для отображения и обновления расширенных непрочитанных сообщений нужно добавить слушателя в IQChannels.
+Слушателя нужно добавлять после конфигурации и логина.
+
+Пример добавления слушателя в `Activity.onCreate`:
+```kotlin
+class MainActivity : AppCompatActivity,
+        NavigationView.OnNavigationItemSelectedListener,
+            AdvancedUnreadListener {
+
+    private var advancedUnreadSubscription : Cancellable? = null
+
+    override fun onCreate(savedInstanceState: Bundle) {
+        super.onCreate(savedInstanceState)
+        listenToAdvancedUnread()
+    }
+
+    // Добавляем слушателя расширенных непрочитанных сообщений.
+    private fun listenToAdvancedUnread() {
+        advancedUnreadSubscription = IQChannels.addAdvancedUnreadListener(this)
+    }
+
+    // Показывает текущее количество расширенных непрочитанных сообщений.
+    override fun advancedUnreadChanged(unread: AdvancedUnread?) {
+
+    }
+
+    // Выводит ошибки расширенных непрочитанных сообщений
+    override fun advancedUnreadException(e: Exception) {
+        
+    }
+}
+```
+
 # Настройка пуш-уведомлений
 SDK поддерживает пуш-уведомления о новых сообщениях в чате.
 Для этого в приложении настроить Firebase Messaging, получить пуш-токен

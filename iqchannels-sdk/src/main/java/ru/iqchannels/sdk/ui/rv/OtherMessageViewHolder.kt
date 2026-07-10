@@ -418,8 +418,11 @@ internal class OtherMessageViewHolder(
 					adapter.setItems(
 						message.SingleChoices?.filter { it.Deleted != true }
 					)
-					rvButtons.adapter = adapter
-					rvButtons.visibility = View.VISIBLE
+
+					if(adapter.itemCount != 0) {
+						rvButtons.adapter = adapter
+						rvButtons.visibility = View.VISIBLE
+					}
 				}
 			} else if ((((message.Payload == ChatPayloadType.CARD) || ((message.Payload == ChatPayloadType.CAROUSEL)))
 						&& (message.Actions != null) && message.Actions?.isNotEmpty() == true)

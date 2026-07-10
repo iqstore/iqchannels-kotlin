@@ -1541,11 +1541,11 @@ class ChatFragment : Fragment() {
 	}
 
 	private fun sendSingleChoice(singleChoice: SingleChoice) {
-		IQChannels.sendPostbackReply(singleChoice.title, singleChoice.value)
+		IQChannels.sendPostbackReply(singleChoice.ChatMessageId, singleChoice.title, singleChoice.value)
 	}
 
 	private fun sendAction(action: Action) {
-		IQChannels.sendPostbackReply(action.Title, action.Payload)
+		IQChannels.sendPostbackReply(action.ChatMessageId, action.Title, action.Payload)
 	}
 
 	// Error alerts

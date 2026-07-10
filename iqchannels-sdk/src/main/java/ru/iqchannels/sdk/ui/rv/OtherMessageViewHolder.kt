@@ -700,7 +700,7 @@ internal class OtherMessageViewHolder(
 		binding.apply {
 			val imageUrl = file.ImagePreviewUrl
 			if (imageUrl != null) {
-				val size = Utils.computeImageSizeFromFile(file, rootViewDimens)
+				val size = Utils.computeImageSizeFromFile(file, rootViewDimens, false)
 				val text = message.Text
 				if (!text.isNullOrEmpty()) {
 					clTexts.visibility = View.VISIBLE

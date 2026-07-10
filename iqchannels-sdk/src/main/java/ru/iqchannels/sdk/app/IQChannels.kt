@@ -1698,7 +1698,7 @@ object IQChannels {
 		user.Online = true
 		user.Id = 1
 		val message = ChatMessage(user, localId)
-		message.Text = "2.3.5"
+		message.Text = "2.3.6"
 		messages?.add(message)
 		for (listener in messageListeners) {
 			execute {
@@ -1709,12 +1709,22 @@ object IQChannels {
 		}
 	}
 
-	internal fun sendPostbackReply(title: String?, botpressPayload: String?) {
+	internal fun sendPostbackReply(chatMessageId: Long?, title: String?, botpressPayload: String?) {
 		if (botpressPayload == null || title == null) {
 			return
 		}
 		if (auth == null) {
 			return
+		}
+
+		val oldMessage = messages?.firstOrNull { it.Id == chatMessageId }
+
+		if(oldMessage != null) {
+			oldMessage.SingleChoices = null
+
+			for (listener in messageListeners) {
+				execute { listener.messageUpdated(oldMessage) }
+			}
 		}
 
 		auth?.Client?.let { client ->

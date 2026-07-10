@@ -425,7 +425,7 @@ internal class MyMessageViewHolder(
 			val file = message.File
 			val imageUrl = file?.ImagePreviewUrl
 			if (imageUrl != null) {
-				val size = Utils.computeImageSizeFromFile(file, rootViewDimens)
+				val size = Utils.computeImageSizeFromFile(file, rootViewDimens, true)
 
 				if (!message.Text.isNullOrEmpty()) {
 					clTextsMy.visibility = View.VISIBLE
@@ -491,6 +491,13 @@ internal class MyMessageViewHolder(
 				myImageFrame.visibility = View.VISIBLE
 				myImageFrame.layoutParams.width = size[0]
 				myImageFrame.layoutParams.height = size[1]
+
+				val params = myImageFrame.layoutParams as LinearLayout.LayoutParams
+				params.width = size[0]
+				params.height = size[1]
+				params.gravity = Gravity.CENTER_HORIZONTAL
+
+				myImageFrame.layoutParams = params
 				myImageFrame.requestLayout()
 
 				myImageFrame.post {

@@ -11,8 +11,13 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import ru.iqchannels.sdk.IQLog
+import ru.iqchannels.sdk.styling.IQChannelsStyles
+import ru.iqchannels.sdk.styling.IQStyles
 import ru.iqchannels.sdk.ui.ChatFragment
 import ru.iqchannels.sdk.ui.images.ImagePreviewFragment
 import ru.iqchannels.sdk.ui.theming.IQChannelsCompose
@@ -23,10 +28,23 @@ class ChannelsFragment : Fragment() {
 
 		private const val ARG_NAV_BAR_ENABLED = "ChannelsFragment#navBarEnabled"
 
-		fun newInstance(navBarEnabled: Boolean = true) = ChannelsFragment().apply {
+		fun newInstance(
+			stylesJson: String? = null,
+			navBarEnabled: Boolean = true
+		) = ChannelsFragment().apply {
 			arguments = bundleOf(
 				ARG_NAV_BAR_ENABLED to navBarEnabled
 			)
+
+			stylesJson?.let { json ->
+				try {
+					Gson().fromJson(json, TypeToken.get(IQChannelsStyles::class.java))?.also {
+						IQStyles.iqChannelsStyles = it
+					}
+				} catch (e: Exception) {
+					IQLog.e("ChannelsFragment", "Error on parsing", e)
+				}
+			}
 		}
 	}
 

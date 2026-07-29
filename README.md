@@ -48,11 +48,11 @@ allprojects {
 }
 ```
 
-5. Добавьте зависимосить `implementation 'ru.iqstore:iqchannels-sdk-2:2.3.6'` в `build.gradle` модуля приложения.
+5. Добавьте зависимосить `implementation 'ru.iqstore:iqchannels-sdk-2:2.3.7'` в `build.gradle` модуля приложения.
 ```build.gradle
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])   
-    implementation 'ru.iqstore:iqchannels-sdk-2:2.3.6'
+    implementation 'ru.iqstore:iqchannels-sdk-2:2.3.7'
     // etc...
 }
 ```
@@ -558,10 +558,14 @@ ChatFragment принимает предзаполненная сообщени�
       }
     }
   },
-  "app_bar": {                 //Верхняя панель (Только iOS)
+  "app_bar": {                 //Верхняя панель
     "background": {           //Фон панели
       "light": "#FFFFFF",
       "dark": "#FFFFE0"
+    },
+    "back_button": {          // Цвет иконки "Назад"
+      "light": "#000000",
+      "dark": "#ffffff"
     },
     "status_label": {         //Текст статуса 
       "color": {
@@ -582,6 +586,41 @@ ChatFragment принимает предзаполненная сообщени�
       },
       "text_size": 10,
       "text_align": "center",
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
+    }
+  },
+  "multi_chat": {             //Экран со списком чатов
+    "background": {           //Фон
+      "light": "#FFFFFF",
+      "dark": "#FFFFE0"
+    },
+    "icon_regular_chat": "https://gas-kvas.com/grafic/uploads/posts/2024-01/gas-kvas-com-p-logotip-cheloveka-na-prozrachnom-fone-4.png", //Иконка общего чата
+    "icon_personal_manager_chat": "https://gas-kvas.com/grafic/uploads/posts/2024-01/gas-kvas-com-p-logotip-cheloveka-na-prozrachnom-fone-4.png", //Иконка чата с персональным менеджером
+    "icon_info_chat": "https://gas-kvas.com/grafic/uploads/posts/2024-01/gas-kvas-com-p-logotip-cheloveka-na-prozrachnom-fone-4.png", //Иконка информационного чата
+    "background_icon": {      //Фон иконки
+      "light": "#000000",
+      "dark": "#ffffff"
+    },
+    "title": {                //Заголовок чата 
+      "color": {
+        "light": "#888888",
+        "dark": "#888888"
+      },
+      "text_size": 10,
+      "text_style": {
+        "bold": false,
+        "italic": false
+      }
+    },
+    "last_message": {          //Последнее сообщение
+      "color": {
+        "light": "#888888",
+        "dark": "#888888"
+      },
+      "text_size": 10,
       "text_style": {
         "bold": false,
         "italic": false

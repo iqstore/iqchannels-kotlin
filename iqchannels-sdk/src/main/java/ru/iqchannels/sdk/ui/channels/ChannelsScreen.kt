@@ -24,13 +24,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.domain.models.Channel
 import ru.iqchannels.sdk.domain.models.ChatType
+import ru.iqchannels.sdk.styling.IQStyles
+import ru.iqchannels.sdk.ui.nav_bar.toComposeColor
 import ru.iqchannels.sdk.ui.theming.Regular16
+
+@Composable
+fun ru.iqchannels.sdk.styling.Color.toComposeColor(): Color {
+	return Color(getColorInt(LocalContext.current))
+}
 
 @Composable
 fun ChannelsScreen(channelsViewModel: ChannelsViewModel) {
@@ -48,7 +61,10 @@ private fun ChannelsScreenContent(
 	channels: List<Channel>,
 	onChannelClick: (Channel) -> Unit
 ) {
-	Surface {
+	Surface (
+		color = IQStyles.iqChannelsStyles?.multiСhat?.background?.toComposeColor()
+			?: MaterialTheme.colors.surface
+	){
 		LazyColumn(
 			modifier = Modifier.fillMaxWidth()
 		) {
@@ -62,6 +78,34 @@ private fun ChannelsScreenContent(
 
 @Composable
 private fun ChannelItem(channel: Channel, onClick: (Channel) -> Unit) {
+	val context = LocalContext.current
+	val chatStyles = IQStyles.iqChannelsStyles?.multiСhat
+
+	val style = when (channel.chatType) {
+		ChatType.REGULAR -> Triple(
+			chatStyles?.icon_regular_chat,
+			chatStyles?.backgroundIcon,
+			chatStyles?.lastMessage
+		)
+
+		ChatType.PERSONAL_MANAGER -> Triple(
+			chatStyles?.icon_personal_manager_chat,
+			chatStyles?.backgroundIcon,
+			chatStyles?.lastMessage
+		)
+
+		ChatType.INFO -> Triple(
+			chatStyles?.icon_info_chat,
+			chatStyles?.backgroundIcon,
+			chatStyles?.lastMessage
+		)
+	}
+
+	val iconUrl = style.first
+	val iconBackground = style.second
+	val lastMessageStyle = style.third
+
+
 	Row(
 		modifier = Modifier
 			.fillMaxWidth()
@@ -73,22 +117,44 @@ private fun ChannelItem(channel: Channel, onClick: (Channel) -> Unit) {
 				.size(52.dp)
 				.background(
 					color = channel.iconColor?.let { Color(android.graphics.Color.parseColor(it)) }
-						?: colorResource(id = R.color.channel_red),
+						?: iconBackground?.toComposeColor() ?: colorResource(id = R.color.channel_red),
 					shape = CircleShape
 				)
 		) {
-			Icon(
-				painter = painterResource(
-					id = when (channel.chatType) {
-						ChatType.REGULAR -> R.drawable.ic_chat_common
-						ChatType.PERSONAL_MANAGER -> R.drawable.ic_pm_24
-						ChatType.INFO -> R.drawable.ic_chat_common
-					}
-				),
-				contentDescription = null,
-				tint = colorResource(id = R.color.white),
-				modifier = Modifier.align(Alignment.Center)
-			)
+//			Icon(
+//				painter = painterResource(
+//					id = when (channel.chatType) {
+//						ChatType.REGULAR -> R.drawable.ic_chat_common
+//						ChatType.PERSONAL_MANAGER -> R.drawable.ic_pm_24
+//						ChatType.INFO -> R.drawable.ic_chat_common
+//					}
+//				),
+//				contentDescription = null,
+//				tint = colorResource(id = R.color.white),
+//				modifier = Modifier.align(Alignment.Center)
+//			)
+			if (iconUrl != null) {
+				AsyncImage(
+					model = iconUrl,
+					contentDescription = null,
+					modifier = Modifier
+						.size(52.dp)
+						.align(Alignment.Center)
+				)
+			} else {
+				Icon(
+					painter = painterResource(
+						when (channel.chatType) {
+							ChatType.REGULAR -> R.drawable.ic_chat_common
+							ChatType.PERSONAL_MANAGER -> R.drawable.ic_pm_24
+							ChatType.INFO -> R.drawable.ic_chat_common
+						}
+					),
+					contentDescription = null,
+					tint = Color.White,
+					modifier = Modifier.align(Alignment.Center)
+				)
+			}
 		}
 
 		Column(
@@ -98,8 +164,17 @@ private fun ChannelItem(channel: Channel, onClick: (Channel) -> Unit) {
 
 			Text(
 				modifier = Modifier.padding(top = 4.dp),
-				text = "Сообщение", style = Regular16,
-				color = colorResource(id = R.color.text_color_description),
+				text = "Сообщение",
+				color = lastMessageStyle?.color?.let {
+					Color(it.getColorInt(context))
+				} ?: colorResource(id = R.color.text_color_description),
+				style = lastMessageStyle?.let{
+					TextStyle(
+						fontSize = (it.textSize ?: 15f).sp,
+						fontWeight = if (it.textStyle?.bold == true) FontWeight.Bold else FontWeight.Normal,
+						fontStyle = if (it.textStyle?.italic == true) FontStyle.Italic else FontStyle.Normal
+					)
+				} ?: Regular16,
 				maxLines = 1
 			)
 		}
@@ -108,22 +183,24 @@ private fun ChannelItem(channel: Channel, onClick: (Channel) -> Unit) {
 
 @Composable
 private fun FirstRow(channel: Channel) {
+	val context = LocalContext.current
+	val title = IQStyles.iqChannelsStyles?.multiСhat?.title
+
 	Row {
 		Text(
 			text = channel.name ?: "",
-			style = MaterialTheme.typography.h1,
-			color = colorResource(id = R.color.text_color_h1),
+			color = title?.color?.let {
+				Color(it.getColorInt(context))
+			} ?: colorResource(id = R.color.text_color_h1),
+			style = title?.let {
+				TextStyle(
+					fontSize = (it.textSize ?: 15f).sp,
+					fontWeight = if (it.textStyle?.bold == true) FontWeight.Bold else FontWeight.Normal,
+					fontStyle = if (it.textStyle?.italic == true) FontStyle.Italic else FontStyle.Normal
+				)
+			} ?: MaterialTheme.typography.h1,
 			maxLines = 1
 		)
-
-//		if (channel.lastMessage?.My == true) {
-//			Icon(
-//				painter = painterResource(id = R.drawable.ic_channel_read),
-//				contentDescription = null
-//			)
-//		}
-
-		//ChannelTime(channel = channel)
 	}
 }
 

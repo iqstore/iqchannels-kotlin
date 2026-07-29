@@ -311,7 +311,10 @@ class IQAppActivity :
 			}
 
 			R.id.nav_multi_chat -> {
-				fragment = ChannelsFragment.newInstance(customNavBarEnabled)
+				val stylesJson = getSharedPreferences(StylesEditFragment.PREFS_STYLES, Context.MODE_PRIVATE)
+					.getString(StylesEditFragment.CONFIG_STYLES, null)
+
+				fragment = ChannelsFragment.newInstance(stylesJson = stylesJson, customNavBarEnabled)
 			}
 
 			R.id.hide_action_bar -> {

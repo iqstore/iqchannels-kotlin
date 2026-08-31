@@ -576,6 +576,24 @@ class ChatFragment : Fragment() {
 				chatType = ChatType.INFO
 				isInfoChat = true
 				this.visibility = View.INVISIBLE
+
+				setPadding(
+					paddingLeft,
+					paddingTop,
+					paddingRight,
+					0
+				)
+
+				listOf(
+					R.id.reply,
+					R.id.file,
+					R.id.divider,
+					R.id.attachButton,
+					R.id.sendText,
+					R.id.sendButton
+				).forEach { id ->
+					findViewById<View>(id)?.visibility = View.GONE
+				}
 			}
 		}
 
@@ -1052,7 +1070,10 @@ class ChatFragment : Fragment() {
 		messagesRequest = IQChannels.loadMessages(object : MessagesListener {
 			override fun messagesLoaded(messages: List<ChatMessage>) {
 				getBlocker {
-					updateViews()
+					activity?.runOnUiThread {
+						updateViews()
+					}
+//					updateViews()
 				}
 				this@ChatFragment.messagesLoaded(messages)
 			}

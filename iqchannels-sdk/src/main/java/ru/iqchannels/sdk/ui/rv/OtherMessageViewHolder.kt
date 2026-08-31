@@ -7,7 +7,9 @@ import android.os.Build
 import android.text.Html
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
+import android.text.Spanned
 import android.text.method.LinkMovementMethod
+import android.text.style.URLSpan
 import android.text.util.Linkify
 import android.view.MotionEvent
 import android.view.View
@@ -278,42 +280,50 @@ internal class OtherMessageViewHolder(
 
 				val text = message.Text.orEmpty()
 
+				val htmlText = text.replace("\n", "<br>")
+
 				val spanned = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-					Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY)
+					Html.fromHtml(htmlText, Html.FROM_HTML_MODE_LEGACY)
 				} else {
 					@Suppress("DEPRECATION")
-					Html.fromHtml(text)
+					Html.fromHtml(htmlText)
 				}
 
 				val spannable = SpannableStringBuilder(spanned)
 
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-					val textClassifier = otherText.context
-						.getSystemService(TextClassificationManager::class.java)
-						.textClassifier
-
-					val request = TextLinks.Request.Builder(spannable.toString()).build()
-					val textLinks = textClassifier.generateLinks(request)
-
-					textLinks.apply(
-						spannable,
-						TextLinks.APPLY_STRATEGY_IGNORE,
-						null
+				val htmlUrlSpans = spannable.getSpans(
+					0,
+					spannable.length,
+					URLSpan::class.java
+				).map {
+					Triple(
+						it,
+						spannable.getSpanStart(it),
+						spannable.getSpanEnd(it)
 					)
 				}
 
 				Linkify.addLinks(spannable, Linkify.WEB_URLS)
+
+				htmlUrlSpans.forEach { (span, start, end) ->
+					spannable.getSpans(start, end, URLSpan::class.java).forEach {
+						spannable.removeSpan(it)
+					}
+
+					spannable.setSpan(
+						span,
+						start,
+						end,
+						Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+					)
+				}
 
 				val phonePattern = Pattern.compile("7\\d{10}")
 				Linkify.addLinks(spannable, phonePattern, "tel:")
 
 				otherText.text = spannable
 				otherText.movementMethod = LinkMovementMethod.getInstance()
-
-				otherText.setOnLongClickListener {
-					itemClickListener.onMessageLongClick(message, it)
-					true
-				}
+				otherText.linksClickable = true
 			}
 			val lp = LinearLayout.LayoutParams(
 				LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -706,38 +716,52 @@ internal class OtherMessageViewHolder(
 					clTexts.visibility = View.VISIBLE
 					otherText.visibility = View.VISIBLE
 
+					val text = message.Text.orEmpty()
+
+					val htmlText = text.replace("\n", "<br>")
+
 					val spanned = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-						Html.fromHtml(text, Html.FROM_HTML_MODE_LEGACY)
+						Html.fromHtml(htmlText, Html.FROM_HTML_MODE_LEGACY)
 					} else {
 						@Suppress("DEPRECATION")
-						Html.fromHtml(text)
+						Html.fromHtml(htmlText)
 					}
 
 					val spannable = SpannableStringBuilder(spanned)
 
-					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-
-						val textClassifier = otherText.context
-							.getSystemService(TextClassificationManager::class.java)
-							.textClassifier
-
-						val request = TextLinks.Request.Builder(spannable.toString()).build()
-						val textLinks = textClassifier.generateLinks(request)
-
-						textLinks.apply(
-							spannable,
-							TextLinks.APPLY_STRATEGY_IGNORE,
-							null
+					val htmlUrlSpans = spannable.getSpans(
+						0,
+						spannable.length,
+						URLSpan::class.java
+					).map {
+						Triple(
+							it,
+							spannable.getSpanStart(it),
+							spannable.getSpanEnd(it)
 						)
 					}
 
 					Linkify.addLinks(spannable, Linkify.WEB_URLS)
+
+					htmlUrlSpans.forEach { (span, start, end) ->
+						spannable.getSpans(start, end, URLSpan::class.java).forEach {
+							spannable.removeSpan(it)
+						}
+
+						spannable.setSpan(
+							span,
+							start,
+							end,
+							Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+						)
+					}
 
 					val phonePattern = Pattern.compile("7\\d{10}")
 					Linkify.addLinks(spannable, phonePattern, "tel:")
 
 					otherText.text = spannable
 					otherText.movementMethod = LinkMovementMethod.getInstance()
+					otherText.linksClickable = true
 				} else {
 					otherText.visibility = View.GONE
 				}

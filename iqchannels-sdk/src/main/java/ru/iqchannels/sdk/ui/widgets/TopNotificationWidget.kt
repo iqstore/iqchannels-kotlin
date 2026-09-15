@@ -32,7 +32,7 @@ class TopNotificationWidget @JvmOverloads constructor(
 				hide()
 			}
 		}
-		findViewById<TextView>(R.id.text)?.run {
+		findViewById<TextView>(R.id.text1)?.run {
 			text = IQChannelsLanguage.iqChannelsLanguage.textCopied
 		}
 	}

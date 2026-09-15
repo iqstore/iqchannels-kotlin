@@ -879,11 +879,11 @@ object IQChannels {
 					}
 
 					override fun onException(e: Exception?) {
-						e?.let { execute { eventsException(e) } }
+						e?.let { execute { advancedUnreadEventsException(e) } }
 					}
 
 					override fun onDisconnected() {
-						execute { eventsDisconnected(Exception("disconnected")) }
+						execute { advancedUnreadEventsDisconnected(Exception("disconnected")) }
 					}
 				}
 			)
@@ -909,6 +909,39 @@ object IQChannels {
 		for (listener in advancedUnreadListeners) {
 			execute { listener.advancedUnreadChanged(copy) }
 		}
+	}
+
+	private fun advancedUnreadEventsException(e: Exception) {
+		if (advancedUnreadEventsRequest == null) {
+			return
+		}
+		advancedUnreadEventsRequest = null
+		if (auth == null) {
+			IQLog.i(TAG, String.format("Failed to listen to advancedUnreadEvents, exc=%s", e))
+			return
+		}
+
+		val delaySec = Retry.delaySeconds(advancedUnreadEventsAttempt)
+		handler?.postDelayed({ listenToAdvancedUnreadEvents() }, (delaySec * 1000).toLong())
+		IQLog.e(
+			TAG, String.format(
+				"Failed to listen to advancedUnreadEvents, will retry in %d seconds, exc=%s",
+				delaySec, e
+			)
+		)
+	}
+
+	private fun advancedUnreadEventsDisconnected(e: Exception) {
+		if (advancedUnreadEventsRequest == null) {
+			return
+		}
+		advancedUnreadEventsRequest = null
+		if (auth == null) {
+			IQLog.i(TAG, String.format("Failed to listen to advancedUnreadEvents, exc=%s", e))
+			return
+		}
+		handler?.postDelayed({ listenToAdvancedUnreadEvents() }, 1000)
+		IQLog.e(TAG, String.format("Failed to listen to advancedUnreadEvents, will retry in 1 seconds, exc=%s", e))
 	}
 
 	private fun unreadException(e: Exception) {
@@ -1698,7 +1731,7 @@ object IQChannels {
 		user.Online = true
 		user.Id = 1
 		val message = ChatMessage(user, localId)
-		message.Text = "2.3.7"
+		message.Text = "2.3.9"
 		messages?.add(message)
 		for (listener in messageListeners) {
 			execute {

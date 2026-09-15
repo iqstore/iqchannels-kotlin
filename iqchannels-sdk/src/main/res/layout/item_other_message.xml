@@ -189,7 +189,8 @@
                             android:orientation="vertical"
                             app:layout_constraintStart_toEndOf="@id/iv_file"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintTop_toTopOf="parent">
+                            app:layout_constraintTop_toTopOf="parent"
+                            app:layout_constrainedWidth="true">
 
                             <TextView
                                 android:id="@+id/tvOtherFileName"

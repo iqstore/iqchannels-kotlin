@@ -50,6 +50,7 @@ class AdvancedUnreadResult {
 	var id: Long? = null
 	var type: String? = null
 	var name: String? = null
+	var chatType: String? = null
 	var lastMessage: LastMessage? = null
 	var unreadCount: Int? = null
 

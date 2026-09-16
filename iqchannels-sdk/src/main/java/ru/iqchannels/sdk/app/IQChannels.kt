@@ -899,7 +899,7 @@ object IQChannels {
 		IQLog.i(TAG, String.format("Received advanced unread event: $event"))
 
 		this.advancedUnread?.channels
-			?.find { it.name == event.name }
+			?.find { it.name == event.name && it.chatType == event.chatType }
 			?.apply {
 				unreadCount = event.unreadCount
 				lastMessage = event.lastMessage
@@ -1731,7 +1731,7 @@ object IQChannels {
 		user.Online = true
 		user.Id = 1
 		val message = ChatMessage(user, localId)
-		message.Text = "2.3.9"
+		message.Text = "2.4.0"
 		messages?.add(message)
 		for (listener in messageListeners) {
 			execute {

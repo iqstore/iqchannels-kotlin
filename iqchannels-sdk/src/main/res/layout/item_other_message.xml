@@ -196,7 +196,6 @@
                                 android:id="@+id/tvOtherFileName"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:autoLink="all"
                                 android:textColor="#3F51B5"
                                 android:textSize="16sp"
                                 tools:text="user-146corporate-audio-message-2a9d1dc"/>

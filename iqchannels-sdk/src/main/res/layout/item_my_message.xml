@@ -191,8 +191,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:orientation="vertical"
-                            android:layout_marginEnd="16dp"
-                            android:paddingHorizontal="16dp"
+                            android:layout_marginHorizontal="16dp"
+                            android:paddingHorizontal="18dp"
                             app:layout_constraintStart_toEndOf="@id/barrier_icon_file"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintTop_toTopOf="parent">

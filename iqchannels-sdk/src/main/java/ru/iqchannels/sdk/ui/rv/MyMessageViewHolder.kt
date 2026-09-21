@@ -171,6 +171,12 @@ internal class MyMessageViewHolder(
 			ivFile.isVisible = false
 		}
 
+
+		myText.setOnLongClickListener {
+			itemClickListener.onMessageLongClick(message, it)
+			true
+		}
+
 		// Message
 		if (message.Upload != null) {
 			myText.visibility = View.VISIBLE
@@ -254,11 +260,6 @@ internal class MyMessageViewHolder(
 
 			myText.text = spannable
 			myText.movementMethod = LinkMovementMethod.getInstance()
-
-			myText.setOnLongClickListener {
-				itemClickListener.onMessageLongClick(message, it)
-				true
-			}
 
 			myText.setTextColor(
 				ContextCompat.getColor(

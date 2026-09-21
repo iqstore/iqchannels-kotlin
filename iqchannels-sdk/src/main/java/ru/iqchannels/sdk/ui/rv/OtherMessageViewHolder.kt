@@ -237,6 +237,11 @@ internal class OtherMessageViewHolder(
 				changeSegment.root.visibility = View.GONE
 			}
 
+			otherText.setOnLongClickListener {
+				itemClickListener.onMessageLongClick(message, otherText)
+				true
+			}
+
 			val file = message.File
 			val msgRating = message.Rating
 			val msgTransfer = message.TransferToChannel

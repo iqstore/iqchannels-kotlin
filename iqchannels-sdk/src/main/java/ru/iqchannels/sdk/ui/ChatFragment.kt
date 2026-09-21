@@ -572,29 +572,47 @@ class ChatFragment : Fragment() {
 				this.setBackgroundColor(it.getColorInt(context))
 			}
 
-			if(auth?.Client?.MultiChatsInfo?.ChannelType == "info") {
-				chatType = ChatType.INFO
-				isInfoChat = true
-				this.visibility = View.INVISIBLE
+			visibility = View.INVISIBLE
 
-				setPadding(
-					paddingLeft,
-					paddingTop,
-					paddingRight,
-					0
-				)
+			fun checkAuth() {
+				if (auth == null) {
+					postDelayed({
+						checkAuth()
+					}, 10)
+					return
+				}
 
-				listOf(
-					R.id.reply,
-					R.id.file,
-					R.id.divider,
-					R.id.attachButton,
-					R.id.sendText,
-					R.id.sendButton
-				).forEach { id ->
-					findViewById<View>(id)?.visibility = View.GONE
+				isInfoChat = auth?.Client?.MultiChatsInfo?.ChannelType == "info"
+
+				if (isInfoChat) {
+					chatType = ChatType.INFO
+
+					setPadding(
+						paddingLeft,
+						paddingTop,
+						paddingRight,
+						0
+					)
+
+					listOf(
+						R.id.reply,
+						R.id.file,
+						R.id.divider,
+						R.id.attachButton,
+						R.id.sendText,
+						R.id.sendButton
+					).forEach { id ->
+						findViewById<View>(id)?.visibility = View.GONE
+					}
+
+					visibility = View.INVISIBLE
+				} else {
+					visibility = View.VISIBLE
 				}
 			}
+
+
+			checkAuth()
 		}
 
 		attachButton = view.findViewById<ImageButton?>(R.id.attachButton)?.apply {

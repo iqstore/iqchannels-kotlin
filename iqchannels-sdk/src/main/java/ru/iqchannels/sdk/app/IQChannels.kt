@@ -1731,7 +1731,7 @@ object IQChannels {
 		user.Online = true
 		user.Id = 1
 		val message = ChatMessage(user, localId)
-		message.Text = "2.4.0"
+		message.Text = "2.4.1"
 		messages?.add(message)
 		for (listener in messageListeners) {
 			execute {

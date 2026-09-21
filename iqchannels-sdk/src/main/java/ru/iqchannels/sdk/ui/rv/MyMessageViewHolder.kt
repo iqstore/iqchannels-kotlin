@@ -3,9 +3,12 @@ package ru.iqchannels.sdk.ui.rv
 import android.content.res.Resources
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
+import android.text.Html
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
+import android.text.Spanned
 import android.text.method.LinkMovementMethod
+import android.text.style.URLSpan
 import android.text.util.Linkify
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -422,6 +425,66 @@ internal class MyMessageViewHolder(
 		rootViewDimens: Pair<Int, Int>
 	) {
 		binding.apply {
+			val text = message.Text
+			if (!text.isNullOrEmpty()) {
+				clTextsMy.visibility = View.VISIBLE
+				myText.visibility = View.VISIBLE
+
+				val text = message.Text.orEmpty()
+
+				val htmlText = text.replace("\n", "<br>")
+
+				val spanned = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+					Html.fromHtml(htmlText, Html.FROM_HTML_MODE_LEGACY)
+				} else {
+					@Suppress("DEPRECATION")
+					Html.fromHtml(htmlText)
+				}
+
+				val spannable = SpannableStringBuilder(spanned)
+
+				val htmlUrlSpans = spannable.getSpans(
+					0,
+					spannable.length,
+					URLSpan::class.java
+				).map {
+					Triple(
+						it,
+						spannable.getSpanStart(it),
+						spannable.getSpanEnd(it)
+					)
+				}
+
+				Linkify.addLinks(spannable, Linkify.WEB_URLS)
+
+				htmlUrlSpans.forEach { (span, start, end) ->
+					spannable.getSpans(start, end, URLSpan::class.java).forEach {
+						spannable.removeSpan(it)
+					}
+
+					spannable.setSpan(
+						span,
+						start,
+						end,
+						Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+					)
+				}
+
+				val phonePattern = Pattern.compile("7\\d{10}")
+				Linkify.addLinks(spannable, phonePattern, "tel:")
+
+				myText.text = spannable
+				myText.movementMethod = LinkMovementMethod.getInstance()
+				myText.linksClickable = true
+			} else {
+				myText.visibility = View.GONE
+			}
+
+
+
+
+
+
 			myUpload.visibility = View.GONE
 			val file = message.File
 			val imageUrl = file?.ImagePreviewUrl
@@ -429,41 +492,6 @@ internal class MyMessageViewHolder(
 				val size = Utils.computeImageSizeFromFile(file, rootViewDimens, true)
 
 				if (!message.Text.isNullOrEmpty()) {
-					clTextsMy.visibility = View.VISIBLE
-					myText.visibility = View.VISIBLE
-
-					val rawText = message.Text.orEmpty()
-
-					val htmlText = HtmlCompat.fromHtml(
-						rawText,
-						HtmlCompat.FROM_HTML_MODE_LEGACY
-					)
-
-					val spannable = SpannableStringBuilder(htmlText)
-
-					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-						val textClassifier = myText.context
-							.getSystemService(TextClassificationManager::class.java)
-							.textClassifier
-
-						val request = TextLinks.Request.Builder(htmlText.toString()).build()
-						val textLinks = textClassifier.generateLinks(request)
-
-						textLinks.apply(
-							spannable,
-							TextLinks.APPLY_STRATEGY_REPLACE,
-							null
-						)
-					}
-
-					Linkify.addLinks(spannable, Linkify.WEB_URLS)
-
-					val phonePattern = Pattern.compile("7\\d{10}")
-					Linkify.addLinks(spannable, phonePattern, "tel:")
-
-					myText.text = spannable
-					myText.movementMethod = LinkMovementMethod.getInstance()
-
 					myFlags.isVisible = true
 
 					myImgFlags.isVisible = false
@@ -517,12 +545,6 @@ internal class MyMessageViewHolder(
 						.into(myImageSrc)
 				}
 			} else {
-				if (!message.Text.isNullOrEmpty()) {
-					myText.visibility = View.VISIBLE
-					myText.text = message.Text
-				} else {
-					myText.visibility = View.GONE
-				}
 				myFlags.isVisible = true
 				myImageFrame.visibility = View.GONE
 				clTextsMy.visibility = View.VISIBLE

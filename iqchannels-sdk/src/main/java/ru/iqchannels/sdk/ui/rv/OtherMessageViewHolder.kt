@@ -713,63 +713,65 @@ internal class OtherMessageViewHolder(
 		markwon: Markwon
 	) {
 		binding.apply {
+			val text = message.Text
+			if (!text.isNullOrEmpty()) {
+				clTexts.visibility = View.VISIBLE
+				otherText.visibility = View.VISIBLE
+
+				val text = message.Text.orEmpty()
+
+				val htmlText = text.replace("\n", "<br>")
+
+				val spanned = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+					Html.fromHtml(htmlText, Html.FROM_HTML_MODE_LEGACY)
+				} else {
+					@Suppress("DEPRECATION")
+					Html.fromHtml(htmlText)
+				}
+
+				val spannable = SpannableStringBuilder(spanned)
+
+				val htmlUrlSpans = spannable.getSpans(
+					0,
+					spannable.length,
+					URLSpan::class.java
+				).map {
+					Triple(
+						it,
+						spannable.getSpanStart(it),
+						spannable.getSpanEnd(it)
+					)
+				}
+
+				Linkify.addLinks(spannable, Linkify.WEB_URLS)
+
+				htmlUrlSpans.forEach { (span, start, end) ->
+					spannable.getSpans(start, end, URLSpan::class.java).forEach {
+						spannable.removeSpan(it)
+					}
+
+					spannable.setSpan(
+						span,
+						start,
+						end,
+						Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+					)
+				}
+
+				val phonePattern = Pattern.compile("7\\d{10}")
+				Linkify.addLinks(spannable, phonePattern, "tel:")
+
+				otherText.text = spannable
+				otherText.movementMethod = LinkMovementMethod.getInstance()
+				otherText.linksClickable = true
+			} else {
+				otherText.visibility = View.GONE
+			}
+
+
 			val imageUrl = file.ImagePreviewUrl
 			if (imageUrl != null) {
 				val size = Utils.computeImageSizeFromFile(file, rootViewDimens, false)
-				val text = message.Text
-				if (!text.isNullOrEmpty()) {
-					clTexts.visibility = View.VISIBLE
-					otherText.visibility = View.VISIBLE
-
-					val text = message.Text.orEmpty()
-
-					val htmlText = text.replace("\n", "<br>")
-
-					val spanned = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-						Html.fromHtml(htmlText, Html.FROM_HTML_MODE_LEGACY)
-					} else {
-						@Suppress("DEPRECATION")
-						Html.fromHtml(htmlText)
-					}
-
-					val spannable = SpannableStringBuilder(spanned)
-
-					val htmlUrlSpans = spannable.getSpans(
-						0,
-						spannable.length,
-						URLSpan::class.java
-					).map {
-						Triple(
-							it,
-							spannable.getSpanStart(it),
-							spannable.getSpanEnd(it)
-						)
-					}
-
-					Linkify.addLinks(spannable, Linkify.WEB_URLS)
-
-					htmlUrlSpans.forEach { (span, start, end) ->
-						spannable.getSpans(start, end, URLSpan::class.java).forEach {
-							spannable.removeSpan(it)
-						}
-
-						spannable.setSpan(
-							span,
-							start,
-							end,
-							Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-						)
-					}
-
-					val phonePattern = Pattern.compile("7\\d{10}")
-					Linkify.addLinks(spannable, phonePattern, "tel:")
-
-					otherText.text = spannable
-					otherText.movementMethod = LinkMovementMethod.getInstance()
-					otherText.linksClickable = true
-				} else {
-					otherText.visibility = View.GONE
-				}
 				otherImageFrame.visibility = View.VISIBLE
 
 				val withText = !text.isNullOrEmpty()
@@ -845,8 +847,6 @@ internal class OtherMessageViewHolder(
 				} else {
 					tvOtherFileSize.text = null
 				}
-
-				val text = message.Text
 			}
 		}
 	}

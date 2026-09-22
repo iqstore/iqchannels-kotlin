@@ -1210,7 +1210,7 @@ object IQChannels {
 							infoChatSettings = InfoChatSettings(
 								BlockerText = result?.Text,
 								BlockerIcon = fileUrl(result?.BlockerFileId ?: ""),
-								IsVisibleBlocker = messages?.isEmpty() ?: false
+								IsVisibleBlocker = ((messages?.isEmpty() ?: false) && (chatType == ChatType.INFO || isInfoChat))
 							)
 
 							onComplete()
@@ -1422,9 +1422,6 @@ object IQChannels {
 		if (auth == null) {
 			return
 		}
-//		if (messages == null) {
-//			return
-//		}
 
 		val query = ChatEventQuery().apply {
 			ChatType = chatType.name.lowercase()
@@ -1731,7 +1728,7 @@ object IQChannels {
 		user.Online = true
 		user.Id = 1
 		val message = ChatMessage(user, localId)
-		message.Text = "2.4.1"
+		message.Text = "2.4.2"
 		messages?.add(message)
 		for (listener in messageListeners) {
 			execute {

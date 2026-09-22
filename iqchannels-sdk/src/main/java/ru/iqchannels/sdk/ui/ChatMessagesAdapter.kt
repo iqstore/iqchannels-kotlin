@@ -53,6 +53,7 @@ internal class ChatMessagesAdapter(
 		messages.clear()
 		agentTyping = false
 		notifyDataSetChanged()
+		iqchannels.infoChatSettings?.IsVisibleBlocker = false
 	}
 
 	fun loaded(messages: List<ChatMessage>) {

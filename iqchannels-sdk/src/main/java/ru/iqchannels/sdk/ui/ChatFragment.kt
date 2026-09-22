@@ -931,7 +931,20 @@ class ChatFragment : Fragment() {
 		if (chatUnavailableLayout?.isVisible == false) {
 			authLayout?.visibility = View.GONE
 			signupLayout?.visibility = View.GONE
-			chatLayout?.visibility = View.GONE
+
+			chatLayout?.visibility = View.VISIBLE
+			listOf(
+				R.id.messagesProgress,
+				R.id.messagesRefresh,
+				R.id.tnw_msg_copied,
+				R.id.fl_scroll_down,
+				R.id.typing,
+				R.id.send
+			).forEach { id ->
+				view?.findViewById<View>(id)?.visibility = View.GONE
+			}
+
+
 			chatUnavailableLayout?.isVisible = true
 			chatUnavailableErrorText?.text = errorMessage
 		}

@@ -61,13 +61,14 @@ class FileMessageView @JvmOverloads constructor(
 
 				val str: String
 				val fileSize: String
+				val df = DecimalFormat("0.00")
 				if (sizeMb > 0) {
 					str = "mb"
-					val df = DecimalFormat("0.00")
 					fileSize = df.format(sizeMb.toDouble())
 				} else {
 					str = "kb"
-					fileSize = sizeKb.toString()
+					fileSize = df.format(sizeKb.toDouble())
+//					fileSize = sizeKb.toString()
 				}
 				tvFileSize.text = "$fileSize $str"
 			} else {

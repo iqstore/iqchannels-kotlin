@@ -606,6 +606,8 @@ class ChatFragment : Fragment() {
 					}
 
 					visibility = View.INVISIBLE
+				} else if ((auth?.Client?.PersonalManagerId == 0L && auth?.Client?.PersonalManagerGroupId == 0L) && chatType == ChatType.PERSONAL_MANAGER){
+					visibility = View.INVISIBLE
 				} else {
 					visibility = View.VISIBLE
 				}

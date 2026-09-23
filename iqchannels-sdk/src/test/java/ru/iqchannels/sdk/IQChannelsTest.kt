@@ -13,7 +13,9 @@ import io.mockk.mockkStatic
 import io.mockk.runs
 import java.lang.reflect.Method
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import ru.iqchannels.sdk.app.IQChannels
 import ru.iqchannels.sdk.app.IQChannelsConfig
 import ru.iqchannels.sdk.http.HttpClient
@@ -55,16 +57,26 @@ class IQChannelsTest {
 		}
 	}
 
+	@get:Rule
+	val tmpFolder: TemporaryFolder = TemporaryFolder()
+
 	@Before
 	fun setUp() {
 		MockKAnnotations.init(this)
 
+		mockkStatic(Log::class)
+		every { Log.d(any(), any()) } returns 0
+		every { Log.i(any(), any()) } returns 0
+		every { Log.w(any<String>(), any<String>()) } returns 0
+		every { Log.e(any(), any()) } returns 0
+
 		every { context.applicationContext.mainLooper } returns mockkClass(Looper::class)
 		every { context.applicationContext.getSharedPreferences(any(), any()) } returns sharedPreferences
+		every { context.applicationContext.getExternalFilesDir(any()) } returns tmpFolder.newFolder()
 
 		IQChannels.configure(
 			context = context,
-			config = IQChannelsConfig(ADDRESS, CHANNEL)
+			config = IQChannelsConfig(ADDRESS, listOf(CHANNEL), CHANNEL)
 		)
 	}
 
@@ -75,8 +87,6 @@ class IQChannelsTest {
 		val credentials = "3"
 
 		every { httpClient.clientsIntegrationAuth(credentials, CHANNEL, any()) } returns httpRequest
-		mockkStatic(Log::class)
-		every { Log.d(any(), any()) } returns 0
 
 		//when
 		IQChannels.login(credentials)
@@ -95,8 +105,6 @@ class IQChannelsTest {
 
 		//given
 		every { httpClient.clientsAuth(any(), any()) } returns httpRequest
-		mockkStatic(Log::class)
-		every { Log.d(any(), any()) } returns 0
 		every { sharedPreferences.getString(ANONYMOUS_TOKEN, any()) } returns TOKEN
 
 		//when

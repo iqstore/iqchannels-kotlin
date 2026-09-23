@@ -13,13 +13,8 @@ import com.google.gson.reflect.TypeToken
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.Interceptor
-import okhttp3.MediaType
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody
-import okio.BufferedSink
 import ru.iqchannels.sdk.IQLog
 import java.io.BufferedOutputStream
 import java.io.BufferedReader
@@ -37,7 +32,6 @@ import ru.iqchannels.sdk.lib.InternalIO
 import ru.iqchannels.sdk.schema.ChatException
 import ru.iqchannels.sdk.schema.Relations
 import ru.iqchannels.sdk.schema.Response
-import java.io.File
 import java.util.concurrent.TimeUnit
 
 class HttpRequest {
@@ -45,7 +39,7 @@ class HttpRequest {
 	companion object {
 		private const val CONNECT_TIMEOUT_MILLIS = 15000
 		private const val POST_READ_TIMEOUT_MILLIS = 15000
-		private const val SSE_READ_TIMEOUT_MILLIS = 120000
+		private const val SSE_READ_TIMEOUT_MILLIS = 60000
 		private const val TAG = "iqchannels.http"
 		private val UTF8 = Charset.forName("UTF-8")
 	}
@@ -309,47 +303,15 @@ class HttpRequest {
 	) {
 		val gson = this.gson ?: return
 
-		val multipartBuilder = MultipartBody.Builder()
-			.setType(MultipartBody.FORM)
-
-		params.forEach { (key, value) ->
-			multipartBuilder.addFormDataPart(key, value)
-		}
-
-		files.forEach { (key, httpFile) ->
-
-			val body = ProgressRequestBody(
-				httpFile.file,
-				httpFile.mimeType,
-				progressCallback
-			)
-
-			multipartBuilder.addFormDataPart(
-				key,
-				httpFile.file.name,
-				body
-			)
-		}
-
-		val requestBuilder = Request.Builder()
-			.url(url!!)
-
-		if (token != null) {
-			requestBuilder.addHeader(
-				"Authorization",
-				"Client $token"
-			)
-		}
-
-//		requestBuilder.post(multipartBuilder.build())
-
-		val multipartBody = multipartBuilder.build()
+		val boundary = generateMultipartBoundary()
+		val multipartBody = IqMultipartRequestBody(boundary, params, files, progressCallback)
 
 		IQLog.d("!!!!!!!!!", "===== MULTIPART =====")
 		IQLog.d("!!!!!!!!!", "URL: $url")
 		IQLog.d("!!!!!!!!!", "Method: POST")
 		IQLog.d("!!!!!!!!!", "Content-Type: ${multipartBody.contentType()}")
 		IQLog.d("!!!!!!!!!", "Content-Length: ${multipartBody.contentLength()}")
+		IQLog.d("!!!!!!!!!", "Boundary: $boundary")
 		IQLog.d("!!!!!!!!!", "Authorization: ${if (token != null) "Client ***" else "null"}")
 
 		IQLog.d("!!!!!!!!!", "Params:")
@@ -362,22 +324,29 @@ class HttpRequest {
 			IQLog.d(
 				"!!!!!!!!!",
 				"  field=$key, " +
-						"name=${httpFile.file.name}, " +
-						"mime=${httpFile.mimeType}, " +
-						"size=${httpFile.file.length()}"
+					"name=${httpFile.file.name}, " +
+					"mime=${httpFile.mimeType}, " +
+					"size=${httpFile.file.length()}"
 			)
 		}
 
 		IQLog.d("!!!!!!!!!", "===== END MULTIPART =====")
 
+		val requestBuilder = Request.Builder()
+			.url(url!!)
+			.post(multipartBody)
 
-
-		requestBuilder.post(multipartBody)
+		if (token != null) {
+			requestBuilder.addHeader(
+				"Authorization",
+				"Client $token"
+			)
+		}
 
 		val client = OkHttpClient.Builder()
 			.addNetworkInterceptor(LoggingInterceptor())
-			.connectTimeout(15, TimeUnit.SECONDS)
-			.readTimeout(15, TimeUnit.SECONDS)
+			.connectTimeout(CONNECT_TIMEOUT_MILLIS.toLong(), TimeUnit.MILLISECONDS)
+			.readTimeout(POST_READ_TIMEOUT_MILLIS.toLong(), TimeUnit.MILLISECONDS)
 			.build()
 
 		val request = requestBuilder.build()
@@ -409,7 +378,7 @@ class HttpRequest {
 
 		call = client.newCall(request)
 
-		call!!.enqueue(object : Callback {
+		call?.enqueue(object : Callback {
 
 			override fun onFailure(call: Call, e: IOException) {
 				callback.onException(e)
@@ -420,14 +389,22 @@ class HttpRequest {
 				try {
 
 					if (!response.isSuccessful) {
-						throw HttpException(response.message)
+						val errorBody = try {
+							response.body?.string()
+						} catch (e: Exception) {
+							null
+						}
+						val exception = HttpException(
+							String.format("%d %s\n%s", response.code, response.message, errorBody)
+						)
+						exception.code = response.code
+						throw exception
 					}
 
-					val body = response.body?.string()
+					val responseBody = response.body?.string()
 						?: throw HttpException("Empty response")
 
-					val result: Response<T> =
-						gson.fromJson(body, resultType?.type)
+					val result: Response<T> = gson.fromJson(responseBody, resultType?.type)
 
 					if (result.OK && !closed) {
 						callback.onResult(result)
@@ -439,48 +416,11 @@ class HttpRequest {
 
 				} catch (e: Exception) {
 					callback.onException(e)
+				} finally {
+					response.close()
 				}
 			}
 		})
-	}
-
-	class ProgressRequestBody(
-		private val file: File,
-		private val mimeType: String,
-		private val progressCallback: HttpProgressCallback?
-	) : RequestBody() {
-
-		override fun contentType(): MediaType? {
-			return mimeType.toMediaTypeOrNull()
-		}
-
-//		override fun contentLength(): Long {
-//			return file.length()
-//		}
-
-		override fun writeTo(sink: BufferedSink) {
-
-			val total = file.length()
-
-			file.inputStream().use { input ->
-
-				val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
-
-				var uploaded = 0L
-				var read: Int
-
-				while (input.read(buffer).also { read = it } != -1) {
-
-					sink.write(buffer, 0, read)
-
-					uploaded += read
-
-					progressCallback?.onProgress(
-						((uploaded * 100) / total).toInt()
-					)
-				}
-			}
-		}
 	}
 
 	private fun generateMultipartBoundary(): String {
@@ -590,8 +530,6 @@ class HttpRequest {
 	}
 }
 
-
-
 class LoggingInterceptor : Interceptor {
 
 	override fun intercept(chain: Interceptor.Chain): okhttp3.Response {
@@ -611,9 +549,21 @@ class LoggingInterceptor : Interceptor {
 			}
 		}
 
+		val contentLengthHeader = request.header("Content-Length")
+		val transferEncodingHeader = request.header("Transfer-Encoding")
+		IQLog.d(
+			"!!!!!!!!!!",
+			"Content-Length header: " +
+				(contentLengthHeader?.let { "PRESENT ($it)" } ?: "ABSENT")
+		)
+		IQLog.d(
+			"!!!!!!!!!!",
+			"Transfer-Encoding header: " +
+				(transferEncodingHeader?.let { "PRESENT ($it)" } ?: "ABSENT")
+		)
+
 		IQLog.d("!!!!!!!!!!", "body.contentLength = ${request.body?.contentLength()}")
 		IQLog.d("!!!!!!!!!!", "body.contentType = ${request.body?.contentType()}")
-
 		IQLog.d("!!!!!!!!!!", "===== END REAL HTTP REQUEST =====")
 
 		return chain.proceed(request)

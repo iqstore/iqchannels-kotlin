@@ -16,6 +16,8 @@ import ru.iqchannels.sdk.schema.ChatFilesConfig
 
 internal object IQChannelsConfigRepository {
 
+	private const val TAG = "iqchannels"
+
 	var config: IQChannelsConfig2? = null
 
 	var credentials: String? = null
@@ -73,6 +75,20 @@ internal object IQChannelsConfigRepository {
 
 					channels.takeIf { it.isNotEmpty() }?.let {
 						_channels.value = it
+
+						val defaultChannel =
+							it.firstOrNull { channel -> channel.chatType == ChatType.REGULAR }
+								?: it.first()
+						IQChannels.configureClient(
+							IQChannelsConfig(config.address, config.channels, defaultChannel.id)
+						)
+						IQChannels.chatType = defaultChannel.chatType
+						IQChannels.login(credentials)
+					} ?: run {
+						IQLog.e(
+							TAG,
+							"applyConfig: no enabled channels found, address=${config.address}"
+						)
 					}
 				}
 			}

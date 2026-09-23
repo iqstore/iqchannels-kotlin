@@ -12,6 +12,7 @@ import com.google.gson.JsonParser
 import com.google.gson.reflect.TypeToken
 import okhttp3.Call
 import okhttp3.Callback
+import okhttp3.Interceptor
 import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -340,14 +341,71 @@ class HttpRequest {
 			)
 		}
 
-		requestBuilder.post(multipartBuilder.build())
+//		requestBuilder.post(multipartBuilder.build())
+
+		val multipartBody = multipartBuilder.build()
+
+		IQLog.d("!!!!!!!!!", "===== MULTIPART =====")
+		IQLog.d("!!!!!!!!!", "URL: $url")
+		IQLog.d("!!!!!!!!!", "Method: POST")
+		IQLog.d("!!!!!!!!!", "Content-Type: ${multipartBody.contentType()}")
+		IQLog.d("!!!!!!!!!", "Content-Length: ${multipartBody.contentLength()}")
+		IQLog.d("!!!!!!!!!", "Authorization: ${if (token != null) "Client ***" else "null"}")
+
+		IQLog.d("!!!!!!!!!", "Params:")
+		params.forEach { (key, value) ->
+			IQLog.d("!!!!!!!!!", "  $key=$value")
+		}
+
+		IQLog.d("!!!!!!!!!", "Files:")
+		files.forEach { (key, httpFile) ->
+			IQLog.d(
+				"!!!!!!!!!",
+				"  field=$key, " +
+						"name=${httpFile.file.name}, " +
+						"mime=${httpFile.mimeType}, " +
+						"size=${httpFile.file.length()}"
+			)
+		}
+
+		IQLog.d("!!!!!!!!!", "===== END MULTIPART =====")
+
+
+
+		requestBuilder.post(multipartBody)
 
 		val client = OkHttpClient.Builder()
+			.addNetworkInterceptor(LoggingInterceptor())
 			.connectTimeout(15, TimeUnit.SECONDS)
 			.readTimeout(15, TimeUnit.SECONDS)
 			.build()
 
 		val request = requestBuilder.build()
+
+
+
+		IQLog.d("!!!!!!!!!", "===== OKHTTP REQUEST =====")
+		IQLog.d("!!!!!!!!!", "URL: ${request.url}")
+		IQLog.d("!!!!!!!!!", "Method: ${request.method}")
+
+		for (i in 0 until request.headers.size) {
+			val name = request.headers.name(i)
+			val value = request.headers.value(i)
+
+			val logValue = if (name.equals("Authorization", ignoreCase = true)) {
+				"Client ***"
+			} else {
+				value
+			}
+
+			IQLog.d("!!!!!!!!!", "$name: $logValue")
+		}
+
+		IQLog.d("!!!!!!!!!", "Body contentType: ${request.body?.contentType()}")
+		IQLog.d("!!!!!!!!!", "Body contentLength: ${request.body?.contentLength()}")
+		IQLog.d("!!!!!!!!!", "===== END OKHTTP REQUEST =====")
+
+
 
 		call = client.newCall(request)
 
@@ -396,9 +454,9 @@ class HttpRequest {
 			return mimeType.toMediaTypeOrNull()
 		}
 
-		override fun contentLength(): Long {
-			return file.length()
-		}
+//		override fun contentLength(): Long {
+//			return file.length()
+//		}
 
 		override fun writeTo(sink: BufferedSink) {
 
@@ -529,5 +587,35 @@ class HttpRequest {
 				listener.onDisconnected()
 			}
 		}
+	}
+}
+
+
+
+class LoggingInterceptor : Interceptor {
+
+	override fun intercept(chain: Interceptor.Chain): okhttp3.Response {
+		val request = chain.request()
+
+		IQLog.d("!!!!!!!!!!", "===== REAL HTTP REQUEST =====")
+		IQLog.d("!!!!!!!!!!", "${request.method} ${request.url}")
+
+		for (i in 0 until request.headers.size) {
+			val name = request.headers.name(i)
+			val value = request.headers.value(i)
+
+			if (name.equals("Authorization", ignoreCase = true)) {
+				IQLog.d("!!!!!!!!!!", "$name: Client ***")
+			} else {
+				IQLog.d("!!!!!!!!!!", "$name: $value")
+			}
+		}
+
+		IQLog.d("!!!!!!!!!!", "body.contentLength = ${request.body?.contentLength()}")
+		IQLog.d("!!!!!!!!!!", "body.contentType = ${request.body?.contentType()}")
+
+		IQLog.d("!!!!!!!!!!", "===== END REAL HTTP REQUEST =====")
+
+		return chain.proceed(request)
 	}
 }

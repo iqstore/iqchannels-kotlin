@@ -209,6 +209,15 @@ class HttpClient(
 				override fun onResult(response: ru.iqchannels.sdk.schema.Response<ClientAuth>?) {
 					val map = response?.Rels?.let { rels.map(it) }
 					val auth = response?.Result
+					if (auth == null) {
+						IQLog.e(
+							TAG,
+							String.format(
+								"integration_auth returned no Result, ok=%s, error=%s",
+								response?.OK, response?.Error
+							)
+						)
+					}
 					if (auth != null) {
 						rels.clientAuth(auth, map)
 					}

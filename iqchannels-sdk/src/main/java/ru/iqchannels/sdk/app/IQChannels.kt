@@ -3,13 +3,8 @@ package ru.iqchannels.sdk.app
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Handler
+import android.util.Log
 import android.webkit.MimeTypeMap
-import java.io.File
-import java.util.*
-import java.util.concurrent.CancellationException
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -61,7 +56,12 @@ import ru.iqchannels.sdk.schema.MaxIdQuery
 import ru.iqchannels.sdk.schema.RatingPollClientAnswerInput
 import ru.iqchannels.sdk.schema.UploadedFile
 import ru.iqchannels.sdk.schema.User
-import kotlin.collections.ArrayList
+import java.io.File
+import java.util.*
+import java.util.concurrent.CancellationException
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 object IQChannels {
 
@@ -396,6 +396,7 @@ object IQChannels {
 
 	private fun authException(exception: Exception) {
 		if (authRequest == null) {
+			IQLog.e(TAG, "authException ignored: authRequest is null, exc=%s".format(exception))
 			return
 		}
 
@@ -430,6 +431,11 @@ object IQChannels {
 		}
 
 		if (authRequest == null) {
+			IQLog.e(
+				TAG,
+				"authComplete ignored: authRequest is null " +
+					"(cleared by logout/reconfigure while the auth request was in flight)"
+			)
 			return
 		}
 
@@ -1728,7 +1734,7 @@ object IQChannels {
 		user.Online = true
 		user.Id = 1
 		val message = ChatMessage(user, localId)
-		message.Text = "2.4.4"
+		message.Text = "2.4.5"
 		messages?.add(message)
 		for (listener in messageListeners) {
 			execute {
@@ -2100,21 +2106,6 @@ object IQChannels {
 				for (listener in messageListeners) {
 					execute { listener.messageUpdated(existing) }
 				}
-
-
-
-//				if (message.UploadRequest == null) {
-//					return@Runnable
-//				}
-//				sendingFile = false
-//				message.Sending = false
-////						message.UploadExc = e
-//				message.UploadProgress = 0
-//				message.UploadRequest = null
-//				IQLog.e(TAG, String.format("sendFile: Failed to upload a file, e=%s", e))
-//				for (listener in messageListeners) {
-//					execute { listener.messageUpdated(message) }
-//				}
 				return
 			}
 		}

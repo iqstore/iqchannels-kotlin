@@ -21,6 +21,12 @@
         <item name="android:statusBarColor" tools:targetApi="lollipop">@android:color/transparent</item>
     </style>
 
+    <style name="Theme.ImagePreview" parent="@style/Theme.MaterialComponents.Light.NoActionBar">
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
+
     <style name="Theme.Dialog.BottomSheet" parent="@style/Theme.Design.BottomSheetDialog">
         <item name="android:windowIsFloating">true</item>
         <item name="bottomSheetStyle">@style/BottomSheetRounded</item>

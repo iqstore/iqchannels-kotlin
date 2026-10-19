@@ -21,7 +21,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
+import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
@@ -42,9 +42,10 @@ import ru.iqchannels.sdk.R
 import ru.iqchannels.sdk.app.IQChannels
 import ru.iqchannels.sdk.localization.IQChannelsLanguage
 
-class ImagePreviewFragment : Fragment() {
+class ImagePreviewFragment : DialogFragment() {
 
 	companion object {
+		private const val TAG = "ImagePreviewFragment"
 		private const val ARG_SENDER_NAME = "ImagePreviewFragment#senderName"
 		private const val ARG_DATE = "ImagePreviewFragment#date"
 		private const val ARG_IMAGE_URL = "ImagePreviewFragment#imageUrl"
@@ -77,6 +78,10 @@ class ImagePreviewFragment : Fragment() {
 				image?.let { startDownload(it, fileName) }
 			}
 		}
+
+	override fun getTheme(): Int {
+		return R.style.Theme_ImagePreview
+	}
 
 	override fun onCreateView(
 		inflater: LayoutInflater,
@@ -137,7 +142,7 @@ class ImagePreviewFragment : Fragment() {
 			})
 			.into(image)
 		ibBack.setOnClickListener {
-			parentFragmentManager.popBackStack()
+			dismiss()
 		}
 
 		ibSave.setOnClickListener {

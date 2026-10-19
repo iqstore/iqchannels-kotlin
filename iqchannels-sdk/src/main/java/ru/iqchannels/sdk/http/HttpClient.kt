@@ -539,7 +539,12 @@ class HttpClient(
 		var path = "/sse/chats/channel/events/$channel?ChatType=${query.ChatType}"
 
 		if (query.LastEventId != null) {
-			path = String.format("%s?LastEventId=%d", path, query.LastEventId)
+			path = if (path.contains("?")) {
+				"$path&"
+			} else {
+				"$path?"
+			}
+			path = String.format("%sLastEventId=%d", path, query.LastEventId)
 		}
 
 		if (query.Limit != null) {

@@ -10,6 +10,9 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import ru.iqchannels.sdk.R
+import ru.iqchannels.sdk.app.IQChannels.chatType
+import ru.iqchannels.sdk.app.IQChannels.isInfoChat
+import ru.iqchannels.sdk.domain.models.ChatType
 import ru.iqchannels.sdk.ui.ChatMessagesAdapter
 
 class SwipeController(private val swipeListener: SwipeListener) : ItemTouchHelper.Callback() {
@@ -28,7 +31,9 @@ class SwipeController(private val swipeListener: SwipeListener) : ItemTouchHelpe
 
 		val chatMessage = (recyclerView.adapter as ChatMessagesAdapter).getItem(position)
 
-		return if (!chatMessage.System && !chatMessage.AutoGreeting) {
+		return if (!chatMessage.System && !chatMessage.AutoGreeting
+			&& chatType != ChatType.INFO && !isInfoChat
+		) {
 			makeMovementFlags(ItemTouchHelper.ACTION_STATE_IDLE, ItemTouchHelper.LEFT)
 		} else {
 			makeMovementFlags(0, 0) // Отключение свайпа влево

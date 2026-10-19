@@ -1734,7 +1734,7 @@ object IQChannels {
 		user.Online = true
 		user.Id = 1
 		val message = ChatMessage(user, localId)
-		message.Text = "2.4.5-1"
+		message.Text = "2.4.6"
 		messages?.add(message)
 		for (listener in messageListeners) {
 			execute {
@@ -2128,7 +2128,46 @@ object IQChannels {
 		}
 		sendRequest = null
 		IQLog.i(TAG, String.format("Sent a message, localId=%d", form.LocalId))
+		updateAdvancedUnreadWithSentMessage(form)
 		send()
+	}
+
+	private fun updateAdvancedUnreadWithSentMessage(form: ChatMessageForm) {
+		if (advancedUnread == null || advancedUnreadListeners.isEmpty()) {
+			return
+		}
+		val channelName = config?.chatToOpen ?: return
+		val channel = advancedUnread?.channels
+			?.find { it.name == channelName && it.chatType == form.ChatType }
+		if (channel == null) {
+			IQLog.d(
+				TAG,
+				String.format(
+					"advancedUnread: channel not found for local update, name=%s, chatType=%s",
+					channelName, form.ChatType
+				)
+			)
+			return
+		}
+
+		channel.unreadCount = 0
+		channel.lastMessage = LastMessage().apply {
+			text = form.Text
+			fileId = form.FileId
+			date = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS Z", Locale.US).format(Date())
+		}
+
+		val copy = advancedUnread
+		for (listener in advancedUnreadListeners) {
+			execute { listener.advancedUnreadChanged(copy) }
+		}
+		IQLog.i(
+			TAG,
+			String.format(
+				"advancedUnread updated locally, channel=%s, localId=%d",
+				channelName, form.LocalId
+			)
+		)
 	}
 
 	// File url

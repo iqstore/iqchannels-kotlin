@@ -1687,14 +1687,9 @@ class ChatFragment : Fragment() {
 			val msg = message.Text
 
 			if (senderName != null && imageUrl != null && date != null && msg != null) {
-				val transaction = parentFragmentManager.beginTransaction()
-				val fragment = ImagePreviewFragment.newInstance(
+				ImagePreviewFragment.newInstance(
 					senderName, date, imageUrl, msg
-				)
-
-				transaction.replace((view?.parent as ViewGroup).id, fragment)
-				transaction.addToBackStack(null)
-				transaction.commit()
+				).show(parentFragmentManager, "ImagePreviewFragment")
 			}
 		}
 

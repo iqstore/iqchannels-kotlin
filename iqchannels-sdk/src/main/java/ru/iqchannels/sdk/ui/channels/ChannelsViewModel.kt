@@ -7,6 +7,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import ru.iqchannels.sdk.app.AdvancedUnread
+import ru.iqchannels.sdk.app.AdvancedUnreadListener
+import ru.iqchannels.sdk.app.Cancellable
 import ru.iqchannels.sdk.app.IQChannels
 import ru.iqchannels.sdk.app.IQChannelsConfig
 import ru.iqchannels.sdk.app.IQChannelsConfigRepository
@@ -17,8 +20,13 @@ class ChannelsViewModel : ViewModel() {
 	private val _channels = MutableStateFlow<List<Channel>>(emptyList())
 	val channels = _channels.asStateFlow()
 
+	private val _advancedUnread = MutableStateFlow<AdvancedUnread?>(null)
+	val advancedUnread = _advancedUnread.asStateFlow()
+
 	private val _events = MutableSharedFlow<Event>()
 	val events = _events.asSharedFlow()
+
+	private var advancedUnreadCancellable: Cancellable? = null
 
 	init {
 		viewModelScope.launch {
@@ -28,6 +36,24 @@ class ChannelsViewModel : ViewModel() {
 				}
 			}
 		}
+
+		advancedUnreadCancellable = IQChannels.addAdvancedUnreadListener(
+			object : AdvancedUnreadListener {
+				override fun advancedUnreadChanged(unread: AdvancedUnread?) {
+					_advancedUnread.value = unread?.let {
+						AdvancedUnread().apply { channels = it.channels }
+					}
+				}
+
+				override fun advancedUnreadException(e: Exception) {}
+			}
+		)
+	}
+
+	override fun onCleared() {
+		advancedUnreadCancellable?.cancel()
+		advancedUnreadCancellable = null
+		super.onCleared()
 	}
 
 	fun onViewCreated() {

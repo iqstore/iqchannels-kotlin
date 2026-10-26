@@ -57,6 +57,7 @@ import androidx.fragment.app.setFragmentResult
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.OnScrollListener
@@ -83,6 +84,7 @@ import ru.iqchannels.sdk.app.Callback
 import ru.iqchannels.sdk.app.Cancellable
 import ru.iqchannels.sdk.app.IQChannels
 import ru.iqchannels.sdk.app.IQChannels.auth
+import ru.iqchannels.sdk.app.IQChannels.chatSubtitleFlow
 import ru.iqchannels.sdk.app.IQChannels.chatTitleFlow
 import ru.iqchannels.sdk.app.IQChannels.chatType
 import ru.iqchannels.sdk.app.IQChannels.getBlocker
@@ -481,6 +483,14 @@ class ChatFragment : Fragment() {
 
 		recycler = view.findViewById(R.id.messages)
 		recycler?.adapter = adapter
+		when (val animator = recycler?.itemAnimator) {
+			is DefaultItemAnimator -> {
+				animator.supportsChangeAnimations = false
+				animator.changeDuration = 0
+			}
+
+			else -> recycler?.itemAnimator = null
+		}
 		btnScrollToBottom = view.findViewById(R.id.fl_scroll_down)
 		btnScrollToBottomDot = view.findViewById(R.id.iv_scroll_down_dot)
 		btnScrollToBottomBackground = view.findViewById(R.id.iv_scroll_down)
@@ -670,9 +680,11 @@ class ChatFragment : Fragment() {
 		view.findViewById<ComposeView>(R.id.nav_bar)?.setContent {
 			IQChannelsTheme {
 				val chatTitle by chatTitleFlow.collectAsState()
+				val chatSubtitle by chatSubtitleFlow.collectAsState()
 
 				NavBar(
-					title = chatTitle ?: ""
+					title = chatTitle ?: "",
+					subtitle = chatSubtitle
 				) {
 					if (checkEvent(IQChatEvent.NavBarBackButtonPressed::class.java)) {
 						sendChatEvent(IQChatEvent.NavBarBackButtonPressed)
@@ -1133,6 +1145,13 @@ class ChatFragment : Fragment() {
 
 			override fun messageUpdated(message: ChatMessage) {
 				this@ChatFragment.messageUpdated(message)
+			}
+
+			override fun messageUploadProgress(message: ChatMessage) {
+				if (messagesRequest == null) {
+					return
+				}
+				adapter?.uploadProgressUpdated(message)
 			}
 
 			override fun messageCancelled(message: ChatMessage) {

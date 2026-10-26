@@ -40,6 +40,7 @@ internal class ChatMessagesAdapter(
 
 	companion object {
 		private val GROUP_TIME_DELTA_MS = 60000
+		internal const val PAYLOAD_UPLOAD_PROGRESS = "upload_progress"
 
 		fun objectEquals(a: Any?, b: Any?): Boolean {
 			return (a === b) || (a != null && (a == b))
@@ -137,6 +138,15 @@ internal class ChatMessagesAdapter(
 		notifyItemChanged(i)
 	}
 
+	fun uploadProgressUpdated(message: ChatMessage) {
+		val i = getIndexByMessage(message)
+		if (i < 0) {
+			return
+		}
+		messages[i] = message
+		notifyItemChanged(i, PAYLOAD_UPLOAD_PROGRESS)
+	}
+
 	fun getItem(position: Int): ChatMessage {
 		return messages[position]
 	}
@@ -203,6 +213,17 @@ internal class ChatMessagesAdapter(
 			msg.NewMsgHeader -> R.layout.item_new_msg_header
 			else -> R.layout.item_other_message
 		}
+	}
+
+	override fun onBindViewHolder(
+		holder: RecyclerView.ViewHolder,
+		position: Int,
+		payloads: MutableList<Any>
+	) {
+		if (payloads.contains(PAYLOAD_UPLOAD_PROGRESS)) {
+			return
+		}
+		super.onBindViewHolder(holder, position, payloads)
 	}
 
 	override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {

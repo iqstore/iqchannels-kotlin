@@ -15,6 +15,10 @@ interface MessagesListener {
 	fun messageSent(message: ChatMessage)
 	fun messageUploaded(message: ChatMessage)
 	fun messageUpdated(message: ChatMessage)
+
+	fun messageUploadProgress(message: ChatMessage) {
+		messageUpdated(message)
+	}
 	fun eventTyping(event: ChatEvent)
 	fun messageCancelled(message: ChatMessage)
 	fun messageDeleted(message: ChatMessage)

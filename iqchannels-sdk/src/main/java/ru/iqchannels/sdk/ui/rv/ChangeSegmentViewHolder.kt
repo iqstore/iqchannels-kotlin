@@ -60,11 +60,7 @@ internal class ChangeSegmentViewHolder(
 			}
 		)
 
-		if(message.Client?.PersonalManagerId == 0L){
-			IQChannels.chatType = ChatType.REGULAR
-		} else {
-			IQChannels.chatType = ChatType.PERSONAL_MANAGER
-		}
+		message.TransferToChatType?.let { IQChannels.chatType = it }
 
 		IQChannels.configure(
 			binding.root.context,

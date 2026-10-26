@@ -51,6 +51,7 @@ class ChatMessage {
 	var File: UploadedFile? = null
 	var Rating: Rating? = null
 	var TransferToChannel: TransferToChannel? = null
+	var TransferToChatType: ru.iqchannels.sdk.domain.models.ChatType? = null
 	var Date: Date? = null
 	var NewMsgHeader: Boolean = false
 

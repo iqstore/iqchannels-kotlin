@@ -49,26 +49,37 @@ internal object IQChannelsConfigRepository {
 						val clientAuth = IQChannels.login2(credentials)
 
 						clientAuth.Client?.MultiChatsInfo?.let { multiChatsInfo ->
-							if (multiChatsInfo.EnableChat) {
+							if (multiChatsInfo.ChannelType == "info") {
 								channels.add(
 									Channel(
 										id = channel,
 										name = multiChatsInfo.ChannelName,
-										chatType = ChatType.REGULAR,
+										chatType = ChatType.INFO,
 										iconColor = multiChatsInfo.ChannelIconColor
 									)
 								)
-							}
+							} else {
+								if (multiChatsInfo.EnableChat) {
+									channels.add(
+										Channel(
+											id = channel,
+											name = multiChatsInfo.ChannelName,
+											chatType = ChatType.REGULAR,
+											iconColor = multiChatsInfo.ChannelIconColor
+										)
+									)
+								}
 
-							if (multiChatsInfo.EnableForPersonalManagers) {
-								channels.add(
-									Channel(
-										id = channel,
-										name = multiChatsInfo.ChannelName,
-										chatType = ChatType.PERSONAL_MANAGER,
-										iconColor = multiChatsInfo.ChannelIconColor
+								if (multiChatsInfo.EnableForPersonalManagers) {
+									channels.add(
+										Channel(
+											id = channel,
+											name = multiChatsInfo.ChannelName,
+											chatType = ChatType.PERSONAL_MANAGER,
+											iconColor = multiChatsInfo.ChannelIconColor
+										)
 									)
-								)
+								}
 							}
 						}
 					}

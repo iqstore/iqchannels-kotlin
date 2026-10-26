@@ -156,6 +156,7 @@ class HttpRequest {
 
 			// Read a response when not void.
 			val result: Response<T>
+			var responseJson: String? = null
 			val clength = conn.contentLength
 			if (resultType == null) {
 				result = Response()
@@ -173,7 +174,7 @@ class HttpRequest {
 					while (reader.readLine().also { line = it } != null) {
 						builder.append(line).append('\n')
 					}
-					var responseJson = builder.toString()
+					responseJson = builder.toString()
 
 					val jsonObject = JsonParser.parseString(responseJson).asJsonObject
 					if (!jsonObject.has("OK")) {

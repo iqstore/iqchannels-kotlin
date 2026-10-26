@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Color as ComposeColor
 import ru.iqchannels.sdk.R
-import ru.iqchannels.sdk.localization.IQChannelsLanguage
+
 import ru.iqchannels.sdk.styling.Color
 import ru.iqchannels.sdk.styling.IQStyles
 import ru.iqchannels.sdk.ui.theming.Regular13
@@ -38,6 +38,7 @@ fun Color.toComposeColor(): ComposeColor {
 @Composable
 fun NavBar(
 	title: String,
+	subtitle: String?,
 	onBackClick: () -> Unit
 ) {
 	Surface(
@@ -112,7 +113,7 @@ fun NavBar(
 				val statusLabel = IQStyles.iqChannelsStyles?.appBar?.statusLabel
 
 				Text(
-					text = IQChannelsLanguage.iqChannelsLanguage.statusLabel,
+					text = subtitle.orEmpty(),
 					textAlign = when (statusLabel?.textAlignment?.lowercase()) {
 						"left" -> TextAlign.Start
 						"right" -> TextAlign.End

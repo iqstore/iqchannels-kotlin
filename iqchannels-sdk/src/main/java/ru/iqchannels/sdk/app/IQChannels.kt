@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import android.os.Handler
 import android.util.Log
 import android.webkit.MimeTypeMap
+import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -17,6 +18,7 @@ import ru.iqchannels.sdk.IQLog
 import ru.iqchannels.sdk.IQLogFileManager
 import ru.iqchannels.sdk.configs.GetConfigsInteractorImpl
 import ru.iqchannels.sdk.domain.models.ChatType
+import ru.iqchannels.sdk.localization.IQChannelsLanguage
 import ru.iqchannels.sdk.http.HttpCallback
 import ru.iqchannels.sdk.http.HttpClient
 import ru.iqchannels.sdk.http.HttpProgressCallback
@@ -57,6 +59,7 @@ import ru.iqchannels.sdk.schema.RatingPollClientAnswerInput
 import ru.iqchannels.sdk.schema.UploadedFile
 import ru.iqchannels.sdk.schema.User
 import java.io.File
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.CancellationException
 import kotlin.coroutines.resume
@@ -157,6 +160,7 @@ object IQChannels {
 	@Volatile
 	var chatType: ChatType = ChatType.REGULAR
 	var chatTitleFlow = MutableStateFlow<String?>(null)
+	var chatSubtitleFlow = MutableStateFlow<String?>(null)
 	var isInfoChat: Boolean = false
 	var isAnonim: Boolean = false
 
@@ -457,6 +461,9 @@ object IQChannels {
 			}
 			sendPushToken()
 			getChatSettings()
+			if (advancedUnreadListeners.isNotEmpty()) {
+				listenToAdvancedUnread()
+			}
 			if(auth.Client?.MultiChatsInfo?.ChannelType == "info") {
 				chatType = ChatType.INFO
 				isInfoChat = true
@@ -810,9 +817,12 @@ object IQChannels {
 
 	private fun clearAdvancedUnread() {
 		advancedUnreadRequest?.cancel()
+		advancedUnreadEventsRequest?.cancel()
 		advancedUnread = null
 		advancedUnreadAttempt = 0
+		advancedUnreadEventsAttempt = 0
 		advancedUnreadRequest = null
+		advancedUnreadEventsRequest = null
 		for (listener in advancedUnreadListeners) {
 			execute { listener.advancedUnreadChanged(null) }
 		}
@@ -832,6 +842,10 @@ object IQChannels {
 	}
 
 	private fun advancedUnreadReceived(unread: AdvancedUnread?) {
+		if (advancedUnreadRequest == null) {
+			return
+		}
+		advancedUnreadRequest = null
 		this.advancedUnread = unread
 		advancedUnreadAttempt = 0
 		val copy = this.advancedUnread
@@ -902,7 +916,7 @@ object IQChannels {
 		}
 
 		advancedUnreadAttempt = 0
-		IQLog.i(TAG, String.format("Received advanced unread event: $event"))
+		IQLog.i(TAG, "Received advanced unread event: $event")
 
 		this.advancedUnread?.channels
 			?.find { it.name == event.name && it.chatType == event.chatType }
@@ -928,7 +942,7 @@ object IQChannels {
 		}
 
 		val delaySec = Retry.delaySeconds(advancedUnreadEventsAttempt)
-		handler?.postDelayed({ listenToAdvancedUnreadEvents() }, (delaySec * 1000).toLong())
+		handler?.postDelayed({ listenToAdvancedUnread() }, (delaySec * 1000).toLong())
 		IQLog.e(
 			TAG, String.format(
 				"Failed to listen to advancedUnreadEvents, will retry in %d seconds, exc=%s",
@@ -946,7 +960,7 @@ object IQChannels {
 			IQLog.i(TAG, String.format("Failed to listen to advancedUnreadEvents, exc=%s", e))
 			return
 		}
-		handler?.postDelayed({ listenToAdvancedUnreadEvents() }, 1000)
+		handler?.postDelayed({ listenToAdvancedUnread() }, 1000)
 		IQLog.e(TAG, String.format("Failed to listen to advancedUnreadEvents, will retry in 1 seconds, exc=%s", e))
 	}
 
@@ -1177,11 +1191,13 @@ object IQChannels {
 
 	private fun getChatSettings() {
 		chatTitleFlow.value = ""
+		chatSubtitleFlow.value = null
 
 		val clientId = auth?.Client?.Id ?: return
 
 		val query = ChatSettingsQuery().apply {
 			ClientId = clientId
+			ChatType = chatType.name.lowercase()
 		}
 
 		client?.let { client ->
@@ -1192,6 +1208,8 @@ object IQChannels {
 					object : HttpCallback<ChatSettings> {
 						override fun onResult(result: ChatSettings?) {
 							chatTitleFlow.value = result?.ChatTitle
+							chatSubtitleFlow.value =
+								result?.ChatSubtitle ?: IQChannelsLanguage.iqChannelsLanguage.statusLabel
 							showAutoGreeting(result)
 						}
 
@@ -1291,7 +1309,6 @@ object IQChannels {
 		for (listener in advancedUnreadListeners) {
 			execute { listener.advancedUnreadException(exception) }
 		}
-		advancedUnreadListeners.clear()
 	}
 
 	private fun messagesLoaded(messages: List<ChatMessage>) {
@@ -1734,7 +1751,7 @@ object IQChannels {
 		user.Online = true
 		user.Id = 1
 		val message = ChatMessage(user, localId)
-		message.Text = "2.4.6"
+		message.Text = "2.4.7"
 		messages?.add(message)
 		for (listener in messageListeners) {
 			execute {
@@ -1911,9 +1928,12 @@ object IQChannels {
 			}, object : HttpProgressCallback {
 				override fun onProgress(progress: Int) {
 					execute {
+						if (message.UploadProgress == progress) {
+							return@execute
+						}
 						message.UploadProgress = progress
 						for (listener in messageListeners) {
-							execute { listener.messageUpdated(message) }
+							execute { listener.messageUploadProgress(message) }
 						}
 					}
 				}
@@ -2013,7 +2033,10 @@ object IQChannels {
 		config?.chatToOpen?.let { channel ->
 			client?.chatsChannelSend(channel, form, object : HttpCallback<Void> {
 				override fun onResult(result: Void?) {
-					execute { sent(form) }
+					execute {
+						sent(form)
+						updateAdvancedUnreadWithSentMessage(form)
+					}
 				}
 
 				override fun onException(exception: Exception) {
@@ -2352,6 +2375,7 @@ object IQChannels {
 			ChatEventType.CHAT_CLOSED -> systemChat = false
 			ChatEventType.CLOSE_SYSTEM_CHAT -> systemChat = false
 			ChatEventType.FILE_UPDATED -> fileUpdated(event)
+			ChatEventType.CHAT_SUBTITLE_CHANGED -> chatSubtitleChanged(event)
 			else -> IQLog.i(TAG, String.format("applyEvent: %s", event.Type))
 		}
 	}
@@ -2509,6 +2533,12 @@ object IQChannels {
 	private fun messageTyping(event: ChatEvent) {
 		for (listener in messageListeners) {
 			execute { listener.eventTyping(event) }
+		}
+	}
+
+	private fun chatSubtitleChanged(event: ChatEvent) {
+		event.ChatSubtitle?.let {
+			chatSubtitleFlow.value = it
 		}
 	}
 

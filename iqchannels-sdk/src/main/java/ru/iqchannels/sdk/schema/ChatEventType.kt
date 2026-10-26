@@ -28,5 +28,7 @@ enum class ChatEventType {
 	@SerializedName("delete-messages")
 	MESSAGE_DELETED,
 	@SerializedName("file_updated")
-	FILE_UPDATED
+	FILE_UPDATED,
+	@SerializedName("chat_subtitle_changed")
+	CHAT_SUBTITLE_CHANGED
 }

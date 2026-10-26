@@ -1,5 +1,7 @@
 package ru.iqchannels.sdk.schema
 
+import com.google.gson.annotations.SerializedName
+
 class ChatEvent {
 	var Id: Long = 0
 	var Type: ChatEventType? = null
@@ -18,6 +20,9 @@ class ChatEvent {
 	var CreatedAt: Long = 0
 
 	var NextChannelName: String? = null
+
+	@SerializedName(value = "chat_subtitle", alternate = ["ChatSubtitle"])
+	var ChatSubtitle: String? = null
 
 	// Local
 	var Client: Client? = null

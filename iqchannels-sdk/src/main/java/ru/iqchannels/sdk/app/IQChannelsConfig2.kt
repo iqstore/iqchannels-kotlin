@@ -18,6 +18,7 @@ class IQChannelsConfig2 @JvmOverloads constructor(
 	val address: String,
 	val channels: List<String>,
 	logging: Boolean = true,
+	val disableSSLValidation: Boolean = false,
 	val uiOptions: UIOptions = UIOptions(),
 ) {
 

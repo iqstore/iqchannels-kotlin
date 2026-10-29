@@ -91,6 +91,7 @@ import ru.iqchannels.sdk.app.IQChannels.getBlocker
 import ru.iqchannels.sdk.app.IQChannels.isAnonim
 import ru.iqchannels.sdk.app.IQChannels.isInfoChat
 import ru.iqchannels.sdk.app.IQChannelsConfig
+import ru.iqchannels.sdk.app.UIOptions
 import ru.iqchannels.sdk.app.IQChannelsConfigRepository
 import ru.iqchannels.sdk.app.IQChannelsListener
 import ru.iqchannels.sdk.app.MessagesListener

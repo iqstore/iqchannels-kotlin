@@ -132,7 +132,8 @@ private fun ChannelItem(channel: Channel, unread: UnreadChannel?, onClick: (Chan
 		unread?.lastMessage == null -> ""
 		unread.lastMessage?.isSurvey == true -> "Опрос"
 		unread.lastMessage?.text.isNullOrBlank() && unread.lastMessage?.fileId != null ->
-			unread.lastMessage?.fileId.orEmpty()
+			unread.lastMessage?.fileName?.takeIf { it.isNotBlank() }
+				?: unread.lastMessage?.fileId.orEmpty()
 		else -> unread.lastMessage?.text.orEmpty()
 	}
 

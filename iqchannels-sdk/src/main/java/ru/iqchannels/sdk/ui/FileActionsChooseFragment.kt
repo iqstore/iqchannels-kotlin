@@ -23,6 +23,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import ru.iqchannels.sdk.R
+import ru.iqchannels.sdk.app.IQChannels
 import ru.iqchannels.sdk.download.FileDownloader.saveFileToDownloads
 import ru.iqchannels.sdk.localization.IQChannelsLanguage
 import ru.iqchannels.sdk.ui.Colors.textColor
@@ -125,7 +126,14 @@ class FileActionsChooseFragment : BottomSheetDialogFragment() {
 
 		CoroutineScope(Dispatchers.IO).launch {
 			try {
-				val client = OkHttpClient()
+				val client = OkHttpClient.Builder()
+					.apply {
+						if (IQChannels.sslBypassEnabled) {
+							sslSocketFactory(IQChannels.sslBypassContext.socketFactory, IQChannels.trustAllManager)
+							hostnameVerifier { _, _ -> true }
+						}
+					}
+					.build()
 				val request = Request.Builder().url(url!!).build()
 				val response = client.newCall(request).execute()
 

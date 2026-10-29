@@ -28,7 +28,9 @@ object IQChannelsShortCuts {
 							IQChannelsConfig(
 								address = IQChannelsConfigRepository.config?.address,
 								channels = IQChannelsConfigRepository.config?.channels,
-								chatToOpen = channel
+								chatToOpen = channel,
+								disableSSLValidation = IQChannelsConfigRepository.config?.disableSSLValidation ?: false,
+								uiOptions = IQChannelsConfigRepository.config?.uiOptions ?: UIOptions()
 							)
 						)
 						IQChannels.chatType = chatType

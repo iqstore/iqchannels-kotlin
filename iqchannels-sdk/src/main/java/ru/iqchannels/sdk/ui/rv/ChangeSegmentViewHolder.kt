@@ -69,6 +69,7 @@ internal class ChangeSegmentViewHolder(
 				IQChannels.config?.channels,
 				message.TransferToChannel?.Name,
 				false,
+				IQChannels.config?.disableSSLValidation ?: false,
 				UIOptions(true))
 		)
 		IQChannels.login(IQChannels.credentials ?: "")

@@ -59,6 +59,11 @@ import ru.iqchannels.sdk.schema.RatingPollClientAnswerInput
 import ru.iqchannels.sdk.schema.UploadedFile
 import ru.iqchannels.sdk.schema.User
 import java.io.File
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
+import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLContext
+import javax.net.ssl.X509TrustManager
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.CancellationException
@@ -161,6 +166,28 @@ object IQChannels {
 	var chatType: ChatType = ChatType.REGULAR
 	var chatTitleFlow = MutableStateFlow<String?>(null)
 	var chatSubtitleFlow = MutableStateFlow<String?>(null)
+
+	internal var sslBypassEnabled: Boolean = false
+
+	internal val trustAllManager: X509TrustManager = object : X509TrustManager {
+		override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
+		override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
+		override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+	}
+
+	internal val sslBypassContext: SSLContext = SSLContext.getInstance("TLS").apply {
+		init(null, arrayOf(trustAllManager), SecureRandom())
+	}
+
+	private fun applySSLBypassIfNeeded(config: IQChannelsConfig?) {
+		val disable = config?.disableSSLValidation ?: false
+		sslBypassEnabled = disable
+		if (disable) {
+			HttpsURLConnection.setDefaultSSLSocketFactory(sslBypassContext.socketFactory)
+			HttpsURLConnection.setDefaultHostnameVerifier { _, _ -> true }
+			IQLog.e(TAG, "SSL certificate validation is DISABLED")
+		}
+	}
 	var isInfoChat: Boolean = false
 	var isAnonim: Boolean = false
 
@@ -205,6 +232,7 @@ object IQChannels {
 
 	fun configure(context: Context, config: IQChannelsConfig) {
 		IQLogFileManager.init(context)
+		applySSLBypassIfNeeded(config)
 
 		config.channels?.let {
 			channels = config.channels
@@ -239,6 +267,7 @@ object IQChannels {
 			}
 
 			this.config = config
+			applySSLBypassIfNeeded(config)
 			client = HttpClient(config.address, Rels(config.address))
 		}
 	}
@@ -892,6 +921,7 @@ object IQChannels {
 
 		client?.let { client ->
 			advancedUnreadEventsRequest = client.advancedUnreadEvents(
+				channels,
 				object : HttpSseListener<AdvancedUnreadResult> {
 					override fun onConnected() {}
 					override fun onEvent(event: AdvancedUnreadResult) {
@@ -924,6 +954,28 @@ object IQChannels {
 				unreadCount = event.unreadCount
 				lastMessage = event.lastMessage
 			}
+		val channelsList = this.advancedUnread?.channels?.toMutableList() ?: mutableListOf()
+		val index = channelsList.indexOfFirst {
+			it.name == event.name && it.chatType == event.chatType
+		}
+
+		if (index >= 0) {
+			channelsList[index].apply {
+				unreadCount = event.unreadCount
+				lastMessage = event.lastMessage
+			}
+		} else {
+			channelsList.add(
+				Channel().apply {
+					name = event.name
+					chatType = event.chatType
+					unreadCount = event.unreadCount
+					lastMessage = event.lastMessage
+				}
+			)
+		}
+
+		this.advancedUnread = AdvancedUnread().apply { channels = channelsList }
 
 		val copy = this.advancedUnread
 		for (listener in advancedUnreadListeners) {

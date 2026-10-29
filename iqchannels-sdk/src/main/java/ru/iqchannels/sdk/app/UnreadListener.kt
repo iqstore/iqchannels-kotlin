@@ -38,7 +38,12 @@ class Channel {
 class LastMessage {
 	var text: String? = null
 	var fileId: String? = null
+	var fileName: String? = null
 	var isSurvey: Boolean? = null
+	var surveyState: String? = null
+	var surveyValue: Int? = null
+	var surveyMaxValue: Int? = null
+	var surveyPoll: Boolean? = null
 	var date: String? = null
 
 	override fun toString(): String {

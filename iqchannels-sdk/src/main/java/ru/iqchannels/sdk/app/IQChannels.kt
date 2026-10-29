@@ -1222,7 +1222,8 @@ object IQChannels {
 							UserId = now.time
 							AutoGreeting = true
 							User = User().apply {
-								DisplayName = settings.Pseudonym
+								val pseudonym: String? = settings.Pseudonym
+								DisplayName = pseudonym ?: settings.OperatorName ?: "Оператор"
 								AvatarUrl = avatarUrl
 							}
 						}
@@ -1798,7 +1799,7 @@ object IQChannels {
 		user.Online = true
 		user.Id = 1
 		val message = ChatMessage(user, localId)
-		message.Text = "2.4.7"
+		message.Text = "2.4.8"
 		messages?.add(message)
 		for (listener in messageListeners) {
 			execute {

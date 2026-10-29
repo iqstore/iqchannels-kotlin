@@ -286,6 +286,7 @@ internal class OtherMessageViewHolder(
 				}
 			} else if (msgRating != null) {
 				message.System = true
+				applySessionSeparatorMargins()
 				if (msgRating.State == RatingState.POLL && msgRating.RatingPoll != null) {
 					showRatingPoll(msgRating, ratingPoll)
 				} else {
@@ -729,6 +730,45 @@ internal class OtherMessageViewHolder(
 			}
 			else -> {
 				rating.root.visibility = View.GONE
+			}
+		}
+	}
+
+	private fun applySessionSeparatorMargins() {
+		val density = binding.root.resources.displayMetrics.density
+		val margin = (16 * density).toInt()
+
+		val views = listOf(binding.rating.root, binding.ratingPoll.root)
+		views.forEach { view ->
+			(view.layoutParams as? LinearLayout.LayoutParams)?.let { params ->
+				params.topMargin = margin
+				params.bottomMargin = margin
+				view.layoutParams = params
+			}
+		}
+	}
+
+	private fun showFilesList(message: ChatMessage) {
+		binding.apply {
+			clTexts.visibility = View.VISIBLE
+			ivFile.visibility = View.GONE
+			otherFileTexts.visibility = View.VISIBLE
+			tvOtherFileName.visibility = View.GONE
+			tvOtherFileSize.visibility = View.GONE
+
+			MultiFilesView.render(
+				otherFileTexts,
+				message,
+				message.Files.orEmpty(),
+				isMy = false,
+				itemClickListener
+			)
+
+			if (!message.Text.isNullOrEmpty()) {
+				otherText.visibility = View.VISIBLE
+				otherText.text = message.Text
+			} else {
+				otherText.visibility = View.GONE
 			}
 		}
 	}

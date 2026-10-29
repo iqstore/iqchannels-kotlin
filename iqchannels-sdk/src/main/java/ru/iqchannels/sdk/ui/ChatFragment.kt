@@ -85,6 +85,7 @@ import ru.iqchannels.sdk.app.Cancellable
 import ru.iqchannels.sdk.app.IQChannels
 import ru.iqchannels.sdk.app.IQChannels.auth
 import ru.iqchannels.sdk.app.IQChannels.chatSubtitleFlow
+import ru.iqchannels.sdk.app.IQChannels.chatTypingFlow
 import ru.iqchannels.sdk.app.IQChannels.chatTitleFlow
 import ru.iqchannels.sdk.app.IQChannels.chatType
 import ru.iqchannels.sdk.app.IQChannels.getBlocker
@@ -682,10 +683,13 @@ class ChatFragment : Fragment() {
 			IQChannelsTheme {
 				val chatTitle by chatTitleFlow.collectAsState()
 				val chatSubtitle by chatSubtitleFlow.collectAsState()
+				val chatTyping by chatTypingFlow.collectAsState()
 
 				NavBar(
 					title = chatTitle ?: "",
 					subtitle = chatSubtitle
+					subtitle = chatSubtitle,
+					typing = chatTyping
 				) {
 					if (checkEvent(IQChatEvent.NavBarBackButtonPressed::class.java)) {
 						sendChatEvent(IQChatEvent.NavBarBackButtonPressed)
@@ -1298,20 +1302,37 @@ class ChatFragment : Fragment() {
 		}
 
 		val name = if (event.User != null) event.User?.DisplayName else "Оператор"
+		val typingText = "$name ${IQChannelsLanguage.iqChannelsLanguage.operatorTyping}..."
 
-		val typingText = view?.findViewById<TextView?>(R.id.typing)
-		typingText?.text = "$name ${IQChannelsLanguage.iqChannelsLanguage.operatorTyping}..."
-		typingText?.applyIQStyles(IQStyles.iqChannelsStyles?.answer?.textOperatorTyping)
-		typingText?.setBackgroundColor(
+		if (IQChannels.config?.uiOptions?.showBottomTypingBar == true) {
+			showBottomTypingBar(typingText)
+		} else {
+			IQChannels.chatTypingFlow.value = typingText
+			Handler(Looper.getMainLooper()).postDelayed(
+				{
+					if (IQChannels.chatTypingFlow.value == typingText) {
+						IQChannels.chatTypingFlow.value = null
+					}
+				},
+				3000
+			)
+		}
+	}
+
+	private fun showBottomTypingBar(typingText: String) {
+		val typingTextView = view?.findViewById<TextView?>(R.id.typing)
+		typingTextView?.text = typingText
+		typingTextView?.applyIQStyles(IQStyles.iqChannelsStyles?.answer?.textOperatorTyping)
+		typingTextView?.setBackgroundColor(
 			IQStyles.iqChannelsStyles?.answer?.backgroundOperatorTyping?.getColorInt(requireContext())
 				?: ContextCompat.getColor(requireContext(), R.color.white)
 		)
 
-		typingText?.visibility = View.VISIBLE
+		typingTextView?.visibility = View.VISIBLE
 
 		Handler(Looper.getMainLooper()).postDelayed(
 			{
-				typingText?.visibility = View.GONE
+				typingTextView?.visibility = View.GONE
 			},
 			3000
 		)
@@ -1643,7 +1664,9 @@ class ChatFragment : Fragment() {
 			IQChannelsConfig(
 				address = IQChannelsConfigRepository.config?.address,
 				channels = IQChannelsConfigRepository.config?.channels,
-				chatToOpen = channel
+				chatToOpen = channel,
+				disableSSLValidation = IQChannelsConfigRepository.config?.disableSSLValidation ?: false,
+				uiOptions = IQChannelsConfigRepository.config?.uiOptions ?: UIOptions()
 			)
 		)
 		chatType = ChatType.REGULAR

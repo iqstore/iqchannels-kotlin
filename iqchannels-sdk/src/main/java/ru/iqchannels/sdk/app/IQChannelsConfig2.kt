@@ -4,13 +4,20 @@ import ru.iqchannels.sdk.IQLog
 
 class UIOptions {
 	var disableIMGConfirmationModal: Boolean = false
+	var showBottomTypingBar: Boolean = false
 
 	constructor() {
 		disableIMGConfirmationModal = false
+		showBottomTypingBar = false
 	}
 
 	constructor(disableIMGConfirmationModal: Boolean) {
 		this.disableIMGConfirmationModal = disableIMGConfirmationModal
+	}
+
+	constructor(disableIMGConfirmationModal: Boolean, showBottomTypingBar: Boolean) {
+		this.disableIMGConfirmationModal = disableIMGConfirmationModal
+		this.showBottomTypingBar = showBottomTypingBar
 	}
 }
 

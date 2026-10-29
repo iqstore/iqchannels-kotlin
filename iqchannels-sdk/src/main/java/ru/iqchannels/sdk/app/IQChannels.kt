@@ -166,6 +166,7 @@ object IQChannels {
 	var chatType: ChatType = ChatType.REGULAR
 	var chatTitleFlow = MutableStateFlow<String?>(null)
 	var chatSubtitleFlow = MutableStateFlow<String?>(null)
+	var chatTypingFlow = MutableStateFlow<String?>(null)
 
 	internal var sslBypassEnabled: Boolean = false
 
@@ -948,12 +949,6 @@ object IQChannels {
 		advancedUnreadAttempt = 0
 		IQLog.i(TAG, "Received advanced unread event: $event")
 
-		this.advancedUnread?.channels
-			?.find { it.name == event.name && it.chatType == event.chatType }
-			?.apply {
-				unreadCount = event.unreadCount
-				lastMessage = event.lastMessage
-			}
 		val channelsList = this.advancedUnread?.channels?.toMutableList() ?: mutableListOf()
 		val index = channelsList.indexOfFirst {
 			it.name == event.name && it.chatType == event.chatType

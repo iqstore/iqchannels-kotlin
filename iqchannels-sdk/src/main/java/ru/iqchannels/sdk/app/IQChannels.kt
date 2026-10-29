@@ -2275,6 +2275,18 @@ object IQChannels {
 		IQLog.i(TAG, String.format("Sent rating, ratingId=%d, value=%d", ratingId, value))
 	}
 
+	internal fun ratingsIgnorePoll(
+		ratingId: Long,
+		pollId: Long,
+		callback: HttpCallback<Void>
+	) {
+		if (auth == null) {
+			return
+		}
+
+		client?.finishPoll(ratingId, pollId, false, callback)
+	}
+
 	internal fun ratingsSendPoll(
 		answers: List<RatingPollClientAnswerInput>,
 		ratingId: Long,

@@ -386,6 +386,14 @@ internal class ChatMessagesAdapter(
 		iqchannels.ratingsSendPoll(answers, ratingId, pollId, callback)
 	}
 
+	fun onRatingPollIgnored(
+		ratingId: Long,
+		pollId: Long,
+		callback: HttpCallback<Void>
+	) {
+		iqchannels.ratingsIgnorePoll(ratingId, pollId, callback)
+	}
+
 	fun onTextMessageClicked(position: Int) {
 		val message = messages[position]
 		val file = message.File ?: return

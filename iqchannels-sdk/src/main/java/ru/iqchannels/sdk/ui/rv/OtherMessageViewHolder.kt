@@ -22,6 +22,8 @@ import androidx.annotation.ColorRes
 import androidx.constraintlayout.helper.widget.Flow
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.LayoutParams
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.model.GlideUrl
@@ -68,6 +70,11 @@ interface RatingPollListener {
 		pollId: Long,
 		callback: HttpCallback<Void>
 	)
+	fun onRatingPollIgnored(
+		ratingId: Long,
+		pollId: Long,
+		callback: HttpCallback<Void>
+	)
 	fun onRatingPollFinished(value: Int?)
 	fun onRatingRenderQuestion()
 }
@@ -93,6 +100,12 @@ internal class OtherMessageViewHolder(
 	fun bind(message: ChatMessage, isPreviousFromOtherUser: Boolean, rootViewDimens: Pair<Int, Int>, markwon: Markwon) =
 		with(binding) {
 			val adapter = bindingAdapter as? ChatMessagesAdapter ?: return@with
+
+			(root.layoutParams as? RecyclerView.LayoutParams)?.let { params ->
+				val density = root.resources.displayMetrics.density
+				params.topMargin = if (message.AutoGreeting) (30 * density).toInt() else 0
+				root.layoutParams = params
+			}
 
 			// Day
 			if (adapter.isNewDay(bindingAdapterPosition) && message.Payload !== ChatPayloadType.TYPING) {
@@ -488,6 +501,18 @@ internal class OtherMessageViewHolder(
 	) {
 		(bindingAdapter as? ChatMessagesAdapter)?.onRatingPollAnswersSend(
 			answers,
+			ratingId,
+			pollId,
+			callback
+		)
+	}
+
+	override fun onRatingPollIgnored(
+		ratingId: Long,
+		pollId: Long,
+		callback: HttpCallback<Void>
+	) {
+		(bindingAdapter as? ChatMessagesAdapter)?.onRatingPollIgnored(
 			ratingId,
 			pollId,
 			callback

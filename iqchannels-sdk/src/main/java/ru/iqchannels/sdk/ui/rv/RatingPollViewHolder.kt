@@ -62,7 +62,7 @@ internal class RatingPollViewHolder(
 		}
 
 		binding.buttonNo.setOnClickListener {
-			finishPoll()
+			ignorePoll()
 		}
 
 		binding.submitButton.text = IQChannelsLanguage.iqChannelsLanguage.sentRating
@@ -528,15 +528,37 @@ internal class RatingPollViewHolder(
 		)
 	}
 
+	private fun ignorePoll() {
+		finishPoll()
+
+		val listener = listener ?: return
+
+		listener.onRatingPollIgnored(
+			rating.Id,
+			poll.Id,
+			object : HttpCallback<Void> {
+				override fun onResult(result: Void?) {}
+
+				override fun onException(exception: Exception) {
+					IQLog.e("RatingPoll", "Failed to ignore poll, exc=$exception")
+				}
+			}
+		)
+	}
+
 	private fun finishPoll() {
 		hideAllQuestionLayouts()
 
 		if (poll.FeedbackThanks) {
 			binding.submitButton.visibility = View.GONE
+			binding.questionText.visibility = View.GONE
+			binding.buttonYes.visibility = View.GONE
+			binding.buttonNo.visibility = View.GONE
+
 			showThanksFeedback()
 			binding.root.postDelayed({
 				hidePoll()
-			}, 2000)
+			}, 3000)
 		} else {
 			binding.root.post {
 				hidePoll()

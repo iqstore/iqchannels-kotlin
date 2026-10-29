@@ -27,6 +27,8 @@ data class DatabaseMessage(
     val payload: String?,
     val text: String?,
     val fileId: String?,
+    val fileIds: String?,
+    val files: String?,
     val ratingId: Long?,
     val replyToMessageId: Long?,
     val isDropDown: Boolean?,
@@ -67,6 +69,8 @@ fun ChatMessage.toDatabaseMessage(): DatabaseMessage {
         payload = this.Payload,
         text = this.Text,
         fileId = this.FileId,
+        fileIds = gson.toJson(this.FileIds),
+        files = gson.toJson(this.Files),
         ratingId = this.RatingId,
         replyToMessageId = this.ReplyToMessageId,
         isDropDown = this.IsDropDown,
@@ -110,6 +114,19 @@ fun DatabaseMessage?.toChatMessage(): ChatMessage? {
         Payload = this@toChatMessage.payload
         Text = this@toChatMessage.text
         FileId = this@toChatMessage.fileId
+        FileIds = try {
+            gson.fromJson(this@toChatMessage.fileIds, Array<String>::class.java)?.toList()
+        } catch (e: Exception) {
+            null
+        }
+        Files = try {
+            gson.fromJson(
+                this@toChatMessage.files,
+                Array<UploadedFile>::class.java
+            )?.toList()
+        } catch (e: Exception) {
+            null
+        }
         RatingId = this@toChatMessage.ratingId
         ReplyToMessageId = this@toChatMessage.replyToMessageId
         IsDropDown = this@toChatMessage.isDropDown

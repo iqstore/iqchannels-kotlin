@@ -245,7 +245,9 @@ internal class OtherMessageViewHolder(
 			val file = message.File
 			val msgRating = message.Rating
 			val msgTransfer = message.TransferToChannel
-			if (file != null) {
+			if (!message.Files.isNullOrEmpty() && (message.Files?.size ?: 0) > 1) {
+				showFilesList(message)
+			} else if (file != null) {
 				when (message.File?.State) {
 					FileValidState.Rejected -> showFileStateMsg(
 						IQChannelsLanguage.iqChannelsLanguage.textFileStateRejected,
@@ -713,6 +715,9 @@ internal class OtherMessageViewHolder(
 		markwon: Markwon
 	) {
 		binding.apply {
+			MultiFilesView.clear(otherFileTexts)
+			tvOtherFileName.visibility = View.VISIBLE
+			tvOtherFileSize.visibility = View.VISIBLE
 			val text = message.Text
 			if (!text.isNullOrEmpty()) {
 				clTexts.visibility = View.VISIBLE

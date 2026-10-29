@@ -112,6 +112,7 @@ import ru.iqchannels.sdk.schema.ChatMessage
 import ru.iqchannels.sdk.schema.ClientAuth
 import ru.iqchannels.sdk.schema.Language
 import ru.iqchannels.sdk.schema.SingleChoice
+import ru.iqchannels.sdk.schema.UploadedFile
 import ru.iqchannels.sdk.setBackgroundDrawable
 import ru.iqchannels.sdk.setRoundedBackground
 import ru.iqchannels.sdk.styling.IQChannelsStyles
@@ -687,7 +688,6 @@ class ChatFragment : Fragment() {
 
 				NavBar(
 					title = chatTitle ?: "",
-					subtitle = chatSubtitle
 					subtitle = chatSubtitle,
 					typing = chatTyping
 				) {
@@ -1730,6 +1730,24 @@ class ChatFragment : Fragment() {
 			val msg = message.Text
 
 			if (senderName != null && imageUrl != null && date != null && msg != null) {
+				ImagePreviewFragment.newInstance(
+					senderName, date, imageUrl, msg
+				).show(parentFragmentManager, "ImagePreviewFragment")
+			}
+		}
+
+		override fun onImageFileClick(message: ChatMessage, file: UploadedFile) {
+			val senderName: String? = if (message.My) {
+				if (message.Client != null) message.Client?.Name else ""
+			} else {
+				if (message.User != null) message.User?.DisplayName else ""
+			}
+
+			val imageUrl = file.imageUrl ?: file.Url
+			val date = message.Date
+			val msg = message.Text ?: ""
+
+			if (senderName != null && imageUrl != null && date != null) {
 				ImagePreviewFragment.newInstance(
 					senderName, date, imageUrl, msg
 				).show(parentFragmentManager, "ImagePreviewFragment")

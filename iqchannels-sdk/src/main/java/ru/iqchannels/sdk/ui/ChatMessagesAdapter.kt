@@ -419,6 +419,8 @@ internal class ChatMessagesAdapter(
 	internal interface ItemClickListener {
 		fun onFileClick(url: String, fileName: String)
 		fun onImageClick(message: ChatMessage)
+
+		fun onImageFileClick(message: ChatMessage, file: UploadedFile) {}
 		fun onButtonClick(message: ChatMessage, singleChoice: SingleChoice)
 		fun onActionClick(message: ChatMessage, action: Action)
 		fun onMessageLongClick(message: ChatMessage, anchor: View)

@@ -1,6 +1,7 @@
 package ru.iqchannels.sdk.schema
 
 import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import java.io.File
 import java.util.*
 import ru.iqchannels.sdk.http.HttpRequest
@@ -23,6 +24,9 @@ class ChatMessage {
 	var Payload: String? = null // ChatPayloadType
 	var Text: String? = null
 	var FileId: String? = null
+
+	@SerializedName(value = "fileIDs", alternate = ["FileIds"])
+	var FileIds: List<String>? = null
 	var NoticeId: String? = null
 	var RatingId: Long? = null
 	var ReplyToMessageId: Long? = null
@@ -49,6 +53,7 @@ class ChatMessage {
 	var Client: Client? = null
 	var User: User? = null
 	var File: UploadedFile? = null
+	var Files: List<UploadedFile>? = null
 	var Rating: Rating? = null
 	var TransferToChannel: TransferToChannel? = null
 	var TransferToChatType: ru.iqchannels.sdk.domain.models.ChatType? = null

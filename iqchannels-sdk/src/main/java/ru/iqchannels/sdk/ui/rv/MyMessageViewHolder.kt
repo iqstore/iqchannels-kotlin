@@ -202,6 +202,8 @@ internal class MyMessageViewHolder(
 			showFileSize(size)
 
 			myText.text = message.Text
+		} else if (!message.Files.isNullOrEmpty() && (message.Files?.size ?: 0) > 1) {
+			showFilesList(message)
 		} else if (message.File != null) {
 			when (message.File?.State) {
 				FileValidState.Rejected -> showFileStateMsg(
@@ -420,11 +422,40 @@ internal class MyMessageViewHolder(
 		}
 	}
 
+	private fun showFilesList(message: ChatMessage) {
+		binding.apply {
+			myImageFrame.visibility = View.GONE
+			myUpload.visibility = View.GONE
+			clTextsMy.visibility = View.VISIBLE
+			ivFile.visibility = View.GONE
+			tvMyFileName.visibility = View.GONE
+			tvMyFileSize.visibility = View.GONE
+
+			MultiFilesView.render(
+				myFileTexts,
+				message,
+				message.Files.orEmpty(),
+				isMy = true,
+				itemClickListener
+			)
+
+			if (!message.Text.isNullOrEmpty()) {
+				myText.visibility = View.VISIBLE
+				myText.text = message.Text
+			} else {
+				myText.visibility = View.GONE
+			}
+		}
+	}
+
 	private fun showApprovedFile(
 		message: ChatMessage,
 		rootViewDimens: Pair<Int, Int>
 	) {
 		binding.apply {
+			MultiFilesView.clear(myFileTexts)
+			tvMyFileName.visibility = View.VISIBLE
+			tvMyFileSize.visibility = View.VISIBLE
 			val text = message.Text
 			if (!text.isNullOrEmpty()) {
 				clTextsMy.visibility = View.VISIBLE

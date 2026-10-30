@@ -180,7 +180,7 @@ class IQAppActivity :
 					localizationJson = file.readText()
 				}
 
-				fragment = ChatFragment.newInstance(stylesJson = stylesJson, localizationJson = localizationJson)
+				fragment = ChatFragment.newInstance(title = "", stylesJson = stylesJson, localizationJson = localizationJson)
 			}
 			R.id.nav_chat_pm -> {
 				val prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE)

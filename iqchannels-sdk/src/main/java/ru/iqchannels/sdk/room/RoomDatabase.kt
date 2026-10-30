@@ -6,10 +6,17 @@ import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import ru.iqchannels.sdk.IQLog
 
-@Database(entities = [DatabaseMessage::class], version = 2, exportSchema = false)
+@Database(entities = [DatabaseMessage::class], version = 3, exportSchema = false)
 @TypeConverters(SingleChoiceListConverter::class, ActionListConverter::class, FileConverter::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun messageDao(): MessageDao
+}
+
+private val MIGRATION_2_3 = object : Migration(2, 3) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        db.execSQL("ALTER TABLE messages ADD COLUMN fileIds TEXT")
+        db.execSQL("ALTER TABLE messages ADD COLUMN files TEXT")
+    }
 }
 
 //val MIGRATION_1_2 = object : Migration(1, 2) {
@@ -29,8 +36,8 @@ object DatabaseInstance {
                 AppDatabase::class.java,
                 "iq_database"
             )
-//            .addMigrations(MIGRATION_1_2)
-            .build()
+                .addMigrations(MIGRATION_2_3)
+                .build()
         }
         return instance!!
     }

@@ -9,7 +9,8 @@ class ChatSettings {
     var Enabled: Boolean = true
     var GreetFrom: String = "user"
     var Lifetime: Int = 300
-    var Pseudonym: String = "Оператор"
+    var Pseudonym: String? = null
+    var OperatorName: String? = null
     var AvatarId: String = ""
     var TotalOpenedTickets: Int = 0
     var ChatTitle: String? = null

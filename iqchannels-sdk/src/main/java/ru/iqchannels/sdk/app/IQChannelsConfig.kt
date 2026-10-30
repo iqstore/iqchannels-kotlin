@@ -7,6 +7,7 @@ class IQChannelsConfig @JvmOverloads constructor(
 	val channels: List<String>?,
 	val chatToOpen: String?,
 	logging: Boolean = true,
+	val disableSSLValidation: Boolean = false,
 	val uiOptions: UIOptions = UIOptions(),
 ) {
 

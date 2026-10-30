@@ -39,6 +39,7 @@ fun Color.toComposeColor(): ComposeColor {
 fun NavBar(
 	title: String,
 	subtitle: String?,
+	typing: String? = null,
 	onBackClick: () -> Unit
 ) {
 	Surface(
@@ -113,7 +114,7 @@ fun NavBar(
 				val statusLabel = IQStyles.iqChannelsStyles?.appBar?.statusLabel
 
 				Text(
-					text = subtitle.orEmpty(),
+					text = typing ?: subtitle.orEmpty(),
 					textAlign = when (statusLabel?.textAlignment?.lowercase()) {
 						"left" -> TextAlign.Start
 						"right" -> TextAlign.End

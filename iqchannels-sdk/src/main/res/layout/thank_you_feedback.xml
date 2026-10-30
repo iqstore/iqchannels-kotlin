@@ -7,12 +7,6 @@
     android:orientation="vertical"
     android:padding="20dp">
 
-    <!-- SVG icon representation -->
-    <ImageView
-        android:id="@+id/thankYouIcon"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:src="@drawable/ic_thank_you_icon" />
 
     <!-- Text of thanks feedback -->
     <TextView

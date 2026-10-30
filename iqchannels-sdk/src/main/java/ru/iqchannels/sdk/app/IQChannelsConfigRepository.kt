@@ -45,7 +45,15 @@ internal object IQChannelsConfigRepository {
 				job = CoroutineScope(coroutineContext).launch {
 					val channels = mutableListOf<Channel>()
 					config.channels.forEach { channel ->
-						IQChannels.configureClient(IQChannelsConfig(config.address, config.channels, channel))
+						IQChannels.configureClient(
+							IQChannelsConfig(
+								config.address,
+								config.channels,
+								channel,
+								disableSSLValidation = config.disableSSLValidation,
+								uiOptions = config.uiOptions
+							)
+						)
 						val clientAuth = IQChannels.login2(credentials)
 
 						clientAuth.Client?.MultiChatsInfo?.let { multiChatsInfo ->
@@ -91,7 +99,13 @@ internal object IQChannelsConfigRepository {
 							it.firstOrNull { channel -> channel.chatType == ChatType.REGULAR }
 								?: it.first()
 						IQChannels.configureClient(
-							IQChannelsConfig(config.address, config.channels, defaultChannel.id)
+							IQChannelsConfig(
+								config.address,
+								config.channels,
+								defaultChannel.id,
+								disableSSLValidation = config.disableSSLValidation,
+								uiOptions = config.uiOptions
+							)
 						)
 						IQChannels.chatType = defaultChannel.chatType
 						IQChannels.login(credentials)

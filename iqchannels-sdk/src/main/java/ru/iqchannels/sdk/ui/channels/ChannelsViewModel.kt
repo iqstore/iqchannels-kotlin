@@ -12,6 +12,7 @@ import ru.iqchannels.sdk.app.AdvancedUnreadListener
 import ru.iqchannels.sdk.app.Cancellable
 import ru.iqchannels.sdk.app.IQChannels
 import ru.iqchannels.sdk.app.IQChannelsConfig
+import ru.iqchannels.sdk.app.UIOptions
 import ru.iqchannels.sdk.app.IQChannelsConfigRepository
 import ru.iqchannels.sdk.domain.models.Channel
 
@@ -71,7 +72,9 @@ class ChannelsViewModel : ViewModel() {
 			IQChannelsConfig(
 				address = IQChannelsConfigRepository.config?.address,
 				channels =  IQChannelsConfigRepository.config?.channels,
-				chatToOpen = channel.id
+				chatToOpen = channel.id,
+				disableSSLValidation = IQChannelsConfigRepository.config?.disableSSLValidation ?: false,
+				uiOptions = IQChannelsConfigRepository.config?.uiOptions ?: UIOptions()
 			)
 		)
 		IQChannels.chatType = channel.chatType

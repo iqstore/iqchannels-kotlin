@@ -9,6 +9,7 @@ import java.io.File
 import java.io.InterruptedIOException
 import java.net.MalformedURLException
 import java.net.URL
+import java.net.URLEncoder
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicInteger
@@ -592,9 +593,16 @@ class HttpClient(
 	// Channel advanced unread events
 	@SuppressLint("DefaultLocale")
 	fun advancedUnreadEvents(
+		channels: List<String>?,
 		listener: HttpSseListener<AdvancedUnreadResult>
 	): HttpRequest {
 		var path = "/sse/chats/channel/unread/multichat"
+
+		val filtered = channels?.filter { it.isNotBlank() } ?: emptyList()
+		if (filtered.isNotEmpty()) {
+			val encoded = URLEncoder.encode(filtered.joinToString(","), "UTF-8")
+			path = "$path?channels=$encoded"
+		}
 
 		val type: TypeToken<ru.iqchannels.sdk.schema.Response<AdvancedUnreadResult>> =
 			object : TypeToken<ru.iqchannels.sdk.schema.Response<AdvancedUnreadResult>>() {}

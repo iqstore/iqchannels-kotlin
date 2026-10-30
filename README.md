@@ -48,11 +48,11 @@ allprojects {
 }
 ```
 
-5. Добавьте зависимосить `implementation 'ru.iqstore:iqchannels-sdk-2:2.4.7'` в `build.gradle` модуля приложения.
+5. Добавьте зависимосить `implementation 'ru.iqstore:iqchannels-sdk-2:2.4.8'` в `build.gradle` модуля приложения.
 ```build.gradle
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])   
-    implementation 'ru.iqstore:iqchannels-sdk-2:2.4.7'
+    implementation 'ru.iqstore:iqchannels-sdk-2:2.4.8'
     // etc...
 }
 ```
@@ -652,6 +652,7 @@ ChatFragment принимает предзаполненная сообщени�
       "light": "#008080",
       "dark": "#008080"
     },
+    "chat_loader_icon": "https://example.com/loader.gif", //Иконка основного лоадера 
     "icon_operator": "https://gas-kvas.com/grafic/uploads/posts/2024-01/gas-kvas-com-p-logotip-cheloveka-na-prozrachnom-fone-4.png", //Иконка оператора
     "system_text": {          //Системные сообщения
       "color": {

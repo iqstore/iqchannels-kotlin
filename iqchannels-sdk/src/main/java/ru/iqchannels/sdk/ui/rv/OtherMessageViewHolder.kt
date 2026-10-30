@@ -22,6 +22,8 @@ import androidx.annotation.ColorRes
 import androidx.constraintlayout.helper.widget.Flow
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.LayoutParams
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.model.GlideUrl
@@ -68,6 +70,11 @@ interface RatingPollListener {
 		pollId: Long,
 		callback: HttpCallback<Void>
 	)
+	fun onRatingPollIgnored(
+		ratingId: Long,
+		pollId: Long,
+		callback: HttpCallback<Void>
+	)
 	fun onRatingPollFinished(value: Int?)
 	fun onRatingRenderQuestion()
 }
@@ -93,6 +100,12 @@ internal class OtherMessageViewHolder(
 	fun bind(message: ChatMessage, isPreviousFromOtherUser: Boolean, rootViewDimens: Pair<Int, Int>, markwon: Markwon) =
 		with(binding) {
 			val adapter = bindingAdapter as? ChatMessagesAdapter ?: return@with
+
+			(root.layoutParams as? RecyclerView.LayoutParams)?.let { params ->
+				val density = root.resources.displayMetrics.density
+				params.topMargin = if (message.AutoGreeting) (30 * density).toInt() else 0
+				root.layoutParams = params
+			}
 
 			// Day
 			if (adapter.isNewDay(bindingAdapterPosition) && message.Payload !== ChatPayloadType.TYPING) {
@@ -245,7 +258,9 @@ internal class OtherMessageViewHolder(
 			val file = message.File
 			val msgRating = message.Rating
 			val msgTransfer = message.TransferToChannel
-			if (file != null) {
+			if (!message.Files.isNullOrEmpty() && (message.Files?.size ?: 0) > 1) {
+				showFilesList(message)
+			} else if (file != null) {
 				when (message.File?.State) {
 					FileValidState.Rejected -> showFileStateMsg(
 						IQChannelsLanguage.iqChannelsLanguage.textFileStateRejected,
@@ -271,6 +286,7 @@ internal class OtherMessageViewHolder(
 				}
 			} else if (msgRating != null) {
 				message.System = true
+				applySessionSeparatorMargins()
 				if (msgRating.State == RatingState.POLL && msgRating.RatingPoll != null) {
 					showRatingPoll(msgRating, ratingPoll)
 				} else {
@@ -492,6 +508,18 @@ internal class OtherMessageViewHolder(
 		)
 	}
 
+	override fun onRatingPollIgnored(
+		ratingId: Long,
+		pollId: Long,
+		callback: HttpCallback<Void>
+	) {
+		(bindingAdapter as? ChatMessagesAdapter)?.onRatingPollIgnored(
+			ratingId,
+			pollId,
+			callback
+		)
+	}
+
 	override fun onRatingPollFinished(value: Int?) {
 		if (value != null) {
 			(bindingAdapter as? ChatMessagesAdapter)?.onRatePollClicked(bindingAdapterPosition, value)
@@ -706,6 +734,45 @@ internal class OtherMessageViewHolder(
 		}
 	}
 
+	private fun applySessionSeparatorMargins() {
+		val density = binding.root.resources.displayMetrics.density
+		val margin = (16 * density).toInt()
+
+		val views = listOf(binding.rating.root, binding.ratingPoll.root)
+		views.forEach { view ->
+			(view.layoutParams as? LinearLayout.LayoutParams)?.let { params ->
+				params.topMargin = margin
+				params.bottomMargin = margin
+				view.layoutParams = params
+			}
+		}
+	}
+
+	private fun showFilesList(message: ChatMessage) {
+		binding.apply {
+			clTexts.visibility = View.VISIBLE
+			ivFile.visibility = View.GONE
+			otherFileTexts.visibility = View.VISIBLE
+			tvOtherFileName.visibility = View.GONE
+			tvOtherFileSize.visibility = View.GONE
+
+			MultiFilesView.render(
+				otherFileTexts,
+				message,
+				message.Files.orEmpty(),
+				isMy = false,
+				itemClickListener
+			)
+
+			if (!message.Text.isNullOrEmpty()) {
+				otherText.visibility = View.VISIBLE
+				otherText.text = message.Text
+			} else {
+				otherText.visibility = View.GONE
+			}
+		}
+	}
+
 	private fun showApprovedState(
 		message: ChatMessage,
 		file: UploadedFile,
@@ -713,6 +780,9 @@ internal class OtherMessageViewHolder(
 		markwon: Markwon
 	) {
 		binding.apply {
+			MultiFilesView.clear(otherFileTexts)
+			tvOtherFileName.visibility = View.VISIBLE
+			tvOtherFileSize.visibility = View.VISIBLE
 			val text = message.Text
 			if (!text.isNullOrEmpty()) {
 				clTexts.visibility = View.VISIBLE

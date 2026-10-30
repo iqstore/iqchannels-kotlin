@@ -21,6 +21,12 @@ object NetworkModule {
 		}
 
 		return OkHttpClient.Builder()
+			.apply {
+				if (IQChannels.sslBypassEnabled) {
+					sslSocketFactory(IQChannels.sslBypassContext.socketFactory, IQChannels.trustAllManager)
+					hostnameVerifier { _, _ -> true }
+				}
+			}
 			.connectTimeout(timeout, TimeUnit.SECONDS)
 			.readTimeout(timeout, TimeUnit.SECONDS)
 			.addInterceptor(interceptor)

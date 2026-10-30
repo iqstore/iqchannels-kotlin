@@ -99,6 +99,11 @@ class Rels(address: String) {
 		if (message.FileId != null) {
 			message.File = map.Files[message.FileId]
 		}
+		if (!message.FileIds.isNullOrEmpty()) {
+			message.Files = message.FileIds?.mapNotNull { fileId ->
+				map.Files[fileId]
+			}
+		}
 		if (message.RatingId != null) {
 			message.Rating = map.Ratings[message.RatingId]
 			var rating = message.Rating

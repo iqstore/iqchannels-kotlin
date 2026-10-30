@@ -16,6 +16,7 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import ru.iqchannels.sdk.IQLog
+import ru.iqchannels.sdk.app.IQChannels
 import java.io.BufferedOutputStream
 import java.io.BufferedReader
 import java.io.ByteArrayOutputStream
@@ -345,6 +346,12 @@ class HttpRequest {
 		}
 
 		val client = OkHttpClient.Builder()
+			.apply {
+				if (IQChannels.sslBypassEnabled) {
+					sslSocketFactory(IQChannels.sslBypassContext.socketFactory, IQChannels.trustAllManager)
+					hostnameVerifier { _, _ -> true }
+				}
+			}
 			.addNetworkInterceptor(LoggingInterceptor())
 			.connectTimeout(CONNECT_TIMEOUT_MILLIS.toLong(), TimeUnit.MILLISECONDS)
 			.readTimeout(POST_READ_TIMEOUT_MILLIS.toLong(), TimeUnit.MILLISECONDS)
